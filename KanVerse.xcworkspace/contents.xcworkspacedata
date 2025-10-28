@@ -10,4 +10,13 @@
    <FileRef
       location = "group:Resources">
    </FileRef>
+   <FileRef
+      location = "group:KanForge/KanForge.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:KanVest/KanVest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:KanViz/KanViz.xcodeproj">
+   </FileRef>
 </Workspace>
