@@ -29,3 +29,8 @@
 #include <Debug/Profiler/Profiler.hpp>
 #include <Debug/Profiler/ScopedProfiler.hpp>
 #include <Debug/Profiler/PerformanceProfiler.hpp>
+
+#include <Core/Event/Events.h>
+#include <Core/Event/ApplicationEvents.h>
+#include <Core/Event/MouseEvents.h>
+#include <Core/Event/KeyboardEvents.h>

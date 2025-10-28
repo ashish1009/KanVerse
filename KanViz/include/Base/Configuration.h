@@ -57,6 +57,9 @@ x(x&&) = delete; \
 x& operator=(const x&) = delete; \
 x& operator =(x&&) = delete; \
 
+// This MACRO Shifts the LSB bit of number 1 at position x
+#define BIT(x) (1 << x)
+
 namespace KanViz
 {
   // Paths
