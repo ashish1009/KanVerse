@@ -21,6 +21,12 @@ namespace KanViz
       return IK_FAILURE;
     }
 
+    // Intialize the scoped timer
+    if (!Profiler::Initialize())
+    {
+      return IK_FAILURE;
+    }
+    
     return IK_SUCCESS;
   }
   
@@ -28,6 +34,12 @@ namespace KanViz
   {
     // Shutdown the core logger
     if (!Logger::Shutdown())
+    {
+      return IK_FAILURE;
+    }
+
+    // Shutdown the scoped timer
+    if (!Profiler::Shutdown())
     {
       return IK_FAILURE;
     }

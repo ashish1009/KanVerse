@@ -29,6 +29,7 @@
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		B289E66E2EB0E50400937D0B /* libKanViz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libKanViz.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E6942EB1128900937D0B /* KanVest.log */ = {isa = PBXFileReference; lastKnownFileType = text; path = KanVest.log; sourceTree = "<group>"; };
+		B289E6AE2EB1166200937D0B /* KanVest.profiler */ = {isa = PBXFileReference; lastKnownFileType = text; path = KanVest.profiler; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				B289E6942EB1128900937D0B /* KanVest.log */,
+				B289E6AE2EB1166200937D0B /* KanVest.profiler */,
 			);
 			path = Log;
 			sourceTree = "<group>";
