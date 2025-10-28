@@ -11,7 +11,7 @@
 
 namespace KanViz
 {
-  /// This enum stores the module names of IKan Logs (Holds only IKan engine log module names)
+  /// This enum stores the module names of KanViz Logs (Holds only KanViz engine log module names)
 #define LogModule(f) \
 f(None) \
 

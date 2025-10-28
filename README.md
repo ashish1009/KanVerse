@@ -12,7 +12,7 @@
 <h1 align="center">🌀 KanVerse</h1>
 
 <p align="center">
-  <i>Modular C++ workspace for graphics, visualization, and real-time application development — powered by the <b>iKanViz</b> engine.</i>
+  <i>Modular C++ workspace for graphics, visualization, and real-time application development — powered by the <b>KanViz</b> engine.</i>
 </p>
 
 <p align="center">
@@ -27,8 +27,8 @@
 
 **KanVerse** is a modular **C++ development workspace** built for high-performance, real-time applications.  
 It acts as a central hub for multiple modular projects 
-— from visualization tools like **iKanVest** to potential **game engines** 
-— all powered by the in-house **iKanViz** visualization & rendering engine.
+— from visualization tools like **KanVest** to potential **game engines** 
+— all powered by the in-house **KanViz** visualization & rendering engine.
 
 > 💡 *One workspace. Infinite possibilities.*
 
@@ -38,9 +38,9 @@ It acts as a central hub for multiple modular projects
 
 | Component   | Description |
 |-------------|-------------|
-| **🧠 iKanViz**    | The **core rendering and visualization engine** of KanVerse. Provides OpenGL-based rendering, ImGui UI layer, and visualization utilities. |
-| **💼 iKanVest**   | A portfolio-management and data-visualization application built on top of iKanViz. Future applications will reuse the same engine. |
-| **🎨 iKanStudio** | A visual editor and sandbox built on **iKanViz** for creating, editing, and managing interactive content — from games to real-time simulations. |
+| **🧠 KanViz**    | The **core rendering and visualization engine** of KanVerse. Provides OpenGL-based rendering, ImGui UI layer, and visualization utilities. |
+| **💼 KanVest**   | A portfolio-management and data-visualization application built on top of KanViz. Future applications will reuse the same engine. |
+| **🎨 KanStudio** | A visual editor and sandbox built on **KanViz** for creating, editing, and managing interactive content — from games to real-time simulations. |
 
 ---
 
@@ -73,11 +73,11 @@ It acts as a central hub for multiple modular projects
 ## 🏗️ Workspace Structure
 
 ```KanVerse/
-├── iKanViz/ ← Core visualization & rendering engine
+├── KanViz/ ← Core visualization & rendering engine
 │ ├── src/
 │ ├── include/
 │
-├── iKanVest/ ← Portfolio management application (uses iKanViz)
+├── KanVest/ ← Portfolio management application (uses KanViz)
 │ ├── src/
 │ ├── include/
 │
@@ -105,8 +105,8 @@ KanVerse aims to be a **multi-purpose, high-performance framework** capable of p
 | Milestone | Description                                   | Status  |
 |-----------|-----------------------------------------------|---------|
 | **v0.1**  | Initialize KanVerse workspace & build system  | 🟩 Planned |
-| **v0.2**  | Integrate OpenGL + ImGui in iKanViz           | 🟩 Planned |
-| **v0.3**  | Develop base UI & CSV loader in iKanVest      | 🟩 Planned |
+| **v0.2**  | Integrate OpenGL + ImGui in KanViz            | 🟩 Planned |
+| **v0.3**  | Develop base UI & CSV loader in KanVest       | 🟩 Planned |
 | **v0.4**  | Add data visualization with ImPlot            | ⬜ Pending |
 | **v0.5**  | Build WebAssembly version using Emscripten    | ⬜ Pending |
 | **v1.0**  | Introduce game engine module under KanVerse   | ⬜ Future  |

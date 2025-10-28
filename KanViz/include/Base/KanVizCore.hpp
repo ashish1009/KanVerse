@@ -13,9 +13,9 @@ namespace KanViz
   class CoreEngine
   {
   public:
-    /// This function initializes the IKan core engine
+    /// This function initializes the KanViz core engine
     static bool Initialize();
-    /// This function shuts down the IKan core engine
+    /// This function shuts down the KanViz core engine
     static bool Shutdown();
   };
 } // namespace KanViz

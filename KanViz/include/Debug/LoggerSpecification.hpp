@@ -26,13 +26,13 @@ namespace KanViz
     Core, Editor
   };
 
-  /// This structure stores the specifications for IKan logger
+  /// This structure stores the specifications for KanViz logger
   struct LoggerSpecification
   {
     LogLevel logLevel {LogLevel::Trace};
     
     std::string logType {""};
-    std::string title {"IKAN"};
+    std::string title {"KanViz"};
     std::filesystem::path logFilePath {""};
     
     spdlog::sink_ptr overrideSink {nullptr};
@@ -44,8 +44,8 @@ namespace KanViz
   
   namespace LoggerUtils
   {
-    /// This function converts the IKan logger level to spdlog logger level.
-    /// - Parameter level: IKan Logger level enum
+    /// This function converts the KanViz logger level to spdlog logger level.
+    /// - Parameter level: KanViz Logger level enum
     spdlog::level::level_enum GetSpdLevel(LogLevel level);
     
     /// This function returns the log level string from the LogLevel enum.

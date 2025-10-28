@@ -9,13 +9,13 @@
 {
   if (!KanViz::CoreEngine::Initialize())
   {
-    std::cerr << "Failed to initialize the IKan engine.\n";
+    std::cerr << "Failed to initialize the KanViz engine.\n";
     return EXIT_FAILURE;
   }
       
   if (!KanViz::CoreEngine::Shutdown())
   {
-    std::cerr << "Failed to shutdown the IKan engine.\n";
+    std::cerr << "Failed to shutdown the KanViz engine.\n";
     return EXIT_FAILURE;
   }
 

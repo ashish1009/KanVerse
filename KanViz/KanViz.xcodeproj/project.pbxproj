@@ -26,6 +26,8 @@
 		B289E6A52EB1147600937D0B /* ScopedProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6A32EB1147600937D0B /* ScopedProfiler.cpp */; };
 		B289E6A82EB114AF00937D0B /* PerformanceProfiler.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6A62EB114AF00937D0B /* PerformanceProfiler.hpp */; };
 		B289E6A92EB114AF00937D0B /* PerformanceProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6A72EB114AF00937D0B /* PerformanceProfiler.cpp */; };
+		B289E6AC2EB1154000937D0B /* ScopedPerformanceProfiler.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6AA2EB1154000937D0B /* ScopedPerformanceProfiler.hpp */; };
+		B289E6AD2EB1154000937D0B /* ScopedPerformanceProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6AB2EB1154000937D0B /* ScopedPerformanceProfiler.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +53,8 @@
 		B289E6A32EB1147600937D0B /* ScopedProfiler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScopedProfiler.cpp; sourceTree = "<group>"; };
 		B289E6A62EB114AF00937D0B /* PerformanceProfiler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PerformanceProfiler.hpp; sourceTree = "<group>"; };
 		B289E6A72EB114AF00937D0B /* PerformanceProfiler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PerformanceProfiler.cpp; sourceTree = "<group>"; };
+		B289E6AA2EB1154000937D0B /* ScopedPerformanceProfiler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ScopedPerformanceProfiler.hpp; sourceTree = "<group>"; };
+		B289E6AB2EB1154000937D0B /* ScopedPerformanceProfiler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScopedPerformanceProfiler.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -157,6 +161,7 @@
 				B289E69E2EB113C300937D0B /* Profiler.hpp */,
 				B289E6A22EB1147600937D0B /* ScopedProfiler.hpp */,
 				B289E6A62EB114AF00937D0B /* PerformanceProfiler.hpp */,
+				B289E6AA2EB1154000937D0B /* ScopedPerformanceProfiler.hpp */,
 			);
 			path = Profiler;
 			sourceTree = "<group>";
@@ -168,6 +173,7 @@
 				B289E69F2EB113C300937D0B /* Profiler.cpp */,
 				B289E6A32EB1147600937D0B /* ScopedProfiler.cpp */,
 				B289E6A72EB114AF00937D0B /* PerformanceProfiler.cpp */,
+				B289E6AB2EB1154000937D0B /* ScopedPerformanceProfiler.cpp */,
 			);
 			path = Profiler;
 			sourceTree = "<group>";
@@ -181,6 +187,7 @@
 			files = (
 				B289E69C2EB1138E00937D0B /* Timer.hpp in Headers */,
 				B289E6842EB10C1200937D0B /* LoggerSpecificationBuilder.hpp in Headers */,
+				B289E6AC2EB1154000937D0B /* ScopedPerformanceProfiler.hpp in Headers */,
 				B289E6A82EB114AF00937D0B /* PerformanceProfiler.hpp in Headers */,
 				B289E6972EB112CD00937D0B /* AssertAPI.h in Headers */,
 				B289E6A42EB1147600937D0B /* ScopedProfiler.hpp in Headers */,
@@ -261,6 +268,7 @@
 				B289E6A92EB114AF00937D0B /* PerformanceProfiler.cpp in Sources */,
 				B289E69D2EB1138E00937D0B /* Timer.cpp in Sources */,
 				B289E6852EB10C1200937D0B /* LoggerSpecificationBuilder.cpp in Sources */,
+				B289E6AD2EB1154000937D0B /* ScopedPerformanceProfiler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
