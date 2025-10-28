@@ -49,7 +49,7 @@ namespace KanViz
       }
       return "";
     }
-    std::string_view GetTypeString(LogType type)
+    std::string_view GetLoggerTypeString(LogType type)
     {
       switch (type)
       {

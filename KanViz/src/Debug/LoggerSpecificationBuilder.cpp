@@ -21,7 +21,7 @@ namespace KanViz
   }
   LoggerSpecificationBuilder& LoggerSpecificationBuilder::Type(LogType type)
   {
-    loggerSpecification.logType = LoggerUtils::GetTypeString(type);
+    loggerSpecification.logType = LoggerUtils::GetLoggerTypeString(type);
     return *this;
   }
   LoggerSpecificationBuilder& LoggerSpecificationBuilder::Level(LogLevel level)

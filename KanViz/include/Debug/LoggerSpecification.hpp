@@ -54,6 +54,6 @@ namespace KanViz
     
     /// This function returns the log type string from prdefined enum
     /// - Parameter type: log type enum
-    std::string_view GetTypeString(LogType type);
+    std::string_view GetLoggerTypeString(LogType type);
   } // namespace LoggerUtils
 } // namespace KanViz

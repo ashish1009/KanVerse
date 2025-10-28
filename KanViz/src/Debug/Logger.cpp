@@ -80,4 +80,40 @@ namespace KanViz
 
     return IK_SUCCESS;
   }
+  
+  Logger::TagDetails& Logger::GetTagDetails(LogModule moduleName)
+  {
+    return s_tags[GetModuleName(moduleName)];
+  }
+  Logger::TagDetails& Logger::GetTagDetails(std::string_view moduleName)
+  {
+    return s_tags[moduleName.data()];
+  }
+  bool Logger::HasTagDetails(LogModule moduleName)
+  {
+    return s_tags.find(GetModuleName(moduleName)) != s_tags.end();
+  }
+  bool Logger::HasTagDetails(std::string_view moduleName)
+  {
+    return s_tags.find(moduleName.data()) != s_tags.end();
+  }
+  
+  const std::string& Logger::GetModuleName(LogModule moduleName)
+  {
+    return LogModuleString[static_cast<size_t>(moduleName)];
+  }
+  
+  Ref<spdlog::logger> Logger::GetLogger(const std::string& type)
+  {
+    if (s_loggerDataMap.find(type) == s_loggerDataMap.end())
+    {
+      return nullptr;
+    }
+    
+    return s_loggerDataMap.at(type);
+  }
+  Ref<spdlog::logger> Logger::GetLogger(LogType type)
+  {
+    return GetLogger(LoggerUtils::GetLoggerTypeString(type).data());
+  }
 } // namespace KanViz

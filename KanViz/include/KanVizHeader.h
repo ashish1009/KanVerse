@@ -14,10 +14,11 @@
 // C++ Files
 #include <iostream>
 #include <filesystem>
+#include <map>
 
 // Engine Files
 #include <Base/Configuration.h>
 #include <Base/KanVizCore.hpp>
 
 #include <Debug/Logger.hpp>
-#include <Debug/LoggerSpecification.hpp>
+#include <Debug/LoggerAPI.h>

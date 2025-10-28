@@ -28,6 +28,7 @@
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		B289E66E2EB0E50400937D0B /* libKanViz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libKanViz.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B289E6942EB1128900937D0B /* KanVest.log */ = {isa = PBXFileReference; lastKnownFileType = text; path = KanVest.log; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +46,7 @@
 		B289E6192EB0E01600937D0B = {
 			isa = PBXGroup;
 			children = (
+				B289E6952EB1128900937D0B /* Log */,
 				B289E6312EB0E05C00937D0B /* PrefixHeader.pch */,
 				B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */,
 				B289E6322EB0E11400937D0B /* include */,
@@ -82,6 +84,14 @@
 				B289E66E2EB0E50400937D0B /* libKanViz.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B289E6952EB1128900937D0B /* Log */ = {
+			isa = PBXGroup;
+			children = (
+				B289E6942EB1128900937D0B /* KanVest.log */,
+			);
+			path = Log;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
