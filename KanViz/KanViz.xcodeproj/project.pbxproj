@@ -14,6 +14,8 @@
 		B289E67B2EB1097100937D0B /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6792EB1097100937D0B /* Logger.cpp */; };
 		B289E67E2EB10AB600937D0B /* LoggerSpecification.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E67C2EB10AB600937D0B /* LoggerSpecification.hpp */; };
 		B289E6812EB10AC400937D0B /* LoggerSpecification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6802EB10AC400937D0B /* LoggerSpecification.cpp */; };
+		B289E6842EB10C1200937D0B /* LoggerSpecificationBuilder.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6822EB10C1200937D0B /* LoggerSpecificationBuilder.hpp */; };
+		B289E6852EB10C1200937D0B /* LoggerSpecificationBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6832EB10C1200937D0B /* LoggerSpecificationBuilder.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +29,8 @@
 		B289E6792EB1097100937D0B /* Logger.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Logger.cpp; sourceTree = "<group>"; };
 		B289E67C2EB10AB600937D0B /* LoggerSpecification.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LoggerSpecification.hpp; sourceTree = "<group>"; };
 		B289E6802EB10AC400937D0B /* LoggerSpecification.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LoggerSpecification.cpp; sourceTree = "<group>"; };
+		B289E6822EB10C1200937D0B /* LoggerSpecificationBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LoggerSpecificationBuilder.hpp; sourceTree = "<group>"; };
+		B289E6832EB10C1200937D0B /* LoggerSpecificationBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LoggerSpecificationBuilder.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +111,7 @@
 			children = (
 				B289E6782EB1097100937D0B /* Logger.hpp */,
 				B289E67C2EB10AB600937D0B /* LoggerSpecification.hpp */,
+				B289E6822EB10C1200937D0B /* LoggerSpecificationBuilder.hpp */,
 			);
 			path = Debug;
 			sourceTree = "<group>";
@@ -116,6 +121,7 @@
 			children = (
 				B289E6792EB1097100937D0B /* Logger.cpp */,
 				B289E6802EB10AC400937D0B /* LoggerSpecification.cpp */,
+				B289E6832EB10C1200937D0B /* LoggerSpecificationBuilder.cpp */,
 			);
 			path = Debug;
 			sourceTree = "<group>";
@@ -127,6 +133,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289E6842EB10C1200937D0B /* LoggerSpecificationBuilder.hpp in Headers */,
 				B289E66A2EB0E43D00937D0B /* KanVizCore.hpp in Headers */,
 				B289E6742EB0E53200937D0B /* Configuration.h in Headers */,
 				B289E67E2EB10AB600937D0B /* LoggerSpecification.hpp in Headers */,
@@ -197,6 +204,7 @@
 				B289E6812EB10AC400937D0B /* LoggerSpecification.cpp in Sources */,
 				B289E66B2EB0E43D00937D0B /* KanVizCore.cpp in Sources */,
 				B289E67B2EB1097100937D0B /* Logger.cpp in Sources */,
+				B289E6852EB10C1200937D0B /* LoggerSpecificationBuilder.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

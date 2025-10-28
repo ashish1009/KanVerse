@@ -20,6 +20,12 @@ namespace KanViz
     Trace, Debug, Info, Warning, Error, Critical
   };
 
+  /// This enum stores the predefined type of logger
+  enum class LogType : uint8_t
+  {
+    Core, Editor
+  };
+
   /// This structure stores the specifications for IKan logger
   struct LoggerSpecification
   {
@@ -45,5 +51,9 @@ namespace KanViz
     /// This function returns the log level string from the LogLevel enum.
     /// - Parameter level: Log level enum
     std::string_view GetLogLevelString(LogLevel level);
+    
+    /// This function returns the log type string from prdefined enum
+    /// - Parameter type: log type enum
+    std::string_view GetTypeString(LogType type);
   } // namespace LoggerUtils
 } // namespace KanViz
