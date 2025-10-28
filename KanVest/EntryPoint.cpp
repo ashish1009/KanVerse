@@ -12,9 +12,7 @@
     std::cerr << "Failed to initialize the IKan engine.\n";
     return EXIT_FAILURE;
   }
-  
-  IK_LOG_TRACE("None", "Core Engine initialized successfully");
-    
+      
   if (!KanViz::CoreEngine::Shutdown())
   {
     std::cerr << "Failed to shutdown the IKan engine.\n";

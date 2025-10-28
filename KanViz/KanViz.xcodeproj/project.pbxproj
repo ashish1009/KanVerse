@@ -18,6 +18,8 @@
 		B289E6852EB10C1200937D0B /* LoggerSpecificationBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6832EB10C1200937D0B /* LoggerSpecificationBuilder.cpp */; };
 		B289E6932EB111F300937D0B /* LoggerAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6922EB111F300937D0B /* LoggerAPI.h */; };
 		B289E6972EB112CD00937D0B /* AssertAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6962EB112CD00937D0B /* AssertAPI.h */; };
+		B289E69C2EB1138E00937D0B /* Timer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E69A2EB1138E00937D0B /* Timer.hpp */; };
+		B289E69D2EB1138E00937D0B /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E69B2EB1138E00937D0B /* Timer.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +37,8 @@
 		B289E6832EB10C1200937D0B /* LoggerSpecificationBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LoggerSpecificationBuilder.cpp; sourceTree = "<group>"; };
 		B289E6922EB111F300937D0B /* LoggerAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoggerAPI.h; sourceTree = "<group>"; };
 		B289E6962EB112CD00937D0B /* AssertAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AssertAPI.h; sourceTree = "<group>"; };
+		B289E69A2EB1138E00937D0B /* Timer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Timer.hpp; sourceTree = "<group>"; };
+		B289E69B2EB1138E00937D0B /* Timer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Timer.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +118,7 @@
 		B289E6762EB0E66600937D0B /* Debug */ = {
 			isa = PBXGroup;
 			children = (
+				B289E6982EB1137700937D0B /* Profiler */,
 				B289E6782EB1097100937D0B /* Logger.hpp */,
 				B289E67C2EB10AB600937D0B /* LoggerSpecification.hpp */,
 				B289E6822EB10C1200937D0B /* LoggerSpecificationBuilder.hpp */,
@@ -125,11 +130,28 @@
 		B289E6772EB0E66A00937D0B /* Debug */ = {
 			isa = PBXGroup;
 			children = (
+				B289E6992EB1138000937D0B /* Profiler */,
 				B289E6792EB1097100937D0B /* Logger.cpp */,
 				B289E6802EB10AC400937D0B /* LoggerSpecification.cpp */,
 				B289E6832EB10C1200937D0B /* LoggerSpecificationBuilder.cpp */,
 			);
 			path = Debug;
+			sourceTree = "<group>";
+		};
+		B289E6982EB1137700937D0B /* Profiler */ = {
+			isa = PBXGroup;
+			children = (
+				B289E69A2EB1138E00937D0B /* Timer.hpp */,
+			);
+			path = Profiler;
+			sourceTree = "<group>";
+		};
+		B289E6992EB1138000937D0B /* Profiler */ = {
+			isa = PBXGroup;
+			children = (
+				B289E69B2EB1138E00937D0B /* Timer.cpp */,
+			);
+			path = Profiler;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -139,6 +161,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289E69C2EB1138E00937D0B /* Timer.hpp in Headers */,
 				B289E6842EB10C1200937D0B /* LoggerSpecificationBuilder.hpp in Headers */,
 				B289E6972EB112CD00937D0B /* AssertAPI.h in Headers */,
 				B289E6932EB111F300937D0B /* LoggerAPI.h in Headers */,
@@ -212,6 +235,7 @@
 				B289E6812EB10AC400937D0B /* LoggerSpecification.cpp in Sources */,
 				B289E66B2EB0E43D00937D0B /* KanVizCore.cpp in Sources */,
 				B289E67B2EB1097100937D0B /* Logger.cpp in Sources */,
+				B289E69D2EB1138E00937D0B /* Timer.cpp in Sources */,
 				B289E6852EB10C1200937D0B /* LoggerSpecificationBuilder.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
