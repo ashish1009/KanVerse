@@ -13,7 +13,7 @@
     return EXIT_FAILURE;
   }
   
-  IK_LOG_TRACE("None", "Logger created successfully");
+  IK_LOG_TRACE("None", "Core Engine initialized successfully");
     
   if (!KanViz::CoreEngine::Shutdown())
   {

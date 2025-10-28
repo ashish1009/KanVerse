@@ -17,6 +17,7 @@
 		B289E6842EB10C1200937D0B /* LoggerSpecificationBuilder.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6822EB10C1200937D0B /* LoggerSpecificationBuilder.hpp */; };
 		B289E6852EB10C1200937D0B /* LoggerSpecificationBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6832EB10C1200937D0B /* LoggerSpecificationBuilder.cpp */; };
 		B289E6932EB111F300937D0B /* LoggerAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6922EB111F300937D0B /* LoggerAPI.h */; };
+		B289E6972EB112CD00937D0B /* AssertAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6962EB112CD00937D0B /* AssertAPI.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		B289E6822EB10C1200937D0B /* LoggerSpecificationBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LoggerSpecificationBuilder.hpp; sourceTree = "<group>"; };
 		B289E6832EB10C1200937D0B /* LoggerSpecificationBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LoggerSpecificationBuilder.cpp; sourceTree = "<group>"; };
 		B289E6922EB111F300937D0B /* LoggerAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoggerAPI.h; sourceTree = "<group>"; };
+		B289E6962EB112CD00937D0B /* AssertAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AssertAPI.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +91,7 @@
 			children = (
 				B289E6682EB0E43D00937D0B /* KanVizCore.hpp */,
 				B289E6732EB0E53200937D0B /* Configuration.h */,
+				B289E6962EB112CD00937D0B /* AssertAPI.h */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -137,6 +140,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B289E6842EB10C1200937D0B /* LoggerSpecificationBuilder.hpp in Headers */,
+				B289E6972EB112CD00937D0B /* AssertAPI.h in Headers */,
 				B289E6932EB111F300937D0B /* LoggerAPI.h in Headers */,
 				B289E66A2EB0E43D00937D0B /* KanVizCore.hpp in Headers */,
 				B289E6742EB0E53200937D0B /* Configuration.h in Headers */,

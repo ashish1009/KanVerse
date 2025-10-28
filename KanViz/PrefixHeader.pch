@@ -19,6 +19,7 @@
 // Engine Files
 #include "Base/Configuration.h"
 #include "Base/KanVizCore.hpp"
+#include "Base/AssertAPI.h"
 
 #include "Debug/Logger.hpp"
 #include "Debug/LoggerAPI.h"
