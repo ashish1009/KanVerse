@@ -38,6 +38,7 @@
 				B289E64B2EB0E14800937D0B /* PrefixHeader.pch */,
 				B289E64C2EB0E17D00937D0B /* include */,
 				B289E64D2EB0E18400937D0B /* src */,
+				B289E6752EB0E5EC00937D0B /* vendors */,
 				B289E63E2EB0E13B00937D0B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -82,6 +83,13 @@
 				B289E6692EB0E43D00937D0B /* KanVizCore.cpp */,
 			);
 			path = Base;
+			sourceTree = "<group>";
+		};
+		B289E6752EB0E5EC00937D0B /* vendors */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = vendors;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -295,6 +303,7 @@
 				HEADER_SEARCH_PATHS = (
 					"${PROJECT_DIR}/include",
 					"${PROJECT_DIR}/src",
+					"${PROJECT_DIR}/vendors/spd_log/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -316,6 +325,7 @@
 				HEADER_SEARCH_PATHS = (
 					"${PROJECT_DIR}/include",
 					"${PROJECT_DIR}/src",
+					"${PROJECT_DIR}/vendors/spd_log/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

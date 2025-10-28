@@ -278,7 +278,10 @@
 				GCC_C_LANGUAGE_STANDARD = gnu23;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
-				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/../KanViz/include";
+				HEADER_SEARCH_PATHS = (
+					"${PROJECT_DIR}/../KanViz/include",
+					"${PROJECT_DIR}/../KanViz/vendors/spd_log/include",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -293,7 +296,10 @@
 				GCC_C_LANGUAGE_STANDARD = gnu23;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
-				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/../KanViz/include";
+				HEADER_SEARCH_PATHS = (
+					"${PROJECT_DIR}/../KanViz/include",
+					"${PROJECT_DIR}/../KanViz/vendors/spd_log/include",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
