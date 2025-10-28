@@ -16,6 +16,7 @@
 #include <filesystem>
 
 // Engine Files
+#include <Base/Configuration.h>
 #include <Base/KanVizCore.hpp>
 
 #include <Debug/Logger.hpp>

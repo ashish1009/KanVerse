@@ -23,5 +23,7 @@ namespace KanViz
     static bool Shutdown();
     
   private:
+    // Member Variables 
+    inline static std::unordered_map<std::string /* Logger type */, Ref<spdlog::logger>> s_loggerDataMap;
   };
 } // namespace KanViz
