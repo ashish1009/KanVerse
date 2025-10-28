@@ -20,6 +20,8 @@
 		B289E6972EB112CD00937D0B /* AssertAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6962EB112CD00937D0B /* AssertAPI.h */; };
 		B289E69C2EB1138E00937D0B /* Timer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E69A2EB1138E00937D0B /* Timer.hpp */; };
 		B289E69D2EB1138E00937D0B /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E69B2EB1138E00937D0B /* Timer.cpp */; };
+		B289E6A02EB113C300937D0B /* Profiler.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E69E2EB113C300937D0B /* Profiler.hpp */; };
+		B289E6A12EB113C300937D0B /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E69F2EB113C300937D0B /* Profiler.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +41,8 @@
 		B289E6962EB112CD00937D0B /* AssertAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AssertAPI.h; sourceTree = "<group>"; };
 		B289E69A2EB1138E00937D0B /* Timer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Timer.hpp; sourceTree = "<group>"; };
 		B289E69B2EB1138E00937D0B /* Timer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Timer.cpp; sourceTree = "<group>"; };
+		B289E69E2EB113C300937D0B /* Profiler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Profiler.hpp; sourceTree = "<group>"; };
+		B289E69F2EB113C300937D0B /* Profiler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Profiler.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +146,7 @@
 			isa = PBXGroup;
 			children = (
 				B289E69A2EB1138E00937D0B /* Timer.hpp */,
+				B289E69E2EB113C300937D0B /* Profiler.hpp */,
 			);
 			path = Profiler;
 			sourceTree = "<group>";
@@ -150,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				B289E69B2EB1138E00937D0B /* Timer.cpp */,
+				B289E69F2EB113C300937D0B /* Profiler.cpp */,
 			);
 			path = Profiler;
 			sourceTree = "<group>";
@@ -167,6 +173,7 @@
 				B289E6932EB111F300937D0B /* LoggerAPI.h in Headers */,
 				B289E66A2EB0E43D00937D0B /* KanVizCore.hpp in Headers */,
 				B289E6742EB0E53200937D0B /* Configuration.h in Headers */,
+				B289E6A02EB113C300937D0B /* Profiler.hpp in Headers */,
 				B289E67E2EB10AB600937D0B /* LoggerSpecification.hpp in Headers */,
 				B289E67A2EB1097100937D0B /* Logger.hpp in Headers */,
 			);
@@ -234,6 +241,7 @@
 			files = (
 				B289E6812EB10AC400937D0B /* LoggerSpecification.cpp in Sources */,
 				B289E66B2EB0E43D00937D0B /* KanVizCore.cpp in Sources */,
+				B289E6A12EB113C300937D0B /* Profiler.cpp in Sources */,
 				B289E67B2EB1097100937D0B /* Logger.cpp in Sources */,
 				B289E69D2EB1138E00937D0B /* Timer.cpp in Sources */,
 				B289E6852EB10C1200937D0B /* LoggerSpecificationBuilder.cpp in Sources */,

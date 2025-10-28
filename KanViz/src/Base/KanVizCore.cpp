@@ -15,7 +15,7 @@ namespace KanViz
   bool CoreEngine::Initialize()
   {
     // Create the core logger
-    const LoggerSpecification& loggerSpec = LoggerSpecification::Create().Type(LogType::Core).Level(LogLevel::Trace).Name("KanVest").SaveAt(LogFilePath).ShowOnConsole(true);
+    const LoggerSpecification& loggerSpec = LoggerSpecification::Create().Type(LogType::Core).Level(LogLevel::Trace).Name("KanVest-Logger").SaveAt(LogFilePath).ShowOnConsole(true);
     if (!Logger::Create(loggerSpec))
     {
       return IK_FAILURE;

@@ -40,9 +40,10 @@ static std::string Name##String[] = { Name(STRING) }; \
 namespace KanViz
 {
   // Paths
-  static const std::filesystem::path WorkSpacePath  = "../../../";
-  static const std::filesystem::path LogFilePath    = WorkSpacePath / "KanVest/Log/KanVest.log";
-  
+  static const std::filesystem::path WorkSpacePath        = "../../../";
+  static const std::filesystem::path LogFilePath          = WorkSpacePath / "KanVest/Log/KanVest.log";
+  static const std::filesystem::path ProfilerFilePath     = WorkSpacePath / "KanVest/Log/KanVest.profiler";
+
   // Smart pointer defines
   template<typename T> using Scope = std::unique_ptr<T>;
   template<typename T, typename ... Args> constexpr Scope<T>

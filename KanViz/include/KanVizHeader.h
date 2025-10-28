@@ -23,3 +23,4 @@
 
 #include <Debug/Logger.hpp>
 #include <Debug/LoggerAPI.h>
+#include <Debug/LoggerSpecificationBuilder.hpp>
