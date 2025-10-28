@@ -5,6 +5,23 @@
 //  Created by Ashish . on 28/10/25.
 //
 
+[[nodiscard]] int ExecuteKanVest(std::span<const char*> args)
+{
+  if (!KanViz::CoreEngine::Initialize())
+  {
+    std::cerr << "Failed to initialize the IKan engine.\n";
+    return EXIT_FAILURE;
+  }
+    
+  if (!KanViz::CoreEngine::Shutdown())
+  {
+    std::cerr << "Failed to shutdown the IKan engine.\n";
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
+}
+
 /// This function is the Entry point of the Studio
 /// - Parameters:
 ///   - argc: Number of arguments passed from binary
@@ -19,5 +36,5 @@
     std::cout << std::format("    Arg[{}]   : {}\n", i, args[i]);
   }
   
-  return 0;
+  return ExecuteKanVest(args);
 }

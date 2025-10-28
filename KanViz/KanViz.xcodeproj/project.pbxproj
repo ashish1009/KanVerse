@@ -6,9 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B289E66A2EB0E43D00937D0B /* KanVizCore.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6682EB0E43D00937D0B /* KanVizCore.hpp */; };
+		B289E66B2EB0E43D00937D0B /* KanVizCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6692EB0E43D00937D0B /* KanVizCore.cpp */; };
+		B289E6742EB0E53200937D0B /* Configuration.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6732EB0E53200937D0B /* Configuration.h */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		B289E63D2EB0E13B00937D0B /* libKanViz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libKanViz.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E64B2EB0E14800937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
+		B289E6682EB0E43D00937D0B /* KanVizCore.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KanVizCore.hpp; sourceTree = "<group>"; };
+		B289E6692EB0E43D00937D0B /* KanVizCore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = KanVizCore.cpp; sourceTree = "<group>"; };
+		B289E66C2EB0E44900937D0B /* KanVizHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KanVizHeader.h; sourceTree = "<group>"; };
+		B289E6732EB0E53200937D0B /* Configuration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Configuration.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,6 +53,8 @@
 		B289E64C2EB0E17D00937D0B /* include */ = {
 			isa = PBXGroup;
 			children = (
+				B289E66C2EB0E44900937D0B /* KanVizHeader.h */,
+				B289E6662EB0E41300937D0B /* Base */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -50,8 +62,26 @@
 		B289E64D2EB0E18400937D0B /* src */ = {
 			isa = PBXGroup;
 			children = (
+				B289E6672EB0E42400937D0B /* Base */,
 			);
 			path = src;
+			sourceTree = "<group>";
+		};
+		B289E6662EB0E41300937D0B /* Base */ = {
+			isa = PBXGroup;
+			children = (
+				B289E6682EB0E43D00937D0B /* KanVizCore.hpp */,
+				B289E6732EB0E53200937D0B /* Configuration.h */,
+			);
+			path = Base;
+			sourceTree = "<group>";
+		};
+		B289E6672EB0E42400937D0B /* Base */ = {
+			isa = PBXGroup;
+			children = (
+				B289E6692EB0E43D00937D0B /* KanVizCore.cpp */,
+			);
+			path = Base;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -61,6 +91,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289E66A2EB0E43D00937D0B /* KanVizCore.hpp in Headers */,
+				B289E6742EB0E53200937D0B /* Configuration.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,6 +156,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289E66B2EB0E43D00937D0B /* KanVizCore.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -259,6 +292,10 @@
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				HEADER_SEARCH_PATHS = (
+					"${PROJECT_DIR}/include",
+					"${PROJECT_DIR}/src",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -276,6 +313,10 @@
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				HEADER_SEARCH_PATHS = (
+					"${PROJECT_DIR}/include",
+					"${PROJECT_DIR}/src",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};

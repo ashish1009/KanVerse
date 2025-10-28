@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B289E6722EB0E52200937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E6712EB0E52200937D0B /* libKanViz.a */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		B289E6552EB0E22A00937D0B /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -22,6 +26,7 @@
 		B289E6572EB0E22A00937D0B /* KanForge */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanForge; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E6612EB0E27300937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		B289E6632EB0E27D00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
+		B289E6712EB0E52200937D0B /* libKanViz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libKanViz.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +34,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289E6722EB0E52200937D0B /* libKanViz.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,6 +48,7 @@
 				B289E6632EB0E27D00937D0B /* EntryPoint.cpp */,
 				B289E6642EB0E28500937D0B /* include */,
 				B289E6652EB0E28A00937D0B /* src */,
+				B289E6702EB0E52200937D0B /* Frameworks */,
 				B289E6582EB0E22A00937D0B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -66,6 +73,14 @@
 			children = (
 			);
 			path = src;
+			sourceTree = "<group>";
+		};
+		B289E6702EB0E52200937D0B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B289E6712EB0E52200937D0B /* libKanViz.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -261,6 +276,7 @@
 				GCC_C_LANGUAGE_STANDARD = c23;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/../KanViz/include";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -275,6 +291,7 @@
 				GCC_C_LANGUAGE_STANDARD = c23;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/../KanViz/include";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

@@ -1,5 +1,5 @@
 //
-//  PrefixHeader.pch
+//  KanVizHeader.h
 //  KanViz
 //
 //  Created by Ashish . on 28/10/25.
@@ -7,7 +7,7 @@
 
 #pragma once
 
-// To remove documentation warning
+// To remove documentation warning in entt::entity
 #pragma clang diagnostic ignored "-Wdocumentation"
 #pragma clang diagnostic ignored "-Wformat-security"
 
@@ -16,5 +16,4 @@
 #include <ranges>
 
 // Engine Files
-#include "Base/Configuration.h"
-#include "Base/KanVizCore.hpp"
+#include <Base/KanVizCore.hpp>
