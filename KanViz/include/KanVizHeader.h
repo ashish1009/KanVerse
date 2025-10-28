@@ -24,3 +24,8 @@
 #include <Debug/Logger.hpp>
 #include <Debug/LoggerAPI.h>
 #include <Debug/LoggerSpecificationBuilder.hpp>
+
+#include <Debug/Profiler/Timer.hpp>
+#include <Debug/Profiler/Profiler.hpp>
+#include <Debug/Profiler/ScopedProfiler.hpp>
+#include <Debug/Profiler/PerformanceProfiler.hpp>
