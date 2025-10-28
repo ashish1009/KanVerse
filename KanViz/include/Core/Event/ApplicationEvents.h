@@ -1,6 +1,6 @@
 //
 //  ApplicationEvents.h
-//  IKan
+//  KanViz
 //
 //  Created by Ashish . on 22/08/25.
 //
@@ -9,7 +9,7 @@
 
 #include "Core/Event/Events.h"
 
-namespace IKan
+namespace KanViz
 {
   // -------------------------------------------------------------------------------------------------------------------
   /// Event triggered when the window is resized
@@ -97,4 +97,4 @@ namespace IKan
   private:
     bool m_maximized {false};
   };
-} // namespace IKan
+} // namespace KanViz

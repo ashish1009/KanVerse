@@ -1,6 +1,6 @@
 //
 //  MouseEvents.h
-//  IKan
+//  KanViz
 //
 //  Created by Ashish . on 22/08/25.
 //
@@ -10,7 +10,7 @@
 #include "Core/Event/Events.h"
 #include "Core/MouseButtonCodes.h"
 
-namespace IKan
+namespace KanViz
 {
   // -------------------------------------------------------------------------------------------------------------------
   /// Event triggered when the mouse is moved
@@ -111,4 +111,4 @@ namespace IKan
     
     EVENT_CLASS_TYPE(MouseButtonReleased);
   };
-} // namespace IKan
+} // namespace KanViz

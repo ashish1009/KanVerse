@@ -1,6 +1,6 @@
 //
 //  KeyboardEvents.h
-//  IKan
+//  KanViz
 //
 //  Created by Ashish . on 22/08/25.
 //
@@ -10,7 +10,7 @@
 #include "Core/Event/Events.h"
 #include "Core/KeyCodes.h"
 
-namespace IKan
+namespace KanViz
 {
   // -------------------------------------------------------------------------------------------------------------------
   /// Base class for all keyboard-related events
@@ -80,4 +80,4 @@ namespace IKan
     
     EVENT_CLASS_TYPE(KeyTyped);
   };
-} // namespace IKan
+} // namespace KanViz

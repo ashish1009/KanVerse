@@ -1,13 +1,13 @@
 //
 //  KeyCodes.h
-//  IKan
+//  KanViz
 //
 //  Created by Ashish . on 22/08/25.
 //
 
 #pragma once
 
-namespace IKan
+namespace KanViz
 {
   /// This enum stores the key button codes
   /// - Note: From glfw3.h
@@ -145,4 +145,4 @@ namespace IKan
     RightSuper          = 347,
     Menu                = 348
   };
-} // namespace IKan
+} // namespace KanViz

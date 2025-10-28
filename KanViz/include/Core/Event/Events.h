@@ -1,13 +1,13 @@
 //
 //  Events.h
-//  IKan
+//  KanViz
 //
 //  Created by Ashish . on 22/08/25.
 //
 
 #pragma once
 
-namespace IKan
+namespace KanViz
 {
   // Macros for defining Event classes
 #define EVENT_CLASS_TYPE(type) \
@@ -21,7 +21,7 @@ int32_t GetCategoryFlags() const noexcept override { return category; }
   // API macro to bind class member function to std::function
 #define IK_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
   
-  /// This enum defines all supported event types in IKan engine
+  /// This enum defines all supported event types in KanViz engine
   enum class EventType : uint8_t
   {
     NoEventType = 0,
@@ -41,7 +41,7 @@ int32_t GetCategoryFlags() const noexcept override { return category; }
     EventCategoryMouseButton = BIT(4)
   };
   
-  /// Base class for all events in the IKan engine.
+  /// Base class for all events in the KanViz engine.
   /// Stores common APIs to identify and categorize events.
   class Event
   {
@@ -107,4 +107,4 @@ int32_t GetCategoryFlags() const noexcept override { return category; }
   // Common typedef for event callback function
   using EventCallbackFn = std::function<void(Event&)>;
   
-} // namespace IKan
+} // namespace KanViz

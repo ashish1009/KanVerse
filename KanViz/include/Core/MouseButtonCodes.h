@@ -1,13 +1,13 @@
 //
 //  MouseButtonCodes.h
-//  IKan
+//  KanViz
 //
 //  Created by Ashish . on 22/08/25.
 //
 
 #pragma once
 
-namespace IKan
+namespace KanViz
 {
   /// This enum stores the mouse button codes
   /// - Note: From glfw3.h
@@ -27,4 +27,4 @@ namespace IKan
     Right  = Button1,
     Middle = Button2
   };
-} // namespace IKan
+} // namespace KanViz
