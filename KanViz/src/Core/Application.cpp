@@ -164,8 +164,6 @@ namespace KanViz
       }
       
       OnImGuiRender();
-      
-      ImGui::ShowDemoWindow();
     }
     m_imguiLayer->End();
   }

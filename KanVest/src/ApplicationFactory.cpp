@@ -6,6 +6,7 @@
 //
 
 #include "ApplicationFactory.hpp"
+#include "KanVestApp.hpp"
 
 namespace KanVest
 {
@@ -31,6 +32,6 @@ namespace KanVest
       .iniFilePath = "../../../KanVest/KanVest.ini"
     };
     
-    return KanViz::ApplicationFactory::CreateApplication<KanViz::Application>(appSpec);
+    return KanViz::ApplicationFactory::CreateApplication<KanVest::Application>(appSpec);
   }
 } // namespace KanVest
