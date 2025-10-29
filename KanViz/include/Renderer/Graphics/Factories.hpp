@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Renderer/Graphics/Specification.h"
+#include "Renderer/Graphics/Specifications.h"
 
 // Forward Declarations
 class GLFWwindow;

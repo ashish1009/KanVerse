@@ -74,7 +74,6 @@
 		B289E88E2EB2287800937D0B /* ShaderUniforms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E88A2EB2287800937D0B /* ShaderUniforms.cpp */; };
 		B289E8912EB228B100937D0B /* Buffer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E88F2EB228B100937D0B /* Buffer.hpp */; };
 		B289E8922EB228B100937D0B /* Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8902EB228B100937D0B /* Buffer.cpp */; };
-		B289E8942EB2290E00937D0B /* Specification.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E8932EB2290E00937D0B /* Specification.h */; };
 		B289E89B2EB22A0F00937D0B /* OpenGLPipeline.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8992EB22A0F00937D0B /* OpenGLPipeline.hpp */; };
 		B289E89C2EB22A0F00937D0B /* OpenGLFrameBuffer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8952EB22A0F00937D0B /* OpenGLFrameBuffer.hpp */; };
 		B289E89D2EB22A0F00937D0B /* OpenGLIndexBuffer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8972EB22A0F00937D0B /* OpenGLIndexBuffer.hpp */; };
@@ -198,7 +197,6 @@
 		B289E88A2EB2287800937D0B /* ShaderUniforms.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderUniforms.cpp; sourceTree = "<group>"; };
 		B289E88F2EB228B100937D0B /* Buffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Buffer.hpp; sourceTree = "<group>"; };
 		B289E8902EB228B100937D0B /* Buffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Buffer.cpp; sourceTree = "<group>"; };
-		B289E8932EB2290E00937D0B /* Specification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Specification.h; sourceTree = "<group>"; };
 		B289E8952EB22A0F00937D0B /* OpenGLFrameBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OpenGLFrameBuffer.hpp; sourceTree = "<group>"; };
 		B289E8962EB22A0F00937D0B /* OpenGLFrameBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLFrameBuffer.cpp; sourceTree = "<group>"; };
 		B289E8972EB22A0F00937D0B /* OpenGLIndexBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OpenGLIndexBuffer.hpp; sourceTree = "<group>"; };
@@ -488,7 +486,6 @@
 			isa = PBXGroup;
 			children = (
 				B289E8282EB1B00D00937D0B /* Factories.hpp */,
-				B289E8932EB2290E00937D0B /* Specification.h */,
 				B289E82C2EB1B01D00937D0B /* RendererContext.hpp */,
 				B289E8302EB1B02500937D0B /* RendererAPI.hpp */,
 				B289E8732EB2284400937D0B /* BufferLayout.hpp */,
@@ -645,7 +642,6 @@
 				B289E89D2EB22A0F00937D0B /* OpenGLIndexBuffer.hpp in Headers */,
 				B289E6D12EB1A44000937D0B /* Application.hpp in Headers */,
 				B289E6E12EB1A81500937D0B /* Window.hpp in Headers */,
-				B289E8942EB2290E00937D0B /* Specification.h in Headers */,
 				B289E82A2EB1B00D00937D0B /* Factories.hpp in Headers */,
 				B289E67E2EB10AB600937D0B /* LoggerSpecification.hpp in Headers */,
 				B289E8782EB2284A00937D0B /* IndexBuffer.hpp in Headers */,
