@@ -16,6 +16,16 @@
 #include <filesystem>
 #include <map>
 
+// glm math library
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/random.hpp>
+#include <glm/gtc/noise.hpp>
+
 // Engine Files
 #include "Base/Configuration.h"
 #include "Base/KanVizCore.hpp"
