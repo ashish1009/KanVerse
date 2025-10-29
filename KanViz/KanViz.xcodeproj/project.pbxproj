@@ -35,7 +35,25 @@
 		B289E6D42EB1A4C800937D0B /* ApplicationSpecification.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6D32EB1A4C800937D0B /* ApplicationSpecification.h */; };
 		B289E6D72EB1A68000937D0B /* ApplicationFactory.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6D52EB1A68000937D0B /* ApplicationFactory.hpp */; };
 		B289E6DE2EB1A78600937D0B /* WindowSpecification.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6DD2EB1A78600937D0B /* WindowSpecification.h */; };
+		B289E6E12EB1A81500937D0B /* Window.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6DF2EB1A81500937D0B /* Window.hpp */; };
+		B289E6E52EB1A81D00937D0B /* WindowFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6E42EB1A81D00937D0B /* WindowFactory.cpp */; };
+		B289E6E62EB1A81D00937D0B /* WindowFactory.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6E32EB1A81D00937D0B /* WindowFactory.hpp */; };
+		B289E6EB2EB1A8F700937D0B /* MacWindiow.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6E92EB1A8F700937D0B /* MacWindiow.hpp */; };
+		B289E6EC2EB1A8F700937D0B /* MacWindiow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6EA2EB1A8F700937D0B /* MacWindiow.cpp */; };
+		B289E8192EB1AA4E00937D0B /* libGLFW.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E7092EB1A9A900937D0B /* libGLFW.a */; };
+		B289E8202EB1AB3800937D0B /* RendererType.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E81E2EB1AB3800937D0B /* RendererType.hpp */; };
+		B289E8212EB1AB3800937D0B /* RendererType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E81F2EB1AB3800937D0B /* RendererType.cpp */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B289E7082EB1A9A900937D0B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B289E7042EB1A9A900937D0B /* GLFW.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B289E6F62EB1A9A800937D0B;
+			remoteInfo = GLFW;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		B289E63D2EB0E13B00937D0B /* libKanViz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libKanViz.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -75,6 +93,14 @@
 		B289E6D32EB1A4C800937D0B /* ApplicationSpecification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ApplicationSpecification.h; sourceTree = "<group>"; };
 		B289E6D52EB1A68000937D0B /* ApplicationFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ApplicationFactory.hpp; sourceTree = "<group>"; };
 		B289E6DD2EB1A78600937D0B /* WindowSpecification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WindowSpecification.h; sourceTree = "<group>"; };
+		B289E6DF2EB1A81500937D0B /* Window.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Window.hpp; sourceTree = "<group>"; };
+		B289E6E32EB1A81D00937D0B /* WindowFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = WindowFactory.hpp; sourceTree = "<group>"; };
+		B289E6E42EB1A81D00937D0B /* WindowFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WindowFactory.cpp; sourceTree = "<group>"; };
+		B289E6E92EB1A8F700937D0B /* MacWindiow.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MacWindiow.hpp; sourceTree = "<group>"; };
+		B289E6EA2EB1A8F700937D0B /* MacWindiow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MacWindiow.cpp; sourceTree = "<group>"; };
+		B289E7042EB1A9A900937D0B /* GLFW.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GLFW.xcodeproj; path = GLFW/GLFW.xcodeproj; sourceTree = "<group>"; };
+		B289E81E2EB1AB3800937D0B /* RendererType.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RendererType.hpp; sourceTree = "<group>"; };
+		B289E81F2EB1AB3800937D0B /* RendererType.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererType.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +108,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289E8192EB1AA4E00937D0B /* libGLFW.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,6 +122,7 @@
 				B289E64C2EB0E17D00937D0B /* include */,
 				B289E64D2EB0E18400937D0B /* src */,
 				B289E6752EB0E5EC00937D0B /* vendors */,
+				B289E8182EB1AA4E00937D0B /* Frameworks */,
 				B289E63E2EB0E13B00937D0B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -114,6 +142,7 @@
 				B289E6662EB0E41300937D0B /* Base */,
 				B289E6762EB0E66600937D0B /* Debug */,
 				B289E6AF2EB1219C00937D0B /* Core */,
+				B289E81A2EB1AB1500937D0B /* Renderer */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -124,6 +153,8 @@
 				B289E6672EB0E42400937D0B /* Base */,
 				B289E6772EB0E66A00937D0B /* Debug */,
 				B289E6B02EB121A900937D0B /* Core */,
+				B289E6E72EB1A8E100937D0B /* Platform */,
+				B289E81B2EB1AB1900937D0B /* Renderer */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -149,6 +180,7 @@
 		B289E6752EB0E5EC00937D0B /* vendors */ = {
 			isa = PBXGroup;
 			children = (
+				B289E7042EB1A9A900937D0B /* GLFW.xcodeproj */,
 			);
 			path = vendors;
 			sourceTree = "<group>";
@@ -211,6 +243,8 @@
 				B289E6C72EB1229800937D0B /* MouseButtonCodes.h */,
 				B289E6C82EB122C200937D0B /* TimeStep.hpp */,
 				B289E6DD2EB1A78600937D0B /* WindowSpecification.h */,
+				B289E6DF2EB1A81500937D0B /* Window.hpp */,
+				B289E6E32EB1A81D00937D0B /* WindowFactory.hpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -220,6 +254,7 @@
 			children = (
 				B289E6D02EB1A44000937D0B /* Application.cpp */,
 				B289E6C92EB122C200937D0B /* TimeStep.cpp */,
+				B289E6E42EB1A81D00937D0B /* WindowFactory.cpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -235,6 +270,70 @@
 			path = Event;
 			sourceTree = "<group>";
 		};
+		B289E6E72EB1A8E100937D0B /* Platform */ = {
+			isa = PBXGroup;
+			children = (
+				B289E6E82EB1A8EE00937D0B /* MacOS */,
+			);
+			path = Platform;
+			sourceTree = "<group>";
+		};
+		B289E6E82EB1A8EE00937D0B /* MacOS */ = {
+			isa = PBXGroup;
+			children = (
+				B289E6E92EB1A8F700937D0B /* MacWindiow.hpp */,
+				B289E6EA2EB1A8F700937D0B /* MacWindiow.cpp */,
+			);
+			path = MacOS;
+			sourceTree = "<group>";
+		};
+		B289E7052EB1A9A900937D0B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B289E7092EB1A9A900937D0B /* libGLFW.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B289E8182EB1AA4E00937D0B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B289E81A2EB1AB1500937D0B /* Renderer */ = {
+			isa = PBXGroup;
+			children = (
+				B289E81C2EB1AB2700937D0B /* Core */,
+			);
+			path = Renderer;
+			sourceTree = "<group>";
+		};
+		B289E81B2EB1AB1900937D0B /* Renderer */ = {
+			isa = PBXGroup;
+			children = (
+				B289E81D2EB1AB2F00937D0B /* Core */,
+			);
+			path = Renderer;
+			sourceTree = "<group>";
+		};
+		B289E81C2EB1AB2700937D0B /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				B289E81E2EB1AB3800937D0B /* RendererType.hpp */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		B289E81D2EB1AB2F00937D0B /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				B289E81F2EB1AB3800937D0B /* RendererType.cpp */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -243,19 +342,23 @@
 			buildActionMask = 2147483647;
 			files = (
 				B289E69C2EB1138E00937D0B /* Timer.hpp in Headers */,
+				B289E8202EB1AB3800937D0B /* RendererType.hpp in Headers */,
 				B289E6842EB10C1200937D0B /* LoggerSpecificationBuilder.hpp in Headers */,
 				B289E6AC2EB1154000937D0B /* ScopedPerformanceProfiler.hpp in Headers */,
 				B289E6A82EB114AF00937D0B /* PerformanceProfiler.hpp in Headers */,
 				B289E6972EB112CD00937D0B /* AssertAPI.h in Headers */,
 				B289E6A42EB1147600937D0B /* ScopedProfiler.hpp in Headers */,
+				B289E6EB2EB1A8F700937D0B /* MacWindiow.hpp in Headers */,
 				B289E6CA2EB122C200937D0B /* TimeStep.hpp in Headers */,
 				B289E6D42EB1A4C800937D0B /* ApplicationSpecification.h in Headers */,
 				B289E6D72EB1A68000937D0B /* ApplicationFactory.hpp in Headers */,
+				B289E6E62EB1A81D00937D0B /* WindowFactory.hpp in Headers */,
 				B289E6932EB111F300937D0B /* LoggerAPI.h in Headers */,
 				B289E66A2EB0E43D00937D0B /* KanVizCore.hpp in Headers */,
 				B289E6742EB0E53200937D0B /* Configuration.h in Headers */,
 				B289E6A02EB113C300937D0B /* Profiler.hpp in Headers */,
 				B289E6D12EB1A44000937D0B /* Application.hpp in Headers */,
+				B289E6E12EB1A81500937D0B /* Window.hpp in Headers */,
 				B289E67E2EB10AB600937D0B /* LoggerSpecification.hpp in Headers */,
 				B289E67A2EB1097100937D0B /* Logger.hpp in Headers */,
 				B289E6DE2EB1A78600937D0B /* WindowSpecification.h in Headers */,
@@ -310,12 +413,28 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B289E63E2EB0E13B00937D0B /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = B289E7052EB1A9A900937D0B /* Products */;
+					ProjectRef = B289E7042EB1A9A900937D0B /* GLFW.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				B289E63C2EB0E13B00937D0B /* KanViz */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		B289E7092EB1A9A900937D0B /* libGLFW.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libGLFW.a;
+			remoteRef = B289E7082EB1A9A900937D0B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B289E63A2EB0E13B00937D0B /* Sources */ = {
@@ -326,12 +445,15 @@
 				B289E6812EB10AC400937D0B /* LoggerSpecification.cpp in Sources */,
 				B289E6D22EB1A44000937D0B /* Application.cpp in Sources */,
 				B289E66B2EB0E43D00937D0B /* KanVizCore.cpp in Sources */,
+				B289E8212EB1AB3800937D0B /* RendererType.cpp in Sources */,
 				B289E6A12EB113C300937D0B /* Profiler.cpp in Sources */,
 				B289E67B2EB1097100937D0B /* Logger.cpp in Sources */,
 				B289E6A92EB114AF00937D0B /* PerformanceProfiler.cpp in Sources */,
 				B289E69D2EB1138E00937D0B /* Timer.cpp in Sources */,
 				B289E6852EB10C1200937D0B /* LoggerSpecificationBuilder.cpp in Sources */,
+				B289E6EC2EB1A8F700937D0B /* MacWindiow.cpp in Sources */,
 				B289E6CB2EB122C200937D0B /* TimeStep.cpp in Sources */,
+				B289E6E52EB1A81D00937D0B /* WindowFactory.cpp in Sources */,
 				B289E6AD2EB1154000937D0B /* ScopedPerformanceProfiler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -472,6 +594,8 @@
 					"${PROJECT_DIR}/include",
 					"${PROJECT_DIR}/src",
 					"${PROJECT_DIR}/vendors/spd_log/include",
+					"${PROJECT_DIR}/vendors/glm",
+					"${PROJECT_DIR}/vendors/GLFW/GLFW/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -494,6 +618,8 @@
 					"${PROJECT_DIR}/include",
 					"${PROJECT_DIR}/src",
 					"${PROJECT_DIR}/vendors/spd_log/include",
+					"${PROJECT_DIR}/vendors/glm",
+					"${PROJECT_DIR}/vendors/GLFW/GLFW/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

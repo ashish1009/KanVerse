@@ -299,6 +299,8 @@
 				HEADER_SEARCH_PATHS = (
 					"${PROJECT_DIR}/../KanViz/include",
 					"${PROJECT_DIR}/../KanViz/vendors/spd_log/include",
+					"${PROJECT_DIR}/../KanViz/vendors/glm",
+					"${PROJECT_DIR}/../KanViz/vendors/GLFW/GLFW/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -317,6 +319,8 @@
 				HEADER_SEARCH_PATHS = (
 					"${PROJECT_DIR}/../KanViz/include",
 					"${PROJECT_DIR}/../KanViz/vendors/spd_log/include",
+					"${PROJECT_DIR}/../KanViz/vendors/glm",
+					"${PROJECT_DIR}/../KanViz/vendors/GLFW/GLFW/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
