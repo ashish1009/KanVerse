@@ -42,6 +42,13 @@ namespace KanVest
     static RendererLayer& Get();
     
   private:
+    /// This function starts main ImGui Window with Docking
+    void UI_StartMainWindowDocking();
+    /// This function ends Main ImGui window with Docking
+    void UI_EndMainWindowDocking();
+    /// This function shows primary Viewport panel
+    void UI_PrimaryViewportPanel();
+
     // Single Instance -----------------------------------
     static RendererLayer* s_instance;                          //< Renderer Layer single instance
   };
