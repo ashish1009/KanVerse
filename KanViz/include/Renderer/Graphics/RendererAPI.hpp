@@ -9,7 +9,7 @@
 
 #include "Renderer/Graphics/Factories.hpp"
 
-namespace IKan
+namespace KanViz
 {
   /// This class is the interface for all the renderer APIs.
   /// It defines the core functions that any rendering backend must implement.
@@ -23,4 +23,4 @@ namespace IKan
     /// - Parameter context: Error message to be printed
     virtual void CheckError(std::string_view context) const = 0;
   };
-} // namespace IKan
+} // namespace KanViz
