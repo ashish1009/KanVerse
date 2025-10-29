@@ -54,6 +54,7 @@
 		B289E83B2EB1B04B00937D0B /* OpenGLRendererAPI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8392EB1B04B00937D0B /* OpenGLRendererAPI.hpp */; };
 		B289E83C2EB1B04B00937D0B /* OpenGLRendererAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E83A2EB1B04B00937D0B /* OpenGLRendererAPI.cpp */; };
 		B289E8642EB1B24F00937D0B /* libGlad.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E8592EB1B06500937D0B /* libGlad.a */; };
+		B289E8682EB1B2C100937D0B /* Layer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8652EB1B2C100937D0B /* Layer.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,6 +131,7 @@
 		B289E8392EB1B04B00937D0B /* OpenGLRendererAPI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OpenGLRendererAPI.hpp; sourceTree = "<group>"; };
 		B289E83A2EB1B04B00937D0B /* OpenGLRendererAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLRendererAPI.cpp; sourceTree = "<group>"; };
 		B289E8542EB1B06400937D0B /* Glad.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Glad.xcodeproj; path = Glad/Glad.xcodeproj; sourceTree = "<group>"; };
+		B289E8652EB1B2C100937D0B /* Layer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Layer.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -276,6 +278,7 @@
 				B289E6DD2EB1A78600937D0B /* WindowSpecification.h */,
 				B289E6DF2EB1A81500937D0B /* Window.hpp */,
 				B289E6E32EB1A81D00937D0B /* WindowFactory.hpp */,
+				B289E8652EB1B2C100937D0B /* Layer.hpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -438,6 +441,7 @@
 				B289E82A2EB1B00D00937D0B /* Factories.hpp in Headers */,
 				B289E67E2EB10AB600937D0B /* LoggerSpecification.hpp in Headers */,
 				B289E8252EB1AEA100937D0B /* Renderer.hpp in Headers */,
+				B289E8682EB1B2C100937D0B /* Layer.hpp in Headers */,
 				B289E67A2EB1097100937D0B /* Logger.hpp in Headers */,
 				B289E83B2EB1B04B00937D0B /* OpenGLRendererAPI.hpp in Headers */,
 				B289E6DE2EB1A78600937D0B /* WindowSpecification.h in Headers */,

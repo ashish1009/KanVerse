@@ -43,6 +43,7 @@
 #include <Core/Application.hpp>
 #include <Core/ApplicationFactory.hpp>
 #include <Core/TimeStep.hpp>
+#include <Core/Layer.hpp>
 
 #include <Core/Event/Events.h>
 #include <Core/Event/ApplicationEvents.h>
