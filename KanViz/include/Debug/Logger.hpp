@@ -15,6 +15,7 @@ namespace KanViz
 #define LogModule(f) \
 f(None) \
 f(Application) f(Window) f(Layers) \
+f(UI) \
 f(Renderer) \
 f(Shader) f(BufferLayout) f(Texture) f(VertexBuffer) f(IndexBuffer) f(Pipeline) f(FrameBuffer) \
 

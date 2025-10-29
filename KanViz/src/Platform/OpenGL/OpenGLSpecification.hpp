@@ -54,7 +54,7 @@ namespace KanViz
     /// - Parameter filter: filter
     std::string_view KanVizFilterName(TextureFilter filter);
     
-    /// This function converts the GL  Format to Ikan Format
+    /// This function converts the GL  Format to KanViz Format
     /// - Parameter format:GL Format
     TextureFormat OpenGLFormatToKanVizFormat(GLint format);
     

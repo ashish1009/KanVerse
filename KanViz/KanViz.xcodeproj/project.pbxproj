@@ -104,6 +104,8 @@
 		B289EDB72EB2314300937D0B /* libUI.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EACB2EB22E3000937D0B /* libUI.a */; };
 		B289EDB82EB2314A00937D0B /* libYAML.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EAF72EB22EBD00937D0B /* libYAML.a */; };
 		B289EDE02EB231ED00937D0B /* libstb_image.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EDDA2EB231BB00937D0B /* libstb_image.a */; };
+		B289EDE52EB232B300937D0B /* ImGuiLayer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289EDE32EB232B300937D0B /* ImGuiLayer.hpp */; };
+		B289EDE62EB232B300937D0B /* ImGuiLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EDE42EB232B300937D0B /* ImGuiLayer.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -251,6 +253,8 @@
 		B289EAD72EB22E6200937D0B /* StringUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StringUtils.cpp; sourceTree = "<group>"; };
 		B289EAF22EB22EBD00937D0B /* YAML.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = YAML.xcodeproj; path = YAML/YAML.xcodeproj; sourceTree = "<group>"; };
 		B289EDD52EB231BB00937D0B /* stb_image.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = stb_image.xcodeproj; path = stb_image/stb_image.xcodeproj; sourceTree = "<group>"; };
+		B289EDE32EB232B300937D0B /* ImGuiLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ImGuiLayer.hpp; sourceTree = "<group>"; };
+		B289EDE42EB232B300937D0B /* ImGuiLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImGuiLayer.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -298,6 +302,7 @@
 				B289E6762EB0E66600937D0B /* Debug */,
 				B289E6AF2EB1219C00937D0B /* Core */,
 				B289E81A2EB1AB1500937D0B /* Renderer */,
+				B289EDE12EB2329100937D0B /* UI */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -311,6 +316,7 @@
 				B289E6B02EB121A900937D0B /* Core */,
 				B289E81B2EB1AB1900937D0B /* Renderer */,
 				B289E6E72EB1A8E100937D0B /* Platform */,
+				B289EDE22EB2329B00937D0B /* UI */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -621,6 +627,22 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		B289EDE12EB2329100937D0B /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B289EDE32EB232B300937D0B /* ImGuiLayer.hpp */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		B289EDE22EB2329B00937D0B /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B289EDE42EB232B300937D0B /* ImGuiLayer.cpp */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -648,6 +670,7 @@
 				B289E8AC2EB22A1F00937D0B /* OpenGLTexture.hpp in Headers */,
 				B289E8AD2EB22A1F00937D0B /* OpenGLSpecification.hpp in Headers */,
 				B289E8AE2EB22A1F00937D0B /* OpenGLVertexBuffer.hpp in Headers */,
+				B289EDE52EB232B300937D0B /* ImGuiLayer.hpp in Headers */,
 				B289EAD12EB22E4F00937D0B /* MathUtils.hpp in Headers */,
 				B289EAD22EB22E4F00937D0B /* FileSystemUtils.hpp in Headers */,
 				B289EAD32EB22E4F00937D0B /* StringUtils.hpp in Headers */,
@@ -835,6 +858,7 @@
 				B289E6EC2EB1A8F700937D0B /* MacWindiow.cpp in Sources */,
 				B289E88B2EB2287800937D0B /* BufferLayout.cpp in Sources */,
 				B289E88C2EB2287800937D0B /* Shader.cpp in Sources */,
+				B289EDE62EB232B300937D0B /* ImGuiLayer.cpp in Sources */,
 				B289E88D2EB2287800937D0B /* ShaderLibrary.cpp in Sources */,
 				B289E88E2EB2287800937D0B /* ShaderUniforms.cpp in Sources */,
 				B289E8B72EB22A3E00937D0B /* RendererStats.cpp in Sources */,
