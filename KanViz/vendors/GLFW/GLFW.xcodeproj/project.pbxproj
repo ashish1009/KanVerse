@@ -1,0 +1,581 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B289E7AD2EB1A9C400937D0B /* xkb_unicode.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E78B2EB1A9C400937D0B /* xkb_unicode.h */; };
+		B289E7AE2EB1A9C400937D0B /* glfw3native.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E74C2EB1A9C400937D0B /* glfw3native.h */; };
+		B289E7B02EB1A9C400937D0B /* posix_poll.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E76F2EB1A9C400937D0B /* posix_poll.h */; };
+		B289E7B12EB1A9C400937D0B /* win32_time.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E77F2EB1A9C400937D0B /* win32_time.h */; };
+		B289E7B22EB1A9C400937D0B /* win32_platform.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E77C2EB1A9C400937D0B /* win32_platform.h */; };
+		B289E7B32EB1A9C400937D0B /* posix_thread.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E7712EB1A9C400937D0B /* posix_thread.h */; };
+		B289E7B42EB1A9C400937D0B /* win32_thread.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E77D2EB1A9C400937D0B /* win32_thread.h */; };
+		B289E7B62EB1A9C400937D0B /* cocoa_joystick.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E7512EB1A9C400937D0B /* cocoa_joystick.h */; };
+		B289E7B72EB1A9C400937D0B /* internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E75E2EB1A9C400937D0B /* internal.h */; };
+		B289E7B82EB1A9C400937D0B /* glfw3.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E74B2EB1A9C400937D0B /* glfw3.h */; };
+		B289E7B92EB1A9C400937D0B /* linux_joystick.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E75F2EB1A9C400937D0B /* linux_joystick.h */; };
+		B289E7BC2EB1A9C400937D0B /* wl_platform.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E7852EB1A9C400937D0B /* wl_platform.h */; };
+		B289E7BD2EB1A9C400937D0B /* x11_platform.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E7892EB1A9C400937D0B /* x11_platform.h */; };
+		B289E7BE2EB1A9C400937D0B /* cocoa_time.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E7552EB1A9C400937D0B /* cocoa_time.h */; };
+		B289E7BF2EB1A9C400937D0B /* cocoa_platform.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E7542EB1A9C400937D0B /* cocoa_platform.h */; };
+		B289E7C02EB1A9C400937D0B /* posix_time.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E7732EB1A9C400937D0B /* posix_time.h */; };
+		B289E7C12EB1A9C400937D0B /* mappings.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E7612EB1A9C400937D0B /* mappings.h */; };
+		B289E7C52EB1A9C400937D0B /* null_platform.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E7692EB1A9C400937D0B /* null_platform.h */; };
+		B289E7C62EB1A9C400937D0B /* null_joystick.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E7662EB1A9C400937D0B /* null_joystick.h */; };
+		B289E7C72EB1A9C400937D0B /* PrefixHeader.pch in Headers */ = {isa = PBXBuildFile; fileRef = B289E7AA2EB1A9C400937D0B /* PrefixHeader.pch */; };
+		B289E7C92EB1A9C400937D0B /* platform.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E76C2EB1A9C400937D0B /* platform.h */; };
+		B289E7CA2EB1A9C400937D0B /* win32_joystick.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E7782EB1A9C400937D0B /* win32_joystick.h */; };
+		B289E7CF2EB1A9C400937D0B /* cocoa_init.m in Sources */ = {isa = PBXBuildFile; fileRef = B289E7502EB1A9C400937D0B /* cocoa_init.m */; };
+		B289E7D12EB1A9C400937D0B /* monitor.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7632EB1A9C400937D0B /* monitor.c */; };
+		B289E7D22EB1A9C400937D0B /* init.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E75C2EB1A9C400937D0B /* init.c */; };
+		B289E7D42EB1A9C400937D0B /* null_monitor.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7682EB1A9C400937D0B /* null_monitor.c */; };
+		B289E7D52EB1A9C400937D0B /* glx_context.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E75B2EB1A9C400937D0B /* glx_context.c */; };
+		B289E7D92EB1A9C400937D0B /* cocoa_monitor.m in Sources */ = {isa = PBXBuildFile; fileRef = B289E7532EB1A9C400937D0B /* cocoa_monitor.m */; };
+		B289E7DA2EB1A9C400937D0B /* context.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7582EB1A9C400937D0B /* context.c */; };
+		B289E7DB2EB1A9C400937D0B /* win32_monitor.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E77B2EB1A9C400937D0B /* win32_monitor.c */; };
+		B289E7DC2EB1A9C400937D0B /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7822EB1A9C400937D0B /* window.c */; };
+		B289E7DE2EB1A9C400937D0B /* posix_time.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7742EB1A9C400937D0B /* posix_time.c */; };
+		B289E7DF2EB1A9C400937D0B /* x11_window.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E78A2EB1A9C400937D0B /* x11_window.c */; };
+		B289E7E12EB1A9C400937D0B /* null_window.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E76A2EB1A9C400937D0B /* null_window.c */; };
+		B289E7E22EB1A9C400937D0B /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E76D2EB1A9C400937D0B /* platform.c */; };
+		B289E7E42EB1A9C400937D0B /* wl_monitor.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7842EB1A9C400937D0B /* wl_monitor.c */; };
+		B289E7E52EB1A9C400937D0B /* win32_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E77E2EB1A9C400937D0B /* win32_thread.c */; };
+		B289E7E72EB1A9C400937D0B /* osmesa_context.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E76B2EB1A9C400937D0B /* osmesa_context.c */; };
+		B289E7E82EB1A9C400937D0B /* win32_module.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E77A2EB1A9C400937D0B /* win32_module.c */; };
+		B289E7EA2EB1A9C400937D0B /* x11_monitor.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7882EB1A9C400937D0B /* x11_monitor.c */; };
+		B289E7ED2EB1A9C400937D0B /* linux_joystick.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7602EB1A9C400937D0B /* linux_joystick.c */; };
+		B289E7EE2EB1A9C400937D0B /* cocoa_window.m in Sources */ = {isa = PBXBuildFile; fileRef = B289E7572EB1A9C400937D0B /* cocoa_window.m */; };
+		B289E7EF2EB1A9C400937D0B /* win32_joystick.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7792EB1A9C400937D0B /* win32_joystick.c */; };
+		B289E7F02EB1A9C400937D0B /* posix_module.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E76E2EB1A9C400937D0B /* posix_module.c */; };
+		B289E7F72EB1A9C400937D0B /* win32_init.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7772EB1A9C400937D0B /* win32_init.c */; };
+		B289E7F82EB1A9C400937D0B /* win32_time.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7802EB1A9C400937D0B /* win32_time.c */; };
+		B289E7F92EB1A9C400937D0B /* nsgl_context.m in Sources */ = {isa = PBXBuildFile; fileRef = B289E7642EB1A9C400937D0B /* nsgl_context.m */; };
+		B289E7FA2EB1A9C400937D0B /* egl_context.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7592EB1A9C400937D0B /* egl_context.c */; };
+		B289E7FC2EB1A9C400937D0B /* vulkan.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7752EB1A9C400937D0B /* vulkan.c */; };
+		B289E7FD2EB1A9C400937D0B /* wl_init.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7832EB1A9C400937D0B /* wl_init.c */; };
+		B289E8022EB1A9C400937D0B /* xkb_unicode.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E78C2EB1A9C400937D0B /* xkb_unicode.c */; };
+		B289E8042EB1A9C400937D0B /* wgl_context.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7762EB1A9C400937D0B /* wgl_context.c */; };
+		B289E8082EB1A9C400937D0B /* win32_window.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7812EB1A9C400937D0B /* win32_window.c */; };
+		B289E80B2EB1A9C400937D0B /* posix_poll.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7702EB1A9C400937D0B /* posix_poll.c */; };
+		B289E80D2EB1A9C400937D0B /* x11_init.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7872EB1A9C400937D0B /* x11_init.c */; };
+		B289E80E2EB1A9C400937D0B /* null_init.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7652EB1A9C400937D0B /* null_init.c */; };
+		B289E8102EB1A9C400937D0B /* posix_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7722EB1A9C400937D0B /* posix_thread.c */; };
+		B289E8122EB1A9C400937D0B /* input.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E75D2EB1A9C400937D0B /* input.c */; };
+		B289E8132EB1A9C400937D0B /* null_joystick.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7672EB1A9C400937D0B /* null_joystick.c */; };
+		B289E8142EB1A9C400937D0B /* wl_window.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7862EB1A9C400937D0B /* wl_window.c */; };
+		B289E8152EB1A9C400937D0B /* cocoa_time.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E7562EB1A9C400937D0B /* cocoa_time.c */; };
+		B289E8172EB1A9C400937D0B /* cocoa_joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = B289E7522EB1A9C400937D0B /* cocoa_joystick.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B289E6F62EB1A9A800937D0B /* libGLFW.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libGLFW.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B289E74B2EB1A9C400937D0B /* glfw3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glfw3.h; sourceTree = "<group>"; };
+		B289E74C2EB1A9C400937D0B /* glfw3native.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glfw3native.h; sourceTree = "<group>"; };
+		B289E74F2EB1A9C400937D0B /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		B289E7502EB1A9C400937D0B /* cocoa_init.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = cocoa_init.m; sourceTree = "<group>"; };
+		B289E7512EB1A9C400937D0B /* cocoa_joystick.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cocoa_joystick.h; sourceTree = "<group>"; };
+		B289E7522EB1A9C400937D0B /* cocoa_joystick.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = cocoa_joystick.m; sourceTree = "<group>"; };
+		B289E7532EB1A9C400937D0B /* cocoa_monitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = cocoa_monitor.m; sourceTree = "<group>"; };
+		B289E7542EB1A9C400937D0B /* cocoa_platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cocoa_platform.h; sourceTree = "<group>"; };
+		B289E7552EB1A9C400937D0B /* cocoa_time.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cocoa_time.h; sourceTree = "<group>"; };
+		B289E7562EB1A9C400937D0B /* cocoa_time.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cocoa_time.c; sourceTree = "<group>"; };
+		B289E7572EB1A9C400937D0B /* cocoa_window.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = cocoa_window.m; sourceTree = "<group>"; };
+		B289E7582EB1A9C400937D0B /* context.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = context.c; sourceTree = "<group>"; };
+		B289E7592EB1A9C400937D0B /* egl_context.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = egl_context.c; sourceTree = "<group>"; };
+		B289E75A2EB1A9C400937D0B /* glfw.rc.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = glfw.rc.in; sourceTree = "<group>"; };
+		B289E75B2EB1A9C400937D0B /* glx_context.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = glx_context.c; sourceTree = "<group>"; };
+		B289E75C2EB1A9C400937D0B /* init.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = init.c; sourceTree = "<group>"; };
+		B289E75D2EB1A9C400937D0B /* input.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = input.c; sourceTree = "<group>"; };
+		B289E75E2EB1A9C400937D0B /* internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = internal.h; sourceTree = "<group>"; };
+		B289E75F2EB1A9C400937D0B /* linux_joystick.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = linux_joystick.h; sourceTree = "<group>"; };
+		B289E7602EB1A9C400937D0B /* linux_joystick.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = linux_joystick.c; sourceTree = "<group>"; };
+		B289E7612EB1A9C400937D0B /* mappings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mappings.h; sourceTree = "<group>"; };
+		B289E7622EB1A9C400937D0B /* mappings.h.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = mappings.h.in; sourceTree = "<group>"; };
+		B289E7632EB1A9C400937D0B /* monitor.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = monitor.c; sourceTree = "<group>"; };
+		B289E7642EB1A9C400937D0B /* nsgl_context.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = nsgl_context.m; sourceTree = "<group>"; };
+		B289E7652EB1A9C400937D0B /* null_init.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = null_init.c; sourceTree = "<group>"; };
+		B289E7662EB1A9C400937D0B /* null_joystick.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = null_joystick.h; sourceTree = "<group>"; };
+		B289E7672EB1A9C400937D0B /* null_joystick.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = null_joystick.c; sourceTree = "<group>"; };
+		B289E7682EB1A9C400937D0B /* null_monitor.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = null_monitor.c; sourceTree = "<group>"; };
+		B289E7692EB1A9C400937D0B /* null_platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = null_platform.h; sourceTree = "<group>"; };
+		B289E76A2EB1A9C400937D0B /* null_window.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = null_window.c; sourceTree = "<group>"; };
+		B289E76B2EB1A9C400937D0B /* osmesa_context.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = osmesa_context.c; sourceTree = "<group>"; };
+		B289E76C2EB1A9C400937D0B /* platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = platform.h; sourceTree = "<group>"; };
+		B289E76D2EB1A9C400937D0B /* platform.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = platform.c; sourceTree = "<group>"; };
+		B289E76E2EB1A9C400937D0B /* posix_module.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = posix_module.c; sourceTree = "<group>"; };
+		B289E76F2EB1A9C400937D0B /* posix_poll.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = posix_poll.h; sourceTree = "<group>"; };
+		B289E7702EB1A9C400937D0B /* posix_poll.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = posix_poll.c; sourceTree = "<group>"; };
+		B289E7712EB1A9C400937D0B /* posix_thread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = posix_thread.h; sourceTree = "<group>"; };
+		B289E7722EB1A9C400937D0B /* posix_thread.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = posix_thread.c; sourceTree = "<group>"; };
+		B289E7732EB1A9C400937D0B /* posix_time.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = posix_time.h; sourceTree = "<group>"; };
+		B289E7742EB1A9C400937D0B /* posix_time.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = posix_time.c; sourceTree = "<group>"; };
+		B289E7752EB1A9C400937D0B /* vulkan.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = vulkan.c; sourceTree = "<group>"; };
+		B289E7762EB1A9C400937D0B /* wgl_context.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wgl_context.c; sourceTree = "<group>"; };
+		B289E7772EB1A9C400937D0B /* win32_init.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = win32_init.c; sourceTree = "<group>"; };
+		B289E7782EB1A9C400937D0B /* win32_joystick.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = win32_joystick.h; sourceTree = "<group>"; };
+		B289E7792EB1A9C400937D0B /* win32_joystick.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = win32_joystick.c; sourceTree = "<group>"; };
+		B289E77A2EB1A9C400937D0B /* win32_module.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = win32_module.c; sourceTree = "<group>"; };
+		B289E77B2EB1A9C400937D0B /* win32_monitor.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = win32_monitor.c; sourceTree = "<group>"; };
+		B289E77C2EB1A9C400937D0B /* win32_platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = win32_platform.h; sourceTree = "<group>"; };
+		B289E77D2EB1A9C400937D0B /* win32_thread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = win32_thread.h; sourceTree = "<group>"; };
+		B289E77E2EB1A9C400937D0B /* win32_thread.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = win32_thread.c; sourceTree = "<group>"; };
+		B289E77F2EB1A9C400937D0B /* win32_time.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = win32_time.h; sourceTree = "<group>"; };
+		B289E7802EB1A9C400937D0B /* win32_time.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = win32_time.c; sourceTree = "<group>"; };
+		B289E7812EB1A9C400937D0B /* win32_window.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = win32_window.c; sourceTree = "<group>"; };
+		B289E7822EB1A9C400937D0B /* window.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = window.c; sourceTree = "<group>"; };
+		B289E7832EB1A9C400937D0B /* wl_init.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wl_init.c; sourceTree = "<group>"; };
+		B289E7842EB1A9C400937D0B /* wl_monitor.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wl_monitor.c; sourceTree = "<group>"; };
+		B289E7852EB1A9C400937D0B /* wl_platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wl_platform.h; sourceTree = "<group>"; };
+		B289E7862EB1A9C400937D0B /* wl_window.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wl_window.c; sourceTree = "<group>"; };
+		B289E7872EB1A9C400937D0B /* x11_init.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = x11_init.c; sourceTree = "<group>"; };
+		B289E7882EB1A9C400937D0B /* x11_monitor.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = x11_monitor.c; sourceTree = "<group>"; };
+		B289E7892EB1A9C400937D0B /* x11_platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = x11_platform.h; sourceTree = "<group>"; };
+		B289E78A2EB1A9C400937D0B /* x11_window.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = x11_window.c; sourceTree = "<group>"; };
+		B289E78B2EB1A9C400937D0B /* xkb_unicode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = xkb_unicode.h; sourceTree = "<group>"; };
+		B289E78C2EB1A9C400937D0B /* xkb_unicode.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = xkb_unicode.c; sourceTree = "<group>"; };
+		B289E7AA2EB1A9C400937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B289E6F42EB1A9A800937D0B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B289E6ED2EB1A9A800937D0B = {
+			isa = PBXGroup;
+			children = (
+				B289E7AA2EB1A9C400937D0B /* PrefixHeader.pch */,
+				B289E7A92EB1A9C400937D0B /* GLFW */,
+				B289E6F72EB1A9A800937D0B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B289E6F72EB1A9A800937D0B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B289E6F62EB1A9A800937D0B /* libGLFW.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B289E74D2EB1A9C400937D0B /* GLFW */ = {
+			isa = PBXGroup;
+			children = (
+				B289E74B2EB1A9C400937D0B /* glfw3.h */,
+				B289E74C2EB1A9C400937D0B /* glfw3native.h */,
+			);
+			path = GLFW;
+			sourceTree = "<group>";
+		};
+		B289E74E2EB1A9C400937D0B /* include */ = {
+			isa = PBXGroup;
+			children = (
+				B289E74D2EB1A9C400937D0B /* GLFW */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		B289E78D2EB1A9C400937D0B /* src */ = {
+			isa = PBXGroup;
+			children = (
+				B289E74F2EB1A9C400937D0B /* CMakeLists.txt */,
+				B289E7502EB1A9C400937D0B /* cocoa_init.m */,
+				B289E7512EB1A9C400937D0B /* cocoa_joystick.h */,
+				B289E7522EB1A9C400937D0B /* cocoa_joystick.m */,
+				B289E7532EB1A9C400937D0B /* cocoa_monitor.m */,
+				B289E7542EB1A9C400937D0B /* cocoa_platform.h */,
+				B289E7552EB1A9C400937D0B /* cocoa_time.h */,
+				B289E7562EB1A9C400937D0B /* cocoa_time.c */,
+				B289E7572EB1A9C400937D0B /* cocoa_window.m */,
+				B289E7582EB1A9C400937D0B /* context.c */,
+				B289E7592EB1A9C400937D0B /* egl_context.c */,
+				B289E75A2EB1A9C400937D0B /* glfw.rc.in */,
+				B289E75B2EB1A9C400937D0B /* glx_context.c */,
+				B289E75C2EB1A9C400937D0B /* init.c */,
+				B289E75D2EB1A9C400937D0B /* input.c */,
+				B289E75E2EB1A9C400937D0B /* internal.h */,
+				B289E75F2EB1A9C400937D0B /* linux_joystick.h */,
+				B289E7602EB1A9C400937D0B /* linux_joystick.c */,
+				B289E7612EB1A9C400937D0B /* mappings.h */,
+				B289E7622EB1A9C400937D0B /* mappings.h.in */,
+				B289E7632EB1A9C400937D0B /* monitor.c */,
+				B289E7642EB1A9C400937D0B /* nsgl_context.m */,
+				B289E7652EB1A9C400937D0B /* null_init.c */,
+				B289E7662EB1A9C400937D0B /* null_joystick.h */,
+				B289E7672EB1A9C400937D0B /* null_joystick.c */,
+				B289E7682EB1A9C400937D0B /* null_monitor.c */,
+				B289E7692EB1A9C400937D0B /* null_platform.h */,
+				B289E76A2EB1A9C400937D0B /* null_window.c */,
+				B289E76B2EB1A9C400937D0B /* osmesa_context.c */,
+				B289E76C2EB1A9C400937D0B /* platform.h */,
+				B289E76D2EB1A9C400937D0B /* platform.c */,
+				B289E76E2EB1A9C400937D0B /* posix_module.c */,
+				B289E76F2EB1A9C400937D0B /* posix_poll.h */,
+				B289E7702EB1A9C400937D0B /* posix_poll.c */,
+				B289E7712EB1A9C400937D0B /* posix_thread.h */,
+				B289E7722EB1A9C400937D0B /* posix_thread.c */,
+				B289E7732EB1A9C400937D0B /* posix_time.h */,
+				B289E7742EB1A9C400937D0B /* posix_time.c */,
+				B289E7752EB1A9C400937D0B /* vulkan.c */,
+				B289E7762EB1A9C400937D0B /* wgl_context.c */,
+				B289E7772EB1A9C400937D0B /* win32_init.c */,
+				B289E7782EB1A9C400937D0B /* win32_joystick.h */,
+				B289E7792EB1A9C400937D0B /* win32_joystick.c */,
+				B289E77A2EB1A9C400937D0B /* win32_module.c */,
+				B289E77B2EB1A9C400937D0B /* win32_monitor.c */,
+				B289E77C2EB1A9C400937D0B /* win32_platform.h */,
+				B289E77D2EB1A9C400937D0B /* win32_thread.h */,
+				B289E77E2EB1A9C400937D0B /* win32_thread.c */,
+				B289E77F2EB1A9C400937D0B /* win32_time.h */,
+				B289E7802EB1A9C400937D0B /* win32_time.c */,
+				B289E7812EB1A9C400937D0B /* win32_window.c */,
+				B289E7822EB1A9C400937D0B /* window.c */,
+				B289E7832EB1A9C400937D0B /* wl_init.c */,
+				B289E7842EB1A9C400937D0B /* wl_monitor.c */,
+				B289E7852EB1A9C400937D0B /* wl_platform.h */,
+				B289E7862EB1A9C400937D0B /* wl_window.c */,
+				B289E7872EB1A9C400937D0B /* x11_init.c */,
+				B289E7882EB1A9C400937D0B /* x11_monitor.c */,
+				B289E7892EB1A9C400937D0B /* x11_platform.h */,
+				B289E78A2EB1A9C400937D0B /* x11_window.c */,
+				B289E78B2EB1A9C400937D0B /* xkb_unicode.h */,
+				B289E78C2EB1A9C400937D0B /* xkb_unicode.c */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		B289E7A92EB1A9C400937D0B /* GLFW */ = {
+			isa = PBXGroup;
+			children = (
+				B289E74E2EB1A9C400937D0B /* include */,
+				B289E78D2EB1A9C400937D0B /* src */,
+			);
+			path = GLFW;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		B289E6F22EB1A9A800937D0B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B289E7AD2EB1A9C400937D0B /* xkb_unicode.h in Headers */,
+				B289E7AE2EB1A9C400937D0B /* glfw3native.h in Headers */,
+				B289E7B02EB1A9C400937D0B /* posix_poll.h in Headers */,
+				B289E7B12EB1A9C400937D0B /* win32_time.h in Headers */,
+				B289E7B22EB1A9C400937D0B /* win32_platform.h in Headers */,
+				B289E7B32EB1A9C400937D0B /* posix_thread.h in Headers */,
+				B289E7B42EB1A9C400937D0B /* win32_thread.h in Headers */,
+				B289E7B62EB1A9C400937D0B /* cocoa_joystick.h in Headers */,
+				B289E7B72EB1A9C400937D0B /* internal.h in Headers */,
+				B289E7B82EB1A9C400937D0B /* glfw3.h in Headers */,
+				B289E7B92EB1A9C400937D0B /* linux_joystick.h in Headers */,
+				B289E7BC2EB1A9C400937D0B /* wl_platform.h in Headers */,
+				B289E7BD2EB1A9C400937D0B /* x11_platform.h in Headers */,
+				B289E7BE2EB1A9C400937D0B /* cocoa_time.h in Headers */,
+				B289E7BF2EB1A9C400937D0B /* cocoa_platform.h in Headers */,
+				B289E7C02EB1A9C400937D0B /* posix_time.h in Headers */,
+				B289E7C12EB1A9C400937D0B /* mappings.h in Headers */,
+				B289E7C52EB1A9C400937D0B /* null_platform.h in Headers */,
+				B289E7C62EB1A9C400937D0B /* null_joystick.h in Headers */,
+				B289E7C72EB1A9C400937D0B /* PrefixHeader.pch in Headers */,
+				B289E7C92EB1A9C400937D0B /* platform.h in Headers */,
+				B289E7CA2EB1A9C400937D0B /* win32_joystick.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		B289E6F52EB1A9A800937D0B /* GLFW */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B289E7012EB1A9A800937D0B /* Build configuration list for PBXNativeTarget "GLFW" */;
+			buildPhases = (
+				B289E6F22EB1A9A800937D0B /* Headers */,
+				B289E6F32EB1A9A800937D0B /* Sources */,
+				B289E6F42EB1A9A800937D0B /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GLFW;
+			packageProductDependencies = (
+			);
+			productName = GLFW;
+			productReference = B289E6F62EB1A9A800937D0B /* libGLFW.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B289E6EE2EB1A9A800937D0B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					B289E6F52EB1A9A800937D0B = {
+						CreatedOnToolsVersion = 16.4;
+					};
+				};
+			};
+			buildConfigurationList = B289E6F12EB1A9A800937D0B /* Build configuration list for PBXProject "GLFW" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B289E6ED2EB1A9A800937D0B;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = B289E6F72EB1A9A800937D0B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B289E6F52EB1A9A800937D0B /* GLFW */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B289E6F32EB1A9A800937D0B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B289E7CF2EB1A9C400937D0B /* cocoa_init.m in Sources */,
+				B289E7D12EB1A9C400937D0B /* monitor.c in Sources */,
+				B289E7D22EB1A9C400937D0B /* init.c in Sources */,
+				B289E7D42EB1A9C400937D0B /* null_monitor.c in Sources */,
+				B289E7D52EB1A9C400937D0B /* glx_context.c in Sources */,
+				B289E7D92EB1A9C400937D0B /* cocoa_monitor.m in Sources */,
+				B289E7DA2EB1A9C400937D0B /* context.c in Sources */,
+				B289E7DB2EB1A9C400937D0B /* win32_monitor.c in Sources */,
+				B289E7DC2EB1A9C400937D0B /* window.c in Sources */,
+				B289E7DE2EB1A9C400937D0B /* posix_time.c in Sources */,
+				B289E7DF2EB1A9C400937D0B /* x11_window.c in Sources */,
+				B289E7E12EB1A9C400937D0B /* null_window.c in Sources */,
+				B289E7E22EB1A9C400937D0B /* platform.c in Sources */,
+				B289E7E42EB1A9C400937D0B /* wl_monitor.c in Sources */,
+				B289E7E52EB1A9C400937D0B /* win32_thread.c in Sources */,
+				B289E7E72EB1A9C400937D0B /* osmesa_context.c in Sources */,
+				B289E7E82EB1A9C400937D0B /* win32_module.c in Sources */,
+				B289E7EA2EB1A9C400937D0B /* x11_monitor.c in Sources */,
+				B289E7ED2EB1A9C400937D0B /* linux_joystick.c in Sources */,
+				B289E7EE2EB1A9C400937D0B /* cocoa_window.m in Sources */,
+				B289E7EF2EB1A9C400937D0B /* win32_joystick.c in Sources */,
+				B289E7F02EB1A9C400937D0B /* posix_module.c in Sources */,
+				B289E7F72EB1A9C400937D0B /* win32_init.c in Sources */,
+				B289E7F82EB1A9C400937D0B /* win32_time.c in Sources */,
+				B289E7F92EB1A9C400937D0B /* nsgl_context.m in Sources */,
+				B289E7FA2EB1A9C400937D0B /* egl_context.c in Sources */,
+				B289E7FC2EB1A9C400937D0B /* vulkan.c in Sources */,
+				B289E7FD2EB1A9C400937D0B /* wl_init.c in Sources */,
+				B289E8022EB1A9C400937D0B /* xkb_unicode.c in Sources */,
+				B289E8042EB1A9C400937D0B /* wgl_context.c in Sources */,
+				B289E8082EB1A9C400937D0B /* win32_window.c in Sources */,
+				B289E80B2EB1A9C400937D0B /* posix_poll.c in Sources */,
+				B289E80D2EB1A9C400937D0B /* x11_init.c in Sources */,
+				B289E80E2EB1A9C400937D0B /* null_init.c in Sources */,
+				B289E8102EB1A9C400937D0B /* posix_thread.c in Sources */,
+				B289E8122EB1A9C400937D0B /* input.c in Sources */,
+				B289E8132EB1A9C400937D0B /* null_joystick.c in Sources */,
+				B289E8142EB1A9C400937D0B /* wl_window.c in Sources */,
+				B289E8152EB1A9C400937D0B /* cocoa_time.c in Sources */,
+				B289E8172EB1A9C400937D0B /* cocoa_joystick.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		B289E6FF2EB1A9A800937D0B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 78KTXZ99TW;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		B289E7002EB1A9A800937D0B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 78KTXZ99TW;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		B289E7022EB1A9A800937D0B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 78KTXZ99TW;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = _GLFW_COCOA;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		B289E7032EB1A9A800937D0B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 78KTXZ99TW;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = _GLFW_COCOA;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B289E6F12EB1A9A800937D0B /* Build configuration list for PBXProject "GLFW" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B289E6FF2EB1A9A800937D0B /* Debug */,
+				B289E7002EB1A9A800937D0B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B289E7012EB1A9A800937D0B /* Build configuration list for PBXNativeTarget "GLFW" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B289E7022EB1A9A800937D0B /* Debug */,
+				B289E7032EB1A9A800937D0B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B289E6EE2EB1A9A800937D0B /* Project object */;
+}
