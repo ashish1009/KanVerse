@@ -10,15 +10,22 @@
 namespace KanViz
 {
   Application::Application(const ApplicationSpecification& specification)
+  : m_specification(specification)
   {
     IK_PROFILE();
-    IK_LOG_INFO(LogModule::Application, "Creating core application instance");
+    IK_ASSERT(!s_instance, "Application instance already created");
+    if (!s_instance)
+    { 
+      s_instance = this;
+      IK_LOG_INFO(LogModule::Application, "Creating core application instance");
+    }
   }
   
   Application::~Application()
   {
     IK_PROFILE();
     IK_LOG_WARN(LogModule::Application, "Destroying core application instance");
+    s_instance = nullptr;
   }
   
   void Application::Run()

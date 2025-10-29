@@ -11,6 +11,7 @@ namespace KanVest
 {
   KanViz::Scope<KanViz::Application> CreateApplication(std::span<const char*> args)
   {
-    return KanViz::CreateScope<KanViz::Application>(KanViz::ApplicationSpecification());
+    KanViz::ApplicationSpecification appSpec;
+    return KanViz::ApplicationFactory::CreateApplication<KanViz::Application>(appSpec);
   }
 } // namespace KanVest

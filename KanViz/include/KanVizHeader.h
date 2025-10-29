@@ -31,6 +31,7 @@
 #include <Debug/Profiler/PerformanceProfiler.hpp>
 
 #include <Core/Application.hpp>
+#include <Core/ApplicationFactory.hpp>
 #include <Core/TimeStep.hpp>
 
 #include <Core/Event/Events.h>

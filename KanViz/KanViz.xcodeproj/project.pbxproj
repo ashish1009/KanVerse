@@ -33,6 +33,7 @@
 		B289E6D12EB1A44000937D0B /* Application.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6CF2EB1A44000937D0B /* Application.hpp */; };
 		B289E6D22EB1A44000937D0B /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6D02EB1A44000937D0B /* Application.cpp */; };
 		B289E6D42EB1A4C800937D0B /* ApplicationSpecification.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6D32EB1A4C800937D0B /* ApplicationSpecification.h */; };
+		B289E6D72EB1A68000937D0B /* ApplicationFactory.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6D52EB1A68000937D0B /* ApplicationFactory.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -71,6 +72,7 @@
 		B289E6CF2EB1A44000937D0B /* Application.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Application.hpp; sourceTree = "<group>"; };
 		B289E6D02EB1A44000937D0B /* Application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
 		B289E6D32EB1A4C800937D0B /* ApplicationSpecification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ApplicationSpecification.h; sourceTree = "<group>"; };
+		B289E6D52EB1A68000937D0B /* ApplicationFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ApplicationFactory.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -201,6 +203,7 @@
 			children = (
 				B289E6C52EB1229800937D0B /* Event */,
 				B289E6CF2EB1A44000937D0B /* Application.hpp */,
+				B289E6D52EB1A68000937D0B /* ApplicationFactory.hpp */,
 				B289E6D32EB1A4C800937D0B /* ApplicationSpecification.h */,
 				B289E6C62EB1229800937D0B /* KeyCodes.h */,
 				B289E6C72EB1229800937D0B /* MouseButtonCodes.h */,
@@ -244,6 +247,7 @@
 				B289E6A42EB1147600937D0B /* ScopedProfiler.hpp in Headers */,
 				B289E6CA2EB122C200937D0B /* TimeStep.hpp in Headers */,
 				B289E6D42EB1A4C800937D0B /* ApplicationSpecification.h in Headers */,
+				B289E6D72EB1A68000937D0B /* ApplicationFactory.hpp in Headers */,
 				B289E6932EB111F300937D0B /* LoggerAPI.h in Headers */,
 				B289E66A2EB0E43D00937D0B /* KanVizCore.hpp in Headers */,
 				B289E6742EB0E53200937D0B /* Configuration.h in Headers */,

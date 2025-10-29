@@ -31,5 +31,13 @@ namespace KanViz
     void Run();
     /// This function closes the current application (IKan::Application) and ends the game loop
     void Close();
+    
+  private:
+    bool m_isRunning {false};
+    
+    ApplicationSpecification m_specification;
+    
+    // Static data members
+    inline static Application* s_instance {nullptr}; //< Singleton instance of the application
   };
 } // namespace KanViz
