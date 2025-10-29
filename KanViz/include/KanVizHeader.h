@@ -30,6 +30,7 @@
 #include <Debug/Profiler/ScopedProfiler.hpp>
 #include <Debug/Profiler/PerformanceProfiler.hpp>
 
+#include <Core/Application.hpp>
 #include <Core/TimeStep.hpp>
 
 #include <Core/Event/Events.h>

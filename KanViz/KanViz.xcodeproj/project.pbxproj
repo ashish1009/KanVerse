@@ -30,6 +30,9 @@
 		B289E6AD2EB1154000937D0B /* ScopedPerformanceProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6AB2EB1154000937D0B /* ScopedPerformanceProfiler.cpp */; };
 		B289E6CA2EB122C200937D0B /* TimeStep.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6C82EB122C200937D0B /* TimeStep.hpp */; };
 		B289E6CB2EB122C200937D0B /* TimeStep.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6C92EB122C200937D0B /* TimeStep.cpp */; };
+		B289E6D12EB1A44000937D0B /* Application.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6CF2EB1A44000937D0B /* Application.hpp */; };
+		B289E6D22EB1A44000937D0B /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6D02EB1A44000937D0B /* Application.cpp */; };
+		B289E6D42EB1A4C800937D0B /* ApplicationSpecification.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6D32EB1A4C800937D0B /* ApplicationSpecification.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +68,9 @@
 		B289E6C72EB1229800937D0B /* MouseButtonCodes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MouseButtonCodes.h; sourceTree = "<group>"; };
 		B289E6C82EB122C200937D0B /* TimeStep.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TimeStep.hpp; sourceTree = "<group>"; };
 		B289E6C92EB122C200937D0B /* TimeStep.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeStep.cpp; sourceTree = "<group>"; };
+		B289E6CF2EB1A44000937D0B /* Application.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Application.hpp; sourceTree = "<group>"; };
+		B289E6D02EB1A44000937D0B /* Application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
+		B289E6D32EB1A4C800937D0B /* ApplicationSpecification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ApplicationSpecification.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -194,6 +200,8 @@
 			isa = PBXGroup;
 			children = (
 				B289E6C52EB1229800937D0B /* Event */,
+				B289E6CF2EB1A44000937D0B /* Application.hpp */,
+				B289E6D32EB1A4C800937D0B /* ApplicationSpecification.h */,
 				B289E6C62EB1229800937D0B /* KeyCodes.h */,
 				B289E6C72EB1229800937D0B /* MouseButtonCodes.h */,
 				B289E6C82EB122C200937D0B /* TimeStep.hpp */,
@@ -204,6 +212,7 @@
 		B289E6B02EB121A900937D0B /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				B289E6D02EB1A44000937D0B /* Application.cpp */,
 				B289E6C92EB122C200937D0B /* TimeStep.cpp */,
 			);
 			path = Core;
@@ -234,10 +243,12 @@
 				B289E6972EB112CD00937D0B /* AssertAPI.h in Headers */,
 				B289E6A42EB1147600937D0B /* ScopedProfiler.hpp in Headers */,
 				B289E6CA2EB122C200937D0B /* TimeStep.hpp in Headers */,
+				B289E6D42EB1A4C800937D0B /* ApplicationSpecification.h in Headers */,
 				B289E6932EB111F300937D0B /* LoggerAPI.h in Headers */,
 				B289E66A2EB0E43D00937D0B /* KanVizCore.hpp in Headers */,
 				B289E6742EB0E53200937D0B /* Configuration.h in Headers */,
 				B289E6A02EB113C300937D0B /* Profiler.hpp in Headers */,
+				B289E6D12EB1A44000937D0B /* Application.hpp in Headers */,
 				B289E67E2EB10AB600937D0B /* LoggerSpecification.hpp in Headers */,
 				B289E67A2EB1097100937D0B /* Logger.hpp in Headers */,
 			);
@@ -305,6 +316,7 @@
 			files = (
 				B289E6A52EB1147600937D0B /* ScopedProfiler.cpp in Sources */,
 				B289E6812EB10AC400937D0B /* LoggerSpecification.cpp in Sources */,
+				B289E6D22EB1A44000937D0B /* Application.cpp in Sources */,
 				B289E66B2EB0E43D00937D0B /* KanVizCore.cpp in Sources */,
 				B289E6A12EB113C300937D0B /* Profiler.cpp in Sources */,
 				B289E67B2EB1097100937D0B /* Logger.cpp in Sources */,

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
+		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,6 +31,8 @@
 		B289E66E2EB0E50400937D0B /* libKanViz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libKanViz.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E6942EB1128900937D0B /* KanVest.log */ = {isa = PBXFileReference; lastKnownFileType = text; path = KanVest.log; sourceTree = "<group>"; };
 		B289E6AE2EB1166200937D0B /* KanVest.profiler */ = {isa = PBXFileReference; lastKnownFileType = text; path = KanVest.profiler; sourceTree = "<group>"; };
+		B289E6CC2EB1A3C600937D0B /* ApplicationFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ApplicationFactory.hpp; sourceTree = "<group>"; };
+		B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ApplicationFactory.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +71,7 @@
 		B289E6322EB0E11400937D0B /* include */ = {
 			isa = PBXGroup;
 			children = (
+				B289E6CC2EB1A3C600937D0B /* ApplicationFactory.hpp */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -75,6 +79,7 @@
 		B289E6332EB0E11900937D0B /* src */ = {
 			isa = PBXGroup;
 			children = (
+				B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -156,6 +161,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

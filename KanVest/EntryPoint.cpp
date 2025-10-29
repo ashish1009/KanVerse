@@ -5,6 +5,16 @@
 //  Created by Ashish . on 28/10/25.
 //
 
+namespace KanVest
+{
+  // External function to create application
+  /// Externam function to create application
+  /// - Parameters:
+  ///   - argc: Number of arguments passed from binary
+  ///   - argv: Arguments ...
+  extern KanViz::Scope<KanViz::Application> CreateApplication(std::span<const char*> args);
+} // namespace KanVest
+
 [[nodiscard]] int ExecuteKanVest(std::span<const char*> args)
 {
   if (!KanViz::CoreEngine::Initialize())
@@ -12,7 +22,17 @@
     std::cerr << "Failed to initialize the KanViz engine.\n";
     return EXIT_FAILURE;
   }
-      
+     
+  if (KanViz::Scope<KanViz::Application> application = KanVest::CreateApplication(args); application)
+  {
+    application->Run();
+  }
+  else
+  {
+    std::cerr << "Failed to create KanViz application.\n";
+    return IK_FAILURE;
+  }
+
   if (!KanViz::CoreEngine::Shutdown())
   {
     std::cerr << "Failed to shutdown the KanViz engine.\n";
