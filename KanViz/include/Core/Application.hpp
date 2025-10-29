@@ -36,11 +36,11 @@ namespace KanViz
     /// This function closes the current application (KanViz::Application) and ends the game loop
     void Close();
     
-    /// This function Pushes the layer of type IKan::Layer in Core Application layer stack.
+    /// This function Pushes the layer of type KanViz::Layer in Core Application layer stack.
     /// - Note: Attaches the layer as well.
     /// - Parameter layer: Reference to the layer to be add
     void PushLayer(const Ref<Layer>& layer);
-    /// This function Pops the layer of type IKan::Layer from Core Application layer stack.
+    /// This function Pops the layer of type KanViz::Layer from Core Application layer stack.
     /// - Note: Detaches the layer as well.
     /// - Parameter layer: Reference to the layer to be removed
     void PopLayer(const Ref<Layer>& layer);

@@ -31,6 +31,7 @@
 #include <Base/KanVizCore.hpp>
 #include <Base/AssertAPI.h>
 #include <Base/DesignHelper.h>
+#include <Base/Buffer.hpp>
 
 #include <Debug/Logger.hpp>
 #include <Debug/LoggerAPI.h>

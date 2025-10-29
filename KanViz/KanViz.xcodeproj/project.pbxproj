@@ -58,6 +58,23 @@
 		B289E86B2EB1B2FE00937D0B /* LayerStack.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8692EB1B2FE00937D0B /* LayerStack.hpp */; };
 		B289E86C2EB1B2FE00937D0B /* LayerStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E86A2EB1B2FE00937D0B /* LayerStack.cpp */; };
 		B289E8722EB1B34F00937D0B /* DesignHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E8712EB1B34F00937D0B /* DesignHelper.h */; };
+		B289E8742EB2284400937D0B /* BufferLayout.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8732EB2284400937D0B /* BufferLayout.hpp */; };
+		B289E8782EB2284A00937D0B /* IndexBuffer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8762EB2284A00937D0B /* IndexBuffer.hpp */; };
+		B289E8792EB2284A00937D0B /* Pipeline.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8772EB2284A00937D0B /* Pipeline.hpp */; };
+		B289E87A2EB2284A00937D0B /* FrameBuffer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8752EB2284A00937D0B /* FrameBuffer.hpp */; };
+		B289E8812EB2285200937D0B /* ShaderUniforms.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E87D2EB2285200937D0B /* ShaderUniforms.hpp */; };
+		B289E8822EB2285200937D0B /* Specifications.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E87E2EB2285200937D0B /* Specifications.h */; };
+		B289E8832EB2285200937D0B /* Texture.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E87F2EB2285200937D0B /* Texture.hpp */; };
+		B289E8842EB2285200937D0B /* ShaderLibrary.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E87C2EB2285200937D0B /* ShaderLibrary.hpp */; };
+		B289E8852EB2285200937D0B /* VertexBuffer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8802EB2285200937D0B /* VertexBuffer.hpp */; };
+		B289E8862EB2285200937D0B /* Shader.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E87B2EB2285200937D0B /* Shader.hpp */; };
+		B289E88B2EB2287800937D0B /* BufferLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8872EB2287800937D0B /* BufferLayout.cpp */; };
+		B289E88C2EB2287800937D0B /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8882EB2287800937D0B /* Shader.cpp */; };
+		B289E88D2EB2287800937D0B /* ShaderLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8892EB2287800937D0B /* ShaderLibrary.cpp */; };
+		B289E88E2EB2287800937D0B /* ShaderUniforms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E88A2EB2287800937D0B /* ShaderUniforms.cpp */; };
+		B289E8912EB228B100937D0B /* Buffer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E88F2EB228B100937D0B /* Buffer.hpp */; };
+		B289E8922EB228B100937D0B /* Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8902EB228B100937D0B /* Buffer.cpp */; };
+		B289E8942EB2290E00937D0B /* Specification.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E8932EB2290E00937D0B /* Specification.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -138,6 +155,23 @@
 		B289E8692EB1B2FE00937D0B /* LayerStack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LayerStack.hpp; sourceTree = "<group>"; };
 		B289E86A2EB1B2FE00937D0B /* LayerStack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LayerStack.cpp; sourceTree = "<group>"; };
 		B289E8712EB1B34F00937D0B /* DesignHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DesignHelper.h; sourceTree = "<group>"; };
+		B289E8732EB2284400937D0B /* BufferLayout.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BufferLayout.hpp; sourceTree = "<group>"; };
+		B289E8752EB2284A00937D0B /* FrameBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FrameBuffer.hpp; sourceTree = "<group>"; };
+		B289E8762EB2284A00937D0B /* IndexBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IndexBuffer.hpp; sourceTree = "<group>"; };
+		B289E8772EB2284A00937D0B /* Pipeline.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Pipeline.hpp; sourceTree = "<group>"; };
+		B289E87B2EB2285200937D0B /* Shader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Shader.hpp; sourceTree = "<group>"; };
+		B289E87C2EB2285200937D0B /* ShaderLibrary.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderLibrary.hpp; sourceTree = "<group>"; };
+		B289E87D2EB2285200937D0B /* ShaderUniforms.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderUniforms.hpp; sourceTree = "<group>"; };
+		B289E87E2EB2285200937D0B /* Specifications.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Specifications.h; sourceTree = "<group>"; };
+		B289E87F2EB2285200937D0B /* Texture.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Texture.hpp; sourceTree = "<group>"; };
+		B289E8802EB2285200937D0B /* VertexBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VertexBuffer.hpp; sourceTree = "<group>"; };
+		B289E8872EB2287800937D0B /* BufferLayout.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BufferLayout.cpp; sourceTree = "<group>"; };
+		B289E8882EB2287800937D0B /* Shader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Shader.cpp; sourceTree = "<group>"; };
+		B289E8892EB2287800937D0B /* ShaderLibrary.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderLibrary.cpp; sourceTree = "<group>"; };
+		B289E88A2EB2287800937D0B /* ShaderUniforms.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderUniforms.cpp; sourceTree = "<group>"; };
+		B289E88F2EB228B100937D0B /* Buffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Buffer.hpp; sourceTree = "<group>"; };
+		B289E8902EB228B100937D0B /* Buffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Buffer.cpp; sourceTree = "<group>"; };
+		B289E8932EB2290E00937D0B /* Specification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Specification.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,6 +238,7 @@
 				B289E6732EB0E53200937D0B /* Configuration.h */,
 				B289E6962EB112CD00937D0B /* AssertAPI.h */,
 				B289E8712EB1B34F00937D0B /* DesignHelper.h */,
+				B289E88F2EB228B100937D0B /* Buffer.hpp */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -212,6 +247,7 @@
 			isa = PBXGroup;
 			children = (
 				B289E6692EB0E43D00937D0B /* KanVizCore.cpp */,
+				B289E8902EB228B100937D0B /* Buffer.cpp */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -386,8 +422,19 @@
 			isa = PBXGroup;
 			children = (
 				B289E8282EB1B00D00937D0B /* Factories.hpp */,
+				B289E8932EB2290E00937D0B /* Specification.h */,
 				B289E82C2EB1B01D00937D0B /* RendererContext.hpp */,
 				B289E8302EB1B02500937D0B /* RendererAPI.hpp */,
+				B289E8732EB2284400937D0B /* BufferLayout.hpp */,
+				B289E8752EB2284A00937D0B /* FrameBuffer.hpp */,
+				B289E8762EB2284A00937D0B /* IndexBuffer.hpp */,
+				B289E8772EB2284A00937D0B /* Pipeline.hpp */,
+				B289E87B2EB2285200937D0B /* Shader.hpp */,
+				B289E87C2EB2285200937D0B /* ShaderLibrary.hpp */,
+				B289E87D2EB2285200937D0B /* ShaderUniforms.hpp */,
+				B289E87E2EB2285200937D0B /* Specifications.h */,
+				B289E87F2EB2285200937D0B /* Texture.hpp */,
+				B289E8802EB2285200937D0B /* VertexBuffer.hpp */,
 			);
 			path = Graphics;
 			sourceTree = "<group>";
@@ -396,6 +443,10 @@
 			isa = PBXGroup;
 			children = (
 				B289E8292EB1B00D00937D0B /* Factories.cpp */,
+				B289E8872EB2287800937D0B /* BufferLayout.cpp */,
+				B289E8882EB2287800937D0B /* Shader.cpp */,
+				B289E8892EB2287800937D0B /* ShaderLibrary.cpp */,
+				B289E88A2EB2287800937D0B /* ShaderUniforms.cpp */,
 			);
 			path = Graphics;
 			sourceTree = "<group>";
@@ -442,14 +493,26 @@
 				B289E6E62EB1A81D00937D0B /* WindowFactory.hpp in Headers */,
 				B289E6932EB111F300937D0B /* LoggerAPI.h in Headers */,
 				B289E66A2EB0E43D00937D0B /* KanVizCore.hpp in Headers */,
+				B289E8742EB2284400937D0B /* BufferLayout.hpp in Headers */,
 				B289E6742EB0E53200937D0B /* Configuration.h in Headers */,
+				B289E8912EB228B100937D0B /* Buffer.hpp in Headers */,
 				B289E6A02EB113C300937D0B /* Profiler.hpp in Headers */,
 				B289E8322EB1B02500937D0B /* RendererAPI.hpp in Headers */,
+				B289E8812EB2285200937D0B /* ShaderUniforms.hpp in Headers */,
+				B289E8822EB2285200937D0B /* Specifications.h in Headers */,
+				B289E8832EB2285200937D0B /* Texture.hpp in Headers */,
+				B289E8842EB2285200937D0B /* ShaderLibrary.hpp in Headers */,
+				B289E8852EB2285200937D0B /* VertexBuffer.hpp in Headers */,
+				B289E8862EB2285200937D0B /* Shader.hpp in Headers */,
 				B289E8382EB1B04100937D0B /* OpenGLRendererContext.hpp in Headers */,
 				B289E6D12EB1A44000937D0B /* Application.hpp in Headers */,
 				B289E6E12EB1A81500937D0B /* Window.hpp in Headers */,
+				B289E8942EB2290E00937D0B /* Specification.h in Headers */,
 				B289E82A2EB1B00D00937D0B /* Factories.hpp in Headers */,
 				B289E67E2EB10AB600937D0B /* LoggerSpecification.hpp in Headers */,
+				B289E8782EB2284A00937D0B /* IndexBuffer.hpp in Headers */,
+				B289E8792EB2284A00937D0B /* Pipeline.hpp in Headers */,
+				B289E87A2EB2284A00937D0B /* FrameBuffer.hpp in Headers */,
 				B289E8252EB1AEA100937D0B /* Renderer.hpp in Headers */,
 				B289E8682EB1B2C100937D0B /* Layer.hpp in Headers */,
 				B289E67A2EB1097100937D0B /* Logger.hpp in Headers */,
@@ -559,7 +622,12 @@
 				B289E6A92EB114AF00937D0B /* PerformanceProfiler.cpp in Sources */,
 				B289E69D2EB1138E00937D0B /* Timer.cpp in Sources */,
 				B289E6852EB10C1200937D0B /* LoggerSpecificationBuilder.cpp in Sources */,
+				B289E8922EB228B100937D0B /* Buffer.cpp in Sources */,
 				B289E6EC2EB1A8F700937D0B /* MacWindiow.cpp in Sources */,
+				B289E88B2EB2287800937D0B /* BufferLayout.cpp in Sources */,
+				B289E88C2EB2287800937D0B /* Shader.cpp in Sources */,
+				B289E88D2EB2287800937D0B /* ShaderLibrary.cpp in Sources */,
+				B289E88E2EB2287800937D0B /* ShaderUniforms.cpp in Sources */,
 				B289E6CB2EB122C200937D0B /* TimeStep.cpp in Sources */,
 				B289E83C2EB1B04B00937D0B /* OpenGLRendererAPI.cpp in Sources */,
 				B289E6E52EB1A81D00937D0B /* WindowFactory.cpp in Sources */,
