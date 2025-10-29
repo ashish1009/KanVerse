@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Core/ApplicationSpecification.h"
+#include "Core/WindowFactory.hpp"
 
 namespace KanViz
 {
@@ -36,7 +37,9 @@ namespace KanViz
     bool m_isRunning {false};
     
     ApplicationSpecification m_specification;
-    
+    TimeStep m_timeStep;
+    Scope<Window> m_window;
+
     // Static data members
     inline static Application* s_instance {nullptr}; //< Singleton instance of the application
   };

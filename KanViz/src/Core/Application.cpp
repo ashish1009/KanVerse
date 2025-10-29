@@ -18,6 +18,9 @@ namespace KanViz
     { 
       s_instance = this;
       IK_LOG_INFO(LogModule::Application, "Creating core application instance");
+      
+      // Create the window
+      m_window = WindowFactory::Create(m_specification.windowSpec);
     }
   }
   
