@@ -7,6 +7,8 @@
 
 #include "Application.hpp"
 
+#include "Renderer/Core/Renderer.hpp"
+
 namespace KanViz
 {
   Application::Application(const ApplicationSpecification& specification)
@@ -19,6 +21,9 @@ namespace KanViz
       s_instance = this;
       IK_LOG_INFO(LogModule::Application, "Creating core application instance");
       
+      // Check Renderer API type
+      IK_ASSERT(m_specification.rendererType == m_specification.windowSpec.rendererType);
+
       // Create the window
       m_window = WindowFactory::Create(m_specification.windowSpec);
       
@@ -27,6 +32,9 @@ namespace KanViz
         // Set window even callbacks
         m_window->SetEventFunction(IK_BIND_EVENT_FN(Application::HandleEvents));
         
+        // Set the renderer type before any renderer creation.
+        Renderer::Initialize(m_specification.rendererType, m_window->GetNativeWindow());
+
         m_isRunning = true;
       } // if window
       else
@@ -85,6 +93,11 @@ namespace KanViz
         m_timeStep = m_window->GetTimestep();
       }
       
+      {
+        IK_PERFORMANCE_FUNC("Application::Renderer_Update");
+        Renderer::OnUpdate();
+      }
+
       // Render ImGui at last
       RenderImGuiLayers();
     }

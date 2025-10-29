@@ -43,6 +43,8 @@
 		B289E8192EB1AA4E00937D0B /* libGLFW.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E7092EB1A9A900937D0B /* libGLFW.a */; };
 		B289E8202EB1AB3800937D0B /* RendererType.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E81E2EB1AB3800937D0B /* RendererType.hpp */; };
 		B289E8212EB1AB3800937D0B /* RendererType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E81F2EB1AB3800937D0B /* RendererType.cpp */; };
+		B289E8242EB1AEA100937D0B /* Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8232EB1AEA100937D0B /* Renderer.cpp */; };
+		B289E8252EB1AEA100937D0B /* Renderer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8222EB1AEA100937D0B /* Renderer.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +103,8 @@
 		B289E7042EB1A9A900937D0B /* GLFW.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GLFW.xcodeproj; path = GLFW/GLFW.xcodeproj; sourceTree = "<group>"; };
 		B289E81E2EB1AB3800937D0B /* RendererType.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RendererType.hpp; sourceTree = "<group>"; };
 		B289E81F2EB1AB3800937D0B /* RendererType.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererType.cpp; sourceTree = "<group>"; };
+		B289E8222EB1AEA100937D0B /* Renderer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Renderer.hpp; sourceTree = "<group>"; };
+		B289E8232EB1AEA100937D0B /* Renderer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Renderer.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -322,6 +326,7 @@
 			isa = PBXGroup;
 			children = (
 				B289E81E2EB1AB3800937D0B /* RendererType.hpp */,
+				B289E8222EB1AEA100937D0B /* Renderer.hpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -330,6 +335,7 @@
 			isa = PBXGroup;
 			children = (
 				B289E81F2EB1AB3800937D0B /* RendererType.cpp */,
+				B289E8232EB1AEA100937D0B /* Renderer.cpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -360,6 +366,7 @@
 				B289E6D12EB1A44000937D0B /* Application.hpp in Headers */,
 				B289E6E12EB1A81500937D0B /* Window.hpp in Headers */,
 				B289E67E2EB10AB600937D0B /* LoggerSpecification.hpp in Headers */,
+				B289E8252EB1AEA100937D0B /* Renderer.hpp in Headers */,
 				B289E67A2EB1097100937D0B /* Logger.hpp in Headers */,
 				B289E6DE2EB1A78600937D0B /* WindowSpecification.h in Headers */,
 			);
@@ -447,6 +454,7 @@
 				B289E66B2EB0E43D00937D0B /* KanVizCore.cpp in Sources */,
 				B289E8212EB1AB3800937D0B /* RendererType.cpp in Sources */,
 				B289E6A12EB113C300937D0B /* Profiler.cpp in Sources */,
+				B289E8242EB1AEA100937D0B /* Renderer.cpp in Sources */,
 				B289E67B2EB1097100937D0B /* Logger.cpp in Sources */,
 				B289E6A92EB114AF00937D0B /* PerformanceProfiler.cpp in Sources */,
 				B289E69D2EB1138E00937D0B /* Timer.cpp in Sources */,
