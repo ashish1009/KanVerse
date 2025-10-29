@@ -77,9 +77,8 @@
 		B289E6322EB0E11400937D0B /* include */ = {
 			isa = PBXGroup;
 			children = (
-				B289E6CC2EB1A3C600937D0B /* ApplicationFactory.hpp */,
-				B289EDE72EB2341100937D0B /* KanVestApp.hpp */,
-				B289EDEA2EB234D400937D0B /* RendererLayer.hpp */,
+				B289EDEE2EB2558400937D0B /* Application */,
+				B289EDF02EB2559500937D0B /* Editor */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -87,9 +86,8 @@
 		B289E6332EB0E11900937D0B /* src */ = {
 			isa = PBXGroup;
 			children = (
-				B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */,
-				B289EDE82EB2341100937D0B /* KanVestApp.cpp */,
-				B289EDEB2EB234D400937D0B /* RendererLayer.cpp */,
+				B289EDED2EB2558200937D0B /* Application */,
+				B289EDEF2EB2558E00937D0B /* Editor */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -109,6 +107,40 @@
 				B289E6AE2EB1166200937D0B /* KanVest.profiler */,
 			);
 			path = Log;
+			sourceTree = "<group>";
+		};
+		B289EDED2EB2558200937D0B /* Application */ = {
+			isa = PBXGroup;
+			children = (
+				B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */,
+				B289EDE82EB2341100937D0B /* KanVestApp.cpp */,
+			);
+			path = Application;
+			sourceTree = "<group>";
+		};
+		B289EDEE2EB2558400937D0B /* Application */ = {
+			isa = PBXGroup;
+			children = (
+				B289E6CC2EB1A3C600937D0B /* ApplicationFactory.hpp */,
+				B289EDE72EB2341100937D0B /* KanVestApp.hpp */,
+			);
+			path = Application;
+			sourceTree = "<group>";
+		};
+		B289EDEF2EB2558E00937D0B /* Editor */ = {
+			isa = PBXGroup;
+			children = (
+				B289EDEB2EB234D400937D0B /* RendererLayer.cpp */,
+			);
+			path = Editor;
+			sourceTree = "<group>";
+		};
+		B289EDF02EB2559500937D0B /* Editor */ = {
+			isa = PBXGroup;
+			children = (
+				B289EDEA2EB234D400937D0B /* RendererLayer.hpp */,
+			);
+			path = Editor;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

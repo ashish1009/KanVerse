@@ -125,6 +125,7 @@ namespace KanVest
     
     if (ImGui::Begin("KanVest"))
     {
+      ImGui::Text("Testing Code");
     }
     ImGui::End();
   }
