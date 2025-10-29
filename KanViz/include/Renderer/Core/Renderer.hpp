@@ -9,6 +9,8 @@
 
 #include "Renderer/Core/RendererType.hpp"
 
+#include "Renderer/Graphics/RendererContext.hpp"
+
 namespace KanViz
 {
   /// Data type of Renderer IDs
@@ -30,19 +32,15 @@ namespace KanViz
     
     /// This function updates the renderer each frame
     static void OnUpdate();
-    
-    /// This function resizes the framebuffer
-    /// - Parameters:
-    ///   - framebufferWidth: framebuffer width
-    ///   - framebufferHeight: framebuffer height
-    static void ResizeFramebuffer(int32_t framebufferWidth, int32_t framebufferHeight);
-    
+        
     // Renderer API functions ---------------------------------------------------------------------
     /// This function returns the current renderer API type
     static RendererType GetCurrentRendererAPI();
     
     // Getters ------------------------------------------------------------------------------------
-    
+    /// This function returns the rednerer context pointer
+    static RendererContext* GetRendererContext();
+
     // Error Handling ------------------------------------------------------------------------------------------------------------------------------
     /// This function checks the renderer API error
     /// - Parameter context: Error message to be printed

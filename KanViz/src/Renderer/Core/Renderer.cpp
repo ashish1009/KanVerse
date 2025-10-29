@@ -7,15 +7,21 @@
 
 #include "Renderer.hpp"
 
+#include "Renderer/Graphics/RendererAPI.hpp"
+
 namespace KanViz
 {
   /// This structure stores the renderer data
   struct RendererData
   {
     RendererType rendererType {RendererType::Invalid};
-    
+    Ref<RendererContext> rendererContext;
+    Scope<RendererAPI> rendererAPI;
+
     void Reset()
     {
+      rendererContext.reset();
+      rendererAPI.reset();
     }
   };
   static RendererData s_rendererData;
@@ -26,6 +32,9 @@ namespace KanViz
     IK_LOG_INFO(LogModule::Renderer, "Initializing the Renderer with backedn API type '{0}'", RendererUtils::GetRendererTypeString(rendererType));
     
     s_rendererData.rendererType = rendererType;
+    
+    s_rendererData.rendererContext = RendererContextFactory::Create(static_cast<GLFWwindow*>(windowPointer));
+    s_rendererData.rendererAPI = RendererAPIFactory::Create();
   }
   void Renderer::Shutdown()
   {
@@ -35,12 +44,7 @@ namespace KanViz
   
   void Renderer::OnUpdate()
   {
-
-  }
-  
-  void Renderer::ResizeFramebuffer(int32_t framebufferWidth, int32_t framebufferHeight)
-  {
-
+    s_rendererData.rendererContext->SwapBuffers();
   }
   
   // Fundamentals -------------------------------------------------------------------------------
@@ -50,10 +54,14 @@ namespace KanViz
   }
   
   // Getters ------------------------------------------------------------------------------------
+  RendererContext* Renderer::GetRendererContext()
+  {
+    return s_rendererData.rendererContext.get();
+  }
 
   // Renderer Controllers ------------------------------------------------------------------------------------------------------------------------
   void Renderer::CheckError(std::string_view context)
   {
-
+    s_rendererData.rendererAPI->CheckError(context);
   }
 } // namespace KanViz

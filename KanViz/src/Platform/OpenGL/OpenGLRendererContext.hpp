@@ -28,25 +28,6 @@ namespace KanViz
     /// - Note: This function should be called each frame to update the display and clear the buffers.
     void SwapBuffers() override;
     
-    /// This function resizes the framebuffer
-    /// - Parameters:
-    ///   - framebufferWidth: framebuffer width
-    ///   - framebufferHeight: framebuffer height
-    void ResizeFramebuffer(int32_t framebufferWidth, int32_t framebufferHeight) const override;
-    
-    /// This function returns the device instance
-    void* GetDevice() const noexcept override;
-    /// This function returns the layer instance
-    void* GetLayer() const noexcept override;
-    /// This function returns the command queue instance
-    void* GetCommandQueue() const noexcept override;
-    /// This function returns the command buffer instance
-    void* GetCommandBuffer() const noexcept override;
-    /// This function returns the drawable instance
-    void* GetDrawable() const noexcept override;
-    /// This function returns the Renderer pass descriptor instance
-    void* GetImGuiPassDescriptor() const noexcept override;
-    
     DELETE_COPY_MOVE_CONSTRUCTORS(OpenGLRendererContext);
     
   private:

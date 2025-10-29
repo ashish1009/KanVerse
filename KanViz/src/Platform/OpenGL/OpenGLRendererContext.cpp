@@ -59,39 +59,4 @@ namespace KanViz
     IK_PERFORMANCE_FUNC("OpenGLRendererContext::SwapBuffers");
     glfwSwapBuffers(m_window);
   }
-  
-  void OpenGLRendererContext::ResizeFramebuffer(int32_t framebufferWidth, int32_t framebufferHeight) const
-  {
-    
-  }
-  
-  void* OpenGLRendererContext::GetDevice() const noexcept
-  {
-    return nullptr;
-  }
-  
-  void* OpenGLRendererContext::GetLayer() const noexcept
-  {
-    return nullptr;
-  }
-  
-  void* OpenGLRendererContext::GetCommandQueue() const noexcept
-  {
-    return nullptr;
-  }
-  
-  void* OpenGLRendererContext::GetCommandBuffer() const noexcept
-  {
-    return nullptr;
-  }
-  
-  void* OpenGLRendererContext::GetDrawable() const noexcept
-  {
-    return nullptr;
-  }
-  
-  void* OpenGLRendererContext::GetImGuiPassDescriptor() const noexcept
-  {
-    return nullptr;
-  }
 } // namespace KanViz

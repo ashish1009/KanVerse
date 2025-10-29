@@ -53,6 +53,7 @@
 		B289E8382EB1B04100937D0B /* OpenGLRendererContext.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8352EB1B04100937D0B /* OpenGLRendererContext.hpp */; };
 		B289E83B2EB1B04B00937D0B /* OpenGLRendererAPI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8392EB1B04B00937D0B /* OpenGLRendererAPI.hpp */; };
 		B289E83C2EB1B04B00937D0B /* OpenGLRendererAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E83A2EB1B04B00937D0B /* OpenGLRendererAPI.cpp */; };
+		B289E8642EB1B24F00937D0B /* libGlad.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E8592EB1B06500937D0B /* libGlad.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +63,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = B289E6F62EB1A9A800937D0B;
 			remoteInfo = GLFW;
+		};
+		B289E8582EB1B06500937D0B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B289E8542EB1B06400937D0B /* Glad.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B289E8462EB1B06400937D0B;
+			remoteInfo = Glad;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -129,6 +137,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289E8642EB1B24F00937D0B /* libGlad.a in Frameworks */,
 				B289E8192EB1AA4E00937D0B /* libGLFW.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -393,6 +402,7 @@
 		B289E8552EB1B06400937D0B /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				B289E8592EB1B06500937D0B /* libGlad.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -505,6 +515,13 @@
 			fileType = archive.ar;
 			path = libGLFW.a;
 			remoteRef = B289E7082EB1A9A900937D0B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		B289E8592EB1B06500937D0B /* libGlad.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libGlad.a;
+			remoteRef = B289E8582EB1B06500937D0B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
