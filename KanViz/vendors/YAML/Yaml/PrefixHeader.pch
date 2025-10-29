@@ -1,0 +1,15 @@
+//
+//  PrefixHeader.pch
+//  YAML
+//
+//  Created by Ashish . on 09/01/25.
+//
+
+#pragma once
+
+// This file includes any system framework and library headers here that should be included in all compilation units
+// for compiling the Kreator
+
+// To remove documentation warning
+#pragma clang diagnostic ignored "-Wdocumentation"
+#pragma clang diagnostic ignored "-Wformat-security"
