@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Renderer/Core/RendererType.hpp"
+#include "Renderer/Core/RendererCommandQueue.hpp"
 
 #include "Renderer/Graphics/RendererContext.hpp"
 
@@ -41,10 +42,58 @@ namespace KanViz
     /// This function returns the rednerer context pointer
     static RendererContext* GetRendererContext();
 
+    // Render Command Queue ------------------------------------------------------------------------------------------------------------------------
+    /// This function executes all the renderer commands in the queue
+    /// - Parameter func: function pointer lambda to be submitted
+    template <typename FuncT> static void Submit(FuncT&& func)
+    {
+#ifdef RENDER_COMMAND_QUEUE_ENABLED
+      using RenderCommandFn = RenderCommandQueue::RenderCommandFn;
+      
+      // Create the render command lambda
+      static RenderCommandFn renderCommand = [](void *ptr)
+      {
+        // Cast the void* function pointer to type of function in which it is submitted
+        FuncT* pFunc = static_cast<FuncT*>(ptr);
+        
+        (*pFunc)();       // Execute the function pointer
+        pFunc->~FuncT();  // Call the destructor
+      };
+      
+      // Get the buffer pointer from queue
+      RenderCommandQueue* renderCommandQueue = GetRenderCommandQueue();
+      if (renderCommandQueue)
+      {
+        void* storageBuffer = renderCommandQueue->Allocate(renderCommand, sizeof(func));
+        if (!storageBuffer)
+        {
+          throw std::runtime_error("Failed to allocate memory for render command");
+        }
+        
+        // Store the function in pre-allocated memory
+        new (storageBuffer) FuncT(std::forward<FuncT>(func));  // Placement new
+      }
+      else
+      {
+        func();  // Directly execute the function if not using command queue
+      }
+      
+#else
+      func();  // Directly execute the function if not using command queue
+#endif
+    }
+    
+    /// This function executes all renderer commands in the queue and waits until rendering is complete
+    static void WaitAndRender();
+
     // Error Handling ------------------------------------------------------------------------------------------------------------------------------
     /// This function checks the renderer API error
     /// - Parameter context: Error message to be printed
     static void CheckError(std::string_view context);
+    
+  private:
+    /// This function returns the render command queue buffer
+    static RenderCommandQueue* GetRenderCommandQueue();
   };
   
   // Error Message define

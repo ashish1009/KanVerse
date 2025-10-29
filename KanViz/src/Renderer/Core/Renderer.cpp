@@ -17,11 +17,13 @@ namespace KanViz
     RendererType rendererType {RendererType::Invalid};
     Ref<RendererContext> rendererContext;
     Scope<RendererAPI> rendererAPI;
+    Scope<RenderCommandQueue> commandQueue;
 
     void Reset()
     {
       rendererContext.reset();
       rendererAPI.reset();
+      commandQueue.reset();
     }
   };
   static RendererData s_rendererData;
@@ -33,6 +35,7 @@ namespace KanViz
     
     s_rendererData.rendererType = rendererType;
     
+    s_rendererData.commandQueue = CreateScope<RenderCommandQueue>(10);
     s_rendererData.rendererContext = RendererContextFactory::Create(static_cast<GLFWwindow*>(windowPointer));
     s_rendererData.rendererAPI = RendererAPIFactory::Create();
   }
@@ -64,4 +67,16 @@ namespace KanViz
   {
     s_rendererData.rendererAPI->CheckError(context);
   }
+  
+  // Render Command Queue --------------------------------------------------------------------------------------------------------------------------
+  void Renderer::WaitAndRender()
+  {
+    IK_ASSERT(s_rendererData.commandQueue, "Render Command Queue is NULL");
+    s_rendererData.commandQueue->Execute();
+  }
+  RenderCommandQueue* Renderer::GetRenderCommandQueue()
+  {
+    return s_rendererData.commandQueue.get();
+  }
+
 } // namespace KanViz
