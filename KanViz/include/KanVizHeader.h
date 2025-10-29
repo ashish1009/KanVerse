@@ -15,6 +15,7 @@
 #include <iostream>
 #include <filesystem>
 #include <map>
+#include <queue>
 
 // glm math library
 #define GLM_ENABLE_EXPERIMENTAL

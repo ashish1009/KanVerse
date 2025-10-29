@@ -93,6 +93,8 @@
 		B289E8B42EB22A1F00937D0B /* OpenGLTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8A82EB22A1F00937D0B /* OpenGLTexture.cpp */; };
 		B289E8B72EB22A3E00937D0B /* RendererStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8B62EB22A3E00937D0B /* RendererStats.cpp */; };
 		B289E8B82EB22A3E00937D0B /* RendererStats.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8B52EB22A3E00937D0B /* RendererStats.hpp */; };
+		B289EABD2EB22C9400937D0B /* RendererCommandQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EABC2EB22C9400937D0B /* RendererCommandQueue.cpp */; };
+		B289EABE2EB22C9400937D0B /* RendererCommandQueue.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289EABB2EB22C9400937D0B /* RendererCommandQueue.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -210,6 +212,8 @@
 		B289E8B62EB22A3E00937D0B /* RendererStats.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererStats.cpp; sourceTree = "<group>"; };
 		B289E8E72EB22AAA00937D0B /* stb_image.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = stb_image.xcodeproj; path = stb_image/stb_image.xcodeproj; sourceTree = "<group>"; };
 		B289E9092EB22B0A00937D0B /* UI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UI.xcodeproj; path = UI/UI.xcodeproj; sourceTree = "<group>"; };
+		B289EABB2EB22C9400937D0B /* RendererCommandQueue.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RendererCommandQueue.hpp; sourceTree = "<group>"; };
+		B289EABC2EB22C9400937D0B /* RendererCommandQueue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererCommandQueue.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -363,7 +367,6 @@
 				B289E6E32EB1A81D00937D0B /* WindowFactory.hpp */,
 				B289E8652EB1B2C100937D0B /* Layer.hpp */,
 				B289E8692EB1B2FE00937D0B /* LayerStack.hpp */,
-				B289E86A2EB1B2FE00937D0B /* LayerStack.cpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -374,6 +377,7 @@
 				B289E6D02EB1A44000937D0B /* Application.cpp */,
 				B289E6C92EB122C200937D0B /* TimeStep.cpp */,
 				B289E6E42EB1A81D00937D0B /* WindowFactory.cpp */,
+				B289E86A2EB1B2FE00937D0B /* LayerStack.cpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -446,6 +450,7 @@
 				B289E81E2EB1AB3800937D0B /* RendererType.hpp */,
 				B289E8222EB1AEA100937D0B /* Renderer.hpp */,
 				B289E8B52EB22A3E00937D0B /* RendererStats.hpp */,
+				B289EABB2EB22C9400937D0B /* RendererCommandQueue.hpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -456,6 +461,7 @@
 				B289E81F2EB1AB3800937D0B /* RendererType.cpp */,
 				B289E8B62EB22A3E00937D0B /* RendererStats.cpp */,
 				B289E8232EB1AEA100937D0B /* Renderer.cpp */,
+				B289EABC2EB22C9400937D0B /* RendererCommandQueue.cpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -570,6 +576,7 @@
 				B289E8AD2EB22A1F00937D0B /* OpenGLSpecification.hpp in Headers */,
 				B289E8AE2EB22A1F00937D0B /* OpenGLVertexBuffer.hpp in Headers */,
 				B289E8AF2EB22A1F00937D0B /* OpenGLShaderUniforms.hpp in Headers */,
+				B289EABE2EB22C9400937D0B /* RendererCommandQueue.hpp in Headers */,
 				B289E8742EB2284400937D0B /* BufferLayout.hpp in Headers */,
 				B289E6742EB0E53200937D0B /* Configuration.h in Headers */,
 				B289E8912EB228B100937D0B /* Buffer.hpp in Headers */,
@@ -712,6 +719,7 @@
 				B289E6D22EB1A44000937D0B /* Application.cpp in Sources */,
 				B289E66B2EB0E43D00937D0B /* KanVizCore.cpp in Sources */,
 				B289E86C2EB1B2FE00937D0B /* LayerStack.cpp in Sources */,
+				B289EABD2EB22C9400937D0B /* RendererCommandQueue.cpp in Sources */,
 				B289E8212EB1AB3800937D0B /* RendererType.cpp in Sources */,
 				B289E6A12EB113C300937D0B /* Profiler.cpp in Sources */,
 				B289E8242EB1AEA100937D0B /* Renderer.cpp in Sources */,
