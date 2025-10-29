@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Core/Events/Events.h"
+#include "Core/Event/Events.h"
 #include "Core/TimeStep.hpp"
 
 namespace KanViz

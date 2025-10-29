@@ -55,6 +55,9 @@
 		B289E83C2EB1B04B00937D0B /* OpenGLRendererAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E83A2EB1B04B00937D0B /* OpenGLRendererAPI.cpp */; };
 		B289E8642EB1B24F00937D0B /* libGlad.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E8592EB1B06500937D0B /* libGlad.a */; };
 		B289E8682EB1B2C100937D0B /* Layer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8652EB1B2C100937D0B /* Layer.hpp */; };
+		B289E86B2EB1B2FE00937D0B /* LayerStack.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8692EB1B2FE00937D0B /* LayerStack.hpp */; };
+		B289E86C2EB1B2FE00937D0B /* LayerStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E86A2EB1B2FE00937D0B /* LayerStack.cpp */; };
+		B289E8722EB1B34F00937D0B /* DesignHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E8712EB1B34F00937D0B /* DesignHelper.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -132,6 +135,9 @@
 		B289E83A2EB1B04B00937D0B /* OpenGLRendererAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLRendererAPI.cpp; sourceTree = "<group>"; };
 		B289E8542EB1B06400937D0B /* Glad.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Glad.xcodeproj; path = Glad/Glad.xcodeproj; sourceTree = "<group>"; };
 		B289E8652EB1B2C100937D0B /* Layer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Layer.hpp; sourceTree = "<group>"; };
+		B289E8692EB1B2FE00937D0B /* LayerStack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LayerStack.hpp; sourceTree = "<group>"; };
+		B289E86A2EB1B2FE00937D0B /* LayerStack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LayerStack.cpp; sourceTree = "<group>"; };
+		B289E8712EB1B34F00937D0B /* DesignHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DesignHelper.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -197,6 +203,7 @@
 				B289E6682EB0E43D00937D0B /* KanVizCore.hpp */,
 				B289E6732EB0E53200937D0B /* Configuration.h */,
 				B289E6962EB112CD00937D0B /* AssertAPI.h */,
+				B289E8712EB1B34F00937D0B /* DesignHelper.h */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -279,6 +286,8 @@
 				B289E6DF2EB1A81500937D0B /* Window.hpp */,
 				B289E6E32EB1A81D00937D0B /* WindowFactory.hpp */,
 				B289E8652EB1B2C100937D0B /* Layer.hpp */,
+				B289E8692EB1B2FE00937D0B /* LayerStack.hpp */,
+				B289E86A2EB1B2FE00937D0B /* LayerStack.cpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -425,6 +434,7 @@
 				B289E82F2EB1B01D00937D0B /* RendererContext.hpp in Headers */,
 				B289E6972EB112CD00937D0B /* AssertAPI.h in Headers */,
 				B289E6A42EB1147600937D0B /* ScopedProfiler.hpp in Headers */,
+				B289E8722EB1B34F00937D0B /* DesignHelper.h in Headers */,
 				B289E6EB2EB1A8F700937D0B /* MacWindiow.hpp in Headers */,
 				B289E6CA2EB122C200937D0B /* TimeStep.hpp in Headers */,
 				B289E6D42EB1A4C800937D0B /* ApplicationSpecification.h in Headers */,
@@ -444,6 +454,7 @@
 				B289E8682EB1B2C100937D0B /* Layer.hpp in Headers */,
 				B289E67A2EB1097100937D0B /* Logger.hpp in Headers */,
 				B289E83B2EB1B04B00937D0B /* OpenGLRendererAPI.hpp in Headers */,
+				B289E86B2EB1B2FE00937D0B /* LayerStack.hpp in Headers */,
 				B289E6DE2EB1A78600937D0B /* WindowSpecification.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -540,6 +551,7 @@
 				B289E8372EB1B04100937D0B /* OpenGLRendererContext.cpp in Sources */,
 				B289E6D22EB1A44000937D0B /* Application.cpp in Sources */,
 				B289E66B2EB0E43D00937D0B /* KanVizCore.cpp in Sources */,
+				B289E86C2EB1B2FE00937D0B /* LayerStack.cpp in Sources */,
 				B289E8212EB1AB3800937D0B /* RendererType.cpp in Sources */,
 				B289E6A12EB113C300937D0B /* Profiler.cpp in Sources */,
 				B289E8242EB1AEA100937D0B /* Renderer.cpp in Sources */,

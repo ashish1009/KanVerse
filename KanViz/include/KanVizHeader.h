@@ -30,6 +30,7 @@
 #include <Base/Configuration.h>
 #include <Base/KanVizCore.hpp>
 #include <Base/AssertAPI.h>
+#include <Base/DesignHelper.h>
 
 #include <Debug/Logger.hpp>
 #include <Debug/LoggerAPI.h>
