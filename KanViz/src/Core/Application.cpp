@@ -35,6 +35,14 @@ namespace KanViz
         // Set the renderer type before any renderer creation.
         Renderer::Initialize(m_specification.rendererType, m_window->GetNativeWindow());
 
+        // Initialize the ImGui Layer
+        m_imguiLayer = CreateRef<UI::ImGuiLayer>(m_window.get());
+        if (m_imguiLayer)
+        {
+          m_layers.PushOverlay(m_imguiLayer);
+          m_imguiLayer->SetIniFilePath(m_specification.iniFilePath);
+        }
+
         // Execute all commands from queue
         Renderer::WaitAndRender();
 
@@ -51,6 +59,15 @@ namespace KanViz
   {
     IK_PROFILE();
     IK_LOG_WARN(LogModule::Application, "Destroying core application instance");
+    
+    if (m_window)
+    {
+      m_window.reset();
+      m_layers.PopOverlay(m_imguiLayer);
+      
+      Renderer::Shutdown();
+    }
+
     s_instance = nullptr;
   }
   
@@ -136,13 +153,21 @@ namespace KanViz
   
   void Application::RenderImGuiLayers()
   {
-    // Render Imgui for all layers
-    for (const Ref<Layer>& layer : m_layers)
-    {
-      layer->OnImGuiRender();
-    }
+    IK_ASSERT(m_imguiLayer, "ImGui Layer is not created yet !!");
     
-    OnImGuiRender();
+    m_imguiLayer->Begin();
+    {
+      // Render Imgui for all layers
+      for (const Ref<Layer>& layer : m_layers)
+      {
+        layer->OnImGuiRender();
+      }
+      
+      OnImGuiRender();
+      
+      ImGui::ShowDemoWindow();
+    }
+    m_imguiLayer->End();
   }
   
   void Application::Close()

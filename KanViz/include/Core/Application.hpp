@@ -13,6 +13,8 @@
 
 #include "Core/Event/ApplicationEvents.h"
 
+#include "UI/ImGuiLayer.hpp"
+
 namespace KanViz
 {
   /// This class is the base Application for the KanViz Engine.
@@ -84,6 +86,7 @@ namespace KanViz
     TimeStep m_timeStep;
     Scope<Window> m_window;
     LayerStack m_layers;
+    Ref<UI::ImGuiLayer> m_imguiLayer;
 
     // Static data members
     inline static Application* s_instance {nullptr}; //< Singleton instance of the application

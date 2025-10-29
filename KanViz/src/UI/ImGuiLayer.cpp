@@ -84,7 +84,7 @@ namespace KanViz::UI
   
   void ImGuiLayer::Begin()
   {
-    IK_PERFORMANCE("ImGuiLayer::Begin");
+    IK_PERFORMANCE_FUNC("ImGuiLayer::Begin");
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     
@@ -96,7 +96,7 @@ namespace KanViz::UI
   
   void ImGuiLayer::End()
   {
-    IK_PERFORMANCE("ImGuiLayer::End");
+    IK_PERFORMANCE_FUNC("ImGuiLayer::End");
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ImVec2((float)m_window->GetWidth(), (float)m_window->GetHeight());
     

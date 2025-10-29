@@ -28,6 +28,7 @@ namespace KanVest
         .maximized = false,
         .hideTitleBar = true,
       },
+      .iniFilePath = "../../../KanVest/KanVest.ini"
     };
     
     return KanViz::ApplicationFactory::CreateApplication<KanViz::Application>(appSpec);

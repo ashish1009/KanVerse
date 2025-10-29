@@ -17,5 +17,6 @@ namespace KanViz
     std::string appName {"KanViz"};                       ///< Application name
     RendererType rendererType {RendererType::Invalid};    ///< Preferred renderer backend
     WindowSpecification windowSpec {};                    ///< Primary window specification
+    std::filesystem::path iniFilePath {};
   };
 } // namespace KanViz
