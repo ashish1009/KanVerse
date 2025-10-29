@@ -29,7 +29,7 @@ namespace KanViz
     
     /// This function runs the Game loop of the application. Updates the application, layers, and window, and renders the GUI layer.
     void Run();
-    /// This function closes the current application (IKan::Application) and ends the game loop
+    /// This function closes the current application (KanViz::Application) and ends the game loop
     void Close();
     
   private:

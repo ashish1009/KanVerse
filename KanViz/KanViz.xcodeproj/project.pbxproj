@@ -34,6 +34,7 @@
 		B289E6D22EB1A44000937D0B /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6D02EB1A44000937D0B /* Application.cpp */; };
 		B289E6D42EB1A4C800937D0B /* ApplicationSpecification.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6D32EB1A4C800937D0B /* ApplicationSpecification.h */; };
 		B289E6D72EB1A68000937D0B /* ApplicationFactory.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E6D52EB1A68000937D0B /* ApplicationFactory.hpp */; };
+		B289E6DE2EB1A78600937D0B /* WindowSpecification.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E6DD2EB1A78600937D0B /* WindowSpecification.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -73,6 +74,7 @@
 		B289E6D02EB1A44000937D0B /* Application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
 		B289E6D32EB1A4C800937D0B /* ApplicationSpecification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ApplicationSpecification.h; sourceTree = "<group>"; };
 		B289E6D52EB1A68000937D0B /* ApplicationFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ApplicationFactory.hpp; sourceTree = "<group>"; };
+		B289E6DD2EB1A78600937D0B /* WindowSpecification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WindowSpecification.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -208,6 +210,7 @@
 				B289E6C62EB1229800937D0B /* KeyCodes.h */,
 				B289E6C72EB1229800937D0B /* MouseButtonCodes.h */,
 				B289E6C82EB122C200937D0B /* TimeStep.hpp */,
+				B289E6DD2EB1A78600937D0B /* WindowSpecification.h */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -255,6 +258,7 @@
 				B289E6D12EB1A44000937D0B /* Application.hpp in Headers */,
 				B289E67E2EB10AB600937D0B /* LoggerSpecification.hpp in Headers */,
 				B289E67A2EB1097100937D0B /* Logger.hpp in Headers */,
+				B289E6DE2EB1A78600937D0B /* WindowSpecification.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

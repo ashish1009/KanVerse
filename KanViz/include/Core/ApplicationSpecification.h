@@ -7,11 +7,14 @@
 
 #pragma once
 
+#include "Core/WindowSpecification.h"
+
 namespace KanViz
 {
   /// Stores application-wide settings
   struct ApplicationSpecification
   {
-    std::string appName {"IKAN"};                         ///< Application name
+    std::string appName {"KanViz"};                       ///< Application name
+    WindowSpecification windowSpec {};                    ///< Primary window specification
   };
 } // namespace KanViz
