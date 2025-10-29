@@ -48,3 +48,5 @@
 #include <Core/Event/ApplicationEvents.h>
 #include <Core/Event/MouseEvents.h>
 #include <Core/Event/KeyboardEvents.h>
+
+#include <Renderer/Core/RendererType.hpp>
