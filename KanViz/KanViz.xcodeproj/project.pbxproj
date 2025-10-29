@@ -208,6 +208,7 @@
 		B289E8AA2EB22A1F00937D0B /* OpenGLVertexBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLVertexBuffer.cpp; sourceTree = "<group>"; };
 		B289E8B52EB22A3E00937D0B /* RendererStats.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RendererStats.hpp; sourceTree = "<group>"; };
 		B289E8B62EB22A3E00937D0B /* RendererStats.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererStats.cpp; sourceTree = "<group>"; };
+		B289E8E72EB22AAA00937D0B /* stb_image.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = stb_image.xcodeproj; path = stb_image/stb_image.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -291,6 +292,7 @@
 		B289E6752EB0E5EC00937D0B /* vendors */ = {
 			isa = PBXGroup;
 			children = (
+				B289E8E72EB22AAA00937D0B /* stb_image.xcodeproj */,
 				B289E8542EB1B06400937D0B /* Glad.xcodeproj */,
 				B289E7042EB1A9A900937D0B /* GLFW.xcodeproj */,
 			);
@@ -524,6 +526,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		B289E8E82EB22AAA00937D0B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -641,6 +650,10 @@
 				{
 					ProductGroup = B289E7052EB1A9A900937D0B /* Products */;
 					ProjectRef = B289E7042EB1A9A900937D0B /* GLFW.xcodeproj */;
+				},
+				{
+					ProductGroup = B289E8E82EB22AAA00937D0B /* Products */;
+					ProjectRef = B289E8E72EB22AAA00937D0B /* stb_image.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -847,6 +860,7 @@
 					"${PROJECT_DIR}/vendors/glm",
 					"${PROJECT_DIR}/vendors/GLFW/GLFW/include",
 					"${PROJECT_DIR}/vendors/Glad/include",
+					"${PROJECT_DIR}/vendors/stb_image/stb_image",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -872,6 +886,7 @@
 					"${PROJECT_DIR}/vendors/glm",
 					"${PROJECT_DIR}/vendors/GLFW/GLFW/include",
 					"${PROJECT_DIR}/vendors/Glad/include",
+					"${PROJECT_DIR}/vendors/stb_image/stb_image",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
