@@ -9,6 +9,7 @@
 
 #include "Core/ApplicationSpecification.h"
 #include "Core/WindowFactory.hpp"
+#include "Core/LayerStack.hpp"
 
 #include "Core/Event/ApplicationEvents.h"
 
@@ -35,6 +36,18 @@ namespace KanViz
     /// This function closes the current application (KanViz::Application) and ends the game loop
     void Close();
     
+    /// This function Pushes the layer of type IKan::Layer in Core Application layer stack.
+    /// - Note: Attaches the layer as well.
+    /// - Parameter layer: Reference to the layer to be add
+    void PushLayer(const Ref<Layer>& layer);
+    /// This function Pops the layer of type IKan::Layer from Core Application layer stack.
+    /// - Note: Detaches the layer as well.
+    /// - Parameter layer: Reference to the layer to be removed
+    void PopLayer(const Ref<Layer>& layer);
+    /// This function checks if layer is present in the stack
+    /// - Parameter layer: Reference to layer to be checked
+    bool Contain(const Ref<Layer>& layer);
+
     // Virtual APIs --------------------------------------------------------------------------------------------------------------------------------
     /// This function is called before game loop
     virtual void OnInit() {}
@@ -70,6 +83,7 @@ namespace KanViz
     ApplicationSpecification m_specification;
     TimeStep m_timeStep;
     Scope<Window> m_window;
+    LayerStack m_layers;
 
     // Static data members
     inline static Application* s_instance {nullptr}; //< Singleton instance of the application

@@ -83,6 +83,15 @@ namespace KanViz
         OnUpdate(m_timeStep);
       }
       
+      // Updating all the attached layer
+      {
+        IK_PERFORMANCE_FUNC("Application::LayersUpdate");
+        for (const Ref<Layer>& layer : m_layers)
+        {
+          layer->OnUpdate(m_timeStep);
+        }
+      }
+
       {
         IK_PERFORMANCE_FUNC("Application::WindowUpdate");
         
@@ -117,7 +126,13 @@ namespace KanViz
   
   void Application::RenderImGuiLayers()
   {
+    // Render Imgui for all layers
+    for (const Ref<Layer>& layer : m_layers)
+    {
+      layer->OnImGuiRender();
+    }
     
+    OnImGuiRender();
   }
   
   void Application::Close()
@@ -125,10 +140,41 @@ namespace KanViz
     m_isRunning = false;
   }
   
+  void Application::PushLayer(const Ref<Layer>& layer)
+  {
+    if (Contain(layer))
+    {
+      IK_LOG_ERROR(LogModule::Application, "Layer already added to stack.");
+      return;
+    }
+    m_layers.PushLayer(layer);
+  }
+  
+  void Application::PopLayer(const Ref<Layer>& layer)
+  {
+    if (!Contain(layer))
+    {
+      IK_LOG_ERROR(LogModule::Application, "Attempted to pop a layer that doesn't exist in the stack.");
+      return;
+    }
+    m_layers.PopLayer(layer);
+  }
+  
+  bool Application::Contain(const Ref<Layer> &layer)
+  {
+    return m_layers.Contain(layer);
+  }
+
   void Application::HandleEvents(Event &event)
   {
     EventDispatcher dispatcher(event);
     dispatcher.Dispatch<WindowCloseEvent>(IK_BIND_EVENT_FN(Application::WindowClose));
+
+    // Event Handler for all layers
+    for (const Ref<Layer>& layer : m_layers)
+    {
+      layer->OnEvent(event);
+    }
 
     // Client events
     OnEvent(event);
