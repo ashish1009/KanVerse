@@ -45,6 +45,16 @@
 		B289E8212EB1AB3800937D0B /* RendererType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E81F2EB1AB3800937D0B /* RendererType.cpp */; };
 		B289E8242EB1AEA100937D0B /* Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8232EB1AEA100937D0B /* Renderer.cpp */; };
 		B289E8252EB1AEA100937D0B /* Renderer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8222EB1AEA100937D0B /* Renderer.hpp */; };
+		B289E82A2EB1B00D00937D0B /* Factories.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8282EB1B00D00937D0B /* Factories.hpp */; };
+		B289E82B2EB1B00D00937D0B /* Factories.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8292EB1B00D00937D0B /* Factories.cpp */; };
+		B289E82E2EB1B01D00937D0B /* RendererContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E82D2EB1B01D00937D0B /* RendererContext.cpp */; };
+		B289E82F2EB1B01D00937D0B /* RendererContext.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E82C2EB1B01D00937D0B /* RendererContext.hpp */; };
+		B289E8322EB1B02500937D0B /* RendererAPI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8302EB1B02500937D0B /* RendererAPI.hpp */; };
+		B289E8332EB1B02500937D0B /* RendererAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8312EB1B02500937D0B /* RendererAPI.cpp */; };
+		B289E8372EB1B04100937D0B /* OpenGLRendererContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E8362EB1B04100937D0B /* OpenGLRendererContext.cpp */; };
+		B289E8382EB1B04100937D0B /* OpenGLRendererContext.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8352EB1B04100937D0B /* OpenGLRendererContext.hpp */; };
+		B289E83B2EB1B04B00937D0B /* OpenGLRendererAPI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8392EB1B04B00937D0B /* OpenGLRendererAPI.hpp */; };
+		B289E83C2EB1B04B00937D0B /* OpenGLRendererAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E83A2EB1B04B00937D0B /* OpenGLRendererAPI.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,6 +115,16 @@
 		B289E81F2EB1AB3800937D0B /* RendererType.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererType.cpp; sourceTree = "<group>"; };
 		B289E8222EB1AEA100937D0B /* Renderer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Renderer.hpp; sourceTree = "<group>"; };
 		B289E8232EB1AEA100937D0B /* Renderer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Renderer.cpp; sourceTree = "<group>"; };
+		B289E8282EB1B00D00937D0B /* Factories.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Factories.hpp; sourceTree = "<group>"; };
+		B289E8292EB1B00D00937D0B /* Factories.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Factories.cpp; sourceTree = "<group>"; };
+		B289E82C2EB1B01D00937D0B /* RendererContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RendererContext.hpp; sourceTree = "<group>"; };
+		B289E82D2EB1B01D00937D0B /* RendererContext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererContext.cpp; sourceTree = "<group>"; };
+		B289E8302EB1B02500937D0B /* RendererAPI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RendererAPI.hpp; sourceTree = "<group>"; };
+		B289E8312EB1B02500937D0B /* RendererAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererAPI.cpp; sourceTree = "<group>"; };
+		B289E8352EB1B04100937D0B /* OpenGLRendererContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OpenGLRendererContext.hpp; sourceTree = "<group>"; };
+		B289E8362EB1B04100937D0B /* OpenGLRendererContext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLRendererContext.cpp; sourceTree = "<group>"; };
+		B289E8392EB1B04B00937D0B /* OpenGLRendererAPI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OpenGLRendererAPI.hpp; sourceTree = "<group>"; };
+		B289E83A2EB1B04B00937D0B /* OpenGLRendererAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLRendererAPI.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -157,8 +177,8 @@
 				B289E6672EB0E42400937D0B /* Base */,
 				B289E6772EB0E66A00937D0B /* Debug */,
 				B289E6B02EB121A900937D0B /* Core */,
-				B289E6E72EB1A8E100937D0B /* Platform */,
 				B289E81B2EB1AB1900937D0B /* Renderer */,
+				B289E6E72EB1A8E100937D0B /* Platform */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -277,6 +297,7 @@
 		B289E6E72EB1A8E100937D0B /* Platform */ = {
 			isa = PBXGroup;
 			children = (
+				B289E8342EB1B03500937D0B /* OpenGL */,
 				B289E6E82EB1A8EE00937D0B /* MacOS */,
 			);
 			path = Platform;
@@ -310,6 +331,7 @@
 			isa = PBXGroup;
 			children = (
 				B289E81C2EB1AB2700937D0B /* Core */,
+				B289E8262EB1AFE400937D0B /* Graphics */,
 			);
 			path = Renderer;
 			sourceTree = "<group>";
@@ -318,6 +340,7 @@
 			isa = PBXGroup;
 			children = (
 				B289E81D2EB1AB2F00937D0B /* Core */,
+				B289E8272EB1AFEC00937D0B /* Graphics */,
 			);
 			path = Renderer;
 			sourceTree = "<group>";
@@ -340,6 +363,37 @@
 			path = Core;
 			sourceTree = "<group>";
 		};
+		B289E8262EB1AFE400937D0B /* Graphics */ = {
+			isa = PBXGroup;
+			children = (
+				B289E8282EB1B00D00937D0B /* Factories.hpp */,
+				B289E82C2EB1B01D00937D0B /* RendererContext.hpp */,
+				B289E8302EB1B02500937D0B /* RendererAPI.hpp */,
+			);
+			path = Graphics;
+			sourceTree = "<group>";
+		};
+		B289E8272EB1AFEC00937D0B /* Graphics */ = {
+			isa = PBXGroup;
+			children = (
+				B289E8292EB1B00D00937D0B /* Factories.cpp */,
+				B289E82D2EB1B01D00937D0B /* RendererContext.cpp */,
+				B289E8312EB1B02500937D0B /* RendererAPI.cpp */,
+			);
+			path = Graphics;
+			sourceTree = "<group>";
+		};
+		B289E8342EB1B03500937D0B /* OpenGL */ = {
+			isa = PBXGroup;
+			children = (
+				B289E8352EB1B04100937D0B /* OpenGLRendererContext.hpp */,
+				B289E8362EB1B04100937D0B /* OpenGLRendererContext.cpp */,
+				B289E8392EB1B04B00937D0B /* OpenGLRendererAPI.hpp */,
+				B289E83A2EB1B04B00937D0B /* OpenGLRendererAPI.cpp */,
+			);
+			path = OpenGL;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -352,6 +406,7 @@
 				B289E6842EB10C1200937D0B /* LoggerSpecificationBuilder.hpp in Headers */,
 				B289E6AC2EB1154000937D0B /* ScopedPerformanceProfiler.hpp in Headers */,
 				B289E6A82EB114AF00937D0B /* PerformanceProfiler.hpp in Headers */,
+				B289E82F2EB1B01D00937D0B /* RendererContext.hpp in Headers */,
 				B289E6972EB112CD00937D0B /* AssertAPI.h in Headers */,
 				B289E6A42EB1147600937D0B /* ScopedProfiler.hpp in Headers */,
 				B289E6EB2EB1A8F700937D0B /* MacWindiow.hpp in Headers */,
@@ -363,11 +418,15 @@
 				B289E66A2EB0E43D00937D0B /* KanVizCore.hpp in Headers */,
 				B289E6742EB0E53200937D0B /* Configuration.h in Headers */,
 				B289E6A02EB113C300937D0B /* Profiler.hpp in Headers */,
+				B289E8322EB1B02500937D0B /* RendererAPI.hpp in Headers */,
+				B289E8382EB1B04100937D0B /* OpenGLRendererContext.hpp in Headers */,
 				B289E6D12EB1A44000937D0B /* Application.hpp in Headers */,
 				B289E6E12EB1A81500937D0B /* Window.hpp in Headers */,
+				B289E82A2EB1B00D00937D0B /* Factories.hpp in Headers */,
 				B289E67E2EB10AB600937D0B /* LoggerSpecification.hpp in Headers */,
 				B289E8252EB1AEA100937D0B /* Renderer.hpp in Headers */,
 				B289E67A2EB1097100937D0B /* Logger.hpp in Headers */,
+				B289E83B2EB1B04B00937D0B /* OpenGLRendererAPI.hpp in Headers */,
 				B289E6DE2EB1A78600937D0B /* WindowSpecification.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -450,9 +509,12 @@
 			files = (
 				B289E6A52EB1147600937D0B /* ScopedProfiler.cpp in Sources */,
 				B289E6812EB10AC400937D0B /* LoggerSpecification.cpp in Sources */,
+				B289E8372EB1B04100937D0B /* OpenGLRendererContext.cpp in Sources */,
 				B289E6D22EB1A44000937D0B /* Application.cpp in Sources */,
+				B289E8332EB1B02500937D0B /* RendererAPI.cpp in Sources */,
 				B289E66B2EB0E43D00937D0B /* KanVizCore.cpp in Sources */,
 				B289E8212EB1AB3800937D0B /* RendererType.cpp in Sources */,
+				B289E82E2EB1B01D00937D0B /* RendererContext.cpp in Sources */,
 				B289E6A12EB113C300937D0B /* Profiler.cpp in Sources */,
 				B289E8242EB1AEA100937D0B /* Renderer.cpp in Sources */,
 				B289E67B2EB1097100937D0B /* Logger.cpp in Sources */,
@@ -461,7 +523,9 @@
 				B289E6852EB10C1200937D0B /* LoggerSpecificationBuilder.cpp in Sources */,
 				B289E6EC2EB1A8F700937D0B /* MacWindiow.cpp in Sources */,
 				B289E6CB2EB122C200937D0B /* TimeStep.cpp in Sources */,
+				B289E83C2EB1B04B00937D0B /* OpenGLRendererAPI.cpp in Sources */,
 				B289E6E52EB1A81D00937D0B /* WindowFactory.cpp in Sources */,
+				B289E82B2EB1B00D00937D0B /* Factories.cpp in Sources */,
 				B289E6AD2EB1154000937D0B /* ScopedPerformanceProfiler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
