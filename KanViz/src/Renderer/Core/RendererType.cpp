@@ -15,7 +15,6 @@ namespace KanViz::RendererUtils
     switch (rendererType)
     {
       case RendererType::OpenGL: return "OpenGL";
-      case RendererType::Metal : return "Metal";
       case RendererType::Invalid:
       default:
         IK_ASSERT(false, "Invalid Renderer Type");

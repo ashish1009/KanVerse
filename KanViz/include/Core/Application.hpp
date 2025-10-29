@@ -10,6 +10,8 @@
 #include "Core/ApplicationSpecification.h"
 #include "Core/WindowFactory.hpp"
 
+#include "Core/Event/ApplicationEvents.h"
+
 namespace KanViz
 {
   /// This class is the base Application for the KanViz Engine.
@@ -33,7 +35,36 @@ namespace KanViz
     /// This function closes the current application (KanViz::Application) and ends the game loop
     void Close();
     
+    // Virtual APIs --------------------------------------------------------------------------------------------------------------------------------
+    /// This function is called before game loop
+    virtual void OnInit() {}
+    /// This function is called after game loop
+    virtual void OnShutdown() {}
+    /// This function is called inside Game Loop Running
+    /// - Parameter ts: Time step for each frame
+    virtual void OnUpdate(const TimeStep&) {}
+    /// This function is called when an event triggers
+    /// - Parameter event: Triggered Events
+    virtual void OnEvent(Event&) {}
+    /// This function is called within the game loop specifically during ImGui layer rendering.
+    virtual void OnImGuiRender() {}
+
   private:
+    /// This function handles all window events. Dispatches the events and executes the appropriate actions.
+    /// - Parameter event: event abstract type
+    void HandleEvents(Event& event);
+    /// This function is dispatched by the event dispatcher when the window closes.
+    /// - Parameter windowCloseEvent: Window close event instance
+    bool WindowClose(WindowCloseEvent& windowCloseEvent);
+
+    /// This function begins the ImGui renderer and renders ImGui
+    void RenderImGuiLayers();
+    
+    /// This function flushes pending tasks before the game loop starts.
+    void FlushBeforeGameLoop();
+    /// This function flushes pending tasks after the game loop ends.
+    void FlushAfterGameLoop();
+
     bool m_isRunning {false};
     
     ApplicationSpecification m_specification;

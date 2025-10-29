@@ -12,7 +12,7 @@ namespace KanViz
   /// This enum stores the Supported rendering backends for engine
   enum class RendererType
   {
-    Invalid, OpenGL, Metal
+    Invalid, OpenGL
   };
   
   namespace RendererUtils

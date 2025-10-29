@@ -11,7 +11,7 @@ namespace KanVest
 {
   KanViz::Scope<KanViz::Application> CreateApplication(std::span<const char*> args)
   {
-    KanViz::RendererType backendRendererType = KanViz::RendererType::Metal;
+    KanViz::RendererType backendRendererType = KanViz::RendererType::OpenGL;
     KanViz::ApplicationSpecification appSpec =
     {
       .appName = "KanVerse",
