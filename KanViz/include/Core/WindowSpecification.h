@@ -7,13 +7,16 @@
 
 #pragma once
 
+#include "Renderer/Core/RendererType.hpp"
+
 namespace KanViz
 {
   /// Stores window creation parameters for KanVerse
   struct WindowSpecification
   {
     std::string title {"KanVerse"};         ///< Window title
-    
+    RendererType rendererType;              ///< Renderer type for context
+
     std::uint32_t width {1600};             ///< Width in pixels
     std::uint32_t height {900};             ///< Height in pixels
     std::uint32_t samples {8};              ///< MSAA samples

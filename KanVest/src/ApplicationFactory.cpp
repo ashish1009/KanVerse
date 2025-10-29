@@ -11,12 +11,15 @@ namespace KanVest
 {
   KanViz::Scope<KanViz::Application> CreateApplication(std::span<const char*> args)
   {
+    KanViz::RendererType backendRendererType = KanViz::RendererType::Metal;
     KanViz::ApplicationSpecification appSpec =
     {
       .appName = "KanVerse",
+      .rendererType = backendRendererType,
       .windowSpec =
       {
         .title = "KanVerse",
+        .rendererType = backendRendererType,
         .width = 1600,
         .height = 900,
         .samples = 8,

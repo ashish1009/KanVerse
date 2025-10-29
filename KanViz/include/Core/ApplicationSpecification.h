@@ -15,6 +15,7 @@ namespace KanViz
   struct ApplicationSpecification
   {
     std::string appName {"KanViz"};                       ///< Application name
+    RendererType rendererType {RendererType::Invalid};    ///< Preferred renderer backend
     WindowSpecification windowSpec {};                    ///< Primary window specification
   };
 } // namespace KanViz
