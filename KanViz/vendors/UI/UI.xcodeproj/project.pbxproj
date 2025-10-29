@@ -7,46 +7,34 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B289EA302EB22B1C00937D0B /* imstb_rectpack.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA1A2EB22B1C00937D0B /* imstb_rectpack.h */; };
 		B289EA322EB22B1C00937D0B /* imstb_textedit.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E9F72EB22B1C00937D0B /* imstb_textedit.h */; };
-		B289EA332EB22B1C00937D0B /* stb_image.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA1E2EB22B1C00937D0B /* stb_image.h */; };
 		B289EA342EB22B1C00937D0B /* imgui.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E9EF2EB22B1C00937D0B /* imgui.h */; };
 		B289EA352EB22B1C00937D0B /* imgui_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E9F32EB22B1C00937D0B /* imgui_internal.h */; };
 		B289EA362EB22B1C00937D0B /* imgui_node_editor_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA0D2EB22B1C00937D0B /* imgui_node_editor_internal.h */; };
 		B289EA372EB22B1C00937D0B /* imstb_truetype.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E9F82EB22B1C00937D0B /* imstb_truetype.h */; };
 		B289EA382EB22B1C00937D0B /* imgui_extra_math.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA082EB22B1C00937D0B /* imgui_extra_math.h */; };
-		B289EA392EB22B1C00937D0B /* ImApp.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA122EB22B1C00937D0B /* ImApp.h */; };
-		B289EA3A2EB22B1C00937D0B /* imgui_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA172EB22B1C00937D0B /* imgui_internal.h */; };
 		B289EA3E2EB22B1C00937D0B /* builders.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E9FB2EB22B1C00937D0B /* builders.h */; };
 		B289EA402EB22B1C00937D0B /* ImGradient.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA222EB22B1C00937D0B /* ImGradient.h */; };
-		B289EA412EB22B1C00937D0B /* imgui.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA142EB22B1C00937D0B /* imgui.h */; };
 		B289EA432EB22B1C00937D0B /* imgui_bezier_math.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA042EB22B1C00937D0B /* imgui_bezier_math.h */; };
 		B289EA442EB22B1C00937D0B /* crude_json.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA022EB22B1C00937D0B /* crude_json.h */; };
 		B289EA472EB22B1C00937D0B /* ImSequencer.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA262EB22B1C00937D0B /* ImSequencer.h */; };
 		B289EA4A2EB22B1C00937D0B /* imgui_node_editor.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA0A2EB22B1C00937D0B /* imgui_node_editor.h */; };
 		B289EA4C2EB22B1C00937D0B /* ImCurveEdit.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA202EB22B1C00937D0B /* ImCurveEdit.h */; };
 		B289EA4D2EB22B1C00937D0B /* widgets.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E9FF2EB22B1C00937D0B /* widgets.h */; };
-		B289EA4F2EB22B1C00937D0B /* imstb_truetype.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA1C2EB22B1C00937D0B /* imstb_truetype.h */; };
 		B289EA552EB22B1C00937D0B /* ImGuizmo.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA242EB22B1C00937D0B /* ImGuizmo.h */; };
-		B289EA562EB22B1C00937D0B /* imconfig.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA132EB22B1C00937D0B /* imconfig.h */; };
 		B289EA572EB22B1C00937D0B /* drawing.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E9FD2EB22B1C00937D0B /* drawing.h */; };
 		B289EA582EB22B1C00937D0B /* imstb_rectpack.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E9F62EB22B1C00937D0B /* imstb_rectpack.h */; };
 		B289EA592EB22B1C00937D0B /* ImZoomSlider.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA282EB22B1C00937D0B /* ImZoomSlider.h */; };
 		B289EA5A2EB22B1C00937D0B /* imconfig.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E9EE2EB22B1C00937D0B /* imconfig.h */; };
-		B289EA5C2EB22B1C00937D0B /* imstb_textedit.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA1B2EB22B1C00937D0B /* imstb_textedit.h */; };
 		B289EA652EB22B1C00937D0B /* imgui_canvas.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EA062EB22B1C00937D0B /* imgui_canvas.h */; };
-		B289EA6D2EB22B1C00937D0B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EA1D2EB22B1C00937D0B /* main.cpp */; };
 		B289EA6E2EB22B1C00937D0B /* ImGradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EA232EB22B1C00937D0B /* ImGradient.cpp */; };
 		B289EA712EB22B1C00937D0B /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E9F52EB22B1C00937D0B /* imgui_widgets.cpp */; };
 		B289EA752EB22B1C00937D0B /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E9F22EB22B1C00937D0B /* imgui_draw.cpp */; };
-		B289EA762EB22B1C00937D0B /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EA182EB22B1C00937D0B /* imgui_widgets.cpp */; };
 		B289EA782EB22B1C00937D0B /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E9F02EB22B1C00937D0B /* imgui.cpp */; };
 		B289EA7A2EB22B1C00937D0B /* drawing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E9FE2EB22B1C00937D0B /* drawing.cpp */; };
 		B289EA7D2EB22B1C00937D0B /* ImGuizmo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EA252EB22B1C00937D0B /* ImGuizmo.cpp */; };
-		B289EA802EB22B1C00937D0B /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EA162EB22B1C00937D0B /* imgui_draw.cpp */; };
 		B289EA812EB22B1C00937D0B /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E9F12EB22B1C00937D0B /* imgui_demo.cpp */; };
 		B289EA882EB22B1C00937D0B /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EA272EB22B1C00937D0B /* ImSequencer.cpp */; };
-		B289EA8A2EB22B1C00937D0B /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EA152EB22B1C00937D0B /* imgui.cpp */; };
 		B289EA8D2EB22B1C00937D0B /* imgui_node_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EA0B2EB22B1C00937D0B /* imgui_node_editor.cpp */; };
 		B289EA912EB22B1C00937D0B /* crude_json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EA032EB22B1C00937D0B /* crude_json.cpp */; };
 		B289EA932EB22B1C00937D0B /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EA212EB22B1C00937D0B /* ImCurveEdit.cpp */; };
@@ -89,20 +77,6 @@
 		B289EA0C2EB22B1C00937D0B /* imgui_node_editor_api.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_node_editor_api.cpp; sourceTree = "<group>"; };
 		B289EA0D2EB22B1C00937D0B /* imgui_node_editor_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_node_editor_internal.h; sourceTree = "<group>"; };
 		B289EA0E2EB22B1C00937D0B /* imgui_node_editor_internal.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = imgui_node_editor_internal.inl; sourceTree = "<group>"; };
-		B289EA102EB22B1C00937D0B /* ImGuizmoSample.exe */ = {isa = PBXFileReference; lastKnownFileType = file; path = ImGuizmoSample.exe; sourceTree = "<group>"; };
-		B289EA122EB22B1C00937D0B /* ImApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImApp.h; sourceTree = "<group>"; };
-		B289EA132EB22B1C00937D0B /* imconfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imconfig.h; sourceTree = "<group>"; };
-		B289EA142EB22B1C00937D0B /* imgui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui.h; sourceTree = "<group>"; };
-		B289EA152EB22B1C00937D0B /* imgui.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui.cpp; sourceTree = "<group>"; };
-		B289EA162EB22B1C00937D0B /* imgui_draw.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_draw.cpp; sourceTree = "<group>"; };
-		B289EA172EB22B1C00937D0B /* imgui_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_internal.h; sourceTree = "<group>"; };
-		B289EA182EB22B1C00937D0B /* imgui_widgets.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_widgets.cpp; sourceTree = "<group>"; };
-		B289EA192EB22B1C00937D0B /* ImGuizmoSample.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = ImGuizmoSample.vcxproj; sourceTree = "<group>"; };
-		B289EA1A2EB22B1C00937D0B /* imstb_rectpack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imstb_rectpack.h; sourceTree = "<group>"; };
-		B289EA1B2EB22B1C00937D0B /* imstb_textedit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imstb_textedit.h; sourceTree = "<group>"; };
-		B289EA1C2EB22B1C00937D0B /* imstb_truetype.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imstb_truetype.h; sourceTree = "<group>"; };
-		B289EA1D2EB22B1C00937D0B /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		B289EA1E2EB22B1C00937D0B /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		B289EA202EB22B1C00937D0B /* ImCurveEdit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImCurveEdit.h; sourceTree = "<group>"; };
 		B289EA212EB22B1C00937D0B /* ImCurveEdit.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImCurveEdit.cpp; sourceTree = "<group>"; };
 		B289EA222EB22B1C00937D0B /* ImGradient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImGradient.h; sourceTree = "<group>"; };
@@ -197,39 +171,9 @@
 			path = ImGuiNode;
 			sourceTree = "<group>";
 		};
-		B289EA112EB22B1C00937D0B /* bin */ = {
-			isa = PBXGroup;
-			children = (
-				B289EA102EB22B1C00937D0B /* ImGuizmoSample.exe */,
-			);
-			path = bin;
-			sourceTree = "<group>";
-		};
-		B289EA1F2EB22B1C00937D0B /* example */ = {
-			isa = PBXGroup;
-			children = (
-				B289EA122EB22B1C00937D0B /* ImApp.h */,
-				B289EA132EB22B1C00937D0B /* imconfig.h */,
-				B289EA142EB22B1C00937D0B /* imgui.h */,
-				B289EA152EB22B1C00937D0B /* imgui.cpp */,
-				B289EA162EB22B1C00937D0B /* imgui_draw.cpp */,
-				B289EA172EB22B1C00937D0B /* imgui_internal.h */,
-				B289EA182EB22B1C00937D0B /* imgui_widgets.cpp */,
-				B289EA192EB22B1C00937D0B /* ImGuizmoSample.vcxproj */,
-				B289EA1A2EB22B1C00937D0B /* imstb_rectpack.h */,
-				B289EA1B2EB22B1C00937D0B /* imstb_textedit.h */,
-				B289EA1C2EB22B1C00937D0B /* imstb_truetype.h */,
-				B289EA1D2EB22B1C00937D0B /* main.cpp */,
-				B289EA1E2EB22B1C00937D0B /* stb_image.h */,
-			);
-			path = example;
-			sourceTree = "<group>";
-		};
 		B289EA2B2EB22B1C00937D0B /* ImGuizmo */ = {
 			isa = PBXGroup;
 			children = (
-				B289EA112EB22B1C00937D0B /* bin */,
-				B289EA1F2EB22B1C00937D0B /* example */,
 				B289EA202EB22B1C00937D0B /* ImCurveEdit.h */,
 				B289EA212EB22B1C00937D0B /* ImCurveEdit.cpp */,
 				B289EA222EB22B1C00937D0B /* ImGradient.h */,
@@ -252,33 +196,25 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B289EA302EB22B1C00937D0B /* imstb_rectpack.h in Headers */,
 				B289EA322EB22B1C00937D0B /* imstb_textedit.h in Headers */,
-				B289EA332EB22B1C00937D0B /* stb_image.h in Headers */,
 				B289EA342EB22B1C00937D0B /* imgui.h in Headers */,
 				B289EA352EB22B1C00937D0B /* imgui_internal.h in Headers */,
 				B289EA362EB22B1C00937D0B /* imgui_node_editor_internal.h in Headers */,
 				B289EA372EB22B1C00937D0B /* imstb_truetype.h in Headers */,
 				B289EA382EB22B1C00937D0B /* imgui_extra_math.h in Headers */,
-				B289EA392EB22B1C00937D0B /* ImApp.h in Headers */,
-				B289EA3A2EB22B1C00937D0B /* imgui_internal.h in Headers */,
 				B289EA3E2EB22B1C00937D0B /* builders.h in Headers */,
 				B289EA402EB22B1C00937D0B /* ImGradient.h in Headers */,
-				B289EA412EB22B1C00937D0B /* imgui.h in Headers */,
 				B289EA432EB22B1C00937D0B /* imgui_bezier_math.h in Headers */,
 				B289EA442EB22B1C00937D0B /* crude_json.h in Headers */,
 				B289EA472EB22B1C00937D0B /* ImSequencer.h in Headers */,
 				B289EA4A2EB22B1C00937D0B /* imgui_node_editor.h in Headers */,
 				B289EA4C2EB22B1C00937D0B /* ImCurveEdit.h in Headers */,
 				B289EA4D2EB22B1C00937D0B /* widgets.h in Headers */,
-				B289EA4F2EB22B1C00937D0B /* imstb_truetype.h in Headers */,
 				B289EA552EB22B1C00937D0B /* ImGuizmo.h in Headers */,
-				B289EA562EB22B1C00937D0B /* imconfig.h in Headers */,
 				B289EA572EB22B1C00937D0B /* drawing.h in Headers */,
 				B289EA582EB22B1C00937D0B /* imstb_rectpack.h in Headers */,
 				B289EA592EB22B1C00937D0B /* ImZoomSlider.h in Headers */,
 				B289EA5A2EB22B1C00937D0B /* imconfig.h in Headers */,
-				B289EA5C2EB22B1C00937D0B /* imstb_textedit.h in Headers */,
 				B289EA652EB22B1C00937D0B /* imgui_canvas.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -343,18 +279,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B289EA6D2EB22B1C00937D0B /* main.cpp in Sources */,
 				B289EA6E2EB22B1C00937D0B /* ImGradient.cpp in Sources */,
 				B289EA712EB22B1C00937D0B /* imgui_widgets.cpp in Sources */,
 				B289EA752EB22B1C00937D0B /* imgui_draw.cpp in Sources */,
-				B289EA762EB22B1C00937D0B /* imgui_widgets.cpp in Sources */,
 				B289EA782EB22B1C00937D0B /* imgui.cpp in Sources */,
 				B289EA7A2EB22B1C00937D0B /* drawing.cpp in Sources */,
 				B289EA7D2EB22B1C00937D0B /* ImGuizmo.cpp in Sources */,
-				B289EA802EB22B1C00937D0B /* imgui_draw.cpp in Sources */,
 				B289EA812EB22B1C00937D0B /* imgui_demo.cpp in Sources */,
 				B289EA882EB22B1C00937D0B /* ImSequencer.cpp in Sources */,
-				B289EA8A2EB22B1C00937D0B /* imgui.cpp in Sources */,
 				B289EA8D2EB22B1C00937D0B /* imgui_node_editor.cpp in Sources */,
 				B289EA912EB22B1C00937D0B /* crude_json.cpp in Sources */,
 				B289EA932EB22B1C00937D0B /* ImCurveEdit.cpp in Sources */,
@@ -494,6 +426,7 @@
 				EXECUTABLE_PREFIX = lib;
 				GCC_ENABLE_CPP_EXCEPTIONS = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/ImGui/examples/libs/glfw/lib-vc2010-64",
@@ -512,6 +445,7 @@
 				EXECUTABLE_PREFIX = lib;
 				GCC_ENABLE_CPP_EXCEPTIONS = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/ImGui/examples/libs/glfw/lib-vc2010-64",

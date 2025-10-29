@@ -101,6 +101,9 @@
 		B289EAD82EB22E6200937D0B /* MathUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EAD62EB22E6200937D0B /* MathUtils.cpp */; };
 		B289EAD92EB22E6200937D0B /* StringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EAD72EB22E6200937D0B /* StringUtils.cpp */; };
 		B289EADA2EB22E6200937D0B /* FileSystemUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EAD52EB22E6200937D0B /* FileSystemUtils.cpp */; };
+		B289EDB72EB2314300937D0B /* libUI.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EACB2EB22E3000937D0B /* libUI.a */; };
+		B289EDB82EB2314A00937D0B /* libYAML.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EAF72EB22EBD00937D0B /* libYAML.a */; };
+		B289EDE02EB231ED00937D0B /* libstb_image.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EDDA2EB231BB00937D0B /* libstb_image.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -117,6 +120,27 @@
 			proxyType = 2;
 			remoteGlobalIDString = B289E8462EB1B06400937D0B;
 			remoteInfo = Glad;
+		};
+		B289EACA2EB22E3000937D0B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B289E9092EB22B0A00937D0B /* UI.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B289E8FB2EB22B0900937D0B;
+			remoteInfo = UI;
+		};
+		B289EAF62EB22EBD00937D0B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B289EAF22EB22EBD00937D0B /* YAML.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B289EAE42EB22EBD00937D0B;
+			remoteInfo = YAML;
+		};
+		B289EDD92EB231BB00937D0B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B289EDD52EB231BB00937D0B /* stb_image.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B289EDC72EB231BA00937D0B;
+			remoteInfo = stb_image;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -215,7 +239,6 @@
 		B289E8AA2EB22A1F00937D0B /* OpenGLVertexBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLVertexBuffer.cpp; sourceTree = "<group>"; };
 		B289E8B52EB22A3E00937D0B /* RendererStats.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RendererStats.hpp; sourceTree = "<group>"; };
 		B289E8B62EB22A3E00937D0B /* RendererStats.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererStats.cpp; sourceTree = "<group>"; };
-		B289E8E72EB22AAA00937D0B /* stb_image.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = stb_image.xcodeproj; path = stb_image/stb_image.xcodeproj; sourceTree = "<group>"; };
 		B289E9092EB22B0A00937D0B /* UI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UI.xcodeproj; path = UI/UI.xcodeproj; sourceTree = "<group>"; };
 		B289EABB2EB22C9400937D0B /* RendererCommandQueue.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RendererCommandQueue.hpp; sourceTree = "<group>"; };
 		B289EABC2EB22C9400937D0B /* RendererCommandQueue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererCommandQueue.cpp; sourceTree = "<group>"; };
@@ -227,6 +250,7 @@
 		B289EAD62EB22E6200937D0B /* MathUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MathUtils.cpp; sourceTree = "<group>"; };
 		B289EAD72EB22E6200937D0B /* StringUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StringUtils.cpp; sourceTree = "<group>"; };
 		B289EAF22EB22EBD00937D0B /* YAML.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = YAML.xcodeproj; path = YAML/YAML.xcodeproj; sourceTree = "<group>"; };
+		B289EDD52EB231BB00937D0B /* stb_image.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = stb_image.xcodeproj; path = stb_image/stb_image.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -234,6 +258,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289EDE02EB231ED00937D0B /* libstb_image.a in Frameworks */,
+				B289EDB82EB2314A00937D0B /* libYAML.a in Frameworks */,
+				B289EDB72EB2314300937D0B /* libUI.a in Frameworks */,
 				B289E8642EB1B24F00937D0B /* libGlad.a in Frameworks */,
 				B289E8192EB1AA4E00937D0B /* libGLFW.a in Frameworks */,
 			);
@@ -312,9 +339,9 @@
 		B289E6752EB0E5EC00937D0B /* vendors */ = {
 			isa = PBXGroup;
 			children = (
+				B289EDD52EB231BB00937D0B /* stb_image.xcodeproj */,
 				B289EAF22EB22EBD00937D0B /* YAML.xcodeproj */,
 				B289E9092EB22B0A00937D0B /* UI.xcodeproj */,
-				B289E8E72EB22AAA00937D0B /* stb_image.xcodeproj */,
 				B289E8542EB1B06400937D0B /* Glad.xcodeproj */,
 				B289E7042EB1A9A900937D0B /* GLFW.xcodeproj */,
 			);
@@ -549,16 +576,10 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B289E8E82EB22AAA00937D0B /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		B289E90A2EB22B0A00937D0B /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				B289EACB2EB22E3000937D0B /* libUI.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -587,6 +608,15 @@
 		B289EAF32EB22EBD00937D0B /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				B289EAF72EB22EBD00937D0B /* libYAML.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B289EDD62EB231BB00937D0B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B289EDDA2EB231BB00937D0B /* libstb_image.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -714,8 +744,8 @@
 					ProjectRef = B289E7042EB1A9A900937D0B /* GLFW.xcodeproj */;
 				},
 				{
-					ProductGroup = B289E8E82EB22AAA00937D0B /* Products */;
-					ProjectRef = B289E8E72EB22AAA00937D0B /* stb_image.xcodeproj */;
+					ProductGroup = B289EDD62EB231BB00937D0B /* Products */;
+					ProjectRef = B289EDD52EB231BB00937D0B /* stb_image.xcodeproj */;
 				},
 				{
 					ProductGroup = B289E90A2EB22B0A00937D0B /* Products */;
@@ -746,6 +776,27 @@
 			fileType = archive.ar;
 			path = libGlad.a;
 			remoteRef = B289E8582EB1B06500937D0B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		B289EACB2EB22E3000937D0B /* libUI.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libUI.a;
+			remoteRef = B289EACA2EB22E3000937D0B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		B289EAF72EB22EBD00937D0B /* libYAML.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libYAML.a;
+			remoteRef = B289EAF62EB22EBD00937D0B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		B289EDDA2EB231BB00937D0B /* libstb_image.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libstb_image.a;
+			remoteRef = B289EDD92EB231BB00937D0B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
