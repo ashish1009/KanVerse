@@ -26,6 +26,11 @@
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/noise.hpp>
 
+// UI Vendor files
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <ImGuizmo.h>
+
 // Engine Files
 #include <Base/Configuration.h>
 #include <Base/KanVizCore.hpp>

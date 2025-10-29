@@ -300,6 +300,8 @@
 					"${PROJECT_DIR}/../KanViz/include",
 					"${PROJECT_DIR}/../KanViz/vendors/spd_log/include",
 					"${PROJECT_DIR}/../KanViz/vendors/glm",
+					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGui",
+					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGuizmo",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -319,6 +321,8 @@
 					"${PROJECT_DIR}/../KanViz/include",
 					"${PROJECT_DIR}/../KanViz/vendors/spd_log/include",
 					"${PROJECT_DIR}/../KanViz/vendors/glm",
+					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGui",
+					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGuizmo",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
