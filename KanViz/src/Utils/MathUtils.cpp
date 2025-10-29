@@ -11,7 +11,7 @@ namespace KanViz::Utils::Math
 {
   glm::mat4 GetTransformMatrix(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
   {
-    IK_PERFORMANCE("Math::GetTransformMatrix");
+    IK_PERFORMANCE_FUNC("Math::GetTransformMatrix");
 
     // Convert Euler rotation to quaternion and then to rotation matrix
     glm::mat4 quadRotation {glm::toMat4(glm::quat(rotation))};
@@ -22,7 +22,7 @@ namespace KanViz::Utils::Math
   
   void DecomposeTransform(const glm::mat4& transform, glm::vec3& outTranslation, glm::vec3& outRotation, glm::vec3& outScale)
   {
-    IK_PERFORMANCE("Math::DecomposeTransform");
+    IK_PERFORMANCE_FUNC("Math::DecomposeTransform");
     
     // Adapted from glm::decompose in matrix_decompose.inl
     using namespace glm;

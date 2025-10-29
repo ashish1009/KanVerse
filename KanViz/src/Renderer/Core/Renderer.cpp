@@ -50,6 +50,50 @@ namespace KanViz
     s_rendererData.rendererContext->SwapBuffers();
   }
   
+  void Renderer::Clear(const glm::vec4& color)
+  {
+    s_rendererData.rendererAPI->SetClearColor(color);
+    s_rendererData.rendererAPI->ClearBits();
+  }
+  void Renderer::ClearColor(const glm::vec4& color)
+  {
+    s_rendererData.rendererAPI->SetClearColor(color);
+  }
+  void Renderer::ClearBits()
+  {
+    s_rendererData.rendererAPI->ClearBits();
+  }
+  void Renderer::ClearColorBits()
+  {
+    s_rendererData.rendererAPI->ClearColorBits();
+  }
+  void Renderer::ClearDepthBits()
+  {
+    s_rendererData.rendererAPI->ClearDepthBits();
+  }
+  void Renderer::ClearStencilBits()
+  {
+    s_rendererData.rendererAPI->ClearStencilBits();
+  }
+  
+  void Renderer::SetViewport(uint32_t width, uint32_t height)
+  {
+    s_rendererData.rendererAPI->SetViewport(width, height);
+  }
+  
+  void Renderer::EnableStencilPass()
+  {
+    s_rendererData.rendererAPI->EnableStencilPass();
+  }
+  void Renderer::DisableStencilPass()
+  {
+    s_rendererData.rendererAPI->DisableStencilPass();
+  }
+  void Renderer::DepthFunc(GlDepthFunc func)
+  {
+    s_rendererData.rendererAPI->DepthFunc(func);
+  }
+
   // Fundamentals -------------------------------------------------------------------------------
   RendererType Renderer::GetCurrentRendererAPI()
   {

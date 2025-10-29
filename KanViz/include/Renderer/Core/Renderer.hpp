@@ -17,6 +17,12 @@ namespace KanViz
   /// Data type of Renderer IDs
   using RendererID = uint32_t;
   
+  /// This enum stores the supported Depth functions
+  enum class GlDepthFunc
+  {
+    Always, Never, Less, Equal, LEqual, Greater, LGreater, NotEqual
+  };
+  
   /// This is the static wrapper class to manage the Renderer APIs that deals with Graphics APIs directly
   /// - Note: Set the renderer API before using any other API related to rendering or window creation (Context)
   class Renderer
@@ -34,6 +40,36 @@ namespace KanViz
     /// This function updates the renderer each frame
     static void OnUpdate();
         
+    /// This function clears the color graphics and clears all the bits
+    /// - Parameter color: new color
+    static void Clear(const glm::vec4& color);
+    /// This function updates the graphics color
+    /// - Parameter color: new color
+    static void ClearColor(const glm::vec4& color);
+    /// This function clears all the bits in GPU
+    static void ClearBits();
+    /// This function clears the depth bits in GPU
+    static void ClearDepthBits();
+    /// This function clears the color bits in GPU
+    static void ClearColorBits();
+    /// This function clears the stencil bits in GPU
+    static void ClearStencilBits();
+    
+    /// This function update the renderer viewport size
+    /// - Parameters:
+    ///   - width: new width of renderer viewport
+    ///   - height: new height of renderer viewport
+    static void SetViewport(uint32_t width, uint32_t height);
+    
+    /// This function enables the stencil pass
+    static void EnableStencilPass();
+    /// This function disables the stencil pass
+    static void DisableStencilPass();
+    
+    /// This function change depth function
+    /// - Parameter func: depth function type
+    static void DepthFunc(GlDepthFunc func);
+
     // Renderer API functions ---------------------------------------------------------------------
     /// This function returns the current renderer API type
     static RendererType GetCurrentRendererAPI();

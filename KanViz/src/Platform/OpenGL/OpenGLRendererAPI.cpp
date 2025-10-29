@@ -11,6 +11,28 @@
 
 namespace KanViz
 {
+  namespace RendererUtils
+  {
+    /// Convert Renderer GL Func to Open GL Func
+    /// - Parameter func: Renderer Func enum
+    static GLint FucToGlFunc(GlDepthFunc func)
+    {
+      switch (func)
+      {
+        case GlDepthFunc::Always : return GL_ALWAYS;
+        case GlDepthFunc::Never : return GL_NEVER;
+        case GlDepthFunc::Less : return GL_LESS;
+        case GlDepthFunc::Equal : return GL_EQUAL;
+        case GlDepthFunc::LEqual : return GL_LEQUAL;
+        case GlDepthFunc::Greater : return GL_GREATER;
+        case GlDepthFunc::LGreater : return GL_GEQUAL;
+        case GlDepthFunc::NotEqual : return GL_NOTEQUAL;
+        default:
+          IK_ASSERT(false, "Invalid Type");
+      }
+    }
+  }
+
   static std::string_view GetGLErrorString(GLenum error)
   {
     switch (error)
@@ -58,5 +80,80 @@ namespace KanViz
       IK_ASSERT(false, "Open GL Error");`
 #endif
     }
+  }
+  
+  void OpenGLRendererAPI::SetClearColor(const glm::vec4& color) const
+  {
+    Renderer::Submit([color]() {
+      glClearColor(color.r, color.g, color.b, color.a);
+      IK_CHECK_RENDERER_ERROR()
+    });
+  }
+  
+  void OpenGLRendererAPI::ClearBits() const
+  {
+    Renderer::Submit([]() {
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+      IK_CHECK_RENDERER_ERROR()
+    });
+  }
+  
+  void OpenGLRendererAPI::ClearColorBits() const
+  {
+    Renderer::Submit([]() {
+      glClear(GL_COLOR_BUFFER_BIT);
+      IK_CHECK_RENDERER_ERROR()
+    });
+  }
+  
+  void OpenGLRendererAPI::ClearDepthBits() const
+  {
+    Renderer::Submit([]() {
+      glClear(GL_DEPTH_BUFFER_BIT);
+      IK_CHECK_RENDERER_ERROR()
+    });
+  }
+  
+  void OpenGLRendererAPI::ClearStencilBits() const
+  {
+    Renderer::Submit([]() {
+      glClear(GL_STENCIL_BUFFER_BIT);
+      IK_CHECK_RENDERER_ERROR()
+    });
+  }
+  
+  void OpenGLRendererAPI::SetViewport(uint32_t width, uint32_t height) const
+  {
+    Renderer::Submit([width, height](){
+      glViewport(0, 0, (GLsizei)width, (GLsizei)height);
+      IK_CHECK_RENDERER_ERROR()
+    });
+  }
+  
+  void OpenGLRendererAPI::EnableStencilPass() const
+  {
+    Renderer::Submit([](){
+      glEnable(GL_STENCIL_TEST);
+      glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+      glStencilMask(0x00);
+      glDisable(GL_DEPTH_TEST);
+      IK_CHECK_RENDERER_ERROR()
+    });
+  }
+  void OpenGLRendererAPI::DisableStencilPass() const
+  {
+    Renderer::Submit([](){
+      glStencilMask(0xFF);
+      glStencilFunc(GL_ALWAYS, 0, 0xFF);
+      glEnable(GL_DEPTH_TEST);
+      IK_CHECK_RENDERER_ERROR()
+    });
+  }
+  void OpenGLRendererAPI::DepthFunc(GlDepthFunc func) const
+  {
+    Renderer::Submit([func](){
+      glDepthFunc(RendererUtils::FucToGlFunc(func));
+      IK_CHECK_RENDERER_ERROR()
+    });
   }
 } // namespace KanViz
