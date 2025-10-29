@@ -11,6 +11,7 @@
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
 		B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EDE82EB2341100937D0B /* KanVestApp.cpp */; };
+		B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EDEB2EB234D400937D0B /* RendererLayer.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,6 +37,8 @@
 		B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ApplicationFactory.cpp; sourceTree = "<group>"; };
 		B289EDE72EB2341100937D0B /* KanVestApp.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KanVestApp.hpp; sourceTree = "<group>"; };
 		B289EDE82EB2341100937D0B /* KanVestApp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = KanVestApp.cpp; sourceTree = "<group>"; };
+		B289EDEA2EB234D400937D0B /* RendererLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RendererLayer.hpp; sourceTree = "<group>"; };
+		B289EDEB2EB234D400937D0B /* RendererLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererLayer.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +79,7 @@
 			children = (
 				B289E6CC2EB1A3C600937D0B /* ApplicationFactory.hpp */,
 				B289EDE72EB2341100937D0B /* KanVestApp.hpp */,
+				B289EDEA2EB234D400937D0B /* RendererLayer.hpp */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -85,6 +89,7 @@
 			children = (
 				B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */,
 				B289EDE82EB2341100937D0B /* KanVestApp.cpp */,
+				B289EDEB2EB234D400937D0B /* RendererLayer.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -168,6 +173,7 @@
 			files = (
 				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
+				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

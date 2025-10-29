@@ -15,11 +15,11 @@ namespace KanVest
     KanViz::RendererType backendRendererType = KanViz::RendererType::OpenGL;
     KanViz::ApplicationSpecification appSpec =
     {
-      .appName = "KanVerse",
+      .appName = "KanVest",
       .rendererType = backendRendererType,
       .windowSpec =
       {
-        .title = "KanVerse",
+        .title = "KanVest",
         .rendererType = backendRendererType,
         .width = 1600,
         .height = 900,

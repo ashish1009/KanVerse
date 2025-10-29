@@ -6,6 +6,7 @@
 //
 
 #include "KanVestApp.hpp"
+#include "RendererLayer.hpp"
 
 namespace KanVest
 {
@@ -25,11 +26,22 @@ namespace KanVest
   void Application::OnInit()
   {
     IK_PROFILE();
+    
+    // Creating a renderer layer and pushing it onto the application stack.
+    m_layer = KanViz::CreateScope<RendererLayer>();
+    PushLayer(std::move(m_layer));
   }
   
   void Application::OnShutdown()
   {
     IK_PROFILE();
+    
+    if (m_layer)
+    {
+      // Removing the renderer layer from the application stack and destroying its instance
+      PopLayer(m_layer);
+      m_layer.reset();
+    }
   }
   
   void Application::OnUpdate([[maybe_unused]] const KanViz::TimeStep& ts)

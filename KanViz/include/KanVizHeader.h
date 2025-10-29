@@ -53,6 +53,7 @@
 #include <Debug/Profiler/Profiler.hpp>
 #include <Debug/Profiler/ScopedProfiler.hpp>
 #include <Debug/Profiler/PerformanceProfiler.hpp>
+#include <Debug/Profiler/ScopedPerformanceProfiler.hpp>
 
 #include <Core/Application.hpp>
 #include <Core/ApplicationFactory.hpp>
