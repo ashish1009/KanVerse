@@ -125,6 +125,7 @@
 		B289E8362EB1B04100937D0B /* OpenGLRendererContext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLRendererContext.cpp; sourceTree = "<group>"; };
 		B289E8392EB1B04B00937D0B /* OpenGLRendererAPI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OpenGLRendererAPI.hpp; sourceTree = "<group>"; };
 		B289E83A2EB1B04B00937D0B /* OpenGLRendererAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLRendererAPI.cpp; sourceTree = "<group>"; };
+		B289E8542EB1B06400937D0B /* Glad.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Glad.xcodeproj; path = Glad/Glad.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,6 +205,7 @@
 		B289E6752EB0E5EC00937D0B /* vendors */ = {
 			isa = PBXGroup;
 			children = (
+				B289E8542EB1B06400937D0B /* Glad.xcodeproj */,
 				B289E7042EB1A9A900937D0B /* GLFW.xcodeproj */,
 			);
 			path = vendors;
@@ -394,6 +396,13 @@
 			path = OpenGL;
 			sourceTree = "<group>";
 		};
+		B289E8552EB1B06400937D0B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -480,6 +489,10 @@
 			productRefGroup = B289E63E2EB0E13B00937D0B /* Products */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = B289E8552EB1B06400937D0B /* Products */;
+					ProjectRef = B289E8542EB1B06400937D0B /* Glad.xcodeproj */;
+				},
 				{
 					ProductGroup = B289E7052EB1A9A900937D0B /* Products */;
 					ProjectRef = B289E7042EB1A9A900937D0B /* GLFW.xcodeproj */;
@@ -668,6 +681,7 @@
 					"${PROJECT_DIR}/vendors/spd_log/include",
 					"${PROJECT_DIR}/vendors/glm",
 					"${PROJECT_DIR}/vendors/GLFW/GLFW/include",
+					"${PROJECT_DIR}/vendors/Glad/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -692,6 +706,7 @@
 					"${PROJECT_DIR}/vendors/spd_log/include",
 					"${PROJECT_DIR}/vendors/glm",
 					"${PROJECT_DIR}/vendors/GLFW/GLFW/include",
+					"${PROJECT_DIR}/vendors/Glad/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

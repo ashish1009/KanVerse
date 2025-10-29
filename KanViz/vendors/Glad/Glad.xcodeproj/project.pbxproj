@@ -7,169 +7,159 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
-		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
-		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
+		B289E8612EB1B08200937D0B /* khrplatform.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E85C2EB1B08200937D0B /* khrplatform.h */; };
+		B289E8622EB1B08200937D0B /* glad.h in Headers */ = {isa = PBXBuildFile; fileRef = B289E85A2EB1B08200937D0B /* glad.h */; };
+		B289E8632EB1B08200937D0B /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = B289E85F2EB1B08200937D0B /* glad.c */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		B289E6202EB0E01600937D0B /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
-		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
-		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
-		B289E66E2EB0E50400937D0B /* libKanViz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libKanViz.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		B289E6942EB1128900937D0B /* KanVest.log */ = {isa = PBXFileReference; lastKnownFileType = text; path = KanVest.log; sourceTree = "<group>"; };
-		B289E6AE2EB1166200937D0B /* KanVest.profiler */ = {isa = PBXFileReference; lastKnownFileType = text; path = KanVest.profiler; sourceTree = "<group>"; };
-		B289E6CC2EB1A3C600937D0B /* ApplicationFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ApplicationFactory.hpp; sourceTree = "<group>"; };
-		B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ApplicationFactory.cpp; sourceTree = "<group>"; };
+		B289E8462EB1B06400937D0B /* libGlad.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libGlad.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B289E85A2EB1B08200937D0B /* glad.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glad.h; sourceTree = "<group>"; };
+		B289E85C2EB1B08200937D0B /* khrplatform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = khrplatform.h; sourceTree = "<group>"; };
+		B289E85F2EB1B08200937D0B /* glad.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = glad.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		B289E61F2EB0E01600937D0B /* Frameworks */ = {
+		B289E8442EB1B06400937D0B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B289E6192EB0E01600937D0B = {
+		B289E83D2EB1B06400937D0B = {
 			isa = PBXGroup;
 			children = (
-				B289E6952EB1128900937D0B /* Log */,
-				B289E6312EB0E05C00937D0B /* PrefixHeader.pch */,
-				B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */,
-				B289E6322EB0E11400937D0B /* include */,
-				B289E6332EB0E11900937D0B /* src */,
-				B289E66D2EB0E50400937D0B /* Frameworks */,
-				B289E6232EB0E01600937D0B /* Products */,
+				B289E85E2EB1B08200937D0B /* include */,
+				B289E8602EB1B08200937D0B /* src */,
+				B289E8472EB1B06400937D0B /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		B289E6232EB0E01600937D0B /* Products */ = {
+		B289E8472EB1B06400937D0B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B289E6222EB0E01600937D0B /* KanVest */,
+				B289E8462EB1B06400937D0B /* libGlad.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B289E6322EB0E11400937D0B /* include */ = {
+		B289E85B2EB1B08200937D0B /* glad */ = {
 			isa = PBXGroup;
 			children = (
-				B289E6CC2EB1A3C600937D0B /* ApplicationFactory.hpp */,
+				B289E85A2EB1B08200937D0B /* glad.h */,
+			);
+			path = glad;
+			sourceTree = "<group>";
+		};
+		B289E85D2EB1B08200937D0B /* KHR */ = {
+			isa = PBXGroup;
+			children = (
+				B289E85C2EB1B08200937D0B /* khrplatform.h */,
+			);
+			path = KHR;
+			sourceTree = "<group>";
+		};
+		B289E85E2EB1B08200937D0B /* include */ = {
+			isa = PBXGroup;
+			children = (
+				B289E85B2EB1B08200937D0B /* glad */,
+				B289E85D2EB1B08200937D0B /* KHR */,
 			);
 			path = include;
 			sourceTree = "<group>";
 		};
-		B289E6332EB0E11900937D0B /* src */ = {
+		B289E8602EB1B08200937D0B /* src */ = {
 			isa = PBXGroup;
 			children = (
-				B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */,
+				B289E85F2EB1B08200937D0B /* glad.c */,
 			);
 			path = src;
 			sourceTree = "<group>";
 		};
-		B289E66D2EB0E50400937D0B /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				B289E66E2EB0E50400937D0B /* libKanViz.a */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		B289E6952EB1128900937D0B /* Log */ = {
-			isa = PBXGroup;
-			children = (
-				B289E6942EB1128900937D0B /* KanVest.log */,
-				B289E6AE2EB1166200937D0B /* KanVest.profiler */,
-			);
-			path = Log;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		B289E8422EB1B06400937D0B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B289E8612EB1B08200937D0B /* khrplatform.h in Headers */,
+				B289E8622EB1B08200937D0B /* glad.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
-		B289E6212EB0E01600937D0B /* KanVest */ = {
+		B289E8452EB1B06400937D0B /* Glad */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B289E6292EB0E01600937D0B /* Build configuration list for PBXNativeTarget "KanVest" */;
+			buildConfigurationList = B289E8512EB1B06400937D0B /* Build configuration list for PBXNativeTarget "Glad" */;
 			buildPhases = (
-				B289E61E2EB0E01600937D0B /* Sources */,
-				B289E61F2EB0E01600937D0B /* Frameworks */,
-				B289E6202EB0E01600937D0B /* CopyFiles */,
+				B289E8422EB1B06400937D0B /* Headers */,
+				B289E8432EB1B06400937D0B /* Sources */,
+				B289E8442EB1B06400937D0B /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = KanVest;
+			name = Glad;
 			packageProductDependencies = (
 			);
-			productName = KanVest;
-			productReference = B289E6222EB0E01600937D0B /* KanVest */;
-			productType = "com.apple.product-type.tool";
+			productName = Glad;
+			productReference = B289E8462EB1B06400937D0B /* libGlad.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		B289E61A2EB0E01600937D0B /* Project object */ = {
+		B289E83E2EB1B06400937D0B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
-					B289E6212EB0E01600937D0B = {
+					B289E8452EB1B06400937D0B = {
 						CreatedOnToolsVersion = 16.4;
 					};
 				};
 			};
-			buildConfigurationList = B289E61D2EB0E01600937D0B /* Build configuration list for PBXProject "KanVest" */;
+			buildConfigurationList = B289E8412EB1B06400937D0B /* Build configuration list for PBXProject "Glad" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = B289E6192EB0E01600937D0B;
+			mainGroup = B289E83D2EB1B06400937D0B;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = B289E6232EB0E01600937D0B /* Products */;
+			productRefGroup = B289E8472EB1B06400937D0B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B289E6212EB0E01600937D0B /* KanVest */,
+				B289E8452EB1B06400937D0B /* Glad */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		B289E61E2EB0E01600937D0B /* Sources */ = {
+		B289E8432EB1B06400937D0B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
-				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
+				B289E8632EB1B08200937D0B /* glad.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		B289E6272EB0E01600937D0B /* Debug */ = {
+		B289E84F2EB1B06400937D0B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -231,7 +221,7 @@
 			};
 			name = Debug;
 		};
-		B289E6282EB0E01600937D0B /* Release */ = {
+		B289E8502EB1B06400937D0B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -286,66 +276,56 @@
 			};
 			name = Release;
 		};
-		B289E62A2EB0E01600937D0B /* Debug */ = {
+		B289E8522EB1B06400937D0B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++23";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 78KTXZ99TW;
-				ENABLE_HARDENED_RUNTIME = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu23;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
-				HEADER_SEARCH_PATHS = (
-					"${PROJECT_DIR}/../KanViz/include",
-					"${PROJECT_DIR}/../KanViz/vendors/spd_log/include",
-					"${PROJECT_DIR}/../KanViz/vendors/glm",
-				);
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/include";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 			};
 			name = Debug;
 		};
-		B289E62B2EB0E01600937D0B /* Release */ = {
+		B289E8532EB1B06400937D0B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++23";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 78KTXZ99TW;
-				ENABLE_HARDENED_RUNTIME = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu23;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
-				HEADER_SEARCH_PATHS = (
-					"${PROJECT_DIR}/../KanViz/include",
-					"${PROJECT_DIR}/../KanViz/vendors/spd_log/include",
-					"${PROJECT_DIR}/../KanViz/vendors/glm",
-				);
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/include";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B289E61D2EB0E01600937D0B /* Build configuration list for PBXProject "KanVest" */ = {
+		B289E8412EB1B06400937D0B /* Build configuration list for PBXProject "Glad" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B289E6272EB0E01600937D0B /* Debug */,
-				B289E6282EB0E01600937D0B /* Release */,
+				B289E84F2EB1B06400937D0B /* Debug */,
+				B289E8502EB1B06400937D0B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B289E6292EB0E01600937D0B /* Build configuration list for PBXNativeTarget "KanVest" */ = {
+		B289E8512EB1B06400937D0B /* Build configuration list for PBXNativeTarget "Glad" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B289E62A2EB0E01600937D0B /* Debug */,
-				B289E62B2EB0E01600937D0B /* Release */,
+				B289E8522EB1B06400937D0B /* Debug */,
+				B289E8532EB1B06400937D0B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = B289E61A2EB0E01600937D0B /* Project object */;
+	rootObject = B289E83E2EB1B06400937D0B /* Project object */;
 }
