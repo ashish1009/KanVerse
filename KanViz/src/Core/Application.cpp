@@ -35,6 +35,9 @@ namespace KanViz
         // Set the renderer type before any renderer creation.
         Renderer::Initialize(m_specification.rendererType, m_window->GetNativeWindow());
 
+        // Execute all commands from queue
+        Renderer::WaitAndRender();
+
         m_isRunning = true;
       } // if window
       else
@@ -109,6 +112,13 @@ namespace KanViz
 
       // Render ImGui at last
       RenderImGuiLayers();
+      
+      {
+        IK_PERFORMANCE_FUNC("Application::WaitAndRender");
+        
+        // Execute all commands from queue before game loop
+        Renderer::WaitAndRender();
+      }
     }
 
     IK_LOG_WARN("", "--------------------------------------------------------------------------");
@@ -193,6 +203,9 @@ namespace KanViz
     
     // Initialize the client side application
     OnInit();
+
+    // Execute all commands from queue before game loop
+    Renderer::WaitAndRender();
   }
   
   void Application::FlushAfterGameLoop()
@@ -201,5 +214,8 @@ namespace KanViz
     
     // Shutdown the client side application
     OnShutdown();
+
+    // Execute all commands from queue after game loop
+    Renderer::WaitAndRender();
   }
 } // namespace KanViz

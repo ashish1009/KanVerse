@@ -95,6 +95,13 @@
 		B289E8B82EB22A3E00937D0B /* RendererStats.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289E8B52EB22A3E00937D0B /* RendererStats.hpp */; };
 		B289EABD2EB22C9400937D0B /* RendererCommandQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EABC2EB22C9400937D0B /* RendererCommandQueue.cpp */; };
 		B289EABE2EB22C9400937D0B /* RendererCommandQueue.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289EABB2EB22C9400937D0B /* RendererCommandQueue.hpp */; };
+		B289EAD12EB22E4F00937D0B /* MathUtils.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289EACE2EB22E4F00937D0B /* MathUtils.hpp */; };
+		B289EAD22EB22E4F00937D0B /* FileSystemUtils.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289EACD2EB22E4F00937D0B /* FileSystemUtils.hpp */; };
+		B289EAD32EB22E4F00937D0B /* StringUtils.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289EACF2EB22E4F00937D0B /* StringUtils.hpp */; };
+		B289EAD42EB22E4F00937D0B /* YAMLUtils.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289EAD02EB22E4F00937D0B /* YAMLUtils.hpp */; };
+		B289EAD82EB22E6200937D0B /* MathUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EAD62EB22E6200937D0B /* MathUtils.cpp */; };
+		B289EAD92EB22E6200937D0B /* StringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EAD72EB22E6200937D0B /* StringUtils.cpp */; };
+		B289EADA2EB22E6200937D0B /* FileSystemUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EAD52EB22E6200937D0B /* FileSystemUtils.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -214,6 +221,14 @@
 		B289E9092EB22B0A00937D0B /* UI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UI.xcodeproj; path = UI/UI.xcodeproj; sourceTree = "<group>"; };
 		B289EABB2EB22C9400937D0B /* RendererCommandQueue.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RendererCommandQueue.hpp; sourceTree = "<group>"; };
 		B289EABC2EB22C9400937D0B /* RendererCommandQueue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererCommandQueue.cpp; sourceTree = "<group>"; };
+		B289EACD2EB22E4F00937D0B /* FileSystemUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FileSystemUtils.hpp; sourceTree = "<group>"; };
+		B289EACE2EB22E4F00937D0B /* MathUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MathUtils.hpp; sourceTree = "<group>"; };
+		B289EACF2EB22E4F00937D0B /* StringUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StringUtils.hpp; sourceTree = "<group>"; };
+		B289EAD02EB22E4F00937D0B /* YAMLUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YAMLUtils.hpp; sourceTree = "<group>"; };
+		B289EAD52EB22E6200937D0B /* FileSystemUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FileSystemUtils.cpp; sourceTree = "<group>"; };
+		B289EAD62EB22E6200937D0B /* MathUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MathUtils.cpp; sourceTree = "<group>"; };
+		B289EAD72EB22E6200937D0B /* StringUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StringUtils.cpp; sourceTree = "<group>"; };
+		B289EAF22EB22EBD00937D0B /* YAML.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = YAML.xcodeproj; path = YAML/YAML.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -253,6 +268,7 @@
 			isa = PBXGroup;
 			children = (
 				B289E66C2EB0E44900937D0B /* KanVizHeader.h */,
+				B289EAC32EB22E3000937D0B /* Utils */,
 				B289E6662EB0E41300937D0B /* Base */,
 				B289E6762EB0E66600937D0B /* Debug */,
 				B289E6AF2EB1219C00937D0B /* Core */,
@@ -264,6 +280,7 @@
 		B289E64D2EB0E18400937D0B /* src */ = {
 			isa = PBXGroup;
 			children = (
+				B289EACC2EB22E3400937D0B /* Utils */,
 				B289E6672EB0E42400937D0B /* Base */,
 				B289E6772EB0E66A00937D0B /* Debug */,
 				B289E6B02EB121A900937D0B /* Core */,
@@ -297,6 +314,7 @@
 		B289E6752EB0E5EC00937D0B /* vendors */ = {
 			isa = PBXGroup;
 			children = (
+				B289EAF22EB22EBD00937D0B /* YAML.xcodeproj */,
 				B289E9092EB22B0A00937D0B /* UI.xcodeproj */,
 				B289E8E72EB22AAA00937D0B /* stb_image.xcodeproj */,
 				B289E8542EB1B06400937D0B /* Glad.xcodeproj */,
@@ -548,6 +566,34 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		B289EAC32EB22E3000937D0B /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				B289EACD2EB22E4F00937D0B /* FileSystemUtils.hpp */,
+				B289EACE2EB22E4F00937D0B /* MathUtils.hpp */,
+				B289EACF2EB22E4F00937D0B /* StringUtils.hpp */,
+				B289EAD02EB22E4F00937D0B /* YAMLUtils.hpp */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		B289EACC2EB22E3400937D0B /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				B289EAD52EB22E6200937D0B /* FileSystemUtils.cpp */,
+				B289EAD62EB22E6200937D0B /* MathUtils.cpp */,
+				B289EAD72EB22E6200937D0B /* StringUtils.cpp */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		B289EAF32EB22EBD00937D0B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -575,6 +621,10 @@
 				B289E8AC2EB22A1F00937D0B /* OpenGLTexture.hpp in Headers */,
 				B289E8AD2EB22A1F00937D0B /* OpenGLSpecification.hpp in Headers */,
 				B289E8AE2EB22A1F00937D0B /* OpenGLVertexBuffer.hpp in Headers */,
+				B289EAD12EB22E4F00937D0B /* MathUtils.hpp in Headers */,
+				B289EAD22EB22E4F00937D0B /* FileSystemUtils.hpp in Headers */,
+				B289EAD32EB22E4F00937D0B /* StringUtils.hpp in Headers */,
+				B289EAD42EB22E4F00937D0B /* YAMLUtils.hpp in Headers */,
 				B289E8AF2EB22A1F00937D0B /* OpenGLShaderUniforms.hpp in Headers */,
 				B289EABE2EB22C9400937D0B /* RendererCommandQueue.hpp in Headers */,
 				B289E8742EB2284400937D0B /* BufferLayout.hpp in Headers */,
@@ -675,6 +725,10 @@
 					ProductGroup = B289E90A2EB22B0A00937D0B /* Products */;
 					ProjectRef = B289E9092EB22B0A00937D0B /* UI.xcodeproj */;
 				},
+				{
+					ProductGroup = B289EAF32EB22EBD00937D0B /* Products */;
+					ProjectRef = B289EAF22EB22EBD00937D0B /* YAML.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -723,6 +777,9 @@
 				B289E8212EB1AB3800937D0B /* RendererType.cpp in Sources */,
 				B289E6A12EB113C300937D0B /* Profiler.cpp in Sources */,
 				B289E8242EB1AEA100937D0B /* Renderer.cpp in Sources */,
+				B289EAD82EB22E6200937D0B /* MathUtils.cpp in Sources */,
+				B289EAD92EB22E6200937D0B /* StringUtils.cpp in Sources */,
+				B289EADA2EB22E6200937D0B /* FileSystemUtils.cpp in Sources */,
 				B289E67B2EB1097100937D0B /* Logger.cpp in Sources */,
 				B289E6A92EB114AF00937D0B /* PerformanceProfiler.cpp in Sources */,
 				B289E69D2EB1138E00937D0B /* Timer.cpp in Sources */,
@@ -885,6 +942,7 @@
 					"${PROJECT_DIR}/vendors/UI/ImGui",
 					"${PROJECT_DIR}/vendors/UI/ImGuizmo",
 					"${PROJECT_DIR}/vendors/Freetype/include",
+					"${PROJECT_DIR}/vendors/YAML/YAML/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -914,6 +972,7 @@
 					"${PROJECT_DIR}/vendors/UI/ImGui",
 					"${PROJECT_DIR}/vendors/UI/ImGuizmo",
 					"${PROJECT_DIR}/vendors/Freetype/include",
+					"${PROJECT_DIR}/vendors/YAML/YAML/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

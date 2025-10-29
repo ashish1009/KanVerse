@@ -302,6 +302,7 @@
 					"${PROJECT_DIR}/../KanViz/vendors/glm",
 					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGui",
 					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGuizmo",
+					"${PROJECT_DIR}/../KanViz/vendors/YAML/YAML/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -323,6 +324,7 @@
 					"${PROJECT_DIR}/../KanViz/vendors/glm",
 					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGui",
 					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGuizmo",
+					"${PROJECT_DIR}/../KanViz/vendors/YAML/YAML/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

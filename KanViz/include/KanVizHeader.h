@@ -39,6 +39,11 @@
 #include <Base/DesignHelper.h>
 #include <Base/Buffer.hpp>
 
+#include <Utils/StringUtils.hpp>
+#include <Utils/FileSystemUtils.hpp>
+#include <Utils/MathUtils.hpp>
+#include <Utils/YAMLUtils.hpp>
+
 #include <Debug/Logger.hpp>
 #include <Debug/LoggerAPI.h>
 #include <Debug/LoggerSpecificationBuilder.hpp>
@@ -59,3 +64,16 @@
 #include <Core/Event/KeyboardEvents.h>
 
 #include <Renderer/Core/RendererType.hpp>
+#include <Renderer/Core/Renderer.hpp>
+#include <Renderer/Core/RendererCommandQueue.hpp>
+#include <Renderer/Core/RendererStats.hpp>
+
+#include <Renderer/Graphics/Specifications.h>
+#include <Renderer/Graphics/Factories.hpp>
+#include <Renderer/Graphics/VertexBuffer.hpp>
+#include <Renderer/Graphics/IndexBuffer.hpp>
+#include <Renderer/Graphics/Shader.hpp>
+#include <Renderer/Graphics/ShaderLibrary.hpp>
+#include <Renderer/Graphics/Texture.hpp>
+#include <Renderer/Graphics/Pipeline.hpp>
+#include <Renderer/Graphics/FrameBuffer.hpp>
