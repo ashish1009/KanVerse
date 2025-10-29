@@ -14,7 +14,7 @@ namespace KanViz
   /// This enum stores the module names of KanViz Logs (Holds only KanViz engine log module names)
 #define LogModule(f) \
 f(None) \
-f(Application) f(Window) \
+f(Application) f(Window) f(Layers) \
 f(Renderer) \
 
   /// Generates enum with elements from above MACRO. Also creates an array named "LogModuleString[]" that stores all
