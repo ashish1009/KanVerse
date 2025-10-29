@@ -22,7 +22,7 @@ namespace KanViz
     Color, Depth
   };
   
-  /// This enum stores the texture type supported by IKan
+  /// This enum stores the texture type supported by KanViz
   enum class TextureType : uint8_t
   {
     Texture2D, TextureCubemap

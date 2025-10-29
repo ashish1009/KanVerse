@@ -10,8 +10,6 @@
 #include "Renderer/Core/Renderer.hpp"
 #include "Renderer/Graphics/Factories.hpp"
 
-#include "Asset/Asset.hpp"
-
 namespace KanViz
 {
   /// This is the interface class for storing graphics texture
@@ -42,7 +40,7 @@ namespace KanViz
   };
   
   /// This class is the interface to create Image
-  class Image : public Texture, public Asset
+  class Image : public Texture
   {
   public:
     /// This is default virtual destructor for Texture
@@ -52,8 +50,6 @@ namespace KanViz
     virtual const std::filesystem::path& GetfilePath() const = 0;
     /// This function returns name of texture
     virtual const std::string& GetName() const = 0;
-    
-    ASSET_TYPE(Image);
   };
 
   /// This class is the interface for creating texture for character text
