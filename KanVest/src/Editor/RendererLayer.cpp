@@ -352,11 +352,11 @@ namespace KanVest
     IK_PERFORMANCE_FUNC("RendererLayer::UI_DrawTitlebar");
     
     static constexpr float titleBarHeight = 45.0f;
-//    const ImVec2 windowPadding = ImGui::GetCurrentWindow()->WindowPadding;
-//    
-//    // Drag and Control the window with user title bar ----------------------------------
-//    UI_TitlebarDragArea(titleBarHeight);
-//    
+    const ImVec2 windowPadding = ImGui::GetCurrentWindow()->WindowPadding;
+    
+    // Drag and Control the window with user title bar ----------------------------------
+    UI_TitlebarDragArea(titleBarHeight);
+    
 //    // Title bar rectangle --------------------------------------------------------------
 //    UI::SetCursorPos(windowPadding);
 //    UI::DrawRect(IM_COL32(0, 0, 0, 0), titleBarHeight);
@@ -434,56 +434,56 @@ namespace KanVest
   
   void RendererLayer::UI_TitlebarDragArea(float titlebarHeight)
   {
-//    static float moveOffsetX;
-//    static float moveOffsetY;
-//    
-//    auto* rootWindow = ImGui::GetCurrentWindow()->RootWindow;
-//    const float windowWidth = (int32_t)rootWindow->RootWindow->Size.x;
-//    
-//    if (ImGui::InvisibleButton("##titleBarDragZone", ImVec2(ImGui::GetContentRegionAvail().x, titlebarHeight * 2), ImGuiButtonFlags_PressedOnClick | ImGuiButtonFlags_AllowItemOverlap))
-//    {
-//      ImVec2 point = ImGui::GetMousePos();
-//      ImRect rect = rootWindow->Rect();
-//      
-//      // Calculate the difference between the cursor pos and window pos
-//      moveOffsetX = point.x - rect.Min.x;
-//      moveOffsetY = point.y - rect.Min.y;
-//    }
-//    
-//    const IKan::Window* window = IKan::Application::Get().GetWindow();
-//    bool maximized = window->IsMaximized();
-//    
-//    // Maximize or restore on doublt click
-//    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) and ImGui::IsItemHovered())
-//    {
-//      (maximized) ? window->Restore() : window->Maximize();
-//    }
-//    else if (ImGui::IsItemActive())
-//    {
-//      if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-//      {
-//        if (maximized)
-//        {
-//          window->Restore();
-//          
-//          // Get the original size of window
-//          [[maybe_unused]] uint32_t newWidth = window->GetWidth();
-//          [[maybe_unused]] uint32_t newHeight = window->GetHeight();
-//          
-//          // Offset position proportionally to mouse position on titlebar
-//          // This ensures we dragging window relatively to cursor position on titlebar
-//          // correctly when window size changes
-//          if (windowWidth - (float)newWidth > 0.0f)
-//          {
-//            moveOffsetX *= (float)newWidth / windowWidth;
-//          }
-//        }
-//        
-//        // Update the new position of window
-//        ImVec2 point = ImGui::GetMousePos();
-//        window->SetPosition({point.x - moveOffsetX, point.y - moveOffsetY});
-//      }
-//    }
+    static float moveOffsetX;
+    static float moveOffsetY;
+    
+    auto* rootWindow = ImGui::GetCurrentWindow()->RootWindow;
+    const float windowWidth = (int32_t)rootWindow->RootWindow->Size.x;
+    
+    if (ImGui::InvisibleButton("##titleBarDragZone", ImVec2(ImGui::GetContentRegionAvail().x, titlebarHeight * 2), ImGuiButtonFlags_PressedOnClick | ImGuiButtonFlags_AllowItemOverlap))
+    {
+      ImVec2 point = ImGui::GetMousePos();
+      ImRect rect = rootWindow->Rect();
+      
+      // Calculate the difference between the cursor pos and window pos
+      moveOffsetX = point.x - rect.Min.x;
+      moveOffsetY = point.y - rect.Min.y;
+    }
+    
+    const KanViz::Window* window = KanViz::Application::Get().GetWindow();
+    bool maximized = window->IsMaximized();
+    
+    // Maximize or restore on doublt click
+    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) and ImGui::IsItemHovered())
+    {
+      (maximized) ? window->Restore() : window->Maximize();
+    }
+    else if (ImGui::IsItemActive())
+    {
+      if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+      {
+        if (maximized)
+        {
+          window->Restore();
+          
+          // Get the original size of window
+          [[maybe_unused]] uint32_t newWidth = window->GetWidth();
+          [[maybe_unused]] uint32_t newHeight = window->GetHeight();
+          
+          // Offset position proportionally to mouse position on titlebar
+          // This ensures we dragging window relatively to cursor position on titlebar
+          // correctly when window size changes
+          if (windowWidth - (float)newWidth > 0.0f)
+          {
+            moveOffsetX *= (float)newWidth / windowWidth;
+          }
+        }
+        
+        // Update the new position of window
+        ImVec2 point = ImGui::GetMousePos();
+        window->SetPosition({point.x - moveOffsetX, point.y - moveOffsetY});
+      }
+    }
   }
 //  
 //  void RendererLayer::UI_MenuBar(float frameeHeight)

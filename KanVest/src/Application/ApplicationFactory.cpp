@@ -26,7 +26,7 @@ namespace KanVest
         .samples = 8,
         .isFullScreen = false,
         .resizable = true,
-        .maximized = false,
+        .maximized = true,
         .hideTitleBar = true,
       },
       .iniFilePath = "../../../KanVest/KanVest.ini"

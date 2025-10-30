@@ -38,6 +38,13 @@ namespace KanViz
         // Set window even callbacks
         m_window->SetEventFunction(IK_BIND_EVENT_FN(Application::HandleEvents));
         
+        // Control Window
+        m_window->SetResizable(m_specification.windowSpec.resizable);
+        if (m_specification.windowSpec.maximized)
+        {
+          m_window->Maximize();
+        }
+
         // Set the renderer type before any renderer creation.
         Renderer::Initialize(m_specification.rendererType, m_window->GetNativeWindow());
 
@@ -207,6 +214,14 @@ namespace KanViz
   const ApplicationSpecification& Application::GetSpecification() const
   {
     return m_specification;
+  }
+  void* Application::GetNativeWindow() const
+  {
+    return m_window->GetNativeWindow();
+  }
+  Window* Application::GetWindow() const
+  {
+    return m_window.get();
   }
 
   void Application::HandleEvents(Event &event)

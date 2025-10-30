@@ -46,6 +46,9 @@ namespace KanViz
       glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
       glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
       glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+      
+      // If flag is true then this removes titlebar.
+      glfwWindowHint(GLFW_DECORATED, !m_data.specification.hideTitleBar);
     }
     else
     {
@@ -83,13 +86,6 @@ namespace KanViz
     glfwSetWindowUserPointer(m_window, &m_data); // Set the user defined pointer to GLFW Window, this pointer will be retrieved when an interrupt will be triggered.
     SetEventCallbacks(); // Set GLFW callbacks.
     SetAtCenter(); // Default window at center
-    
-    // Control Window
-    SetResizable(m_data.specification.resizable);
-    if (m_data.specification.maximized)
-    {
-      Maximize();
-    }
   }
   
   MacWindow::~MacWindow()

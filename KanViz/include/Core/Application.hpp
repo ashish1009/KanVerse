@@ -67,6 +67,10 @@ namespace KanViz
     // Getters -------------------------------------------------------------------------------------------------------------------------------------
     /// This function returns the application specification
     const ApplicationSpecification& GetSpecification() const;
+    /// This function returns the native pointer Window native as void
+    void* GetNativeWindow() const;
+    /// This function returns the iKan Window Instance as reference
+    Window* GetWindow() const;
 
     /// This static API returns the single instance of core application
     [[nodiscard]] static Application& Get();
