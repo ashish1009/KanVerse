@@ -315,8 +315,8 @@
 				B289E6772EB0E66A00937D0B /* Debug */,
 				B289E6B02EB121A900937D0B /* Core */,
 				B289E81B2EB1AB1900937D0B /* Renderer */,
-				B289E6E72EB1A8E100937D0B /* Platform */,
 				B289EDE22EB2329B00937D0B /* UI */,
+				B289E6E72EB1A8E100937D0B /* Platform */,
 			);
 			path = src;
 			sourceTree = "<group>";

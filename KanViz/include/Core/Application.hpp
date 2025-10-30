@@ -64,6 +64,15 @@ namespace KanViz
     /// This function is called within the game loop specifically during ImGui layer rendering.
     virtual void OnImGuiRender() {}
 
+    // Getters -------------------------------------------------------------------------------------------------------------------------------------
+    /// This function returns the application specification
+    const ApplicationSpecification& GetSpecification() const;
+
+    /// This static API returns the single instance of core application
+    [[nodiscard]] static Application& Get();
+    
+    DELETE_COPY_MOVE_CONSTRUCTORS(Application);
+
   private:
     /// This function handles all window events. Dispatches the events and executes the appropriate actions.
     /// - Parameter event: event abstract type

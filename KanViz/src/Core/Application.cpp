@@ -11,6 +11,12 @@
 
 namespace KanViz
 {
+  Application& Application::Get()
+  {
+    IK_ASSERT(s_instance, "Application instance not created !!!");
+    return *s_instance;
+  }
+  
   Application::Application(const ApplicationSpecification& specification)
   : m_specification(specification)
   {
@@ -196,6 +202,11 @@ namespace KanViz
   bool Application::Contain(const Ref<Layer> &layer)
   {
     return m_layers.Contain(layer);
+  }
+
+  const ApplicationSpecification& Application::GetSpecification() const
+  {
+    return m_specification;
   }
 
   void Application::HandleEvents(Event &event)
