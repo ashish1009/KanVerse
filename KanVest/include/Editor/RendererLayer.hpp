@@ -46,8 +46,12 @@ namespace KanVest
     void UI_StartMainWindowDocking();
     /// This function ends Main ImGui window with Docking
     void UI_EndMainWindowDocking();
+    
+    /// This function shows stock analyzer panel
+    void UI_StockAnalyzer();
+    
     /// This function shows primary Viewport panel
-    void UI_PrimaryViewportPanel();
+    void UI_PrimaryViewportPanel_DEMO();
 
     /// This function renders our title bar
     float UI_DrawTitlebar();
