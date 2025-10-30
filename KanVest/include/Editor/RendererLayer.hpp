@@ -49,6 +49,14 @@ namespace KanVest
     /// This function shows primary Viewport panel
     void UI_PrimaryViewportPanel();
 
+    /// This function renders our title bar
+    float UI_DrawTitlebar();
+    /// This function handle the drag and Click on title bar
+    /// - Parameter titlebarHeight: Title bar height
+    void UI_TitlebarDragArea(float titlebarHeight);
+    /// This function renders window buttons
+    void UI_WindowButtons();
+
     // Single Instance -----------------------------------
     static RendererLayer* s_instance;                          //< Renderer Layer single instance
   };

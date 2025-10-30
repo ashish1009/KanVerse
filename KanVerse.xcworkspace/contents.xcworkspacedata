@@ -17,6 +17,9 @@
       location = "group:KanVest/KanVest.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:KanVasX/KanVasX.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:KanViz/KanViz.xcodeproj">
    </FileRef>
 </Workspace>

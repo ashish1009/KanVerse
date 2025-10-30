@@ -13,6 +13,7 @@
 		B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EDE82EB2341100937D0B /* KanVestApp.cpp */; };
 		B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EDEB2EB234D400937D0B /* RendererLayer.cpp */; };
 		B289EDF62EB3047400937D0B /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EDF52EB3047400937D0B /* libcurl.tbd */; };
+		B289EE332EB37F9400937D0B /* libKanVasX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EE322EB37F9400937D0B /* libKanVasX.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,6 +42,7 @@
 		B289EDEA2EB234D400937D0B /* RendererLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RendererLayer.hpp; sourceTree = "<group>"; };
 		B289EDEB2EB234D400937D0B /* RendererLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RendererLayer.cpp; sourceTree = "<group>"; };
 		B289EDF52EB3047400937D0B /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
+		B289EE322EB37F9400937D0B /* libKanVasX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libKanVasX.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +50,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289EE332EB37F9400937D0B /* libKanVasX.a in Frameworks */,
 				B289EDF62EB3047400937D0B /* libcurl.tbd in Frameworks */,
 				B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */,
 			);
@@ -98,6 +101,7 @@
 		B289E66D2EB0E50400937D0B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B289EE322EB37F9400937D0B /* libKanVasX.a */,
 				B289EDF52EB3047400937D0B /* libcurl.tbd */,
 				B289E66E2EB0E50400937D0B /* libKanViz.a */,
 			);
@@ -353,6 +357,7 @@
 					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGuizmo",
 					"${PROJECT_DIR}/../KanViz/vendors/YAML/YAML/include",
 					"${PROJECT_DIR}/../KanViz/vendors/UI/Implot",
+					"${PROJECT_DIR}/../KanVasX/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -377,6 +382,7 @@
 					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGuizmo",
 					"${PROJECT_DIR}/../KanViz/vendors/YAML/YAML/include",
 					"${PROJECT_DIR}/../KanViz/vendors/UI/Implot",
+					"${PROJECT_DIR}/../KanVasX/include",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
