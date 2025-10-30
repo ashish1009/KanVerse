@@ -13,6 +13,21 @@
 
 // C++ Files
 #include <iostream>
+#include <string>
+#include <string_view>
+#include <filesystem>
+#include <map>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <atomic>
+#include <stdexcept>
+#include <ranges>
+#include <queue>
+#include <fstream>
+#include <cxxabi.h>
+#include <stack>
 
 // glm math library
 #define GLM_ENABLE_EXPERIMENTAL

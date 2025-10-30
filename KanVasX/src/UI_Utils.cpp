@@ -6,11 +6,48 @@
 //
 
 #include "UI_Utils.hpp"
+#include "UI_Scoped.hpp"
 
 namespace KanVasX
 {
   // This MACRO Cast uint32_t into void pointer
 #define INT2VOIDP(i)    (void*)(uintptr_t)(i)
+  
+  static int32_t s_UIContextID = 0;
+  static uint32_t s_counter = 0;
+  static char s_bufferID[16] = "##";
+  static char s_labeledBufferID[1024];
+
+  void BeginDisabled(bool disabled)
+  {
+    if (disabled)
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, Color::TextMuted);
+      ImGui::BeginDisabled(true);
+    }
+  }
+  void EndDisabled()
+  {
+    if (GImGui->DisabledStackSize > 0)
+    {
+      ImGui::PopStyleColor();
+      ImGui::EndDisabled();
+    }
+  }
+
+  const char* GenerateID()
+  {
+    std::string result = "##";
+    result += std::to_string(s_counter++);
+    memcpy(s_bufferID, result.c_str(), 16);
+    return s_bufferID;
+  }
+  const char* GenerateLabelID(const std::string_view& label)
+  {
+    auto formatted = std::format("{}##{}", label, s_counter++);
+    std::snprintf(s_labeledBufferID, std::size(s_labeledBufferID), "%s", formatted.c_str());
+    return s_labeledBufferID;
+  }
 
   bool UI::IsItemHovered()
   {
@@ -56,6 +93,29 @@ namespace KanVasX
   void UI::SameLine(float offsetFromStartX, float spacing)
   {
     ImGui::SameLine(offsetFromStartX, spacing);
+  }
+
+  void UI::Text(ImFont* imGuiFont, std::string_view string, AlignX xAlign, const glm::vec2& offset, const ImU32& color)
+  {
+    KanVasX::ScopedFont header(imGuiFont);
+    KanVasX::ScopedColor textColor(ImGuiCol_Text, color);
+    
+    float xOffset = offset.x;
+    switch (xAlign)
+    {
+      case AlignX::Center:
+        xOffset += (ImGui::GetColumnWidth() - ImGui::CalcTextSize(string.data()).x) / 2;
+        break;
+      case AlignX::Right:
+        xOffset += (ImGui::GetColumnWidth() - ImGui::CalcTextSize(string.data()).x) ;
+        break;
+      case AlignX::Left:
+      default:
+        break;
+    }
+    
+    UI::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY() + offset.y});
+    ImGui::Text("%s", string.data());
   }
 
   void UI::DrawRect(const ImU32& color, float height, float widthFactor, const glm::vec2& offset, float rounding)

@@ -10,7 +10,6 @@
 		B289EE342EB37FE500937D0B /* UI_Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE2D2EB37E3500937D0B /* UI_Utils.cpp */; };
 		B289EE3B2EB3A5FA00937D0B /* UI_Theme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE3A2EB3A5FA00937D0B /* UI_Theme.cpp */; };
 		B289EE432EB3AE2C00937D0B /* UI_Scoped.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289EE412EB3AE2C00937D0B /* UI_Scoped.hpp */; };
-		B289EE442EB3AE2C00937D0B /* UI_Scoped.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE422EB3AE2C00937D0B /* UI_Scoped.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,7 +22,6 @@
 		B289EE382EB3847300937D0B /* UI_Theme.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Theme.hpp; sourceTree = "<group>"; };
 		B289EE3A2EB3A5FA00937D0B /* UI_Theme.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Theme.cpp; sourceTree = "<group>"; };
 		B289EE412EB3AE2C00937D0B /* UI_Scoped.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Scoped.hpp; sourceTree = "<group>"; };
-		B289EE422EB3AE2C00937D0B /* UI_Scoped.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Scoped.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,7 +70,6 @@
 			children = (
 				B289EE2D2EB37E3500937D0B /* UI_Utils.cpp */,
 				B289EE3A2EB3A5FA00937D0B /* UI_Theme.cpp */,
-				B289EE422EB3AE2C00937D0B /* UI_Scoped.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -150,7 +147,6 @@
 			files = (
 				B289EE342EB37FE500937D0B /* UI_Utils.cpp in Sources */,
 				B289EE3B2EB3A5FA00937D0B /* UI_Theme.cpp in Sources */,
-				B289EE442EB3AE2C00937D0B /* UI_Scoped.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,9 +273,11 @@
 		B289EE272EB37D6600937D0B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++23";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 78KTXZ99TW;
 				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = c23;
 				GCC_ENABLE_CPP_EXCEPTIONS = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -298,9 +296,11 @@
 		B289EE282EB37D6600937D0B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++23";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 78KTXZ99TW;
 				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = c23;
 				GCC_ENABLE_CPP_EXCEPTIONS = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

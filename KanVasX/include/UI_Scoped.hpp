@@ -9,7 +9,7 @@
 
 #include "UI_Utils.hpp"
 
-namespace Kreator::UI
+namespace KanVasX
 {
   /// This class creates scoped style variable for ImGui
   class ScopedStyle
@@ -138,7 +138,7 @@ namespace Kreator::UI
     {
       assert(m_columns.size());
       
-      m_tableBegin = ImGui::BeginTable(Kreator::UI::GenerateID(), static_cast<int32_t>(m_columns.size()), tableFlags | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerV,
+      m_tableBegin = ImGui::BeginTable(UI::GenerateID(), static_cast<int32_t>(m_columns.size()), tableFlags | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerV,
                                        ImVec2(ImGui::GetContentRegionAvail()));
       
       if (m_tableBegin)
@@ -183,4 +183,4 @@ namespace Kreator::UI
     std::vector<TableColumns> m_columns;
     bool m_tableBegin = false;
   };
-} // namespace Kreator::UI
+} // namespace KanVasX

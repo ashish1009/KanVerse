@@ -18,10 +18,10 @@ namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
   // Kretor Resource Path
-#define KreatorResourcePath(path) std::filesystem::absolute(KanVestResourcePath / path)
+#define KanVestResourcePath(path) std::filesystem::absolute(KanVestResourcePath / path)
 
   // Kreate Texture
-#define CreateTexture(path) KanViz::TextureFactory::Create(KreatorResourcePath(path))
+#define CreateTexture(path) KanViz::TextureFactory::Create(KanVestResourcePath(path))
 
   static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
     size_t totalSize = size * nmemb;
@@ -126,29 +126,29 @@ namespace KanVest
     
     // Set the Imgui theme ----------------------------------------------------------------------
     KanVest::UI::Font::Load({
-      {UI::FontType::Regular,                 {KreatorResourcePath("Fonts/Opensans/Regular.ttf"),         14}},
-      {UI::FontType::Light,                   {KreatorResourcePath("Fonts/Opensans/Light.ttf"),           14}},
-      {UI::FontType::Italic,                  {KreatorResourcePath("Fonts/Opensans/Italic.ttf"),          14}},
-      {UI::FontType::LightItalic,             {KreatorResourcePath("Fonts/Opensans/LightItalic.ttf"),     14}},
-      {UI::FontType::SemiBold,                {KreatorResourcePath("Fonts/Opensans/SemiBold.ttf"),        14}},
-      {UI::FontType::Bold,                    {KreatorResourcePath("Fonts/Opensans/Bold.ttf"),            14}},
-      {UI::FontType::SemiBoldItalic,          {KreatorResourcePath("Fonts/Opensans/SemiBoldItalic.ttf"),  14}},
-      {UI::FontType::BoldItalic,              {KreatorResourcePath("Fonts/Opensans/BoldItalic.ttf"),      14}},
-      {UI::FontType::ExtraBold,               {KreatorResourcePath("Fonts/Opensans/ExtraBold.ttf"),       14}},
-      {UI::FontType::ExtraBoldItalic,         {KreatorResourcePath("Fonts/Opensans/ExtraBoldItalic.ttf"), 14}},
+      {UI::FontType::Regular,                 {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         14}},
+      {UI::FontType::Light,                   {KanVestResourcePath("Fonts/Opensans/Light.ttf"),           14}},
+      {UI::FontType::Italic,                  {KanVestResourcePath("Fonts/Opensans/Italic.ttf"),          14}},
+      {UI::FontType::LightItalic,             {KanVestResourcePath("Fonts/Opensans/LightItalic.ttf"),     14}},
+      {UI::FontType::SemiBold,                {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        14}},
+      {UI::FontType::Bold,                    {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            14}},
+      {UI::FontType::SemiBoldItalic,          {KanVestResourcePath("Fonts/Opensans/SemiBoldItalic.ttf"),  14}},
+      {UI::FontType::BoldItalic,              {KanVestResourcePath("Fonts/Opensans/BoldItalic.ttf"),      14}},
+      {UI::FontType::ExtraBold,               {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       14}},
+      {UI::FontType::ExtraBoldItalic,         {KanVestResourcePath("Fonts/Opensans/ExtraBoldItalic.ttf"), 14}},
       
-      {UI::FontType::FixedWidthRegular,       {KreatorResourcePath("Fonts/HfMonorita/Regular.ttf"),       10}},
-      {UI::FontType::FixedWidthLight,         {KreatorResourcePath("Fonts/HfMonorita/Light.ttf"),         10}},
-      {UI::FontType::FixedWidthMedium,        {KreatorResourcePath("Fonts/HfMonorita/Medium.ttf"),        10}},
-      {UI::FontType::FixedWidthBold,          {KreatorResourcePath("Fonts/HfMonorita/Bold.ttf"),          10}},
+      {UI::FontType::FixedWidthRegular,       {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       10}},
+      {UI::FontType::FixedWidthLight,         {KanVestResourcePath("Fonts/HfMonorita/Light.ttf"),         10}},
+      {UI::FontType::FixedWidthMedium,        {KanVestResourcePath("Fonts/HfMonorita/Medium.ttf"),        10}},
+      {UI::FontType::FixedWidthBold,          {KanVestResourcePath("Fonts/HfMonorita/Bold.ttf"),          10}},
       
-      {UI::FontType::Small,                   {KreatorResourcePath("Fonts/Opensans/Regular.ttf"),         12}},
-      {UI::FontType::Medium,                  {KreatorResourcePath("Fonts/Opensans/Regular.ttf"),         13}},
-      {UI::FontType::Large,                   {KreatorResourcePath("Fonts/Opensans/Regular.ttf"),         16}},
-      {UI::FontType::ExtraLarge,              {KreatorResourcePath("Fonts/Opensans/Regular.ttf"),         18}},
-      {UI::FontType::SemiHeader,              {KreatorResourcePath("Fonts/Opensans/SemiBold.ttf"),        20}},
-      {UI::FontType::Header,                  {KreatorResourcePath("Fonts/Opensans/Bold.ttf"),            30}},
-      {UI::FontType::HugeHeader,              {KreatorResourcePath("Fonts/Opensans/ExtraBold.ttf"),       40}},
+      {UI::FontType::Small,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         12}},
+      {UI::FontType::Medium,                  {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         13}},
+      {UI::FontType::Large,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         16}},
+      {UI::FontType::ExtraLarge,              {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         18}},
+      {UI::FontType::SemiHeader,              {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        20}},
+      {UI::FontType::Header,                  {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            30}},
+      {UI::FontType::HugeHeader,              {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       40}},
     });
     
     KanVasX::Color::Initialize();
@@ -415,38 +415,13 @@ namespace KanVest
       ImGui::OpenPopup("MainMenu");
     }
 
-//    // Studio Name -------------------------------------------------------------------------
-//    UI::SetCursorPos({0.0f, 0.0f});
-//    UI::Text(UI::FontType::SemiHeader, "IKan-Studio", UI::AlignX::Center, {0.0f, 12.0f}, UI::Color::Highlight);
-//    
-//    // Title Rectangles --------------------------------------------------------------------
-//    UI::SetCursorPos({ImGui::GetWindowWidth() / 4, windowPadding.y});
-//    UI::DrawRect(UI::Color::Alpha(UI::Color::HighlightMuted, 0.4f), titleBarHeight / 2, 0.5f, {0.0f, titleBarHeight / 4});
-//    
-//    // Project Name ------------------------------------------------------------------------
-//    UI::SetCursorPos({ImGui::GetWindowWidth() / 4, 0.0f});
-//    const std::string projectName = IKan::Project::GetActive()->GetConfig().name;
-//    UI::Text(UI::FontType::Large, projectName, UI::AlignX::Left, {5.0f, 14.0f}, UI::Color::Alpha(UI::Color::Text, 0.4f));
-//    UI::Tooltip("Current project (" + IKan::Project::GetActive()->GetConfig().projectFileName + ")");
-//    
-//    // Current Scene name ---------------------------------------------------------------
-//    UI::SetCursorPos({3 * ImGui::GetWindowWidth() / 4, 0.0f});
-//    const std::string sceneName = m_currentScene->GetName();
-//    UI::Text(UI::FontType::Large, sceneName, UI::AlignX::Left, {-ImGui::CalcTextSize(sceneName.c_str()).x * 1.2f, 14.0f},
-//             m_sceneFilePath == "" ? UI::Color::Alpha(UI::Color::Error, 0.4f) : UI::Color::Alpha(UI::Color::Text, 0.4f));
-//    if (m_sceneFilePath == "")
-//    {
-//      UI::Tooltip("Unsaved Scene");
-//    }
-//    else
-//    {
-//      UI::Tooltip("Current scene (" + m_sceneFilePath.string() + ")");
-//    }
-//    
-//    // Draw the Menu Tab in Title bar --------------------------------------------------
-//    UI::SetCursorPosX(60.0f);
-//    UI::SetCursorPosY(titleBarHeight / 4);
-//    UI_MenuBar(titleBarHeight);
+    // Studio Name -------------------------------------------------------------------------
+    KanVasX::UI::SetCursorPos({0.0f, 0.0f});
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header), "KanVest", KanVasX::UI::AlignX::Center, {0.0f, 12.0f}, KanVasX::Color::Highlight);
+    
+    // Title Rectangles --------------------------------------------------------------------
+    KanVasX::UI::SetCursorPos({ImGui::GetWindowWidth() / 4, windowPadding.y});
+    KanVasX::UI::DrawRect(KanVasX::Color::Alpha(KanVasX::Color::HighlightMuted, 0.4f), titleBarHeight / 1.2, 0.5f, {0.0f, titleBarHeight / 4});
     
     // Render the Window Buttons -------------------------------------------------------
     KanVasX::UI::SetCursorPosX(ImGui::GetWindowWidth() - 78);

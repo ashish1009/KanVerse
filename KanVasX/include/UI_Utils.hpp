@@ -14,12 +14,39 @@ namespace KanVasX
   class UI
   {
   public:
+    /// This enum stores the ImGui item position in X Axis
+    /// Do not chnage Values ....
+    enum class AlignX : uint8_t
+    {
+      Left = 0,
+      Center = 1,
+      Right = 2
+    };
+    
+    /// This enum stores the ImGui item position
+    enum class Position : uint8_t
+    {
+      Left, Right, Top, Bottom
+    };
+    
+    // Begin / End -----------------------------------------------------------------------------------------------------------------------------------
+    /// This function begin disable
+    static void BeginDisabled(bool disabled = true);
+    /// This function Ends the disable
+    static void EndDisabled();
+
     // Wrappers --------------------------------------------------------------------------------------------------------------------------------------
     /// This function checkes is imgui item hovered
     static bool IsItemHovered();
     /// This function checles is imgui item disabled
     static bool IsItemDisabled();
     
+    /// This function generate unique ID for ImGui
+    static const char* GenerateID();
+    /// This function generate Unique id for labeled widget
+    /// - Parameter label: Widget lable
+    static const char* GenerateLabelID(const std::string_view& label);
+
     /// This function return ImTexture id from ID
     /// - Parameter ID: Client texture textureID
     static ImTextureID GetTextureID(uint32_t textureID);
@@ -50,6 +77,15 @@ namespace KanVasX
     ///   - offsetFromStartX: offset from sstart point
     ///   - spacing: space after last item
     static void SameLine(float offsetFromStartX = 0.0f, float spacing = -1.0f);
+
+    // Texts -----------------------------------------------------------------------------------------------------------------------------------------
+    /// This function renders the text
+    /// - Parameters:
+    ///   - type: Type of font
+    ///   - string: string to be printed
+    ///   - xAlign: alignment in x axis
+    ///   - offset: offset from current cursor position
+    static void Text(ImFont* imGuiFont, std::string_view string, AlignX xAlign, const glm::vec2& offset = {0, 0}, const ImU32& color = Color::Text);
 
     // Draw ------------------------------------------------------------------------------------------------------------------------------------------
     /// This function draw hollow rectangle
