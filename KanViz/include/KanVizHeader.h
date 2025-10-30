@@ -31,6 +31,7 @@
 // UI Vendor files
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <implot.h>
 #include <ImGuizmo.h>
 
 // Engine Files

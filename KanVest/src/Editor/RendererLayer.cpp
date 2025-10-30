@@ -69,6 +69,16 @@ namespace KanVest
     }
     return values;
   }
+  
+  static void SeparatorText(const char* label)
+  {
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::TextUnformatted(label);
+    ImGui::Separator();
+    ImGui::Spacing();
+  }
+
   RendererLayer* RendererLayer::s_instance = nullptr;
   RendererLayer& RendererLayer::Get()
   {
@@ -178,7 +188,7 @@ namespace KanVest
     IK_PERFORMANCE_FUNC("RendererLayer::UI_EndMainWindowDocking");
     ImGui::End();
   }
-  
+    
   void RendererLayer::UI_PrimaryViewportPanel()
   {
     IK_PERFORMANCE_FUNC("RendererLayer::UI_PrimaryViewportPanel");
@@ -190,15 +200,28 @@ namespace KanVest
     static std::string lastUpdated = "Never";
     static float refreshInterval = 20.0f; // seconds
     static double lastUpdateTime = 0.0;
+    static std::vector<double> closes;
     
-    double currentTime = ImGui::GetTime(); // seconds since app start
+    double currentTime = ImGui::GetTime();
     float timeSinceUpdate = static_cast<float>(currentTime - lastUpdateTime);
     float timeLeft = std::max(0.0f, refreshInterval - timeSinceUpdate);
     
-    // Function to fetch + update data
+    // Fetch + update
     auto updateData = [&]() {
       std::string liveURL = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol;
       std::string liveData = fetchURL(liveURL);
+      
+      // Auto fallback to .BO if .NS fails
+      if (liveData.find("\"regularMarketPrice\"") == std::string::npos &&
+          symbol.find(".NS") != std::string::npos)
+      {
+        std::string altSymbol = symbol.substr(0, symbol.find(".NS")) + ".BO";
+        std::string altData = fetchURL("https://query1.finance.yahoo.com/v8/finance/chart/" + altSymbol);
+        if (altData.find("\"regularMarketPrice\"") != std::string::npos) {
+          symbol = altSymbol;
+          liveData = altData;
+        }
+      }
       
       price = extractValue(liveData, "regularMarketPrice");
       high52 = extractValue(liveData, "fiftyTwoWeekHigh");
@@ -206,7 +229,7 @@ namespace KanVest
       volume = extractValue(liveData, "regularMarketVolume");
       currency = extractString(liveData, "currency");
       
-      // --- Custom range (example: Jan–Mar 2024) ---
+      // Custom date range (example: Jan–Mar 2024)
       long period1 = 1704067200; // 1 Jan 2024
       long period2 = 1711843200; // 31 Mar 2024
       std::string histURL =
@@ -216,59 +239,106 @@ namespace KanVest
       "&interval=1d";
       
       std::string histData = fetchURL(histURL);
-      std::vector<double> closes = extractArray(histData, "close");
+      closes = extractArray(histData, "close");
       
       if (!closes.empty()) {
         customHigh = *std::max_element(closes.begin(), closes.end());
         customLow = *std::min_element(closes.begin(), closes.end());
+      } else {
+        customHigh = customLow = -1;
       }
       
-      // Record update time with full date/time
+      // Timestamp
       time_t now = time(nullptr);
       char buf[128];
       strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S", localtime(&now));
-      // Example: Thu, 30 Oct 2025 14:25:18
       lastUpdated = buf;
       
       lastUpdateTime = ImGui::GetTime();
     };
-
-    // Auto refresh every 20 seconds
+    
     if (timeSinceUpdate >= refreshInterval)
       updateData();
     
-    if (ImGui::Begin("KanVest"))
+    if (ImGui::Begin("📊 KanVest Stock Tracker", nullptr,
+                     ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse))
     {
-      ImGui::Separator();
-      ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
-      ImGui::Separator();
+      ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 6));
+      ImGui::PushStyleColor(ImGuiCol_Separator, IM_COL32(100, 100, 255, 100));
       
-      ImGui::InputText("Symbol", symbol.data(), 120);
+      SeparatorText("Live Market Data");
+      ImGui::Spacing();
       
-      ImGui::Text("Symbol: %s", symbol.c_str());
-      ImGui::Text("Current Price: %.2f %s", price, currency.c_str());
-      ImGui::Text("Volume: %.0f", volume);
-      ImGui::Text("52W High: %.2f | 52W Low: %.2f", high52, low52);
-      
-      ImGui::Separator();
-      ImGui::Text("=== CUSTOM RANGE (Jan–Mar 2024) ===");
-      if (customHigh > 0 && customLow > 0)
-        ImGui::Text("High: %.2f | Low: %.2f", customHigh, customLow);
-      else
-        ImGui::Text("No historical data available.");
-      
-      ImGui::Separator();
-      ImGui::Text("Last Updated: %s", lastUpdated.c_str());
-      ImGui::Text("Next update in: %.1f s", timeLeft);
-      
-      // Manual refresh button
-      if (ImGui::Button("Refresh Now"))
+      ImGui::PushItemWidth(160);
+      ImGui::InputText("##Symbol", symbol.data(), 120);
+      ImGui::SameLine();
+      if (ImGui::Button("🔄 Refresh Now", ImVec2(120, 0)))
         updateData();
+      ImGui::PopItemWidth();
       
       ImGui::SameLine();
-      ImGui::TextDisabled("(Auto every %.0f s)", refreshInterval);
+      ImGui::TextDisabled("(Auto %.0fs)", refreshInterval);
+      ImGui::Spacing();
+      
+      // --- Live Data Card ---
+      ImGui::BeginChild("LiveData", ImVec2(0, 130), true, ImGuiWindowFlags_NoScrollbar);
+      ImGui::Text("Symbol:   %s", symbol.c_str());
+      ImGui::Text("Price:    %.2f %s", price, currency.c_str());
+      ImGui::Text("Volume:   %.0f", volume);
+      ImGui::Text("52W High: %.2f   |   52W Low: %.2f", high52, low52);
+      ImGui::EndChild();
+      
+      ImGui::Spacing();
+      SeparatorText("Custom Range (Jan–Mar 2024)");
+      
+      // --- Custom Range Card ---
+      ImGui::BeginChild("CustomRange", ImVec2(0, 70), true);
+      if (customHigh > 0 && customLow > 0)
+        ImGui::Text("High: %.2f   |   Low: %.2f", customHigh, customLow);
+      else
+        ImGui::TextDisabled("No historical data available.");
+      ImGui::EndChild();
+      
+      // 📊 Chart Button
+      if (!closes.empty()) {
+        ImGui::Spacing();
+        if (ImGui::Button("📊 Open Full Chart", ImVec2(-1, 0)))
+          ImGui::OpenPopup("FullChart");
+      }
+      
+      // Popup Chart
+      if (ImGui::BeginPopupModal("FullChart", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+      {
+        if (ImPlot::BeginPlot(symbol.c_str(), ImVec2(600, 400))) {
+          std::vector<double> days(closes.size());
+          std::iota(days.begin(), days.end(), 0);
+          ImPlot::SetupAxes("Day", "Price");
+          ImPlot::PlotLine("Close", days.data(), closes.data(), (int)closes.size());
+          ImPlot::EndPlot();
+        }
+        
+        if (ImGui::Button("Close", ImVec2(120, 0)))
+          ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+      }
+      
+      ImGui::Spacing();
+      SeparatorText("Update Status");
+      
+      // --- Update status ---
+      ImGui::BeginChild("UpdateInfo", ImVec2(0, 60), true);
+      ImGui::Text("Last Updated: %s", lastUpdated.c_str());
+      
+      ImVec4 color = timeLeft > 5 ? ImVec4(0.4f, 0.9f, 0.4f, 1.0f)
+      : ImVec4(1.0f, 0.7f, 0.3f, 1.0f);
+      ImGui::TextColored(color, "Next Update In: %.1f s", timeLeft);
+      ImGui::EndChild();
+      
+      ImGui::PopStyleColor();
+      ImGui::PopStyleVar();
     }
     ImGui::End();
   }
+
 
 } // namespace KanVest

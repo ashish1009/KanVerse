@@ -32,6 +32,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
+#include <implot.h>
 
 // Engine Files
 #include "Base/Configuration.h"

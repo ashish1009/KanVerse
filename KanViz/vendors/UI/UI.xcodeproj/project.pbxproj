@@ -43,6 +43,11 @@
 		B289EAA42EB22B1C00937D0B /* imgui_node_editor_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EA0C2EB22B1C00937D0B /* imgui_node_editor_api.cpp */; };
 		B289EAA62EB22B1C00937D0B /* builders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E9FC2EB22B1C00937D0B /* builders.cpp */; };
 		B289EAAA2EB22B1C00937D0B /* imgui_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E9F42EB22B1C00937D0B /* imgui_tables.cpp */; };
+		B289EE052EB37A7100937D0B /* implot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EDFD2EB37A7100937D0B /* implot.cpp */; };
+		B289EE062EB37A7100937D0B /* implot_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EDFE2EB37A7100937D0B /* implot_demo.cpp */; };
+		B289EE082EB37A7100937D0B /* implot_items.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE002EB37A7100937D0B /* implot_items.cpp */; };
+		B289EE092EB37A7100937D0B /* implot.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EDFC2EB37A7100937D0B /* implot.h */; };
+		B289EE0A2EB37A7100937D0B /* implot_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B289EDFF2EB37A7100937D0B /* implot_internal.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -88,6 +93,11 @@
 		B289EA282EB22B1C00937D0B /* ImZoomSlider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImZoomSlider.h; sourceTree = "<group>"; };
 		B289EA292EB22B1C00937D0B /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		B289EA2A2EB22B1C00937D0B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		B289EDFC2EB37A7100937D0B /* implot.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = implot.h; sourceTree = "<group>"; };
+		B289EDFD2EB37A7100937D0B /* implot.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = implot.cpp; sourceTree = "<group>"; };
+		B289EDFE2EB37A7100937D0B /* implot_demo.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = implot_demo.cpp; sourceTree = "<group>"; };
+		B289EDFF2EB37A7100937D0B /* implot_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = implot_internal.h; sourceTree = "<group>"; };
+		B289EE002EB37A7100937D0B /* implot_items.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = implot_items.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +114,7 @@
 		B289E8F22EB22B0900937D0B = {
 			isa = PBXGroup;
 			children = (
+				B289EE042EB37A7100937D0B /* Implot */,
 				B289E9FA2EB22B1C00937D0B /* ImGui */,
 				B289EA0F2EB22B1C00937D0B /* ImGuiNode */,
 				B289EA2B2EB22B1C00937D0B /* ImGuizmo */,
@@ -189,6 +200,18 @@
 			path = ImGuizmo;
 			sourceTree = "<group>";
 		};
+		B289EE042EB37A7100937D0B /* Implot */ = {
+			isa = PBXGroup;
+			children = (
+				B289EDFC2EB37A7100937D0B /* implot.h */,
+				B289EDFD2EB37A7100937D0B /* implot.cpp */,
+				B289EDFE2EB37A7100937D0B /* implot_demo.cpp */,
+				B289EDFF2EB37A7100937D0B /* implot_internal.h */,
+				B289EE002EB37A7100937D0B /* implot_items.cpp */,
+			);
+			path = Implot;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -196,6 +219,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289EE092EB37A7100937D0B /* implot.h in Headers */,
+				B289EE0A2EB37A7100937D0B /* implot_internal.h in Headers */,
 				B289EA322EB22B1C00937D0B /* imstb_textedit.h in Headers */,
 				B289EA342EB22B1C00937D0B /* imgui.h in Headers */,
 				B289EA352EB22B1C00937D0B /* imgui_internal.h in Headers */,
@@ -284,6 +309,9 @@
 				B289EA752EB22B1C00937D0B /* imgui_draw.cpp in Sources */,
 				B289EA782EB22B1C00937D0B /* imgui.cpp in Sources */,
 				B289EA7A2EB22B1C00937D0B /* drawing.cpp in Sources */,
+				B289EE052EB37A7100937D0B /* implot.cpp in Sources */,
+				B289EE062EB37A7100937D0B /* implot_demo.cpp in Sources */,
+				B289EE082EB37A7100937D0B /* implot_items.cpp in Sources */,
 				B289EA7D2EB22B1C00937D0B /* ImGuizmo.cpp in Sources */,
 				B289EA812EB22B1C00937D0B /* imgui_demo.cpp in Sources */,
 				B289EA882EB22B1C00937D0B /* ImSequencer.cpp in Sources */,

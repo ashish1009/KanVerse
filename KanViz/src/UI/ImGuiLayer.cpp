@@ -35,7 +35,10 @@ namespace KanViz::UI
     IK_LOG_INFO(LogModule::UI, "Attaching '{0}' Layer to application", GetName());
     
     IMGUI_CHECKVERSION();
+    
     ImGui::CreateContext();
+    ImPlot::CreateContext();
+
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -69,7 +72,9 @@ namespace KanViz::UI
     
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
+
     ImGui::DestroyContext();
+    ImPlot::DestroyContext();
   }
   
   void ImGuiLayer::OnEvent(Event& event)

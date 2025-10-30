@@ -14,6 +14,7 @@
 // C++ Files
 #include <iostream>
 #include <ranges>
+#include <numeric>
 
 // Engine Files
 #include <KanVizHeader.h>
