@@ -104,6 +104,36 @@ namespace KanVasX
   {
     ImGui::NewLine();
   }
+  
+  ImRect UI::GetItemRect()
+  {
+    return ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+  }
+  
+  ImRect UI::RectExpanded(const ImRect& rect, float x, float y)
+  {
+    ImRect result = rect;
+    result.Min.x -= x;
+    result.Min.y -= y;
+    result.Max.x += x;
+    result.Max.y += y;
+    return result;
+  }
+  
+  ImRect UI::RectOffset(const ImRect& rect, const ImVec2& xy)
+  {
+    return RectOffset(rect, xy.x, xy.y);
+  }
+  
+  ImRect UI::RectOffset(const ImRect& rect, float x, float y)
+  {
+    ImRect result = rect;
+    result.Min.x += x;
+    result.Min.y += y;
+    result.Max.x += x;
+    result.Max.y += y;
+    return result;
+  }
 
   void UI::Text(ImFont* imGuiFont, std::string_view string, AlignX xAlign, const glm::vec2& offset, const ImU32& color)
   {
@@ -216,5 +246,66 @@ namespace KanVasX
     
     DrawButtonImageUtil(image, ImRect{logoRectStart, logoRectMax}, normalColor, hoveredColor, pressedColor);
     return clicked;
+  }
+  
+  // Shadow ----------------------------------------------------------------------------------------------------------------------------------------
+  void DrawShadowInnerImpl(ImTextureID shadowImageID, UI::Position position, int radius, const ImVec2& rectMin,
+                           const ImVec2& rectMax, float alpha, float lengthStretch)
+  {
+    const float widthOffset = lengthStretch;
+    const float alphaTop = alpha; //std::min(0.25f * alphMultiplier, 1.0f);
+    const float alphaSides = alpha; //std::min(0.30f * alphMultiplier, 1.0f);
+    const float alphaBottom = alpha; //std::min(0.60f * alphMultiplier, 1.0f);
+    const auto p1 = ImVec2(rectMin.x + radius, rectMin.y + radius);
+    const auto p2 = ImVec2(rectMax.x - radius, rectMax.y - radius);
+    auto* drawList = ImGui::GetWindowDrawList();
+    
+    switch (position)
+    {
+      case UI::Position::Top:
+        drawList->AddImage(shadowImageID, { p1.x - widthOffset,  p1.y - radius }, { p2.x + widthOffset, p1.y },
+                           ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), ImColor(0.0f, 0.0f, 0.0f, alphaTop));
+        break;
+      case UI::Position::Bottom:
+        drawList->AddImage(shadowImageID, { p1.x - widthOffset,  p2.y }, { p2.x + widthOffset, p2.y + radius },
+                           ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), ImColor(0.0f, 0.0f, 0.0f, alphaBottom));
+        break;
+      case UI::Position::Left:
+        drawList->AddImageQuad(shadowImageID, { p1.x - radius, p1.y - widthOffset }, { p1.x, p1.y - widthOffset },
+                               { p1.x, p2.y + widthOffset }, { p1.x - radius, p2.y + widthOffset },
+                               { 0.0f, 0.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f },
+                               ImColor(0.0f, 0.0f, 0.0f, alphaSides));
+        break;
+      case UI::Position::Right:
+        drawList->AddImageQuad(shadowImageID, { p2.x, p1.y - widthOffset }, { p2.x + radius, p1.y - widthOffset },
+                               { p2.x + radius, p2.y + widthOffset }, { p2.x, p2.y + widthOffset },
+                               { 0.0f, 1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f },
+                               ImColor(0.0f, 0.0f, 0.0f, alphaSides));
+        break;
+      default:
+        break;
+    }
+  }
+  
+  void DrawShadowInner(ImTextureID shadowImageID, UI::Position position, int radius, const ImRect& rectangle, float alpha, float lengthStretch)
+  {
+    DrawShadowInnerImpl(shadowImageID, position, radius, rectangle.Min, rectangle.Max, alpha, lengthStretch);
+  }
+  
+  void UI::DrawShadow(ImTextureID shadowImageID, Position position, int32_t radius, float alpha)
+  {
+    // Draw side shadow
+    ImRect windowRect = UI::RectExpanded(ImGui::GetCurrentWindow()->Rect(), 0.0f, 0.0f);
+    ImGui::PushClipRect(windowRect.Min, windowRect.Max, false);
+    DrawShadowInner(shadowImageID, position, radius, windowRect, alpha, windowRect.GetHeight() / 4.0f);
+    ImGui::PopClipRect();
+  }
+  
+  void UI::DrawShadowAllDirection(ImTextureID shadowImageID, int32_t radius, float alpha)
+  {
+    UI::DrawShadow(shadowImageID, UI::Position::Left, radius, alpha);
+    UI::DrawShadow(shadowImageID, UI::Position::Right, radius, alpha);
+    UI::DrawShadow(shadowImageID, UI::Position::Top, radius, alpha);
+    UI::DrawShadow(shadowImageID, UI::Position::Bottom, radius, alpha);
   }
 } // namespace KanVasX

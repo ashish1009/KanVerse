@@ -83,6 +83,27 @@ namespace KanVasX
     /// This function create separtor
     static void Separator(float alpha = 0.08f);
 
+    // Rectangles API --------------------------------------------------------------------------------------------------------------------------------
+    /// This function returns the ImGui Item Rectangle vertex
+    static ImRect GetItemRect();
+    /// This function expand the ImGui Retangle
+    /// - Parameters:
+    ///   - rect: rectangle
+    ///   - x: expand x
+    ///   - y: expand y
+    static ImRect RectExpanded(const ImRect& rect, float x, float y);
+    /// This function Offset the rectangle
+    /// - Parameters:
+    ///   - rect: rectangle pos
+    ///   - x: x offset
+    ///   - y: y offset
+    static ImRect RectOffset(const ImRect& rect, float x, float y);
+    /// This function Offset the rectangle
+    /// - Parameters:
+    ///   - rect: rectangle pos
+    ///   - xy: offset
+    static ImRect RectOffset(const ImRect& rect, const ImVec2& xy);
+
     // Texts -----------------------------------------------------------------------------------------------------------------------------------------
     /// This function renders the text
     /// - Parameters:
@@ -123,5 +144,18 @@ namespace KanVasX
     static bool DrawButtonImage(const std::string_view title, ImTextureID image, bool highlight,
                                 const ImVec2& size, const ImVec2& offset = {0, 0},
                                 const ImU32& normalColor = Color::White, const ImU32& hoveredColor = Color::White, const ImU32& pressedColor = Color::White);
+    
+    // Shadow ----------------------------------------------------------------------------------------------------------------------------------------
+    /// This function render the Shadow Texture in ImGui
+    /// - Parameters:
+    ///   - position: position of shadow
+    ///   - radius: radius of shadow
+    ///   - alpha: Blurr alpha
+    static void DrawShadow(ImTextureID shadowImageID, Position position = Position::Right, int32_t radius = 15.0f, float alpha = 1.0f);
+    /// This function render the Shadow Texture in ImGui in all directions
+    /// - Parameters:
+    ///   - radius: radius of shadow
+    ///   - alpha: Blurr alpha
+    static void DrawShadowAllDirection(ImTextureID shadowImageID, int32_t radius = 15.0f, float alpha = 1.0f);
   };
 } // namespace KanVasX
