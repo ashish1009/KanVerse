@@ -80,9 +80,9 @@ namespace KanVest
   static void SeparatorText(const char* label)
   {
     ImGui::Spacing();
-    ImGui::Separator();
+    KanVasX::UI::Separator();
     ImGui::TextUnformatted(label);
-    ImGui::Separator();
+    KanVasX::UI::Separator();
     ImGui::Spacing();
   }
 

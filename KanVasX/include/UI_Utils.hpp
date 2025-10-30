@@ -78,6 +78,11 @@ namespace KanVasX
     ///   - spacing: space after last item
     static void SameLine(float offsetFromStartX = 0.0f, float spacing = -1.0f);
 
+    /// This function create same line
+    static void NewLine();
+    /// This function create separtor
+    static void Separator(float alpha = 0.08f);
+
     // Texts -----------------------------------------------------------------------------------------------------------------------------------------
     /// This function renders the text
     /// - Parameters:

@@ -94,6 +94,16 @@ namespace KanVasX
   {
     ImGui::SameLine(offsetFromStartX, spacing);
   }
+  void UI::Separator(float alpha)
+  {
+    ScopedColor Separator(ImGuiCol_Separator, KanVasX::Color::Alpha(KanVasX::Color::Separator, alpha));
+    UI::ShiftCursorY(5.0f);
+    ImGui::Separator();
+  }
+  void UI::NewLine()
+  {
+    ImGui::NewLine();
+  }
 
   void UI::Text(ImFont* imGuiFont, std::string_view string, AlignX xAlign, const glm::vec2& offset, const ImU32& color)
   {
