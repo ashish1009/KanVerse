@@ -58,8 +58,10 @@ namespace KanVest
     void UI_WindowButtons();
 
     // Single Instance -----------------------------------
-    KanViz::Ref<KanViz::Image> m_applicationIcon;              //< Application icon
+    KanViz::Ref<KanViz::Image> m_applicationIcon;                  //< Application icon
+    KanViz::Ref<KanViz::Image> m_iconMinimize, m_iconMaximize;     //< Icons to maximize and minimize the iwndow
+    KanViz::Ref<KanViz::Image> m_iconRestore, m_iconClose;         //< Icons to close and restore the window
 
-    static RendererLayer* s_instance;                          //< Renderer Layer single instance
+    static RendererLayer* s_instance;                              //< Renderer Layer single instance
   };
 } // namespace KanVest

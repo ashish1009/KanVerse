@@ -103,7 +103,14 @@ namespace KanVest
     
     IK_LOG_INFO("RendererLayer", "Creating '{0}' Layer instance", GetName());
     
-    m_applicationIcon = CreateTexture("Textures/Icons/KanVest.png");
+    // Load Textures -----------------------------------------------------------------------------
+    m_applicationIcon = CreateTexture("Textures/Logo/KanVest.png");
+    
+    // Window Icons
+    m_iconClose = CreateTexture("Textures/Icons/Close.png");
+    m_iconMinimize = CreateTexture("Textures/Icons/Minimize.png");
+    m_iconMaximize = CreateTexture("Textures/Icons/Maximize.png");
+    m_iconRestore = CreateTexture("Textures/Icons/Restore.png");
   }
   
   RendererLayer::~RendererLayer()
@@ -434,12 +441,12 @@ namespace KanVest
 //    UI::SetCursorPosX(60.0f);
 //    UI::SetCursorPosY(titleBarHeight / 4);
 //    UI_MenuBar(titleBarHeight);
-//    
-//    // Render the Window Buttons -------------------------------------------------------
-//    UI::SetCursorPosX(ImGui::GetWindowWidth() - 78);
-//    UI::SetCursorPosY(10.0f);
-//    UI_WindowButtons();
-//    
+    
+    // Render the Window Buttons -------------------------------------------------------
+    KanVasX::UI::SetCursorPosX(ImGui::GetWindowWidth() - 78);
+    KanVasX::UI::SetCursorPosY(10.0f);
+    UI_WindowButtons();
+    
     return titleBarHeight;
   }
   
@@ -496,234 +503,50 @@ namespace KanVest
       }
     }
   }
-//  
-//  void RendererLayer::UI_MenuBar(float frameeHeight)
-//  {
-//    IK_PERFORMANCE("RendererLayer::UI_MenuBar")
-//    
-//    // Menu Bar Rectactangle Size
-//    const ImRect menuBarRect =
-//    {
-//      ImGui::GetCursorPos(), // Min Rect Coord
-//      {ImGui::GetContentRegionAvail().x, frameeHeight} // Max Rect Coord
-//    };
-//    
-//    ImGui::BeginGroup();
-//    if (UI::BeginMenuBar(menuBarRect))
-//    {
-//      bool menuOpen = ImGui::IsPopupOpen("##menubar", ImGuiPopupFlags_AnyPopupId);
-//      
-//      // Push the Colors if Menu is active
-//      if (menuOpen)
-//      {
-//        ImGui::PushStyleColor(ImGuiCol_Header, UI::Color::Highlight);
-//        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, UI::Color::Highlight);
-//      }
-//      
-//      static auto popItemHighlight = [&menuOpen]
-//      {
-//        if (menuOpen)
-//        {
-//          ImGui::PopStyleColor(2);
-//          menuOpen = false;
-//        }
-//      };
-//      
-//      // Menu Items
-//      UI_Utils::AddMenu("File", popItemHighlight, [this]() {
-//        // Project options ----------------------
-//        if (ImGui::MenuItem("Create Project...", "Cmd + Shift + N"))
-//        {
-//          FolderExplorer::ShowCreatePopup("Create Project", m_directories.studioPath / "Kreator", nullptr);
-//          m_folderExplorerAction = FolderExplorerAction::NewProject;
-//        }
-//        if (ImGui::MenuItem("Open Project...", "Cmd + Shift + O"))
-//        {
-//          FolderExplorer::ShowOpenPopup("Open Project", IKan::ProjectExtension, "", nullptr);
-//          m_folderExplorerAction = FolderExplorerAction::OpenProject;
-//        }
-//        
-//        UI_Utils::ScopedMenu("Open Recent", [this]() {
-//          size_t i = 0;
-//          std::string openProjectFilePath = "";
-//          for (auto it = m_userPreferences->recentProjects.begin(); it != m_userPreferences->recentProjects.end(); it++)
-//          {
-//            // Show only 10 Items
-//            if (i > 10)
-//            {
-//              break;
-//            }
-//            
-//            if (std::filesystem::exists(it->second.filePath))
-//            {
-//              ImGui::PushStyleColor(ImGuiCol_HeaderHovered, UI::Color::HighlightMuted);
-//              ImGui::PushStyleColor(ImGuiCol_Text, UI::Color::Text);
-//              if (ImGui::MenuItem(it->second.name.c_str()))
-//              {
-//                RecentProject projectEntry;
-//                projectEntry.name = it->second.name;
-//                projectEntry.filePath = it->second.filePath;
-//                projectEntry.lastOpened = time(NULL);
-//                
-//                it = m_userPreferences->recentProjects.erase(it);
-//                
-//                m_userPreferences->recentProjects[projectEntry.lastOpened] = projectEntry;
-//                
-//                UserPreferencesSerializer preferencesSerializer(m_userPreferences);
-//                preferencesSerializer.Serialize(m_userPreferences->filePath);
-//                
-//                OpenProject(projectEntry.filePath, false);
-//                ImGui::PopStyleColor(2);
-//                break;
-//              }
-//              ImGui::PopStyleColor(2);
-//            }
-//            else
-//            {
-//              m_userPreferences->recentProjects.erase(it);
-//              UserPreferencesSerializer serializer(m_userPreferences);
-//              serializer.Serialize(m_userPreferences->filePath);
-//              break;
-//            }
-//            
-//            i++;
-//          }
-//        });
-//        ImGui::Separator();
-//        
-//        // Scene Options ------------------------
-//        if (ImGui::MenuItem("New Scene", "Cmd+N"))
-//        {
-//          NewScenePopup();
-//        }
-//        if (ImGui::MenuItem("Open Scene", "Cmd+O"))
-//        {
-//          OpenScene();
-//        }
-//        if (ImGui::MenuItem("Save Scene", "Cmd+S"))
-//        {
-//          SaveScene();
-//        }
-//        if (ImGui::MenuItem("Save Scene As", "Cmd+Shift+S"))
-//        {
-//          SaveSceneAs();
-//        }
-//        ImGui::Separator();
-//      });
-//      
-//      static bool serializePreferences = false;
-//      UI_Utils::AddMenu("Editor", popItemHighlight, [this]() {
-//      });
-//      
-//      UI_Utils::AddMenu("View", popItemHighlight, [this]() {
-//        for (auto& [id, panelData] : m_panels.GetPanels())
-//        {
-//          ImGui::MenuItem(panelData.name, nullptr, &panelData.isOpen);
-//        }
-//        bool modified = false;
-//        if (ImGui::MenuItem("Performance", nullptr, &m_userPreferences->showPerformancePanel))
-//        {
-//          modified = true;
-//        }
-//        if (ImGui::MenuItem("Scene Settings", nullptr, &m_userPreferences->showSceneSettings))
-//        {
-//          modified = true;
-//        }
-//        
-//        if (modified)
-//        {
-//          UserPreferencesSerializer serializer(m_userPreferences);
-//          serializer.Serialize(m_userPreferences->filePath);
-//        }
-//        ImGui::Separator();
-//      });
-//      
-//      UI_Utils::AddMenu("Debug", popItemHighlight, [this]() {
-//        bool modified = false;
-//        
-//        if (ImGui::MenuItem("Show System Info", nullptr, &m_userPreferences->renderSystemInfo))
-//        {
-//          modified = true;
-//        }
-//        if (ImGui::MenuItem("Show Collider", nullptr, &m_userPreferences->showColliders))
-//        {
-//          modified = true;
-//        }
-//        if (ImGui::MenuItem("Show Relationship Connection", nullptr, &m_userPreferences->showRelationshipConnection))
-//        {
-//          modified = true;
-//        }
-//        if (ImGui::MenuItem("Show Joint Connection", nullptr, &m_userPreferences->showJointConnections))
-//        {
-//          modified = true;
-//        }
-//        if (ImGui::MenuItem("Show Camera Path", nullptr, &m_userPreferences->showDebugCameraControllerPath))
-//        {
-//          modified = true;
-//        }
-//        if (ImGui::MenuItem("Show Mini viewport", nullptr, &m_userPreferences->showMiniViewport))
-//        {
-//          modified = true;
-//        }
-//        
-//        if (modified)
-//        {
-//          UserPreferencesSerializer serializer(m_userPreferences);
-//          serializer.Serialize(m_userPreferences->filePath);
-//        }
-//      });
-//      
-//      UI_Utils::AddMenu("Help", popItemHighlight, [this]() {
-//      });
-//      
-//      if (menuOpen)
-//      {
-//        ImGui::PopStyleColor(2);
-//      }
-//    }
-//    UI::EndMenuBar();
-//    ImGui::EndGroup();
-//  }
-//  
+
   void RendererLayer::UI_WindowButtons()
   {
     IK_PERFORMANCE_FUNC("RendererLayer::UI_WindowButtons");
-//    // Window buttons
-//    static const ImU32 buttonColN = UI::Color::MultipliedValue(UI::Color::Text, 0.9f);
-//    static const ImU32 buttonColH = UI::Color::MultipliedValue(UI::Color::Text, 1.2f);
-//    static const ImU32 buttonColP = UI::Color::TextDark;
-//    static const float buttonWidth = 14.0f;
-//    static const float buttonHeight = 14.0f;
-//    static const IKan::Window* window = IKan::Application::Get().GetWindow();
-//    
-//    // Minimize Button
-//    {
-//      static const float iconHeight = m_iconMinimize->GetHeight();
-//      const float padY = (buttonHeight - (float)iconHeight) / 2.0f;
-//      
-//      if (UI::DrawButtonImage("Minimize", m_iconMinimize, false, {buttonWidth, iconHeight}, {0, 10.0f}, buttonColN, UI::Color::MultipliedValue(UI::Color::Yellow, 1.4f), buttonColP))
-//      {
-//        window->Iconify();
-//      }
-//    }
-//    
-//    UI::SameLine();
-//    // Maximize Button
-//    {
-//      bool isMaximized = window->IsMaximized();
-//      if (UI::DrawButtonImage("Maximized/Restore", isMaximized ? m_iconRestore : m_iconMaximize, false, {buttonWidth, buttonHeight}, {0, -5.0f}, buttonColN, UI::Color::MultipliedValue(UI::Color::Blue, 1.4f), buttonColP))
-//      {
-//        (isMaximized) ? window->Restore() : window->Maximize();
-//      }
-//    }
-//    
-//    UI::SameLine();
-//    // Close Button
-//    {
-//      if (UI::DrawButtonImage("Close", m_iconClose, false, {buttonWidth, buttonHeight}, {0, -5.0f}, UI::Color::Text, UI::Color::MultipliedValue(UI::Color::Red, 1.4f), buttonColP))
-//      {
-//        IKan::Application::Get().Close();
-//      }
-//    }
+    // Window buttons
+    static const ImU32 buttonColN = KanVasX::Color::MultipliedValue(KanVasX::Color::Text, 0.9f);
+    static const ImU32 buttonColP = KanVasX::Color::TextDark;
+    
+    static const float buttonWidth = 14.0f;
+    static const float buttonHeight = 14.0f;
+    static const KanViz::Window* window = KanViz::Application::Get().GetWindow();
+    
+    // Minimize Button
+    {
+      static const float iconHeight = m_iconMinimize->GetHeight();
+      
+      if (KanVasX::UI::DrawButtonImage("Minimize", KanVasX::UI::GetTextureID(m_iconMinimize->GetRendererID()), false, {buttonWidth, iconHeight}, {0, 10.0f},
+                                       buttonColN, KanVasX::Color::MultipliedValue(KanVasX::Color::Yellow, 1.4f), buttonColP))
+      {
+        window->Iconify();
+      }
+    }
+    
+    KanVasX::UI::SameLine();
+    // Maximize Button
+    {
+      bool isMaximized = window->IsMaximized();
+      if (KanVasX::UI::DrawButtonImage("Maximized/Restore",
+                                       KanVasX::UI::GetTextureID(isMaximized ? m_iconRestore->GetRendererID() : m_iconMaximize->GetRendererID()),
+                                       false, {buttonWidth, buttonHeight}, {0, -5.0f},
+                                       buttonColN, KanVasX::Color::MultipliedValue(KanVasX::Color::Blue, 1.4f), buttonColP))
+      {
+        (isMaximized) ? window->Restore() : window->Maximize();
+      }
+    }
+    
+    KanVasX::UI::SameLine();
+    // Close Button
+    {
+      if (KanVasX::UI::DrawButtonImage("Close", KanVasX::UI::GetTextureID(m_iconClose->GetRendererID()), false, {buttonWidth, buttonHeight}, {0, -5.0f},
+                                   KanVasX::Color::Text, KanVasX::Color::MultipliedValue(KanVasX::Color::Red, 1.4f), buttonColP))
+      {
+        KanViz::Application::Get().Close();
+      }
+    }
   }
 } // namespace KanVest

@@ -53,6 +53,11 @@ namespace KanVasX
     ImGui::SetCursorPos(val);
   }
   
+  void UI::SameLine(float offsetFromStartX, float spacing)
+  {
+    ImGui::SameLine(offsetFromStartX, spacing);
+  }
+
   void UI::DrawRect(const ImU32& color, float height, float widthFactor, const glm::vec2& offset, float rounding)
   {
     // Draw the title Bar rectangle ---------------------------------------------------

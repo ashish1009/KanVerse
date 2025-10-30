@@ -34,7 +34,6 @@ namespace KanVasX
     /// This function shift the cursor position
     /// - Parameter val: new shifted value
     static void ShiftCursor(const ImVec2& val);
-    
 
     /// This function shift the cursor position for x
     /// - Parameter distance: val x
@@ -46,6 +45,12 @@ namespace KanVasX
     /// - Parameter val: New shift value
     static void SetCursorPos(const ImVec2& val);
     
+    /// This function create same line
+    /// - Parameters:
+    ///   - offsetFromStartX: offset from sstart point
+    ///   - spacing: space after last item
+    static void SameLine(float offsetFromStartX = 0.0f, float spacing = -1.0f);
+
     // Draw ------------------------------------------------------------------------------------------------------------------------------------------
     /// This function draw hollow rectangle
     /// - Parameters:
