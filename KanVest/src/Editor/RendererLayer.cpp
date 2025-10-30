@@ -124,6 +124,33 @@ namespace KanVest
     IK_PROFILE();
     IK_LOG_INFO("RendererLayer", "Attaching '{0}' Layer to application", GetName());
     
+    // Set the Imgui theme ----------------------------------------------------------------------
+    KanVest::UI::Font::Load({
+      {UI::FontType::Regular,                 {KreatorResourcePath("Fonts/Opensans/Regular.ttf"),         14}},
+      {UI::FontType::Light,                   {KreatorResourcePath("Fonts/Opensans/Light.ttf"),           14}},
+      {UI::FontType::Italic,                  {KreatorResourcePath("Fonts/Opensans/Italic.ttf"),          14}},
+      {UI::FontType::LightItalic,             {KreatorResourcePath("Fonts/Opensans/LightItalic.ttf"),     14}},
+      {UI::FontType::SemiBold,                {KreatorResourcePath("Fonts/Opensans/SemiBold.ttf"),        14}},
+      {UI::FontType::Bold,                    {KreatorResourcePath("Fonts/Opensans/Bold.ttf"),            14}},
+      {UI::FontType::SemiBoldItalic,          {KreatorResourcePath("Fonts/Opensans/SemiBoldItalic.ttf"),  14}},
+      {UI::FontType::BoldItalic,              {KreatorResourcePath("Fonts/Opensans/BoldItalic.ttf"),      14}},
+      {UI::FontType::ExtraBold,               {KreatorResourcePath("Fonts/Opensans/ExtraBold.ttf"),       14}},
+      {UI::FontType::ExtraBoldItalic,         {KreatorResourcePath("Fonts/Opensans/ExtraBoldItalic.ttf"), 14}},
+      
+      {UI::FontType::FixedWidthRegular,       {KreatorResourcePath("Fonts/HfMonorita/Regular.ttf"),       10}},
+      {UI::FontType::FixedWidthLight,         {KreatorResourcePath("Fonts/HfMonorita/Light.ttf"),         10}},
+      {UI::FontType::FixedWidthMedium,        {KreatorResourcePath("Fonts/HfMonorita/Medium.ttf"),        10}},
+      {UI::FontType::FixedWidthBold,          {KreatorResourcePath("Fonts/HfMonorita/Bold.ttf"),          10}},
+      
+      {UI::FontType::Small,                   {KreatorResourcePath("Fonts/Opensans/Regular.ttf"),         12}},
+      {UI::FontType::Medium,                  {KreatorResourcePath("Fonts/Opensans/Regular.ttf"),         13}},
+      {UI::FontType::Large,                   {KreatorResourcePath("Fonts/Opensans/Regular.ttf"),         16}},
+      {UI::FontType::ExtraLarge,              {KreatorResourcePath("Fonts/Opensans/Regular.ttf"),         18}},
+      {UI::FontType::SemiHeader,              {KreatorResourcePath("Fonts/Opensans/SemiBold.ttf"),        20}},
+      {UI::FontType::Header,                  {KreatorResourcePath("Fonts/Opensans/Bold.ttf"),            30}},
+      {UI::FontType::HugeHeader,              {KreatorResourcePath("Fonts/Opensans/ExtraBold.ttf"),       40}},
+    });
+    
     KanVasX::Color::Initialize();
   }
   
@@ -388,27 +415,6 @@ namespace KanVest
       ImGui::OpenPopup("MainMenu");
     }
 
-//    if (UI::BeginPopup("MainMenu"))
-//    {
-//      ImGui::PushStyleColor(ImGuiCol_HeaderHovered, UI::Color::Highlight);
-//      static const IKan::Window* window = IKan::Application::Get().GetWindow();
-//      if (ImGui::MenuItem("Minimize"))
-//      {
-//        window->Iconify();
-//      }
-//      if (ImGui::MenuItem("Maximize", nullptr, false, !window->IsMaximized()))
-//      {
-//        window->Maximize();
-//      }
-//      ImGui::Separator();
-//      if (ImGui::MenuItem("Close", "Cmd + Q"))
-//      {
-//        IKan::Application::Get().Close();
-//      }
-//      ImGui::PopStyleColor();
-//      UI::EndPopup();
-//    }
-//    
 //    // Studio Name -------------------------------------------------------------------------
 //    UI::SetCursorPos({0.0f, 0.0f});
 //    UI::Text(UI::FontType::SemiHeader, "IKan-Studio", UI::AlignX::Center, {0.0f, 12.0f}, UI::Color::Highlight);

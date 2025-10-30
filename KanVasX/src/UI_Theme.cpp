@@ -296,5 +296,5 @@ namespace KanVasX
   ImU32 Color::U32FromVec4(const glm::vec4& color)
   {
     return ImGui::ColorConvertFloat4ToU32({color.r, color.g, color.b, color.a});
-  } 
+  }
 } // namespace KanVasX

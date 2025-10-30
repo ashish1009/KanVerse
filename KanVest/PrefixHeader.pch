@@ -19,3 +19,6 @@
 // Engine Files
 #include <KanVizHeader.h>
 #include <KanVasX.h>
+
+// Internal
+#include "UI/UI_Font.hpp"

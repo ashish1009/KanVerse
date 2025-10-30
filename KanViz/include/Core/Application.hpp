@@ -71,6 +71,8 @@ namespace KanViz
     void* GetNativeWindow() const;
     /// This function returns the iKan Window Instance as reference
     Window* GetWindow() const;
+    /// This function returns the ImGui Layer instance reference
+    UI::ImGuiLayer& GetImGuiLayer() const;
 
     /// This static API returns the single instance of core application
     [[nodiscard]] static Application& Get();

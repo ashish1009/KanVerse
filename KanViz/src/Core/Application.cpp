@@ -223,6 +223,14 @@ namespace KanViz
   {
     return m_window.get();
   }
+  UI::ImGuiLayer& Application::GetImGuiLayer() const
+  {
+    if (!m_imguiLayer)
+    {
+      throw std::runtime_error("ImGui Layer is not created yet !!");
+    }
+    return *m_imguiLayer.get();
+  }
 
   void Application::HandleEvents(Event &event)
   {
