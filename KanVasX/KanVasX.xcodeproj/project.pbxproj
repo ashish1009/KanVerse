@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B289EE342EB37FE500937D0B /* UI_Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE2D2EB37E3500937D0B /* UI_Utils.cpp */; };
+		B289EE3B2EB3A5FA00937D0B /* UI_Theme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE3A2EB3A5FA00937D0B /* UI_Theme.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -16,6 +17,9 @@
 		B289EE2C2EB37E3500937D0B /* UI_Utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Utils.hpp; sourceTree = "<group>"; };
 		B289EE2D2EB37E3500937D0B /* UI_Utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Utils.cpp; sourceTree = "<group>"; };
 		B289EE352EB37FF500937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
+		B289EE362EB3820C00937D0B /* UI_Settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Settings.hpp; sourceTree = "<group>"; };
+		B289EE382EB3847300937D0B /* UI_Theme.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Theme.hpp; sourceTree = "<group>"; };
+		B289EE3A2EB3A5FA00937D0B /* UI_Theme.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Theme.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +56,8 @@
 			children = (
 				B289EE2B2EB37E0900937D0B /* KanVasX.h */,
 				B289EE2C2EB37E3500937D0B /* UI_Utils.hpp */,
+				B289EE362EB3820C00937D0B /* UI_Settings.hpp */,
+				B289EE382EB3847300937D0B /* UI_Theme.hpp */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -60,6 +66,7 @@
 			isa = PBXGroup;
 			children = (
 				B289EE2D2EB37E3500937D0B /* UI_Utils.cpp */,
+				B289EE3A2EB3A5FA00937D0B /* UI_Theme.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -135,6 +142,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B289EE342EB37FE500937D0B /* UI_Utils.cpp in Sources */,
+				B289EE3B2EB3A5FA00937D0B /* UI_Theme.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -272,6 +280,7 @@
 					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGui",
 					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGuizmo",
 					"${PROJECT_DIR}/../KanViz/vendors/UI/Implot",
+					"${PROJECT_DIR}/../KanViz/vendors/glm",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -292,6 +301,7 @@
 					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGui",
 					"${PROJECT_DIR}/../KanViz/vendors/UI/ImGuizmo",
 					"${PROJECT_DIR}/../KanViz/vendors/UI/Implot",
+					"${PROJECT_DIR}/../KanViz/vendors/glm",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

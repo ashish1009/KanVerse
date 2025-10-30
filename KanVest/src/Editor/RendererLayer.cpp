@@ -16,6 +16,13 @@
 
 namespace KanVest
 {
+  static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
+  // Kretor Resource Path
+#define KreatorResourcePath(path) std::filesystem::absolute(KanVestResourcePath / path)
+
+  // Kreate Texture
+#define CreateTexture(path) KanViz::TextureFactory::Create(KreatorResourcePath(path))
+
   static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
     size_t totalSize = size * nmemb;
     output->append((char*)contents, totalSize);
@@ -95,6 +102,8 @@ namespace KanVest
     s_instance = this;
     
     IK_LOG_INFO("RendererLayer", "Creating '{0}' Layer instance", GetName());
+    
+    m_applicationIcon = CreateTexture("Textures/Icons/KanVest.png");
   }
   
   RendererLayer::~RendererLayer()
@@ -107,6 +116,8 @@ namespace KanVest
   {
     IK_PROFILE();
     IK_LOG_INFO("RendererLayer", "Attaching '{0}' Layer to application", GetName());
+    
+    KanVasX::Color::Initialize();
   }
   
   void RendererLayer::OnDetach() noexcept
@@ -357,19 +368,19 @@ namespace KanVest
     // Drag and Control the window with user title bar ----------------------------------
     UI_TitlebarDragArea(titleBarHeight);
     
-//    // Title bar rectangle --------------------------------------------------------------
-//    UI::SetCursorPos(windowPadding);
-//    UI::DrawRect(IM_COL32(0, 0, 0, 0), titleBarHeight);
-//    
-//    // Draw Kreator Logo ---------------------------------------------------------------
-//    ImGui::SetItemAllowOverlap();
-//    UI::SetCursorPos(windowPadding);
-//    static const ImVec2 size = {titleBarHeight - 10.0f, titleBarHeight - 10.0f};
-//    if (UI::DrawButtonImage("MainMenu", m_applicationIcon, false, size, {10.0f, 5.0f}, UI::Color::Highlight))
-//    {
-//      ImGui::OpenPopup("MainMenu");
-//    }
-//    
+    // Title bar rectangle --------------------------------------------------------------
+    KanVasX::UI::SetCursorPos(windowPadding);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::TitleBar, titleBarHeight);
+
+    // Draw KanVest Logo ----------------------------------------------------------------
+    ImGui::SetItemAllowOverlap();
+    KanVasX::UI::SetCursorPos(windowPadding);
+    static const ImVec2 size = {titleBarHeight - 10.0f, titleBarHeight - 10.0f};
+    if (KanVasX::UI::DrawButtonImage("MainMenu", KanVasX::UI::GetTextureID(m_applicationIcon->GetRendererID()), false, size, {10.0f, 5.0f}, KanVasX::Color::White))
+    {
+      ImGui::OpenPopup("MainMenu");
+    }
+
 //    if (UI::BeginPopup("MainMenu"))
 //    {
 //      ImGui::PushStyleColor(ImGuiCol_HeaderHovered, UI::Color::Highlight);

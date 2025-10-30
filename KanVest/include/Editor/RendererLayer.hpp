@@ -58,6 +58,8 @@ namespace KanVest
     void UI_WindowButtons();
 
     // Single Instance -----------------------------------
+    KanViz::Ref<KanViz::Image> m_applicationIcon;              //< Application icon
+
     static RendererLayer* s_instance;                          //< Renderer Layer single instance
   };
 } // namespace KanVest

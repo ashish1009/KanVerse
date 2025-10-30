@@ -14,8 +14,21 @@
 // C++ Files
 #include <iostream>
 
+// glm math library
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/random.hpp>
+#include <glm/gtc/noise.hpp>
+
 // UI Vendor files
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
 #include <implot.h>
+
+// UI Files
+#include "UI_Settings.hpp"

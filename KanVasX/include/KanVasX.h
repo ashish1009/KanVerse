@@ -21,4 +21,5 @@
 #include <ImGuizmo.h>
 
 // UX files
+#include <UI_Settings.hpp>
 #include <UI_Utils.hpp>
