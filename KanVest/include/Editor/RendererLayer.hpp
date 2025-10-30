@@ -50,6 +50,9 @@ namespace KanVest
     /// This function shows stock analyzer panel
     void UI_StockAnalyzer();
     
+    /// This function shows Performance pane;
+    void UI_PerformancePanel();
+    
     /// This function shows primary Viewport panel
     void UI_PrimaryViewportPanel_DEMO();
 
@@ -65,6 +68,7 @@ namespace KanVest
     KanViz::Ref<KanViz::Image> m_applicationIcon;                  //< Application icon
     KanViz::Ref<KanViz::Image> m_iconMinimize, m_iconMaximize;     //< Icons to maximize and minimize the iwndow
     KanViz::Ref<KanViz::Image> m_iconRestore, m_iconClose;         //< Icons to close and restore the window
+    KanViz::Ref<KanViz::Image> m_shadowTexture;                    //< Side shadow
 
     static RendererLayer* s_instance;                              //< Renderer Layer single instance
   };

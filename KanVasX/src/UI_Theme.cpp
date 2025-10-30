@@ -35,7 +35,7 @@ namespace KanVasX
     // Colors ----------------------------------------------------------------------------------------------------------------------------------------
     // Values -----------------------------
     // Window
-    Background            = IM_COL32(25, 26, 27, 155);
+    Background            = IM_COL32(25, 26, 30, 155);
     
     // Highlight
     Highlight             = IM_COL32(191, 177, 155, 255);
@@ -78,7 +78,7 @@ namespace KanVasX
     FrameBgActive         = Alpha(FrameBg, 0.3f);
     
     // Widget Title BG
-    TitleBar              = Alpha(Saturation(Background, 0.3f), 0.1f);
+    TitleBar              = Alpha(Saturation(Background, 0.3f), 1.0f);
     TitleBgActive         = Alpha(TitleBar, 0.2f);
     TitleBgCollapsed      = Alpha(TitleBar, 0.3f);
     

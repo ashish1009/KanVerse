@@ -108,47 +108,51 @@ namespace KanViz
     
     while (m_isRunning)
     {
-      IK_PERFORMANCE_FUNC("Application::Run");
-      
-      // Client virtual override update function.
+      PerformanceProfile::Get().BeginFrame();
       {
-        IK_PERFORMANCE_FUNC("Application::ClientUpdate");
-        OnUpdate(m_timeStep);
-      }
-      
-      // Updating all the attached layer
-      {
-        IK_PERFORMANCE_FUNC("Application::LayersUpdate");
-        for (const Ref<Layer>& layer : m_layers)
+        IK_PERFORMANCE_FUNC("Application::Run");
+        
+        // Client virtual override update function.
         {
-          layer->OnUpdate(m_timeStep);
+          IK_PERFORMANCE_FUNC("Application::ClientUpdate");
+          OnUpdate(m_timeStep);
+        }
+        
+        // Updating all the attached layer
+        {
+          IK_PERFORMANCE_FUNC("Application::LayersUpdate");
+          for (const Ref<Layer>& layer : m_layers)
+          {
+            layer->OnUpdate(m_timeStep);
+          }
+        }
+        
+        {
+          IK_PERFORMANCE_FUNC("Application::WindowUpdate");
+          
+          // Update the window swap buffers
+          m_window->Update();
+          
+          // Store the frame time difference
+          m_timeStep = m_window->GetTimestep();
+        }
+        
+        {
+          IK_PERFORMANCE_FUNC("Application::Renderer_Update");
+          Renderer::OnUpdate();
+        }
+        
+        // Render ImGui at last
+        RenderImGuiLayers();
+        
+        {
+          IK_PERFORMANCE_FUNC("Application::WaitAndRender");
+          
+          // Execute all commands from queue before game loop
+          Renderer::WaitAndRender();
         }
       }
-
-      {
-        IK_PERFORMANCE_FUNC("Application::WindowUpdate");
-        
-        // Update the window swap buffers
-        m_window->Update();
-        
-        // Store the frame time difference
-        m_timeStep = m_window->GetTimestep();
-      }
-      
-      {
-        IK_PERFORMANCE_FUNC("Application::Renderer_Update");
-        Renderer::OnUpdate();
-      }
-
-      // Render ImGui at last
-      RenderImGuiLayers();
-      
-      {
-        IK_PERFORMANCE_FUNC("Application::WaitAndRender");
-        
-        // Execute all commands from queue before game loop
-        Renderer::WaitAndRender();
-      }
+      PerformanceProfile::Get().EndFrame();
     }
 
     IK_LOG_WARN("", "--------------------------------------------------------------------------");

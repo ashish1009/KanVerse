@@ -23,3 +23,6 @@
 // UX files
 #include <UI_Settings.hpp>
 #include <UI_Utils.hpp>
+#include <UI_Theme.hpp>
+#include <UI_Scoped.hpp>
+#include <UI_Panel.hpp>

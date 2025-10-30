@@ -10,6 +10,8 @@
 		B289EE342EB37FE500937D0B /* UI_Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE2D2EB37E3500937D0B /* UI_Utils.cpp */; };
 		B289EE3B2EB3A5FA00937D0B /* UI_Theme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE3A2EB3A5FA00937D0B /* UI_Theme.cpp */; };
 		B289EE432EB3AE2C00937D0B /* UI_Scoped.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289EE412EB3AE2C00937D0B /* UI_Scoped.hpp */; };
+		B289EE472EB3BEBE00937D0B /* UI_Panel.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289EE452EB3BEBE00937D0B /* UI_Panel.hpp */; };
+		B289EE482EB3BEBE00937D0B /* UI_Panel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE462EB3BEBE00937D0B /* UI_Panel.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +24,8 @@
 		B289EE382EB3847300937D0B /* UI_Theme.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Theme.hpp; sourceTree = "<group>"; };
 		B289EE3A2EB3A5FA00937D0B /* UI_Theme.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Theme.cpp; sourceTree = "<group>"; };
 		B289EE412EB3AE2C00937D0B /* UI_Scoped.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Scoped.hpp; sourceTree = "<group>"; };
+		B289EE452EB3BEBE00937D0B /* UI_Panel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Panel.hpp; sourceTree = "<group>"; };
+		B289EE462EB3BEBE00937D0B /* UI_Panel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Panel.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +65,7 @@
 				B289EE362EB3820C00937D0B /* UI_Settings.hpp */,
 				B289EE382EB3847300937D0B /* UI_Theme.hpp */,
 				B289EE412EB3AE2C00937D0B /* UI_Scoped.hpp */,
+				B289EE452EB3BEBE00937D0B /* UI_Panel.hpp */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -70,6 +75,7 @@
 			children = (
 				B289EE2D2EB37E3500937D0B /* UI_Utils.cpp */,
 				B289EE3A2EB3A5FA00937D0B /* UI_Theme.cpp */,
+				B289EE462EB3BEBE00937D0B /* UI_Panel.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -82,6 +88,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B289EE432EB3AE2C00937D0B /* UI_Scoped.hpp in Headers */,
+				B289EE472EB3BEBE00937D0B /* UI_Panel.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -145,6 +152,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289EE482EB3BEBE00937D0B /* UI_Panel.cpp in Sources */,
 				B289EE342EB37FE500937D0B /* UI_Utils.cpp in Sources */,
 				B289EE3B2EB3A5FA00937D0B /* UI_Theme.cpp in Sources */,
 			);

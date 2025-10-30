@@ -89,14 +89,14 @@ namespace KanVest
     return values;
   }
   
-  static void SeparatorText(const char* label)
-  {
-    ImGui::Spacing();
-    KanVasX::UI::Separator();
-    ImGui::TextUnformatted(label);
-    KanVasX::UI::Separator();
-    ImGui::Spacing();
-  }
+//  static void SeparatorText(const char* label)
+//  {
+//    ImGui::Spacing();
+//    KanVasX::UI::Separator();
+//    ImGui::TextUnformatted(label);
+//    KanVasX::UI::Separator();
+//    ImGui::Spacing();
+//  }
 
   RendererLayer* RendererLayer::s_instance = nullptr;
   RendererLayer& RendererLayer::Get()
@@ -123,6 +123,7 @@ namespace KanVest
     m_iconMinimize = CreateTexture("Textures/Icons/Minimize.png");
     m_iconMaximize = CreateTexture("Textures/Icons/Maximize.png");
     m_iconRestore = CreateTexture("Textures/Icons/Restore.png");
+    m_shadowTexture = CreateTexture("Textures/Editor/Shadow.png");
   }
   
   RendererLayer::~RendererLayer()
@@ -181,8 +182,9 @@ namespace KanVest
   {
     UI_StartMainWindowDocking();
     
-    UI_PrimaryViewportPanel_DEMO();
+//    UI_PrimaryViewportPanel_DEMO();
     UI_StockAnalyzer();
+//    UI_PerformancePanel();
     
     UI_EndMainWindowDocking();
   }
@@ -260,10 +262,61 @@ namespace KanVest
   {
     IK_PERFORMANCE_FUNC("RendererLayer::UI_StockAnalyzer");
     
-    ImGui::Begin("KanVest Stock Analyzer");
-    {      
+    KanVasX::Panel::Begin("Stock Analyzer");
+    {
     }
-    ImGui::End();
+    KanVasX::Panel::End(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
+  }
+  
+  void RendererLayer::UI_PerformancePanel()
+  {
+    KanVasX::Panel::Begin("Performance");
+    {
+      ImGui::Text("Frame Time: %.2f ms (%.1f FPS)",
+                  1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+      ImGui::Separator();
+      
+      const KanViz::PerfNode* root = KanViz::PerformanceProfile::Get().GetRoot(); // adjust to your API
+      
+      if (!root) {
+        ImGui::TextDisabled("No performance data available.");
+        ImGui::End();
+        return;
+      }
+      
+      std::function<void(const KanViz::PerfNode*, int)> drawNode;
+      drawNode = [&](const KanViz::PerfNode* node, int depth)
+      {
+        if (!node) return;
+        
+        double ms = node->durationMicro / 1000.0;
+        
+        // Color by duration
+        ImVec4 color;
+        if (ms > 8.0)      color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); // slow (red)
+        else if (ms > 3.0) color = ImVec4(1.0f, 0.8f, 0.3f, 1.0f); // medium (yellow)
+        else               color = ImVec4(0.6f, 1.0f, 0.6f, 1.0f); // fast (green)
+        
+        bool open = ImGui::TreeNodeEx(
+                                      (void*)node,
+                                      ImGuiTreeNodeFlags_DefaultOpen | (node->children.empty() ? ImGuiTreeNodeFlags_Leaf : 0),
+                                      "%s", node->name.c_str()
+                                      );
+        
+        ImGui::SameLine(300);
+        ImGui::TextColored(color, "%6.3f ms", ms);
+        
+        if (open) {
+          for (auto& child : node->children)
+            drawNode(child.get(), depth + 1);
+          ImGui::TreePop();
+        }
+      };
+      
+      drawNode(root, 0);
+    }
+
+    KanVasX::Panel::End(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
   }
 
   void RendererLayer::UI_PrimaryViewportPanel_DEMO()
@@ -573,11 +626,11 @@ namespace KanVest
 
     // KanVest Name -------------------------------------------------------------------------
     KanVasX::UI::SetCursorPos({0.0f, 0.0f});
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header), "KanVest", KanVasX::UI::AlignX::Center, {0.0f, 12.0f}, KanVasX::Color::Highlight);
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header), "KanVest", KanVasX::UI::AlignX::Center, {0.0f, 10.0f}, KanVasX::Color::Highlight);
     
     // Title Rectangles --------------------------------------------------------------------
     KanVasX::UI::SetCursorPos({ImGui::GetWindowWidth() / 4, windowPadding.y});
-    KanVasX::UI::DrawRect(KanVasX::Color::Alpha(KanVasX::Color::HighlightMuted, 0.4f), titleBarHeight / 1.2, 0.5f, {0.0f, titleBarHeight / 4});
+    KanVasX::UI::DrawRect(KanVasX::Color::Alpha(KanVasX::Color::HighlightMuted, 0.4f), titleBarHeight / 1.6, 0.5f, {0.0f, titleBarHeight / 4});
     
     // Render the Window Buttons -------------------------------------------------------
     KanVasX::UI::SetCursorPosX(ImGui::GetWindowWidth() - 78);

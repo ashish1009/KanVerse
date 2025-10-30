@@ -13,7 +13,6 @@ namespace KanVasX
   // This MACRO Cast uint32_t into void pointer
 #define INT2VOIDP(i)    (void*)(uintptr_t)(i)
   
-  static int32_t s_UIContextID = 0;
   static uint32_t s_counter = 0;
   static char s_bufferID[16] = "##";
   static char s_labeledBufferID[1024];
