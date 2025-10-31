@@ -7,6 +7,7 @@
 
 #include "RendererLayer.hpp"
 
+#include "Stocks/StockController.hpp"
 #include "Stocks/StockAPI.hpp"
 
 namespace KanVest
@@ -224,7 +225,7 @@ namespace KanVest
           ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
       {
         std::string stockSymbol = searchedString + std::string(".NS");
-        stockData = StockAPI::UpdateStockData(stockSymbol);
+        stockData = StockController::UpdateStockData(stockSymbol);
       }
 
       if (stockData.livePrice != -1)
@@ -277,12 +278,12 @@ namespace KanVest
       symbol = std::string(symbolBuf);
       
       std::string liveURL = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol;
-      std::string liveData = fetchURL(liveURL);
+      std::string liveData = StockAPI::FetchURL(liveURL);
       
       // If liveData doesn't contain usual fields, try .BO fallback for Indian stocks
       if (liveData.find("\"regularMarketPrice\"") == std::string::npos && autoFallbackBO && symbol.find(".NS") != std::string::npos) {
         std::string altSymbol = symbol.substr(0, symbol.find(".NS")) + ".BO";
-        std::string altData = fetchURL("https://query1.finance.yahoo.com/v8/finance/chart/" + altSymbol);
+        std::string altData = StockAPI::FetchURL("https://query1.finance.yahoo.com/v8/finance/chart/" + altSymbol);
         if (altData.find("\"regularMarketPrice\"") != std::string::npos) {
           symbol = altSymbol;
           std::snprintf(symbolBuf, sizeof(symbolBuf), "%s", symbol.c_str());
@@ -340,7 +341,7 @@ namespace KanVest
       "?period1=" + std::to_string(period1) +
       "&period2=" + std::to_string(period2) +
       "&interval=1d";
-      std::string histData = fetchURL(histURL);
+      std::string histData = StockAPI::FetchURL(histURL);
       
       // parse arrays
       closes = extractArray(histData, "close");

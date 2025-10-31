@@ -9,36 +9,28 @@
 
 namespace KanVest
 {
-  StockData StockAPI::UpdateStockData(const std::string& symbolName)
+  static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output)
   {
-    // Ensure symbol has a suffix (.NS, .BO, etc.)
-    std::string symbol = symbolName;
-    if (symbol.find('.') == std::string::npos) {
-      symbol += ".NS"; // default to NSE
-    }
+    size_t totalSize = size * nmemb;
+    output->append((char*)contents, totalSize);
+    return totalSize;
+  }
 
-    // Fetch data from URL
-    std::string liveURL = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol;
-    std::string liveData = fetchURL(liveURL);
-    
-    // If liveData doesn't contain usual fields, try .BO fallback for Indian stocks
-    if (liveData.find("\"regularMarketPrice\"") == std::string::npos and symbolName.find(".NS") != std::string::npos)
+  std::string StockAPI::FetchURL(const std::string& url)
+  {
+    CURL* curl = curl_easy_init();
+    std::string response;
+    if (curl)
     {
-      std::string altSymbol = symbol.substr(0, symbol.find(".NS")) + ".BO";
-      std::string altData = fetchURL("https://query1.finance.yahoo.com/v8/finance/chart/" + altSymbol);
-
-      if (altData.find("\"regularMarketPrice\"") != std::string::npos)
-      {
-        symbol = altSymbol;
-        liveData = altData;
-      }
+      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+      curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0");
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_perform(curl);
+      curl_easy_cleanup(curl);
     }
-
-    // Update Stock data
-    StockData stockData(symbol);
-    
-    stockData.livePrice = extractValue(liveData, "regularMarketPrice");
-    
-    return stockData;
+    return response;
   }
 } // namespace KanVest

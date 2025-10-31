@@ -16,7 +16,9 @@
 		B289EE332EB37F9400937D0B /* libKanVasX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EE322EB37F9400937D0B /* libKanVasX.a */; };
 		B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE3F2EB3ACF200937D0B /* UI_Font.cpp */; };
 		B289EE512EB4CDFD00937D0B /* StockData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE502EB4CDFD00937D0B /* StockData.cpp */; };
-		B289EE542EB4CE7300937D0B /* StockAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE532EB4CE7300937D0B /* StockAPI.cpp */; };
+		B289EE542EB4CE7300937D0B /* StockController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE532EB4CE7300937D0B /* StockController.cpp */; };
+		B289EE572EB4D2F600937D0B /* StockAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE562EB4D2F600937D0B /* StockAPI.cpp */; };
+		B289EE5A2EB4D43700937D0B /* URL_Manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE592EB4D43700937D0B /* URL_Manager.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -50,8 +52,12 @@
 		B289EE3F2EB3ACF200937D0B /* UI_Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Font.cpp; sourceTree = "<group>"; };
 		B289EE4F2EB4CDFD00937D0B /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
 		B289EE502EB4CDFD00937D0B /* StockData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockData.cpp; sourceTree = "<group>"; };
-		B289EE522EB4CE7300937D0B /* StockAPI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockAPI.hpp; sourceTree = "<group>"; };
-		B289EE532EB4CE7300937D0B /* StockAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockAPI.cpp; sourceTree = "<group>"; };
+		B289EE522EB4CE7300937D0B /* StockController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockController.hpp; sourceTree = "<group>"; };
+		B289EE532EB4CE7300937D0B /* StockController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockController.cpp; sourceTree = "<group>"; };
+		B289EE552EB4D2F600937D0B /* StockAPI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockAPI.hpp; sourceTree = "<group>"; };
+		B289EE562EB4D2F600937D0B /* StockAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockAPI.cpp; sourceTree = "<group>"; };
+		B289EE582EB4D43700937D0B /* URL_Manager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = URL_Manager.hpp; sourceTree = "<group>"; };
+		B289EE592EB4D43700937D0B /* URL_Manager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = URL_Manager.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -184,7 +190,9 @@
 			isa = PBXGroup;
 			children = (
 				B289EE4F2EB4CDFD00937D0B /* StockData.hpp */,
-				B289EE522EB4CE7300937D0B /* StockAPI.hpp */,
+				B289EE522EB4CE7300937D0B /* StockController.hpp */,
+				B289EE552EB4D2F600937D0B /* StockAPI.hpp */,
+				B289EE582EB4D43700937D0B /* URL_Manager.hpp */,
 			);
 			path = Stocks;
 			sourceTree = "<group>";
@@ -193,7 +201,9 @@
 			isa = PBXGroup;
 			children = (
 				B289EE502EB4CDFD00937D0B /* StockData.cpp */,
-				B289EE532EB4CE7300937D0B /* StockAPI.cpp */,
+				B289EE532EB4CE7300937D0B /* StockController.cpp */,
+				B289EE562EB4D2F600937D0B /* StockAPI.cpp */,
+				B289EE592EB4D43700937D0B /* URL_Manager.cpp */,
 			);
 			path = Stocks;
 			sourceTree = "<group>";
@@ -261,10 +271,12 @@
 				B289EE512EB4CDFD00937D0B /* StockData.cpp in Sources */,
 				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
+				B289EE572EB4D2F600937D0B /* StockAPI.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
-				B289EE542EB4CE7300937D0B /* StockAPI.cpp in Sources */,
+				B289EE542EB4CE7300937D0B /* StockController.cpp in Sources */,
 				B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
+				B289EE5A2EB4D43700937D0B /* URL_Manager.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
