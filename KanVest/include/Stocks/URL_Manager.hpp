@@ -14,5 +14,6 @@ namespace KanVest
   {
   public:
     static std::string Get();
+    static std::string GetValueParserPattern(const std::string& key);
   };
 } // namespace KanVest

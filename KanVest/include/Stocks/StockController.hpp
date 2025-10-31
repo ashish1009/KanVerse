@@ -22,16 +22,7 @@ namespace KanVest
     // mktime assumes localtime. Yahoo wants UTC timestamps, but using local is usually fine for daily ranges.
     return mktime(&tm);
   }
-      
-  static double extractValue(const std::string& text, const std::string& key) {
-    std::string patternStr = "\"" + key + "\"\\s*:\\s*([-+]?[0-9]*\\.?[0-9]+)";
-    std::regex pattern(patternStr);
-    std::smatch match;
-    if (std::regex_search(text, match, pattern))
-      return std::stod(match[1].str());
-    return -1;
-  }
-  
+        
   static std::string extractString(const std::string& text, const std::string& key) {
     std::string patternStr = "\"" + key + "\"\\s*:\\s*\"([^\"]+)\"";
     std::regex pattern(patternStr);

@@ -9,6 +9,7 @@
 
 #include "Stocks/StockController.hpp"
 #include "Stocks/StockAPI.hpp"
+#include "Stocks/StockParser.hpp"
 
 namespace KanVest
 {
@@ -291,30 +292,30 @@ namespace KanVest
       }
       
       // --- Meta fields (many common ones) ---
-      price = extractValue(liveData, "regularMarketPrice");
-      openPrice = extractValue(liveData, "regularMarketOpen");
-      dayHigh = extractValue(liveData, "regularMarketDayHigh");
-      dayLow = extractValue(liveData, "regularMarketDayLow");
-      prevClose = extractValue(liveData, "chartPreviousClose");
+      price = StockParser::ExtractValue(liveData, "regularMarketPrice");
+      openPrice = StockParser::ExtractValue(liveData, "regularMarketOpen");
+      dayHigh = StockParser::ExtractValue(liveData, "regularMarketDayHigh");
+      dayLow = StockParser::ExtractValue(liveData, "regularMarketDayLow");
+      prevClose = StockParser::ExtractValue(liveData, "chartPreviousClose");
       
       change = price - prevClose;
       // some endpoints include percent field, try reading directly:
-      changePercent = extractValue(liveData, "regularMarketChangePercent");
+      changePercent = StockParser::ExtractValue(liveData, "regularMarketChangePercent");
       if (changePercent == -1 && prevClose > 0) changePercent = (change / prevClose) * 100.0;
       
-      fiftyTwoHigh = extractValue(liveData, "fiftyTwoWeekHigh");
-      fiftyTwoLow = extractValue(liveData, "fiftyTwoWeekLow");
+      fiftyTwoHigh = StockParser::ExtractValue(liveData, "fiftyTwoWeekHigh");
+      fiftyTwoLow = StockParser::ExtractValue(liveData, "fiftyTwoWeekLow");
       
-      regularMarketVolume = extractValue(liveData, "regularMarketVolume");
-      avgVolume3m = extractValue(liveData, "averageDailyVolume3Month");
-      avgVolume10day = extractValue(liveData, "averageDailyVolume10Day");
+      regularMarketVolume = StockParser::ExtractValue(liveData, "regularMarketVolume");
+      avgVolume3m = StockParser::ExtractValue(liveData, "averageDailyVolume3Month");
+      avgVolume10day = StockParser::ExtractValue(liveData, "averageDailyVolume10Day");
       
-      marketCap = extractValue(liveData, "marketCap");
-      trailingPE = extractValue(liveData, "trailingPE");
-      forwardPE = extractValue(liveData, "forwardPE");
+      marketCap = StockParser::ExtractValue(liveData, "marketCap");
+      trailingPE = StockParser::ExtractValue(liveData, "trailingPE");
+      forwardPE = StockParser::ExtractValue(liveData, "forwardPE");
       
-      dividendRate = extractValue(liveData, "dividendRate");
-      dividendYield = extractValue(liveData, "dividendYield");
+      dividendRate = StockParser::ExtractValue(liveData, "dividendRate");
+      dividendYield = StockParser::ExtractValue(liveData, "dividendYield");
       
       currency = extractString(liveData, "currency");
       exchangeName = extractString(liveData, "exchangeName");

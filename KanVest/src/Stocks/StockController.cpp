@@ -8,6 +8,7 @@
 #include "StockController.hpp"
 
 #include "Stocks/StockAPI.hpp"
+#include "Stocks/StockParser.hpp"
 
 namespace KanVest
 {
@@ -38,7 +39,7 @@ namespace KanVest
     // Update Stock data
     StockData stockData(symbol);
     
-    stockData.livePrice = extractValue(liveData, "regularMarketPrice");
+    stockData.livePrice = StockParser::ExtractValue(liveData, "regularMarketPrice");
     
     return stockData;
   }
