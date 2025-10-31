@@ -7,13 +7,13 @@
 
 #include "StockParser.hpp"
 
-#include "Stocks/URL_Manager.hpp"
+#include "Stocks/API_Provider.hpp"
 
 namespace KanVest
 {
   double StockParser::ExtractValue(const std::string& text, const std::string& key)
   {
-    std::string patternStr = URL::GetValueParserPattern(key);
+    std::string patternStr = API_Provider::GetValueParserPattern(key);
     std::regex pattern(patternStr);
     std::smatch match;
     

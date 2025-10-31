@@ -225,13 +225,13 @@ namespace KanVest
       if (KanVasX::UI::DrawButtonImage("Refresh", KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()), false, {prevItemHeight, prevItemHeight}, {-8.0, 4.0}) or
           ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
       {
-        std::string stockSymbol = searchedString + std::string(".NS");
-        stockData = StockController::UpdateStockData(stockSymbol);
+        stockData = StockController::UpdateStockData(searchedString);
       }
 
       if (stockData.livePrice != -1)
       {
-        ImGui::Text("%s : %f", stockData.symbol.c_str(), stockData.livePrice);
+        ImGui::Text("Name  : %s", stockData.symbol.c_str());
+        ImGui::Text("Price : %f", stockData.livePrice);
       }
     }
     KanVasX::Panel::End();

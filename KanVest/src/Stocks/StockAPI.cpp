@@ -7,7 +7,7 @@
 
 #include "StockAPI.hpp"
 
-#include "Stocks/URL_Manager.hpp"
+#include "Stocks/API_Provider.hpp"
 
 namespace KanVest
 {
@@ -24,7 +24,7 @@ namespace KanVest
     std::string response;
     if (curl)
     {
-      std::string url = URL::Get() + symbolName;
+      std::string url = API_Provider::GetURL() + symbolName;
       
       curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
