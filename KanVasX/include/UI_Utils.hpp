@@ -36,6 +36,11 @@ namespace KanVasX
     static void EndDisabled();
 
     // Wrappers --------------------------------------------------------------------------------------------------------------------------------------
+    /// This function push unque id for ImGui
+    static void PushID();
+    /// This function pop last used id for ImGui
+    static void PopID();
+
     /// This function checkes is imgui item hovered
     static bool IsItemHovered();
     /// This function checles is imgui item disabled
@@ -130,6 +135,33 @@ namespace KanVasX
     ///   - offset: offset position
     ///   - rounding: rounding factor
     static void DrawFilledRect(const ImU32& color, float height, float widthFactor = 1.0f, const glm::vec2& offset = {0, 0}, float rounding = Settings::FrameRounding);
+    /// This function draw the Activity outline
+    /// - Parameters:
+    ///   - rounding: Outline rounding
+    ///   - drawWhenInactive: Flag to draw when inactive
+    ///   - colourWhenActive: Color when active
+    static void DrawItemActivityOutline(float rounding = Settings::FrameRounding, bool drawWhenInactive = false, const ImColor& colourWhenActive = ImColor(80, 80, 80));
+    /// This function renders the line in Ingui
+    /// - Parameters:
+    ///   - color: color of line
+    ///   - fullWidth: cover full widget of widget
+    ///   - offsetX: X offset
+    ///   - offsetY: X offset
+    static void DrawUnderline(const ImU32& color = Color::Alpha(Color::Separator, 0.08f), bool fullWidth = true, float offsetX = 0.0f, float offsetY = 1.0f);
+
+    
+    // Image -----------------------------------------------------------------------------------------------------------------------------------------
+    /// This function renders the imgui image
+    /// - Parameters:
+    ///   - texture: Ikan Image refernce
+    ///   - size: size of imgui image
+    ///   - color: override color of image
+    ///   - bodorColor: boder color of image
+    ///   - uv0 top left corner border of image
+    ///   - uv1 bottom right corner border of image
+    static void Image(ImTextureID textureId, const ImVec2& size,
+                      const ImU32& color = Color::White, const ImU32& borderColor = Color::Null,
+                      const ImVec2& uv0 = {0, 1}, const ImVec2& uv1 = {1, 0});
 
     // Buttons ---------------------------------------------------------------------------------------------------------------------------------------
     /// This function draws the image button
@@ -144,7 +176,18 @@ namespace KanVasX
     static bool DrawButtonImage(const std::string_view title, ImTextureID image, bool highlight,
                                 const ImVec2& size, const ImVec2& offset = {0, 0},
                                 const ImU32& normalColor = Color::White, const ImU32& hoveredColor = Color::White, const ImU32& pressedColor = Color::White);
-    
+    /// This function draw the button with string
+    /// - Parameters:
+    ///   - title: button title
+    ///   - fontType: Button font instance
+    ///   - textColor: button text color
+    ///   - buttonColor: button color
+    ///   - ZeroVec2: button size
+    ///   - rounding: button edge rounding
+    ///   - size: button extra size
+    static bool DrawButton(std::string_view title, ImFont* imGuiFont, const ImU32& buttonColor = Color::Button, const ImU32& textColor = Color::Text,
+                           bool inactive = false, float rounding = Settings::FrameRounding, const ImVec2& size = {0, 0});
+
     // Shadow ----------------------------------------------------------------------------------------------------------------------------------------
     /// This function render the Shadow Texture in ImGui
     /// - Parameters:

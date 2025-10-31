@@ -12,11 +12,18 @@ namespace KanVasX
   class Panel
   {
   public:
+    /// This initializes the texture ID
+    /// - Parameter shadowTextureID: shadow texture ID
+    static void Initialize(ImTextureID shadowTextureID);
+    
     /// This function wraps the ImGui Begin with theme modification
     /// - Parameter title: title of imgui
     static bool Begin(std::string_view title, bool* isOpen = nullptr, ImGuiWindowFlags flags = 0);
     /// This function ends the ImGui panel
     /// - Parameter shadow: Flag to render shadow
-    static void End(ImTextureID shadowTextureID = 0, int32_t radius = 15);
+    static void End(int32_t radius = 15);
+    
+  private:
+    inline static ImTextureID s_shadowTextureID = 0;
   };
 } // namespace KanVasX

@@ -10,6 +10,11 @@
 
 namespace KanVasX
 {
+  void Panel::Initialize(ImTextureID shadowTextureID)
+  {
+    s_shadowTextureID = shadowTextureID;
+  }
+  
   bool Panel::Begin(std::string_view title, bool* isOpen, ImGuiWindowFlags flags)
   {
     ScopedColor textColor(ImGuiCol_Text, Color::HighlightContrast);
@@ -18,11 +23,11 @@ namespace KanVasX
     
     return ImGui::Begin(title.data(), isOpen, flags | ImGuiWindowFlags_NoTitleBar);
   }
-  void Panel::End(ImTextureID shadowTextureID, int32_t radius)
+  void Panel::End(int32_t radius)
   {
-    if (shadowTextureID != 0)
+    if (s_shadowTextureID != 0)
     {
-      UI::DrawShadowAllDirection(shadowTextureID, radius);
+      UI::DrawShadowAllDirection(s_shadowTextureID, radius);
     }
     ImGui::End();
   }

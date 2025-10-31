@@ -165,6 +165,7 @@ namespace KanVest
     });
     
     KanVasX::Color::Initialize();
+    KanVasX::Panel::Initialize(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
   }
   
   void RendererLayer::OnDetach() noexcept
@@ -184,7 +185,7 @@ namespace KanVest
     
 //    UI_PrimaryViewportPanel_DEMO();
     UI_StockAnalyzer();
-//    UI_PerformancePanel();
+    UI_PerformancePanel();
     
     UI_EndMainWindowDocking();
   }
@@ -265,7 +266,7 @@ namespace KanVest
     KanVasX::Panel::Begin("Stock Analyzer");
     {
     }
-    KanVasX::Panel::End(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
+    KanVasX::Panel::End();
   }
   
   void RendererLayer::UI_PerformancePanel()
@@ -316,7 +317,7 @@ namespace KanVest
       drawNode(root, 0);
     }
 
-    KanVasX::Panel::End(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
+    KanVasX::Panel::End();
   }
 
   void RendererLayer::UI_PrimaryViewportPanel_DEMO()

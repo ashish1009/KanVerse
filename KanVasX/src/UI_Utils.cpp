@@ -13,6 +13,7 @@ namespace KanVasX
   // This MACRO Cast uint32_t into void pointer
 #define INT2VOIDP(i)    (void*)(uintptr_t)(i)
   
+  static int32_t s_UIContextID = 0;
   static uint32_t s_counter = 0;
   static char s_bufferID[16] = "##";
   static char s_labeledBufferID[1024];
@@ -32,6 +33,17 @@ namespace KanVasX
       ImGui::PopStyleColor();
       ImGui::EndDisabled();
     }
+  }
+
+  void UI::PushID()
+  {
+    ImGui::PushID(s_UIContextID++);
+    s_counter = 0;
+  }
+  void UI::PopID()
+  {
+    ImGui::PopID();
+    s_UIContextID--;
   }
 
   const char* GenerateID()
@@ -190,6 +202,61 @@ namespace KanVasX
     auto* drawList = ImGui::GetWindowDrawList();
     drawList->AddRectFilled(titlebarMin, titlebarMax, color, rounding);
   }
+  
+  // Image -----------------------------------------------------------------------------------------------------------------------------------------
+  void UI::Image(ImTextureID textureId, const ImVec2& size, const ImU32& tintCol, const ImU32& borderCol, const ImVec2& uv0, const ImVec2& uv1)
+  {
+    ImGui::Image(textureId, size, uv0, uv1, ImGui::ColorConvertU32ToFloat4(tintCol), ImGui::ColorConvertU32ToFloat4(borderCol));
+  }
+
+  void UI::DrawItemActivityOutline(float rounding, bool drawWhenInactive, const ImColor& colorWhenActive)
+  {
+    auto* drawList = ImGui::GetWindowDrawList();
+    const ImRect rect = RectExpanded(GetItemRect(), 0.1f, 0.1f);
+    if (ImGui::IsItemHovered() and !ImGui::IsItemActive())
+    {
+      drawList->AddRect(rect.Min, rect.Max, Color::Lerp(colorWhenActive, Color::TitleBar, 0.3), rounding, 0, 1.5f);
+    }
+    if (ImGui::IsItemActive())
+    {
+      drawList->AddRect(rect.Min, rect.Max, colorWhenActive, rounding, 0, 2.0f);
+    }
+    else if (!ImGui::IsItemHovered() and drawWhenInactive)
+    {
+      drawList->AddRect(rect.Min, rect.Max, Color::Lerp(colorWhenActive, Color::TitleBar, 0.5), rounding, 0, 1.0f);
+    }
+  }
+  void UI::DrawUnderline(const ImU32& color, bool fullWidth, float offsetX, float offsetY)
+  {
+    if (fullWidth)
+    {
+      if (ImGui::GetCurrentWindow()->DC.CurrentColumns != nullptr)
+      {
+        ImGui::PushColumnsBackground();
+      }
+      else if (ImGui::GetCurrentTable() != nullptr)
+      {
+        ImGui::TablePushBackgroundChannel();
+      }
+    }
+    
+    const float width = fullWidth ? ImGui::GetWindowWidth() : ImGui::GetContentRegionAvail().x;
+    UI::ShiftCursorY(5);
+    const ImVec2 cursor = ImGui::GetCursorScreenPos();
+    ImGui::GetWindowDrawList()->AddLine(ImVec2(cursor.x + offsetX, cursor.y + offsetY), ImVec2(cursor.x + width, cursor.y + offsetY), color, 1.0f);
+    
+    if (fullWidth)
+    {
+      if (ImGui::GetCurrentWindow()->DC.CurrentColumns != nullptr)
+      {
+        ImGui::PopColumnsBackground();
+      }
+      else if (ImGui::GetCurrentTable() != nullptr)
+      {
+        ImGui::TablePopBackgroundChannel();
+      }
+    }
+  }
 
   void DrawButtonImageImpl(ImTextureID imageNormal, ImTextureID imageHovered, ImTextureID imagePressed,
                        const ImVec2& rectMin, const ImVec2& rectMax,
@@ -247,6 +314,48 @@ namespace KanVasX
     return clicked;
   }
   
+  bool UI::DrawButton(std::string_view title, ImFont* imGuiFont, const ImU32& buttonColor, const ImU32& textColor, bool inactive, float rounding, const ImVec2& size)
+  {
+    ImGui::PushStyleColor(ImGuiCol_Text, textColor);
+    ImGui::PushID(title.data());
+    
+    ScopedStyle roundingStyle(ImGuiStyleVar_FrameRounding, rounding);
+    ScopedFont headerStyle(imGuiFont);
+    
+    if (inactive)
+    {
+      ImGui::PushStyleColor(ImGuiCol_Button, Color::ButtonMuted);
+      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Color::ButtonMuted);
+      ImGui::PushStyleColor(ImGuiCol_ButtonActive, Color::ButtonMuted);
+      
+      ImGui::PushStyleColor(ImGuiCol_BorderShadow, Color::Lerp(Color::BackgroundShadow, Color::ButtonMuted, 0.9));
+      ImGui::PushStyleColor(ImGuiCol_Border, Color::Lerp(Color::Border, Color::ButtonMuted, 0.9));
+      
+      ImGui::PushStyleColor(ImGuiCol_Text, Color::TextMuted);
+    }
+    else
+    {
+      ImU32 tintNormal = Color::Alpha(buttonColor, 0.6f);
+      ImU32 tintHovered = Color::Alpha(buttonColor, 1.1f);
+      ImU32 tintPressed = Color::Alpha(buttonColor, 0.3f);
+      
+      ImGui::PushStyleColor(ImGuiCol_Button, tintNormal);
+      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, tintHovered);
+      ImGui::PushStyleColor(ImGuiCol_ButtonActive, tintPressed);
+    }
+    
+    bool clicked = ImGui::Button(title.data(), size);
+    
+    ImGui::PopStyleColor(3);
+    if (inactive)
+    {
+      ImGui::PopStyleColor(3);
+    }
+    ImGui::PopID();
+    ImGui::PopStyleColor();
+    return inactive ? false : clicked;
+  }
+
   // Shadow ----------------------------------------------------------------------------------------------------------------------------------------
   void DrawShadowInnerImpl(ImTextureID shadowImageID, UI::Position position, int radius, const ImVec2& rectMin,
                            const ImVec2& rectMax, float alpha, float lengthStretch)
