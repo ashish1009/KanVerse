@@ -17,6 +17,8 @@ namespace KanVest
   struct APIKeys
   {
     std::string price;
+    std::string prevClose;
+    std::string changePercent;
   };
   
   /// This class stores the server URL from where data need to be extracted

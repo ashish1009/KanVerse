@@ -42,8 +42,17 @@ namespace KanVest
 
     // Update Stock data
     StockData stockData(symbolName);
-    stockData.livePrice = StockParser::ExtractValue(liveData, keys.price);
     
+    stockData.livePrice = StockParser::ExtractValue(liveData, keys.price);
+    stockData.prevClose = StockParser::ExtractValue(liveData, keys.prevClose);
+    stockData.change = stockData.livePrice - stockData.prevClose;
+    stockData.changePercent = StockParser::ExtractValue(liveData, "regularMarketChangePercent");
+    if (stockData.changePercent == -1 && stockData.prevClose > 0)
+    {
+      stockData.changePercent = (stockData.change / stockData.prevClose) * 100.0;
+    }
+
+
     return stockData;
   }
 } // namespace KanVest

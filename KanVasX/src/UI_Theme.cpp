@@ -15,7 +15,7 @@ namespace KanVasX
     ImGuiStyle& imGuiStyle = ImGui::GetStyle();
     
     // ImGui Style ---------------------------------------------------------------------------------------------------------------------------------
-    Settings::FrameRounding = 4.0f;
+    Settings::FrameRounding = 6.0f;
     Settings::FrameHeight = 8.0f;
     
     imGuiStyle.FrameRounding = Settings::FrameRounding;
@@ -61,7 +61,7 @@ namespace KanVasX
     SeparatorActive       = Alpha(Separator, 0.3);
     
     // Text
-    TextMuted             = Alpha(Text, 0.5f);
+    TextMuted             = Value(Text, 0.5f);
     TextDark              = Value(Text, 1.5f);
     TextSelectedBg        = HighlightMuted;
     

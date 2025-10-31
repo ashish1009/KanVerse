@@ -37,7 +37,9 @@ namespace KanVest
     switch (s_stockAPIProvider)
     {
       case StockAPIProvider::Yahoo:
-        keys.price = "regularMarketPrice";
+        keys.price            = "regularMarketPrice";
+        keys.prevClose        = "chartPreviousClose";
+        keys.changePercent    = "regularMarketChangePercent";
         break;
         
       default:

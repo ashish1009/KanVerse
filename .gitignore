@@ -4,8 +4,10 @@ DerivedData/
 
 #Engine Files
 *.log
+*.profiler
 
 # Mac Files
 .DS_Store
 *.xcuserstate
 xcuserdata/
+*.profiler
