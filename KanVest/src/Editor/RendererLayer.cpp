@@ -19,10 +19,10 @@ namespace KanVest
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
   // Kretor Resource Path
 #define KanVestResourcePath(path) std::filesystem::absolute(KanVestResourcePath / path)
-
+  
   // Kreate Texture
 #define CreateTexture(path) KanViz::TextureFactory::Create(KanVestResourcePath(path))
-
+  
   static time_t parseDateYYYYMMDD(const std::string &s) {
     // Accepts "YYYY-MM-DD", returns time_t for 00:00:00 local time on that date
     std::tm tm = {};
@@ -34,7 +34,7 @@ namespace KanVest
     // mktime assumes localtime. Yahoo wants UTC timestamps, but using local is usually fine for daily ranges.
     return mktime(&tm);
   }
-
+  
   static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
     size_t totalSize = size * nmemb;
     output->append((char*)contents, totalSize);
@@ -89,15 +89,26 @@ namespace KanVest
     return values;
   }
   
-//  static void SeparatorText(const char* label)
-//  {
-//    ImGui::Spacing();
-//    KanVasX::UI::Separator();
-//    ImGui::TextUnformatted(label);
-//    KanVasX::UI::Separator();
-//    ImGui::Spacing();
-//  }
-
+  //  static void SeparatorText(const char* label)
+  //  {
+  //    ImGui::Spacing();
+  //    KanVasX::UI::Separator();
+  //    ImGui::TextUnformatted(label);
+  //    KanVasX::UI::Separator();
+  //    ImGui::Spacing();
+  //  }
+  
+  namespace Utils
+  {
+    void ConvertUpper(char* string)
+    {
+      for (char* p = string; *p; ++p)
+      {
+        *p = (char)toupper(*p);
+      }
+    }
+  } // namespace Utils
+  
   RendererLayer* RendererLayer::s_instance = nullptr;
   RendererLayer& RendererLayer::Get()
   {
@@ -124,11 +135,11 @@ namespace KanVest
     m_iconMaximize = CreateTexture("Textures/Icons/Maximize.png");
     m_iconRestore = CreateTexture("Textures/Icons/Restore.png");
     m_shadowTexture = CreateTexture("Textures/Editor/Shadow.png");
-
+    
     // Widget Icons
     m_searchIcon = CreateTexture("Textures/Icons/Search.png");
     m_settingIcon = CreateTexture("Textures/Icons/Gear.png");
-
+    
   }
   
   RendererLayer::~RendererLayer()
@@ -144,28 +155,28 @@ namespace KanVest
     
     // Set the Imgui theme ----------------------------------------------------------------------
     KanVest::UI::Font::Load({
-      {UI::FontType::Regular,                 {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         14}},
-      {UI::FontType::Light,                   {KanVestResourcePath("Fonts/Opensans/Light.ttf"),           14}},
-      {UI::FontType::Italic,                  {KanVestResourcePath("Fonts/Opensans/Italic.ttf"),          14}},
-      {UI::FontType::LightItalic,             {KanVestResourcePath("Fonts/Opensans/LightItalic.ttf"),     14}},
-      {UI::FontType::SemiBold,                {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        14}},
-      {UI::FontType::Bold,                    {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            14}},
-      {UI::FontType::SemiBoldItalic,          {KanVestResourcePath("Fonts/Opensans/SemiBoldItalic.ttf"),  14}},
-      {UI::FontType::BoldItalic,              {KanVestResourcePath("Fonts/Opensans/BoldItalic.ttf"),      14}},
-      {UI::FontType::ExtraBold,               {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       14}},
-      {UI::FontType::ExtraBoldItalic,         {KanVestResourcePath("Fonts/Opensans/ExtraBoldItalic.ttf"), 14}},
+      {UI::FontType::Regular,                 {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         16}},
+      {UI::FontType::Light,                   {KanVestResourcePath("Fonts/Opensans/Light.ttf"),           16}},
+      {UI::FontType::Italic,                  {KanVestResourcePath("Fonts/Opensans/Italic.ttf"),          16}},
+      {UI::FontType::LightItalic,             {KanVestResourcePath("Fonts/Opensans/LightItalic.ttf"),     16}},
+      {UI::FontType::SemiBold,                {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        16}},
+      {UI::FontType::Bold,                    {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            16}},
+      {UI::FontType::SemiBoldItalic,          {KanVestResourcePath("Fonts/Opensans/SemiBoldItalic.ttf"),  16}},
+      {UI::FontType::BoldItalic,              {KanVestResourcePath("Fonts/Opensans/BoldItalic.ttf"),      16}},
+      {UI::FontType::ExtraBold,               {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       16}},
+      {UI::FontType::ExtraBoldItalic,         {KanVestResourcePath("Fonts/Opensans/ExtraBoldItalic.ttf"), 16}},
       
       {UI::FontType::FixedWidthRegular,       {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       10}},
       {UI::FontType::FixedWidthLight,         {KanVestResourcePath("Fonts/HfMonorita/Light.ttf"),         10}},
       {UI::FontType::FixedWidthMedium,        {KanVestResourcePath("Fonts/HfMonorita/Medium.ttf"),        10}},
       {UI::FontType::FixedWidthBold,          {KanVestResourcePath("Fonts/HfMonorita/Bold.ttf"),          10}},
       
-      {UI::FontType::Small,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         12}},
-      {UI::FontType::Medium,                  {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         13}},
-      {UI::FontType::Large,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         16}},
-      {UI::FontType::ExtraLarge,              {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         18}},
-      {UI::FontType::SemiHeader,              {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        20}},
-      {UI::FontType::Header,                  {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            30}},
+      {UI::FontType::Small,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         14}},
+      {UI::FontType::Medium,                  {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         17}},
+      {UI::FontType::Large,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         18}},
+      {UI::FontType::ExtraLarge,              {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         20}},
+      {UI::FontType::SemiHeader,              {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        22}},
+      {UI::FontType::Header,                  {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            34}},
       {UI::FontType::HugeHeader,              {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       40}},
     });
     
@@ -192,9 +203,9 @@ namespace KanVest
   {
     UI_StartMainWindowDocking();
     
-//    UI_PrimaryViewportPanel_DEMO();
+    //    UI_PrimaryViewportPanel_DEMO();
     UI_StockAnalyzer();
-//    UI_PerformancePanel();
+    //    UI_PerformancePanel();
     
     UI_EndMainWindowDocking();
   }
@@ -243,14 +254,14 @@ namespace KanVest
     {
       ImGui::PopStyleVar(2);
     }
-        
+    
     // Render the title if original title bar is hidden
     if (KanViz::Application::Get().GetSpecification().windowSpec.hideTitleBar)
     {
       float titlebarHeight = UI_DrawTitlebar();
       KanVasX::UI::SetCursorPosY(titlebarHeight + ImGui::GetCurrentWindow()->WindowPadding.y);
     }
-
+    
     // Dockspace
     float minWinSizeX = style.WindowMinSize.x;
     style.WindowMinSize.x = 250.0f;
@@ -276,63 +287,32 @@ namespace KanVest
     {
       static char searchedString[128];
       const float contentRegionAvail = ImGui::GetContentRegionAvail().x;
-//      KanVasX::UI::ShiftCursor({contentRegionAvail / 4, 0});
-      KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvail * 0.2f, "Search Stock...");
+      
+      KanVasX::UI::ShiftCursor({5.0f, 5.0f});
+      if (KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvail * 0.2f, "Search Stock...", true))
+      {
+        Utils::ConvertUpper(searchedString);
+      }
+      
+      std::string stockSymbol = searchedString + std::string(".NS");
+      
+      // Full query/update routine
+      static double price = -1;
+      
+      auto updateData = [&](const std::string& symbol) {
+        std::string liveURL = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol;
+        std::string liveData = fetchURL(liveURL);
+        
+        price = extractValue(liveData, "regularMarketPrice");
+
+      };
+      
+      if (ImGui::Button("🔄 Refresh Now")) { updateData(stockSymbol); }
+      ImGui::Text("%s : %f", stockSymbol.c_str(), price);
     }
     KanVasX::Panel::End();
   }
   
-  void RendererLayer::UI_PerformancePanel()
-  {
-    KanVasX::Panel::Begin("Performance");
-    {
-      ImGui::Text("Frame Time: %.2f ms (%.1f FPS)",
-                  1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-      ImGui::Separator();
-      
-      const KanViz::PerfNode* root = KanViz::PerformanceProfile::Get().GetRoot(); // adjust to your API
-      
-      if (!root) {
-        ImGui::TextDisabled("No performance data available.");
-        ImGui::End();
-        return;
-      }
-      
-      std::function<void(const KanViz::PerfNode*, int)> drawNode;
-      drawNode = [&](const KanViz::PerfNode* node, int depth)
-      {
-        if (!node) return;
-        
-        double ms = node->durationMicro / 1000.0;
-        
-        // Color by duration
-        ImVec4 color;
-        if (ms > 8.0)      color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); // slow (red)
-        else if (ms > 3.0) color = ImVec4(1.0f, 0.8f, 0.3f, 1.0f); // medium (yellow)
-        else               color = ImVec4(0.6f, 1.0f, 0.6f, 1.0f); // fast (green)
-        
-        bool open = ImGui::TreeNodeEx(
-                                      (void*)node,
-                                      ImGuiTreeNodeFlags_DefaultOpen | (node->children.empty() ? ImGuiTreeNodeFlags_Leaf : 0),
-                                      "%s", node->name.c_str()
-                                      );
-        
-        ImGui::SameLine(300);
-        ImGui::TextColored(color, "%6.3f ms", ms);
-        
-        if (open) {
-          for (auto& child : node->children)
-            drawNode(child.get(), depth + 1);
-          ImGui::TreePop();
-        }
-      };
-      
-      drawNode(root, 0);
-    }
-
-    KanVasX::Panel::End();
-  }
-
   void RendererLayer::UI_PrimaryViewportPanel_DEMO()
   {
     IK_PERFORMANCE_FUNC("RendererLayer::UI_PrimaryViewportPanel");
@@ -581,11 +561,11 @@ namespace KanVest
           std::vector<double> x(closes.size());
           std::iota(x.begin(), x.end(), 0);
           ImPlot::SetNextAxisLimits(ImAxis_X1, 0, (double)closes.size() - 1, ImGuiCond_Always);
-
+          
           if (ImPlot::BeginPlot(symbol.c_str(), ImVec2(800, 400))) {
             ImPlot::SetupAxis(ImAxis_X1, "Day");
             ImPlot::SetupAxis(ImAxis_Y1, "Price");
-
+            
             // Plot price series (choose colors)
             if (showClose) ImPlot::PlotLine("Close", x.data(), closes.data(), (int)closes.size());
             if (showOpen && opens.size() == closes.size()) ImPlot::PlotLine("Open", x.data(), opens.data(), (int)opens.size());
@@ -614,7 +594,58 @@ namespace KanVest
     } // end window
     ImGui::End();
   }
-
+  
+  void RendererLayer::UI_PerformancePanel()
+  {
+    KanVasX::Panel::Begin("Performance");
+    {
+      ImGui::Text("Frame Time: %.2f ms (%.1f FPS)",
+                  1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+      ImGui::Separator();
+      
+      const KanViz::PerfNode* root = KanViz::PerformanceProfile::Get().GetRoot(); // adjust to your API
+      
+      if (!root) {
+        ImGui::TextDisabled("No performance data available.");
+        ImGui::End();
+        return;
+      }
+      
+      std::function<void(const KanViz::PerfNode*, int)> drawNode;
+      drawNode = [&](const KanViz::PerfNode* node, int depth)
+      {
+        if (!node) return;
+        
+        double ms = node->durationMicro / 1000.0;
+        
+        // Color by duration
+        ImVec4 color;
+        if (ms > 8.0)      color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); // slow (red)
+        else if (ms > 3.0) color = ImVec4(1.0f, 0.8f, 0.3f, 1.0f); // medium (yellow)
+        else               color = ImVec4(0.6f, 1.0f, 0.6f, 1.0f); // fast (green)
+        
+        bool open = ImGui::TreeNodeEx(
+                                      (void*)node,
+                                      ImGuiTreeNodeFlags_DefaultOpen | (node->children.empty() ? ImGuiTreeNodeFlags_Leaf : 0),
+                                      "%s", node->name.c_str()
+                                      );
+        
+        ImGui::SameLine(300);
+        ImGui::TextColored(color, "%6.3f ms", ms);
+        
+        if (open) {
+          for (auto& child : node->children)
+            drawNode(child.get(), depth + 1);
+          ImGui::TreePop();
+        }
+      };
+      
+      drawNode(root, 0);
+    }
+    
+    KanVasX::Panel::End();
+  }
+  
   float RendererLayer::UI_DrawTitlebar()
   {
     IK_PERFORMANCE_FUNC("RendererLayer::UI_DrawTitlebar");
@@ -628,7 +659,7 @@ namespace KanVest
     // Title bar rectangle --------------------------------------------------------------
     KanVasX::UI::SetCursorPos(windowPadding);
     KanVasX::UI::DrawFilledRect(KanVasX::Color::TitleBar, titleBarHeight);
-
+    
     // Draw KanVest Logo ----------------------------------------------------------------
     ImGui::SetItemAllowOverlap();
     KanVasX::UI::SetCursorPos(windowPadding);
@@ -637,7 +668,7 @@ namespace KanVest
     {
       ImGui::OpenPopup("MainMenu");
     }
-
+    
     // KanVest Name -------------------------------------------------------------------------
     KanVasX::UI::SetCursorPos({0.0f, 0.0f});
     KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header), "KanVest", KanVasX::UI::AlignX::Center, {0.0f, 10.0f}, KanVasX::Color::Highlight);
@@ -707,7 +738,7 @@ namespace KanVest
       }
     }
   }
-
+  
   void RendererLayer::UI_WindowButtons()
   {
     IK_PERFORMANCE_FUNC("RendererLayer::UI_WindowButtons");
@@ -747,7 +778,7 @@ namespace KanVest
     // Close Button
     {
       if (KanVasX::UI::DrawButtonImage("Close", KanVasX::UI::GetTextureID(m_iconClose->GetRendererID()), false, {buttonWidth, buttonHeight}, {0, -5.0f},
-                                   KanVasX::Color::Text, KanVasX::Color::MultipliedValue(KanVasX::Color::Red, 1.4f), buttonColP))
+                                       KanVasX::Color::Text, KanVasX::Color::MultipliedValue(KanVasX::Color::Red, 1.4f), buttonColP))
       {
         KanViz::Application::Get().Close();
       }

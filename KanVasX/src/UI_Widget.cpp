@@ -199,6 +199,7 @@ namespace KanVasX
         {
           const float iconYOffset = framePaddingY - 3.0f;
           UI::ShiftCursorY(iconYOffset);
+          UI::ShiftCursorX(5.0);
           UI::Image(s_searchTextureID, iconSize);
           UI::ShiftCursorY(-iconYOffset);
         }
