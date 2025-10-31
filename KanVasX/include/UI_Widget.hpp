@@ -38,7 +38,7 @@ namespace KanVasX
     ///   - hint: hint to be shown on search bar
     ///   - roundingVall: rounding value of search widget
     static bool Search(char* stringSearch, uint32_t bufferSize, float height = Settings::FrameHeight, int32_t width = -1,
-                       std::string_view hint = "Search ...", float roundingVal = Settings::FrameRounding, bool* grabFocus = nullptr);
+                       std::string_view hint = "Search ...", ImFont* imGuiFont = nullptr, float roundingVal = Settings::FrameRounding, bool* grabFocus = nullptr);
     /// This function renders the Setting Button
     /// - Parameter color: color of button
     static bool OptionsButton(const ImU32& color);

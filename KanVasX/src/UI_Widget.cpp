@@ -128,8 +128,13 @@ namespace KanVasX
     return (UI::DrawButton(title, imGuiFont, inactive ? Color::TextMuted : Color::Button, Color::ButtonContrast, inactive) or (!inactive and ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter)));
   }
   
-  bool Widget::Search(char *searchString, uint32_t bufferSize, float height, int32_t width, std::string_view hint, float roundingVal, bool* grabFocus)
+  bool Widget::Search(char *searchString, uint32_t bufferSize, float height, int32_t width, std::string_view hint, ImFont* imGuiFont, float roundingVal, bool* grabFocus)
   {
+    if (imGuiFont)
+    {
+      ImGui::PushFont(imGuiFont);
+    }
+
     ScopedStyle headerPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2{height, height});
     
     bool modified = false;
@@ -226,6 +231,11 @@ namespace KanVasX
       
     }
     UI::PopID();
+    
+    if (imGuiFont)
+    {
+      ImGui::PopFont();
+    }
     
     return modified;
   }

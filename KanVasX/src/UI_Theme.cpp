@@ -16,7 +16,7 @@ namespace KanVasX
     
     // ImGui Style ---------------------------------------------------------------------------------------------------------------------------------
     Settings::FrameRounding = 4.0f;
-    Settings::FrameHeight = 6.0f;
+    Settings::FrameHeight = 8.0f;
     
     imGuiStyle.FrameRounding = Settings::FrameRounding;
     imGuiStyle.TabRounding = std::min(Settings::FrameRounding, 5.0f);
@@ -36,17 +36,18 @@ namespace KanVasX
     // Colors ----------------------------------------------------------------------------------------------------------------------------------------
     // Values -----------------------------
     // Window
-    Background            = IM_COL32(20, 24, 28, 155);
-    
+    Background            = IM_COL32(8, 12, 17, 155);
+    BackgroundDark        = IM_COL32(26, 30, 36, 155);
+
     // Highlight
-    Highlight             = IM_COL32(191, 177, 155, 255);
+    Highlight             = IM_COL32(20, 28, 38, 255);
     HighlightContrast     = IM_COL32(5, 5, 5, 255);
     
     // Text
     Text                  = IM_COL32(240, 240, 240, 222);
     
     // Frame : Checkbox BG, Text BG, Drop Menu
-    FrameBg               = IM_COL32(28, 33, 38, 255);
+    FrameBg               = IM_COL32(14, 20, 25, 255);
     
     // Commons ----------------------------
     // Highlight
@@ -64,7 +65,6 @@ namespace KanVasX
     
     // Window
     Border                = Alpha(Separator, 0.3f);
-    BackgroundDark        = Value(Background, 0.01f);
     BackgroundLight       = Value(Background, 0.25f);
     PopupBackground       = Alpha(Background, 0.6f);
     BackgroundShadow      = Alpha(Highlight, 0.07f);

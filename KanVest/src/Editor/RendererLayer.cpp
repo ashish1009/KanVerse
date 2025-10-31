@@ -10,27 +10,18 @@
 #include "Stocks/StockController.hpp"
 #include "Stocks/StockAPI.hpp"
 #include "Stocks/StockParser.hpp"
+#include "Stocks/Stock_UI.hpp"
 
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
+  
   // Kretor Resource Path
 #define KanVestResourcePath(path) std::filesystem::absolute(KanVestResourcePath / path)
   
   // Kreate Texture
 #define CreateTexture(path) KanViz::TextureFactory::Create(KanVestResourcePath(path))
-  
-  namespace Utils
-  {
-    void ConvertUpper(char* string)
-    {
-      for (char* p = string; *p; ++p)
-      {
-        *p = (char)toupper(*p);
-      }
-    }
-  } // namespace Utils
-  
+    
   RendererLayer* RendererLayer::s_instance = nullptr;
   RendererLayer& RendererLayer::Get()
   {
@@ -63,7 +54,6 @@ namespace KanVest
     m_settingIcon = CreateTexture("Textures/Icons/Gear.png");
 
     m_reloadIcon = CreateTexture("Textures/Icons/Rotate.png");
-
   }
   
   RendererLayer::~RendererLayer()
@@ -79,28 +69,28 @@ namespace KanVest
     
     // Set the Imgui theme ----------------------------------------------------------------------
     KanVest::UI::Font::Load({
-      {UI::FontType::Regular,                 {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         16}},
-      {UI::FontType::Light,                   {KanVestResourcePath("Fonts/Opensans/Light.ttf"),           16}},
-      {UI::FontType::Italic,                  {KanVestResourcePath("Fonts/Opensans/Italic.ttf"),          16}},
-      {UI::FontType::LightItalic,             {KanVestResourcePath("Fonts/Opensans/LightItalic.ttf"),     16}},
-      {UI::FontType::SemiBold,                {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        16}},
-      {UI::FontType::Bold,                    {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            16}},
-      {UI::FontType::SemiBoldItalic,          {KanVestResourcePath("Fonts/Opensans/SemiBoldItalic.ttf"),  16}},
-      {UI::FontType::BoldItalic,              {KanVestResourcePath("Fonts/Opensans/BoldItalic.ttf"),      16}},
-      {UI::FontType::ExtraBold,               {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       16}},
-      {UI::FontType::ExtraBoldItalic,         {KanVestResourcePath("Fonts/Opensans/ExtraBoldItalic.ttf"), 16}},
+      {UI::FontType::Regular,                 {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         18}},
+      {UI::FontType::Light,                   {KanVestResourcePath("Fonts/Opensans/Light.ttf"),           18}},
+      {UI::FontType::Italic,                  {KanVestResourcePath("Fonts/Opensans/Italic.ttf"),          18}},
+      {UI::FontType::LightItalic,             {KanVestResourcePath("Fonts/Opensans/LightItalic.ttf"),     18}},
+      {UI::FontType::SemiBold,                {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        18}},
+      {UI::FontType::Bold,                    {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            18}},
+      {UI::FontType::SemiBoldItalic,          {KanVestResourcePath("Fonts/Opensans/SemiBoldItalic.ttf"),  18}},
+      {UI::FontType::BoldItalic,              {KanVestResourcePath("Fonts/Opensans/BoldItalic.ttf"),      18}},
+      {UI::FontType::ExtraBold,               {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       18}},
+      {UI::FontType::ExtraBoldItalic,         {KanVestResourcePath("Fonts/Opensans/ExtraBoldItalic.ttf"), 18}},
       
       {UI::FontType::FixedWidthRegular,       {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       10}},
       {UI::FontType::FixedWidthLight,         {KanVestResourcePath("Fonts/HfMonorita/Light.ttf"),         10}},
       {UI::FontType::FixedWidthMedium,        {KanVestResourcePath("Fonts/HfMonorita/Medium.ttf"),        10}},
       {UI::FontType::FixedWidthBold,          {KanVestResourcePath("Fonts/HfMonorita/Bold.ttf"),          10}},
       
-      {UI::FontType::Small,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         14}},
-      {UI::FontType::Medium,                  {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         17}},
-      {UI::FontType::Large,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         18}},
-      {UI::FontType::ExtraLarge,              {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         20}},
-      {UI::FontType::SemiHeader,              {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        22}},
-      {UI::FontType::Header,                  {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            30}},
+      {UI::FontType::Small,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         16}},
+      {UI::FontType::Medium,                  {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         20}},
+      {UI::FontType::Large,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         22}},
+      {UI::FontType::ExtraLarge,              {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         24}},
+      {UI::FontType::SemiHeader,              {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        28}},
+      {UI::FontType::Header,                  {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            32}},
       {UI::FontType::HugeHeader,              {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       40}},
     });
     
@@ -110,6 +100,8 @@ namespace KanVest
     KanVasX::Widget::Initialize();
     KanVasX::Widget::SetSearchIcon(KanVasX::UI::GetTextureID(m_searchIcon->GetRendererID()));
     KanVasX::Widget::SetSettingIcon(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
+    
+    StockUI::Initialize(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
   }
   
   void RendererLayer::OnDetach() noexcept
@@ -206,35 +198,7 @@ namespace KanVest
   void RendererLayer::UI_StockAnalyzer()
   {
     IK_PERFORMANCE_FUNC("RendererLayer::UI_StockAnalyzer");
-    
-    KanVasX::Panel::Begin("Stock Analyzer");
-    {
-      static StockData stockData{""};
-      
-      static char searchedString[128];
-      const float contentRegionAvail = ImGui::GetContentRegionAvail().x;
-      
-      KanVasX::UI::ShiftCursor({5.0f, 5.0f});
-      if (KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvail * 0.2f, "Search Stock...", true))
-      {
-        Utils::ConvertUpper(searchedString);
-      }
-      
-      ImGui::SameLine();
-      float prevItemHeight = ImGui::GetItemRectSize().y - 8;
-      if (KanVasX::UI::DrawButtonImage("Refresh", KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()), false, {prevItemHeight, prevItemHeight}, {-8.0, 4.0}) or
-          ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
-      {
-        stockData = StockController::UpdateStockData(searchedString);
-      }
-
-      if (stockData.livePrice != -1)
-      {
-        ImGui::Text("Name  : %s", stockData.symbol.c_str());
-        ImGui::Text("Price : %f", stockData.livePrice);
-      }
-    }
-    KanVasX::Panel::End();
+    StockUI::StockAnalyzer();
   }
   
   void RendererLayer::UI_PrimaryViewportPanel_DEMO()
@@ -575,7 +539,7 @@ namespace KanVest
   {
     IK_PERFORMANCE_FUNC("RendererLayer::UI_DrawTitlebar");
     
-    static constexpr float titleBarHeight = 45.0f;
+    static constexpr float titleBarHeight = 48.0f;
     const ImVec2 windowPadding = ImGui::GetCurrentWindow()->WindowPadding;
     
     // Drag and Control the window with user title bar ----------------------------------
@@ -596,7 +560,7 @@ namespace KanVest
     
     // KanVest Name -------------------------------------------------------------------------
     KanVasX::UI::SetCursorPos({0.0f, 0.0f});
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header), "KanVest", KanVasX::UI::AlignX::Center, {0.0f, 10.0f}, KanVasX::Color::Highlight);
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header), "KanVest", KanVasX::UI::AlignX::Center, {0.0f, 10.0f}, KanVasX::Color::TextMuted);
     
     // Title Rectangles --------------------------------------------------------------------
     KanVasX::UI::SetCursorPos({ImGui::GetWindowWidth() / 4, windowPadding.y});
