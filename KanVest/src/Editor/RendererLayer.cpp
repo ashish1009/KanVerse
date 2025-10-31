@@ -277,13 +277,12 @@ namespace KanVest
       // sync symbolBuf -> symbol
       symbol = std::string(symbolBuf);
       
-      std::string liveURL = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol;
-      std::string liveData = StockAPI::FetchURL(liveURL);
+      std::string liveData = StockAPI::FetchLiveData(symbol);
       
       // If liveData doesn't contain usual fields, try .BO fallback for Indian stocks
       if (liveData.find("\"regularMarketPrice\"") == std::string::npos && autoFallbackBO && symbol.find(".NS") != std::string::npos) {
         std::string altSymbol = symbol.substr(0, symbol.find(".NS")) + ".BO";
-        std::string altData = StockAPI::FetchURL("https://query1.finance.yahoo.com/v8/finance/chart/" + altSymbol);
+        std::string altData = StockAPI::FetchLiveData(altSymbol);
         if (altData.find("\"regularMarketPrice\"") != std::string::npos) {
           symbol = altSymbol;
           std::snprintf(symbolBuf, sizeof(symbolBuf), "%s", symbol.c_str());
@@ -341,7 +340,9 @@ namespace KanVest
       "?period1=" + std::to_string(period1) +
       "&period2=" + std::to_string(period2) +
       "&interval=1d";
-      std::string histData = StockAPI::FetchURL(histURL);
+      std::string histData = StockAPI::FetchLiveData(symbol);
+
+//      std::string histData = StockAPI::FetchURL(histURL);
       
       // parse arrays
       closes = extractArray(histData, "close");

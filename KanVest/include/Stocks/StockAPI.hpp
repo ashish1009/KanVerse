@@ -14,6 +14,6 @@ namespace KanVest
   public:
     /// This function fetch data from URL and return the string data to be parsed
     /// - Parameter url: URL
-    static std::string FetchURL(const std::string& url);
+    static std::string FetchLiveData(const std::string& symbolName);
   };
 } // namespace KanVest

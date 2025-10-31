@@ -7,6 +7,8 @@
 
 #include "StockAPI.hpp"
 
+#include "Stocks/URL_Manager.hpp"
+
 namespace KanVest
 {
   static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output)
@@ -16,12 +18,14 @@ namespace KanVest
     return totalSize;
   }
 
-  std::string StockAPI::FetchURL(const std::string& url)
+  std::string StockAPI::FetchLiveData(const std::string& symbolName)
   {
     CURL* curl = curl_easy_init();
     std::string response;
     if (curl)
     {
+      std::string url = URL::Get() + symbolName;
+      
       curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
