@@ -15,6 +15,8 @@
 		B289EDF62EB3047400937D0B /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EDF52EB3047400937D0B /* libcurl.tbd */; };
 		B289EE332EB37F9400937D0B /* libKanVasX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EE322EB37F9400937D0B /* libKanVasX.a */; };
 		B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE3F2EB3ACF200937D0B /* UI_Font.cpp */; };
+		B289EE512EB4CDFD00937D0B /* StockData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE502EB4CDFD00937D0B /* StockData.cpp */; };
+		B289EE542EB4CE7300937D0B /* StockAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE532EB4CE7300937D0B /* StockAPI.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -46,6 +48,10 @@
 		B289EE322EB37F9400937D0B /* libKanVasX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libKanVasX.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289EE3E2EB3ACF200937D0B /* UI_Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Font.hpp; sourceTree = "<group>"; };
 		B289EE3F2EB3ACF200937D0B /* UI_Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Font.cpp; sourceTree = "<group>"; };
+		B289EE4F2EB4CDFD00937D0B /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
+		B289EE502EB4CDFD00937D0B /* StockData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockData.cpp; sourceTree = "<group>"; };
+		B289EE522EB4CE7300937D0B /* StockAPI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockAPI.hpp; sourceTree = "<group>"; };
+		B289EE532EB4CE7300937D0B /* StockAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockAPI.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +95,7 @@
 				B289EDEE2EB2558400937D0B /* Application */,
 				B289EDF02EB2559500937D0B /* Editor */,
 				B289EE3C2EB3ACDD00937D0B /* UI */,
+				B289EE4D2EB4CD2C00937D0B /* Stocks */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -99,6 +106,7 @@
 				B289EDED2EB2558200937D0B /* Application */,
 				B289EDEF2EB2558E00937D0B /* Editor */,
 				B289EE3D2EB3ACE300937D0B /* UI */,
+				B289EE4E2EB4CD3600937D0B /* Stocks */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -172,6 +180,24 @@
 			path = UI;
 			sourceTree = "<group>";
 		};
+		B289EE4D2EB4CD2C00937D0B /* Stocks */ = {
+			isa = PBXGroup;
+			children = (
+				B289EE4F2EB4CDFD00937D0B /* StockData.hpp */,
+				B289EE522EB4CE7300937D0B /* StockAPI.hpp */,
+			);
+			path = Stocks;
+			sourceTree = "<group>";
+		};
+		B289EE4E2EB4CD3600937D0B /* Stocks */ = {
+			isa = PBXGroup;
+			children = (
+				B289EE502EB4CDFD00937D0B /* StockData.cpp */,
+				B289EE532EB4CE7300937D0B /* StockAPI.cpp */,
+			);
+			path = Stocks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -232,9 +258,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B289EE512EB4CDFD00937D0B /* StockData.cpp in Sources */,
 				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
+				B289EE542EB4CE7300937D0B /* StockAPI.cpp in Sources */,
 				B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
 			);
