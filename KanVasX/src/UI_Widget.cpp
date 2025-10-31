@@ -15,7 +15,7 @@
 namespace KanVasX
 {
 #define MAX_INPUT_BUFFER_LENGTH 256
-
+  
   namespace StringUtils
   {
     /// Converts a string to lowercase
@@ -109,6 +109,15 @@ namespace KanVasX
     delete [] s_assetSearchString;
   }
   
+  void Widget::SetSearchIcon(ImTextureID searchTextureID)
+  {
+    s_searchTextureID = searchTextureID;
+  }
+  void Widget::SetSettingIcon(ImTextureID optionTextureID)
+  {
+    s_optionTextureID = optionTextureID;
+  }
+
   bool Widget::CancelButton(std::string_view title, ImFont* imGuiFont, bool inactive)
   {
     return (UI::DrawButton(title.data(), imGuiFont, Color::ButtonMuted, Color::Text, inactive) or ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Escape));
@@ -119,7 +128,7 @@ namespace KanVasX
     return (UI::DrawButton(title, imGuiFont, inactive ? Color::TextMuted : Color::Button, Color::ButtonContrast, inactive) or (!inactive and ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter)));
   }
   
-  bool Widget::Search(char *searchString, uint32_t bufferSize, float height, std::string_view hint, float roundingVal, bool* grabFocus)
+  bool Widget::Search(char *searchString, uint32_t bufferSize, float height, int32_t width, std::string_view hint, float roundingVal, bool* grabFocus)
   {
     ScopedStyle headerPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2{height, height});
     
@@ -147,6 +156,7 @@ namespace KanVasX
       ScopedStyle padding(ImGuiStyleVar_FramePadding, ImVec2(28.0f, framePaddingY));
       
       // Input Tex box
+      ImGui::SetNextItemWidth(width);
       if (ImGui::InputText(UI::GenerateID(), searchString, bufferSize))
       {
         modified = true;
@@ -156,7 +166,7 @@ namespace KanVasX
         modified = true;
       }
       searching = searchString[0] != 0;
-      
+
       if (grabFocus and *grabFocus)
       {
         if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) and !ImGui::IsAnyItemActive() and !ImGui::IsMouseClicked(0))
@@ -185,10 +195,13 @@ namespace KanVasX
       
       // Search icon
       {
-        const float iconYOffset = framePaddingY - 3.0f;
-        UI::ShiftCursorY(iconYOffset);
-        UI::Image(s_searchTextureID, iconSize);
-        UI::ShiftCursorY(-iconYOffset);
+        if (s_optionTextureID)
+        {
+          const float iconYOffset = framePaddingY - 3.0f;
+          UI::ShiftCursorY(iconYOffset);
+          UI::Image(s_searchTextureID, iconSize);
+          UI::ShiftCursorY(-iconYOffset);
+        }
         
         // Hint
         if (!searching)

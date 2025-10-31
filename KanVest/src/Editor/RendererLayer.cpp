@@ -124,6 +124,11 @@ namespace KanVest
     m_iconMaximize = CreateTexture("Textures/Icons/Maximize.png");
     m_iconRestore = CreateTexture("Textures/Icons/Restore.png");
     m_shadowTexture = CreateTexture("Textures/Editor/Shadow.png");
+
+    // Widget Icons
+    m_searchIcon = CreateTexture("Textures/Icons/Search.png");
+    m_settingIcon = CreateTexture("Textures/Icons/Gear.png");
+
   }
   
   RendererLayer::~RendererLayer()
@@ -166,6 +171,10 @@ namespace KanVest
     
     KanVasX::Color::Initialize();
     KanVasX::Panel::Initialize(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
+    
+    KanVasX::Widget::Initialize();
+    KanVasX::Widget::SetSearchIcon(KanVasX::UI::GetTextureID(m_searchIcon->GetRendererID()));
+    KanVasX::Widget::SetSettingIcon(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
   }
   
   void RendererLayer::OnDetach() noexcept
@@ -185,7 +194,7 @@ namespace KanVest
     
 //    UI_PrimaryViewportPanel_DEMO();
     UI_StockAnalyzer();
-    UI_PerformancePanel();
+//    UI_PerformancePanel();
     
     UI_EndMainWindowDocking();
   }
@@ -265,6 +274,10 @@ namespace KanVest
     
     KanVasX::Panel::Begin("Stock Analyzer");
     {
+      static char searchedString[128];
+      const float contentRegionAvail = ImGui::GetContentRegionAvail().x;
+//      KanVasX::UI::ShiftCursor({contentRegionAvail / 4, 0});
+      KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvail * 0.2f, "Search Stock...");
     }
     KanVasX::Panel::End();
   }

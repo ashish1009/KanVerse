@@ -69,6 +69,7 @@ namespace KanVest
     KanViz::Ref<KanViz::Image> m_iconMinimize, m_iconMaximize;     //< Icons to maximize and minimize the iwndow
     KanViz::Ref<KanViz::Image> m_iconRestore, m_iconClose;         //< Icons to close and restore the window
     KanViz::Ref<KanViz::Image> m_shadowTexture;                    //< Side shadow
+    KanViz::Ref<KanViz::Image> m_searchIcon, m_settingIcon;        //< WIdget Icons
 
     static RendererLayer* s_instance;                              //< Renderer Layer single instance
   };

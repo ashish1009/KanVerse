@@ -17,6 +17,9 @@ namespace KanVasX
     /// This function remove widget icons
     static void Shutdown();
     
+    static void SetSearchIcon(ImTextureID searchTextureID);
+    static void SetSettingIcon(ImTextureID optionTextureID);
+    
     /// This creates the cancel button
     /// - Parameters:
     ///   - title: title of enter button
@@ -34,7 +37,7 @@ namespace KanVasX
     ///   - bufferSize: buffer size
     ///   - hint: hint to be shown on search bar
     ///   - roundingVall: rounding value of search widget
-    static bool Search(char* stringSearch, uint32_t bufferSize, float height = Settings::FrameHeight,
+    static bool Search(char* stringSearch, uint32_t bufferSize, float height = Settings::FrameHeight, int32_t width = -1,
                        std::string_view hint = "Search ...", float roundingVal = Settings::FrameRounding, bool* grabFocus = nullptr);
     /// This function renders the Setting Button
     /// - Parameter color: color of button

@@ -46,14 +46,14 @@ namespace KanVasX
     s_UIContextID--;
   }
 
-  const char* GenerateID()
+  const char* UI::GenerateID()
   {
     std::string result = "##";
     result += std::to_string(s_counter++);
     memcpy(s_bufferID, result.c_str(), 16);
     return s_bufferID;
   }
-  const char* GenerateLabelID(const std::string_view& label)
+  const char* UI::GenerateLabelID(const std::string_view& label)
   {
     auto formatted = std::format("{}##{}", label, s_counter++);
     std::snprintf(s_labeledBufferID, std::size(s_labeledBufferID), "%s", formatted.c_str());

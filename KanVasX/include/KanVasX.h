@@ -26,3 +26,4 @@
 #include <UI_Theme.hpp>
 #include <UI_Scoped.hpp>
 #include <UI_Panel.hpp>
+#include <UI_Widget.hpp>
