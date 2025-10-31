@@ -147,7 +147,7 @@ namespace KanVasX
     ///   - fullWidth: cover full widget of widget
     ///   - offsetX: X offset
     ///   - offsetY: X offset
-    static void DrawUnderline(const ImU32& color = Color::Alpha(Color::Separator, 0.08f), bool fullWidth = true, float offsetX = 0.0f, float offsetY = 1.0f);
+    static void DrawUnderline(const ImU32& color = Color::Separator, bool fullWidth = true, float offsetX = 0.0f, float offsetY = 1.0f);
 
     
     // Image -----------------------------------------------------------------------------------------------------------------------------------------

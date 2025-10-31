@@ -34,14 +34,13 @@ namespace KanVest
     KanVasX::Panel::Begin("Stock Analyzer");
     {
       static StockData stockData{""};
+      static bool ValidData = false;
+            
+      KanVasX::UI::ShiftCursor({0.0f, 5.0f});
       
-//      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, 40, 0.22);
-      
-      KanVasX::UI::ShiftCursor({5.0f, 5.0f});
-      
-      static char searchedString[128];
+      static char searchedString[128] = "BEL";
       const float contentRegionAvail = ImGui::GetContentRegionAvail().x;
-      if (KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvail * 0.2f,
+      if (KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvail * 0.20f,
                                   "Enter Symbol ...", UI::Font::Get(UI::FontType::Large) , true))
       {
         Utils::ConvertUpper(searchedString);
@@ -53,12 +52,24 @@ namespace KanVest
           ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
       {
         stockData = StockController::UpdateStockData(searchedString);
+        ValidData = true;
       }
       
-      if (stockData.livePrice != -1)
+      KanVasX::UI::ShiftCursorY(5.0f);
+      
+      const float availY = ImGui::GetContentRegionAvail().y;
+      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, availY, 0.198);
+
+      auto Format2 = [](double value) {
+        char buf[32];
+        std::snprintf(buf, sizeof(buf), "%.2f", value);
+        return std::string(buf);
+      };
+      
+      if (ValidData)
       {
-        ImGui::Text("Name  : %s", stockData.symbol.c_str());
-        ImGui::Text("Price : %f", stockData.livePrice);
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_34), stockData.symbol.c_str(), KanVasX::UI::AlignX::Left, {30.0f, 20.0f}, KanVasX::Color::TextBright);
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_44), Format2(stockData.livePrice), KanVasX::UI::AlignX::Left, {30.0f, 10.0f}, KanVasX::Color::TextBright);
       }
     }
     KanVasX::Panel::End();

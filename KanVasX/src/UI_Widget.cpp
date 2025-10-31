@@ -157,8 +157,10 @@ namespace KanVasX
       const float areaPosX = ImGui::GetCursorPosX();
       const float framePaddingY = ImGui::GetStyle().FramePadding.y;
       
+      const ImVec2 iconSize(ImGui::GetTextLineHeight() - 2.0f, ImGui::GetTextLineHeight() - 2.0f);
+
       ScopedStyle rounding(ImGuiStyleVar_FrameRounding, roundingVal);
-      ScopedStyle padding(ImGuiStyleVar_FramePadding, ImVec2(28.0f, framePaddingY));
+      ScopedStyle padding(ImGuiStyleVar_FramePadding, ImVec2(iconSize.x * 2, framePaddingY));
       
       // Input Tex box
       ImGui::SetNextItemWidth(width);
@@ -196,7 +198,6 @@ namespace KanVasX
       }
       
       ImGui::BeginHorizontal(UI::GenerateID(), ImGui::GetItemRectSize());
-      const ImVec2 iconSize(ImGui::GetTextLineHeight() - 2.0f, ImGui::GetTextLineHeight() - 2.0f);
       
       // Search icon
       {

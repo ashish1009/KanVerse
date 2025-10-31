@@ -91,7 +91,20 @@ namespace KanVest
       {UI::FontType::ExtraLarge,              {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         24}},
       {UI::FontType::SemiHeader,              {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        28}},
       {UI::FontType::Header,                  {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            32}},
-      {UI::FontType::HugeHeader,              {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       40}},
+      {UI::FontType::LargeHeader,             {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       40}},
+      {UI::FontType::HugeHeader,              {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       50}},
+      
+      {UI::FontType::Header_32,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         32}},
+      {UI::FontType::Header_34,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         34}},
+      {UI::FontType::Header_36,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         36}},
+      {UI::FontType::Header_38,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         38}},
+      {UI::FontType::Header_40,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         40}},
+      {UI::FontType::Header_42,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         42}},
+      {UI::FontType::Header_44,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         44}},
+      {UI::FontType::Header_46,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         46}},
+      {UI::FontType::Header_48,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         48}},
+      {UI::FontType::Header_50,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         50}},
+
     });
     
     KanVasX::Color::Initialize();

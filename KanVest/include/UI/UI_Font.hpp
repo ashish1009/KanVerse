@@ -14,7 +14,8 @@ namespace KanVest::UI
   {
     Regular, Light, Italic, LightItalic, SemiBold, Bold, SemiBoldItalic, BoldItalic, ExtraBold, ExtraBoldItalic,
     FixedWidthRegular, FixedWidthLight, FixedWidthMedium, FixedWidthBold,
-    Small, Medium, Large, ExtraLarge, Header, SemiHeader, HugeHeader,
+    Small, Medium, Large, ExtraLarge, Header, SemiHeader, LargeHeader, HugeHeader,
+    Header_32, Header_34, Header_36, Header_38, Header_40, Header_42, Header_44, Header_46, Header_48, Header_50,
     Max // Should be at last for loop in class
   };
   

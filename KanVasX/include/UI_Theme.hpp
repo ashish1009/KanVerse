@@ -32,6 +32,7 @@ namespace KanVasX
     
     // Text
     inline static ImU32 Text                  = IM_COL32(55, 35, 12, 255);
+    inline static ImU32 TextBright            = IM_COL32(55, 35, 12, 255);
     inline static ImU32 TextMuted             = IM_COL32(55, 35, 12, 255);
     inline static ImU32 TextSelectedBg        = IM_COL32(55, 35, 12, 255);
     inline static ImU32 TextDark              = IM_COL32(55, 35, 12, 255);

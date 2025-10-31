@@ -37,7 +37,8 @@ namespace KanVasX
     // Values -----------------------------
     // Window
     Background            = IM_COL32(8, 12, 17, 155);
-    BackgroundDark        = IM_COL32(26, 30, 36, 155);
+    BackgroundLight       = IM_COL32(14, 20, 25, 255);
+    BackgroundDark        = IM_COL32(126, 30, 36, 155);
 
     // Highlight
     Highlight             = IM_COL32(20, 28, 38, 255);
@@ -45,6 +46,7 @@ namespace KanVasX
     
     // Text
     Text                  = IM_COL32(240, 240, 240, 222);
+    TextBright            = IM_COL32(255, 255, 255, 255);
     
     // Frame : Checkbox BG, Text BG, Drop Menu
     FrameBg               = IM_COL32(14, 20, 25, 255);
@@ -54,7 +56,7 @@ namespace KanVasX
     HighlightMuted        = Value(Highlight, 0.3f);
     
     // Widget and Column Separator
-    Separator             = Alpha(Highlight, 0.0f);
+    Separator             = Highlight;
     SeparatorHovered      = MultipliedValue(Highlight, 0.5f);
     SeparatorActive       = Alpha(Separator, 0.3);
     
@@ -65,7 +67,6 @@ namespace KanVasX
     
     // Window
     Border                = Alpha(Separator, 0.3f);
-    BackgroundLight       = Value(Background, 0.25f);
     PopupBackground       = Alpha(Background, 0.6f);
     BackgroundShadow      = Alpha(Highlight, 0.07f);
     ChildBackground       = Alpha(Background, 0.6f);
