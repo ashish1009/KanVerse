@@ -70,6 +70,7 @@ namespace KanVest
     KanViz::Ref<KanViz::Image> m_iconRestore, m_iconClose;         //< Icons to close and restore the window
     KanViz::Ref<KanViz::Image> m_shadowTexture;                    //< Side shadow
     KanViz::Ref<KanViz::Image> m_searchIcon, m_settingIcon;        //< WIdget Icons
+    KanViz::Ref<KanViz::Image> m_reloadIcon;                       //< Reload Icon
 
     static RendererLayer* s_instance;                              //< Renderer Layer single instance
   };

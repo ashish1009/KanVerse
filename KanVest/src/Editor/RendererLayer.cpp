@@ -139,7 +139,9 @@ namespace KanVest
     // Widget Icons
     m_searchIcon = CreateTexture("Textures/Icons/Search.png");
     m_settingIcon = CreateTexture("Textures/Icons/Gear.png");
-    
+
+    m_reloadIcon = CreateTexture("Textures/Icons/Rotate.png");
+
   }
   
   RendererLayer::~RendererLayer()
@@ -176,7 +178,7 @@ namespace KanVest
       {UI::FontType::Large,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         18}},
       {UI::FontType::ExtraLarge,              {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         20}},
       {UI::FontType::SemiHeader,              {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        22}},
-      {UI::FontType::Header,                  {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            34}},
+      {UI::FontType::Header,                  {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            30}},
       {UI::FontType::HugeHeader,              {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       40}},
     });
     
@@ -285,6 +287,15 @@ namespace KanVest
     
     KanVasX::Panel::Begin("Stock Analyzer");
     {
+      // Full query/update routine
+      static double price = -1;
+      auto updateData = [&](const std::string& symbol) {
+        std::string liveURL = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol;
+        std::string liveData = fetchURL(liveURL);
+        
+        price = extractValue(liveData, "regularMarketPrice");
+      };
+
       static char searchedString[128];
       const float contentRegionAvail = ImGui::GetContentRegionAvail().x;
       
@@ -293,22 +304,19 @@ namespace KanVest
       {
         Utils::ConvertUpper(searchedString);
       }
-      
       std::string stockSymbol = searchedString + std::string(".NS");
       
-      // Full query/update routine
-      static double price = -1;
-      
-      auto updateData = [&](const std::string& symbol) {
-        std::string liveURL = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol;
-        std::string liveData = fetchURL(liveURL);
-        
-        price = extractValue(liveData, "regularMarketPrice");
+      ImGui::SameLine();
+      float prevItemHeight = ImGui::GetItemRectSize().y - 8;
+      if (KanVasX::UI::DrawButtonImage("Refresh", KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()), false, {prevItemHeight, prevItemHeight}, {-8.0, 4.0}))
+      {
+        updateData(stockSymbol);
+      }
 
-      };
-      
-      if (ImGui::Button("🔄 Refresh Now")) { updateData(stockSymbol); }
-      ImGui::Text("%s : %f", stockSymbol.c_str(), price);
+      if (price != -1)
+      {
+        ImGui::Text("%s : %f", stockSymbol.c_str(), price);
+      }
     }
     KanVasX::Panel::End();
   }
