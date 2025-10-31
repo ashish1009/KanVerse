@@ -207,7 +207,7 @@ namespace KanVest
     
     KanVasX::Panel::Begin("Stock Analyzer");
     {
-      static Stock stockData;
+      static StockData stockData{""};
       
       static char searchedString[128];
       const float contentRegionAvail = ImGui::GetContentRegionAvail().x;
@@ -217,18 +217,19 @@ namespace KanVest
       {
         Utils::ConvertUpper(searchedString);
       }
-      std::string stockSymbol = searchedString + std::string(".NS");
       
       ImGui::SameLine();
       float prevItemHeight = ImGui::GetItemRectSize().y - 8;
-      if (KanVasX::UI::DrawButtonImage("Refresh", KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()), false, {prevItemHeight, prevItemHeight}, {-8.0, 4.0}))
+      if (KanVasX::UI::DrawButtonImage("Refresh", KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()), false, {prevItemHeight, prevItemHeight}, {-8.0, 4.0}) or
+          ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
       {
-        stockData = updateData(stockSymbol);
+        std::string stockSymbol = searchedString + std::string(".NS");
+        stockData = StockAPI::UpdateStockData(stockSymbol);
       }
 
       if (stockData.livePrice != -1)
       {
-        ImGui::Text("%s : %f", stockSymbol.c_str(), stockData.livePrice);
+        ImGui::Text("%s : %f", stockData.symbol.c_str(), stockData.livePrice);
       }
     }
     KanVasX::Panel::End();

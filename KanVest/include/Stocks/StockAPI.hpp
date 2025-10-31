@@ -77,18 +77,11 @@ namespace KanVest
     return values;
   }
   
-  static Stock updateData(const std::string& symbol)  {
-    Stock stockData;
-    std::string liveURL = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol;
-    std::string liveData = fetchURL(liveURL);
-    
-    stockData.livePrice = extractValue(liveData, "regularMarketPrice");
-    return stockData;
-  };
-  
   class StockAPI
   {
   public:
-    
+    /// This function fetches real time data for stock and returns the stock data
+    /// - Parameter symbol: symbolName
+    static StockData UpdateStockData(const std::string& symbolName);
   };
 } // namespace KanVest

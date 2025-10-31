@@ -9,9 +9,11 @@
 
 namespace KanVest
 {
-  struct Stock
+  struct StockData
   {
-    std::string name = "";
+    std::string symbol = "";
     double livePrice = -1; // Should be updated live
+    
+    StockData(const std::string& name) : symbol(name) {}
   };
 } // namespace KanVest
