@@ -94,6 +94,27 @@ namespace KanVest
       {UI::FontType::LargeHeader,             {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       40}},
       {UI::FontType::HugeHeader,              {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       50}},
       
+      {UI::FontType::FixedWidthHeader_12,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       12}},
+      {UI::FontType::FixedWidthHeader_14,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       14}},
+      {UI::FontType::FixedWidthHeader_16,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       16}},
+      {UI::FontType::FixedWidthHeader_18,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       18}},
+      {UI::FontType::FixedWidthHeader_20,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       20}},
+      {UI::FontType::FixedWidthHeader_22,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       22}},
+      {UI::FontType::FixedWidthHeader_24,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       24}},
+      {UI::FontType::FixedWidthHeader_26,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       26}},
+      {UI::FontType::FixedWidthHeader_28,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       28}},
+      {UI::FontType::FixedWidthHeader_30,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       30}},
+      {UI::FontType::FixedWidthHeader_32,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       32}},
+      {UI::FontType::FixedWidthHeader_34,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       34}},
+      {UI::FontType::FixedWidthHeader_36,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       36}},
+      {UI::FontType::FixedWidthHeader_38,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       38}},
+      {UI::FontType::FixedWidthHeader_40,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       40}},
+
+      {UI::FontType::Header_22,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         22}},
+      {UI::FontType::Header_24,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         24}},
+      {UI::FontType::Header_26,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         26}},
+      {UI::FontType::Header_28,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         28}},
+      {UI::FontType::Header_30,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         30}},
       {UI::FontType::Header_32,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         32}},
       {UI::FontType::Header_34,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         34}},
       {UI::FontType::Header_36,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         36}},
@@ -104,7 +125,6 @@ namespace KanVest
       {UI::FontType::Header_46,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         46}},
       {UI::FontType::Header_48,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         48}},
       {UI::FontType::Header_50,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         50}},
-
     });
     
     KanVasX::Color::Initialize();
@@ -132,7 +152,7 @@ namespace KanVest
   {
     UI_StartMainWindowDocking();
     
-    //    UI_PrimaryViewportPanel_DEMO();
+        UI_PrimaryViewportPanel_DEMO();
     UI_StockAnalyzer();
     //    UI_PerformancePanel();
     
@@ -282,7 +302,7 @@ namespace KanVest
       
       fiftyTwoHigh = StockParser::ExtractValue(liveData, "fiftyTwoWeekHigh");
       fiftyTwoLow = StockParser::ExtractValue(liveData, "fiftyTwoWeekLow");
-      
+      std::cout << fiftyTwoLow;
       regularMarketVolume = StockParser::ExtractValue(liveData, "regularMarketVolume");
       avgVolume3m = StockParser::ExtractValue(liveData, "averageDailyVolume3Month");
       avgVolume10day = StockParser::ExtractValue(liveData, "averageDailyVolume10Day");
@@ -294,12 +314,12 @@ namespace KanVest
       dividendRate = StockParser::ExtractValue(liveData, "dividendRate");
       dividendYield = StockParser::ExtractValue(liveData, "dividendYield");
       
-      currency = extractString(liveData, "currency");
-      exchangeName = extractString(liveData, "exchangeName");
-      fullExchangeName = extractString(liveData, "fullExchangeName");
-      shortName = extractString(liveData, "shortName");
-      longName = extractString(liveData, "longName");
-      marketState = extractString(liveData, "marketState");
+      currency = StockParser::ExtractString(liveData, "currency");
+      exchangeName = StockParser::ExtractString(liveData, "exchangeName");
+      fullExchangeName = StockParser::ExtractString(liveData, "fullExchangeName");
+      shortName = StockParser::ExtractString(liveData, "shortName");
+      longName = StockParser::ExtractString(liveData, "longName");
+      marketState = StockParser::ExtractString(liveData, "marketState");
       
       // --- Historical range (user controlled) ---
       time_t s = parseDateYYYYMMDD(startDate);

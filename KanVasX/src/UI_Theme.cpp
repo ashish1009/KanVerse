@@ -41,7 +41,7 @@ namespace KanVasX
     BackgroundDark        = IM_COL32(126, 30, 36, 155);
 
     // Highlight
-    Highlight             = IM_COL32(20, 28, 38, 255);
+    Highlight             = IM_COL32(40, 48, 58, 255);;
     HighlightContrast     = IM_COL32(5, 5, 5, 255);
     
     // Text
@@ -56,7 +56,7 @@ namespace KanVasX
     HighlightMuted        = Value(Highlight, 0.3f);
     
     // Widget and Column Separator
-    Separator             = Highlight;
+    Separator             = IM_COL32(40, 48, 58, 255);;
     SeparatorHovered      = MultipliedValue(Highlight, 0.5f);
     SeparatorActive       = Alpha(Separator, 0.3);
     

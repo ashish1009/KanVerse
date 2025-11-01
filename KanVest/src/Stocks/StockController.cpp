@@ -43,15 +43,26 @@ namespace KanVest
     // Update Stock data
     StockData stockData(symbolName);
     
+    stockData.shortName = StockParser::StockParser::ExtractString(liveData, keys.shortName);
+    stockData.longName = StockParser::StockParser::ExtractString(liveData, keys.longName);
+    stockData.currency = StockParser::StockParser::ExtractString(liveData, keys.currency);
+    stockData.exchangeName = StockParser::StockParser::ExtractString(liveData, keys.exchangeName);
+
     stockData.livePrice = StockParser::ExtractValue(liveData, keys.price);
     stockData.prevClose = StockParser::ExtractValue(liveData, keys.prevClose);
     stockData.change = stockData.livePrice - stockData.prevClose;
-    stockData.changePercent = StockParser::ExtractValue(liveData, "regularMarketChangePercent");
+    stockData.changePercent = StockParser::ExtractValue(liveData, keys.changePercent);
+    
     if (stockData.changePercent == -1 && stockData.prevClose > 0)
     {
       stockData.changePercent = (stockData.change / stockData.prevClose) * 100.0;
     }
+    stockData.volume = StockParser::ExtractValue(liveData, keys.volume);
 
+    stockData.fiftyTwoHigh = StockParser::ExtractValue(liveData, keys.fiftyTwoHigh);
+    stockData.fiftyTwoLow = StockParser::ExtractValue(liveData, keys.fiftyTwoLow);
+    stockData.dayHigh = StockParser::ExtractValue(liveData, keys.dayHigh);
+    stockData.dayLow = StockParser::ExtractValue(liveData, keys.dayLow);
 
     return stockData;
   }

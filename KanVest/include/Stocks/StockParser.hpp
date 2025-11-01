@@ -18,5 +18,10 @@ namespace KanVest
     ///   - text: parsing text
     ///   - key: key parser
     static double ExtractValue(const std::string& text, const std::string& key);
+    /// This function extract the stock data as double value
+    /// - Parameters:
+    ///   - text: parsing text
+    ///   - key: key parser
+    static std::string ExtractString(const std::string& text, const std::string& key);
   };
 } // namespace KanVest

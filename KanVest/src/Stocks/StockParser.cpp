@@ -24,4 +24,19 @@ namespace KanVest
     
     return -1;
   }
+  
+  std::string StockParser::ExtractString(const std::string& text, const std::string& key)
+  {
+    std::string patternStr = API_Provider::GetStringParserPattern(key); 
+    std::regex pattern(patternStr);
+    std::smatch match;
+    
+    if (std::regex_search(text, match, pattern))
+    {
+      return match[1].str();
+    }
+    
+    return "";
+  }
+
 } // namespace KanVest

@@ -16,9 +16,18 @@ namespace KanVest
   
   struct APIKeys
   {
-    std::string price;
-    std::string prevClose;
-    std::string changePercent;
+    std::string price = "";
+    std::string prevClose = "";
+    std::string changePercent = "";
+    std::string volume = "";
+    std::string shortName = "";
+    std::string longName = "";
+    std::string currency = "";
+    std::string exchangeName = "";
+    std::string fiftyTwoHigh = "";
+    std::string fiftyTwoLow = "";
+    std::string dayHigh = "";
+    std::string dayLow = "";
   };
   
   /// This class stores the server URL from where data need to be extracted
@@ -28,6 +37,7 @@ namespace KanVest
     static void Initialize(StockAPIProvider apiProvider);
     static std::string GetURL();
     static std::string GetValueParserPattern(const std::string& key);
+    static std::string GetStringParserPattern(const std::string& key);
     static APIKeys GetAPIKeys();
     
   private:

@@ -30,6 +30,11 @@ namespace KanVest
     return "\"" + key + "\"\\s*:\\s*([-+]?[0-9]*\\.?[0-9]+)";
   }
   
+  std::string API_Provider::GetStringParserPattern(const std::string& key)
+  {
+    return "\"" + key + "\"\\s*:\\s*\"([^\"]+)\"";
+  }
+  
   APIKeys API_Provider::GetAPIKeys()
   {
     APIKeys keys;
@@ -40,6 +45,18 @@ namespace KanVest
         keys.price            = "regularMarketPrice";
         keys.prevClose        = "chartPreviousClose";
         keys.changePercent    = "regularMarketChangePercent";
+        keys.volume           = "regularMarketVolume";
+        
+        keys.shortName        = "shortName";
+        keys.longName         = "longName";
+        keys.currency         = "currency";
+        keys.exchangeName     = "exchangeName";
+        
+        keys.fiftyTwoHigh     = "fiftyTwoWeekHigh";
+        keys.fiftyTwoLow      = "fiftyTwoWeekLow";
+        keys.dayHigh          = "regularMarketDayHigh";
+        keys.dayLow           = "regularMarketDayLow";
+        
         break;
         
       default:
