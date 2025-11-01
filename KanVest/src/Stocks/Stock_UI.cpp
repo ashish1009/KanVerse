@@ -61,89 +61,127 @@ namespace KanVest
   {
     KanVasX::Panel::Begin("Stock Analyzer");
     {
-      static StockData stockData{""};
-      static bool ValidData = false;
+      const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
+      const float contentRegionAvailY = ImGui::GetContentRegionAvail().y;;
+
+      // 🔒 Non-resizable, borderless, fixed-size table
+      if (ImGui::BeginTable("StockAnalyzerTable", 3, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
+      {
+        float totalWidth = ImGui::GetContentRegionAvail().x;
+        float firstColWidth = totalWidth * 0.3f;
+        float secondColWidth = totalWidth * 0.4f;
+        float thirdColWidth = totalWidth * 0.3f;
+        
+        ImGui::TableSetupColumn("Stock Info", ImGuiTableColumnFlags_WidthFixed, firstColWidth);
+        ImGui::TableSetupColumn("Chart", ImGuiTableColumnFlags_WidthFixed, secondColWidth);
+        ImGui::TableSetupColumn("Analytics", ImGuiTableColumnFlags_WidthFixed, thirdColWidth);
+        
+        ImGui::TableNextRow();
+        
+        // ============================================================
+        // 🧭 COLUMN 1 : Stock Details
+        // ============================================================
+        {
+          ImGui::TableSetColumnIndex(0);
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.295);
+          
+          static StockData stockData{""};
+          static bool ValidData = false;
+          
+          static char searchedString[128] = "BEL";
+          
+          if (KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.2839f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
+          {
+            Utils::ConvertUpper(searchedString);
+          }
+          
+          ImGui::SameLine();
+          float iconSize = ImGui::GetItemRectSize().y - 12;
+          if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {-8.0, 6.0}) ||
+              ImGui::IsKeyDown(ImGuiKey_Enter))
+          {
+            stockData = StockController::UpdateStockData(searchedString);
+            ValidData = true;
+          }
+          
+          KanVasX::UI::ShiftCursorY(8.0f);
+          if (ValidData)
+          {
+            using namespace UI;
+            static const auto &textColor = KanVasX::Color::TextBright;
+            static const auto &alignLeft = KanVasX::UI::AlignX::Left;
             
-      KanVasX::UI::ShiftCursor({0.0f, 5.0f});
-      
-      static char searchedString[128] = "BEL";
-      const float contentRegionAvail = ImGui::GetContentRegionAvail().x;
-      if (KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvail * 0.30f,
-                                  "Enter Symbol ...", UI::Font::Get(UI::FontType::Large) , true))
-      {
-        Utils::ConvertUpper(searchedString);
+            // Stock Name and Value
+            std::string name = stockData.shortName + " (" + stockData.currency + ")";
+            KanVasX::UI::Text(Font::Get(FontType::Header_36), name.c_str(), alignLeft, {30.0f, 10.0f}, textColor);
+            KanVasX::UI::Text(Font::Get(FontType::Header_48), Utils::FormatDoubleToString(stockData.livePrice), alignLeft, {30.0f, 10.0f}, textColor);
+            
+            // Change
+            std::string change = stockData.change > 0 ? "+" : "";
+            change += Utils::FormatDoubleToString(stockData.change);
+            change += stockData.change > 0 ? " ( +" : " ( ";
+            change += Utils::FormatDoubleToString(stockData.changePercent) + "%)";
+            ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+            KanVasX::UI::Text(Font::Get(FontType::Header_30), change, alignLeft, {30.0f, 10.0f}, changeColor);
+            
+            // Under line
+            KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.2, {20.0, 5.0});
+            KanVasX::UI::ShiftCursorY(10);
+            
+            // 52-Week
+            std::string fiftytwoWeek = Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " +
+            Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
+            KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), "52-Week Range ", alignLeft, {30.0f, 10.0f}, textColor);
+            ImGui::SameLine();
+            KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), fiftytwoWeek, alignLeft, {50.0f, 0.0f}, textColor);
+            
+            // Day
+            std::string dayRange = Utils::FormatDoubleToString(stockData.dayLow) + " - " +
+            Utils::FormatDoubleToString(stockData.dayHigh);
+            KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), "Day Range     ", alignLeft, {30.0f, 10.0f}, textColor);
+            ImGui::SameLine();
+            KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), dayRange, alignLeft, {50.0f, 0.0f}, textColor);
+            
+            // Voldume
+            KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), "Volume        ", alignLeft, {30.0f, 10.0f}, textColor);
+            ImGui::SameLine();
+            KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), Utils::FormatLargeNumber(stockData.volume), alignLeft, {50.0f, 0.0f}, textColor);
+            
+            KanVasX::UI::ShiftCursorY(10);
+            KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.2, {20.0, 5.0});
+          }
+        }
+        
+        // ============================================================
+        // 📊 COLUMN 2 : Chart
+        // ============================================================
+        {
+          ImGui::TableSetColumnIndex(1);
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.395);
+          
+          static KanVasX::Date startDate{2024, 1, 1};
+          static KanVasX::Date endDate{2024, 3, 31};
+          
+          KanVasX::Date::RangeSelectorUI(startDate, endDate);
+        }
+        
+        // ============================================================
+        // 📊 COLUMN 2 : Analytics / Date Range
+        // ============================================================
+        {
+          ImGui::TableSetColumnIndex(2);
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.295);
+        }
       }
-      
-      ImGui::SameLine();
-      float iconSize = ImGui::GetItemRectSize().y - 12;
-      if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {-8.0, 6.0}) or
-          ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
+      ImGui::EndTable();
+
       {
-        stockData = StockController::UpdateStockData(searchedString);
-        ValidData = true;
+        KanVasX::UI::SetCursorPosY(contentRegionAvailY * 0.765f);
+        KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y);
       }
-      
-      KanVasX::UI::ShiftCursorY(5.0f);
-      
-      const float availY = ImGui::GetContentRegionAvail().y;
-      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, availY, 0.298);
-      
-      if (ValidData)
-      {
-        static const auto& textColor = KanVasX::Color::TextBright;
-        static const auto& alignLeft = KanVasX::UI::AlignX::Left;
-        using namespace UI;
- 
-        std::string name = stockData.shortName + " (" + stockData.currency + ")";
-        
-        // Namme
-        KanVasX::UI::Text(Font::Get(FontType::Header_36), name.c_str(), alignLeft, {30.0f, 10.0f}, textColor);
-        
-        // Price
-        KanVasX::UI::Text(Font::Get(FontType::Header_48), Utils::FormatDoubleToString(stockData.livePrice), alignLeft, {30.0f, 10.0f}, textColor);
-        
-        // Change and percent
-        std::string change = stockData.change > 0 ? "+" : "";
-        change += Utils::FormatDoubleToString(stockData.change);
-        change += stockData.change > 0 ? " ( +" : " ( ";
-        change += Utils::FormatDoubleToString(stockData.changePercent) + "%)";
-        
-        ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
-        KanVasX::UI::Text(Font::Get(FontType::Header_30), change, alignLeft, {30.0f, 10.0f}, changeColor);
-
-        // Under line
-        KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.2, {20.0, 5.0});
-        KanVasX::UI::ShiftCursorY(10);
-        
-        // 52-Week
-        std::string fiftytwoWeek = Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " + Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
-        KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), "52-Week Range ", alignLeft, {30.0f, 10.0f}, textColor);
-        ImGui::SameLine();
-        KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), fiftytwoWeek, alignLeft, {50.0f, 0.0f}, textColor);
-
-        // Day
-        std::string datRange = Utils::FormatDoubleToString(stockData.dayLow) + " - " + Utils::FormatDoubleToString(stockData.dayHigh);
-        KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), "Day Range     ", alignLeft, {30.0f, 10.0f}, textColor);
-        ImGui::SameLine();
-        KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), datRange, alignLeft, {50.0f, 0.0f}, textColor);
-
-        // Volume
-        KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), "Volume        ", alignLeft, {30.0f, 10.0f}, textColor);
-        ImGui::SameLine();
-        KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), Utils::FormatLargeNumber(stockData.volume), alignLeft, {50.0f, 0.0f}, textColor);
-        
-        // Under line
-        KanVasX::UI::ShiftCursorY(10);
-        KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.2, {20.0, 5.0});
-      }
-      
-      static KanVasX::Date startDate{2024, 1, 1};
-      static KanVasX::Date endDate{2024, 3, 31};
-      
-      KanVasX::Date::RangeSelectorUI(startDate, endDate);
-      ImGui::Text("Start Dtaa : %s", startDate.ToString().c_str());
-      ImGui::Text("Start Dtaa : %s", endDate.ToString().c_str());
+      KanVasX::Panel::End();
     }
-    KanVasX::Panel::End();
   }
+
+
 } // namespace KanVest

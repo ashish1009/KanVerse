@@ -152,7 +152,7 @@ namespace KanVest
   {
     UI_StartMainWindowDocking();
     
-        UI_PrimaryViewportPanel_DEMO();
+//        UI_PrimaryViewportPanel_DEMO();
     UI_StockAnalyzer();
     //    UI_PerformancePanel();
     

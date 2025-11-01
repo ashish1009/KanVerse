@@ -49,7 +49,7 @@ namespace KanVasX
     TextBright            = IM_COL32(255, 255, 255, 255);
     
     // Frame : Checkbox BG, Text BG, Drop Menu
-    FrameBg               = IM_COL32(14, 20, 25, 255);
+    FrameBg               = IM_COL32(24, 30, 35, 255);
     
     // Commons ----------------------------
     // Highlight
