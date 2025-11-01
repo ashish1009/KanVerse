@@ -74,6 +74,7 @@ namespace KanVest
     // History data
     std::vector<double> timestamps = StockParser::ExtractArray(liveData, "timestamp");
     std::vector<double> closes     = StockParser::ExtractArray(liveData, "close");
+    std::vector<double> opens      = StockParser::ExtractArray(liveData, "open");
     std::vector<double> lows       = StockParser::ExtractArray(liveData, "low");
     std::vector<double> highs      = StockParser::ExtractArray(liveData, "high");
     std::vector<double> volumes    = StockParser::ExtractArray(liveData, "volume");
@@ -84,6 +85,7 @@ namespace KanVest
     {
       StockPoint p;
       p.timestamp = timestamps[i];
+      p.open      = opens[i];
       p.close     = closes[i];
       p.low       = lows[i];
       p.high      = highs[i];

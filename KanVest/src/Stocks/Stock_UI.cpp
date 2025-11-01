@@ -56,7 +56,84 @@ namespace KanVest
   {
     s_reloadIconID = reloadIconID;
   }
+  
+  void DrawCandleChart(const std::vector<StockPoint>& history) {
+    if (history.empty()) {
+      ImGui::Text("No data to display.");
+      return;
+    }
+    
+    // Normalize timestamps
+    double t0 = history.front().timestamp;
+    double t1 = history.back().timestamp;
+    double range = (t1 - t0);
+    if (range == 0) range = 1.0;
+    
+    std::vector<double> xs, opens, highs, lows, closes;
+    xs.reserve(history.size());
+    opens.reserve(history.size());
+    highs.reserve(history.size());
+    lows.reserve(history.size());
+    closes.reserve(history.size());
+    
+    double ymin = DBL_MAX, ymax = -DBL_MAX;
+    for (auto& h : history) {
+      double normx = (h.timestamp - t0) / range * (double)(history.size() - 1);
+      xs.push_back(normx);
+      opens.push_back(h.open);
+      highs.push_back(h.high);
+      lows.push_back(h.low);
+      closes.push_back(h.close);
+      
+      ymin = std::min({ymin, h.low});
+      ymax = std::max({ymax, h.high});
+    }
+    
+    if (ImPlot::BeginPlot("Candlestick Chart", ImVec2(-1, 400))) {
+      // Force axis limits to data range
+      ImPlot::SetupAxes("Time", "Price");
+      ImPlot::SetupAxisLimits(ImAxis_X1, xs.front() - 1, xs.back() + 1, ImGuiCond_Always);
+      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin - 1, ymax + 1, ImGuiCond_Always);
+      
+      // ⚠️ Important: Plot invisible data so ImPlot initializes coordinate transform
+      ImPlot::PlotLine("", xs.data(), closes.data(), (int)xs.size(), ImPlotLineFlags_None, 0, 0);
+      
+      ImDrawList* draw_list = ImPlot::GetPlotDrawList();
+      double half_width = 0.3;
+      
+      for (size_t i = 0; i < xs.size(); ++i) {
+        double x = xs[i];
+        double o = opens[i];
+        double c = closes[i];
+        double h = highs[i];
+        double l = lows[i];
+        
+        ImU32 color = (c >= o) ? IM_COL32(0, 200, 0, 255) : IM_COL32(200, 60, 60, 255);
+        
+        // Convert to pixel coordinates (now works because axis is initialized)
+        ImVec2 p_high = ImPlot::PlotToPixels(ImPlotPoint(x, h));
+        ImVec2 p_low  = ImPlot::PlotToPixels(ImPlotPoint(x, l));
+        ImVec2 p_open = ImPlot::PlotToPixels(ImPlotPoint(x, o));
+        ImVec2 p_close = ImPlot::PlotToPixels(ImPlotPoint(x, c));
+        
+        // Wick
+        draw_list->AddLine(p_low, p_high, IM_COL32(180, 180, 180, 255));
+        
+        // Body
+        float top = std::min(p_open.y, p_close.y);
+        float bottom = std::max(p_open.y, p_close.y);
+        float cx = (p_open.x + p_close.x) * 0.5f;
+        float w = 5.0f; // fixed pixel width for clarity
+        
+        draw_list->AddRectFilled(ImVec2(cx - w, top), ImVec2(cx + w, bottom), color);
+        draw_list->AddRect(ImVec2(cx - w, top), ImVec2(cx + w, bottom), IM_COL32(50, 50, 50, 255));
+      }
+      
+      ImPlot::EndPlot();
+    }
+  }
 
+  
   void StockUI::StockAnalyzer()
   {
     KanVasX::Panel::Begin("Stock Analyzer");
@@ -90,7 +167,7 @@ namespace KanVest
         if (startTime == 0 || endTime == 0 || endTime <= startTime)
         {
           endTime = time(nullptr);
-          startTime = endTime - 60*60*24*90;
+          startTime = endTime - 60 * 60 * 24 * 90;
         }
         
         // Use period1= start (UTC), period2 = end (UTC) + one day to include end date
@@ -210,7 +287,7 @@ namespace KanVest
           }
 
           ImGui::SameLine();
-          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Chart", KanVasX::UI::AlignX::Center, {-90.0, -10.0f});
+          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Chart", KanVasX::UI::AlignX::Center, {-70.0, -10.0f});
           
           ImGui::SameLine();
           KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x - 120);
@@ -219,6 +296,9 @@ namespace KanVest
           {
             UpdateStockData(stockData.symbol);
           }
+
+          DrawCandleChart(stockData.history);
+          
 //          KanVasX::Date::RangeSelectorUI(startDate, endDate);
         }
         
