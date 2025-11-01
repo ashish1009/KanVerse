@@ -14,7 +14,7 @@
 
 namespace KanVest
 {
-  StockData StockController::UpdateStockData(const std::string& symbolName, const std::string& period1, const std::string& period2)
+  StockData StockController::UpdateStockData(const std::string& symbolName, const std::string& period1, const std::string& period2, const std::string& interval, const std::string& range)
   {
     // Ensure symbol has a suffix (.NS, .BO, etc.)
     std::string symbol = symbolName;
@@ -26,13 +26,13 @@ namespace KanVest
     APIKeys keys = API_Provider::GetAPIKeys();
 
     // Fetch data from URL ------------------------------------
-    std::string liveData = StockAPI::FetchLiveData(symbol);
+    std::string liveData = StockAPI::FetchLiveData(symbol, interval, range);
     
     // If liveData doesn't contain usual fields, try .BO fallback for Indian stocks
     if (liveData.find("\"" + keys.price + "\"") == std::string::npos and symbolName.find(".NS") != std::string::npos)
     {
       std::string altSymbol = symbol.substr(0, symbol.find(".NS")) + ".BO";
-      std::string altData = StockAPI::FetchLiveData(altSymbol);
+      std::string altData = StockAPI::FetchLiveData(altSymbol, interval, range);
 
       if (altData.find("\"" + keys.price + "\"") != std::string::npos)
       {

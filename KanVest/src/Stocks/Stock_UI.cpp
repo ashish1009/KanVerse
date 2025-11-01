@@ -62,21 +62,47 @@ namespace KanVest
     KanVasX::Panel::Begin("Stock Analyzer");
     {
       const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
-      const float contentRegionAvailY = ImGui::GetContentRegionAvail().y;;
+      const float contentRegionAvailY = ImGui::GetContentRegionAvail().y;
+      
+      // Stock Data
+      static StockData stockData{""};
+      
+      // History date range
+      static KanVasX::Date startDate{2024, 1, 30};
+      static KanVasX::Date endDate{2024, 1, 31};
+      
+      static const char* inteval[] =
+      {
+        "1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"
+      };
+      static int32_t intervalIndex = 0;
+      
+      static const char* range[] =
+      {
+        "1d", "5d", "1mo", "6mo", "1y", "5y", "max"
+      };
+      static int32_t rangeIndex = 0;
+
+      auto UpdateStockData = [](const std::string& symbol) {
+        time_t startTime = StockParser::ParseDateYYYYMMDD(startDate.ToString());
+        time_t endTime = StockParser::ParseDateYYYYMMDD(endDate.ToString());
+        
+        if (startTime == 0 || endTime == 0 || endTime <= startTime)
+        {
+          endTime = time(nullptr);
+          startTime = endTime - 60*60*24*90;
+        }
+        
+        // Use period1= start (UTC), period2 = end (UTC) + one day to include end date
+        long period1 = static_cast<long>(startTime);
+        long period2 = static_cast<long>(endTime + 60*60*24);
+        
+        stockData = StockController::UpdateStockData(symbol, std::to_string(period1), std::to_string(period2), inteval[intervalIndex], range[rangeIndex]);
+      };
 
       // 🔒 Non-resizable, borderless, fixed-size table
       if (ImGui::BeginTable("StockAnalyzerTable", 3, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
       {
-        // Check if data captured
-        static bool ValidData = false;
-
-        // Stock Data
-        static StockData stockData{""};
-
-        // History date range
-        static KanVasX::Date startDate{2024, 1, 30};
-        static KanVasX::Date endDate{2024, 1, 31};
-        
         // UI
         float totalWidth = ImGui::GetContentRegionAvail().x;
         float firstColWidth = totalWidth * 0.3f;
@@ -95,7 +121,8 @@ namespace KanVest
         {
           ImGui::TableSetColumnIndex(0);
           KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.295);
-          
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.295);
+
           static char searchedString[128] = "BEL";
           
           if (KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.2839f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
@@ -105,29 +132,13 @@ namespace KanVest
           
           ImGui::SameLine();
           float iconSize = ImGui::GetItemRectSize().y - 12;
-          if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {-8.0, 6.0}) ||
-              ImGui::IsKeyDown(ImGuiKey_Enter))
+          if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {-8.0, 6.0}) || ImGui::IsKeyDown(ImGuiKey_Enter))
           {
-            time_t startTime = StockParser::ParseDateYYYYMMDD(startDate.ToString());
-            time_t endTime = StockParser::ParseDateYYYYMMDD(endDate.ToString());
-            
-            if (startTime == 0 || endTime == 0 || endTime <= startTime)
-            {
-              endTime = time(nullptr);
-              startTime = endTime - 60*60*24*90;
-            }
-            
-            // Use period1= start (UTC), period2 = end (UTC) + one day to include end date
-            long period1 = static_cast<long>(startTime);
-            long period2 = static_cast<long>(endTime + 60*60*24);
-
-            stockData = StockController::UpdateStockData(searchedString, std::to_string(period1), std::to_string(period2));
-
-            ValidData = true;
+            UpdateStockData(searchedString);
           }
           
           KanVasX::UI::ShiftCursorY(8.0f);
-          if (ValidData)
+          if (stockData.IsValid())
           {
             using namespace UI;
             static const auto &textColor = KanVasX::Color::TextBright;
@@ -185,14 +196,34 @@ namespace KanVest
         // 📊 COLUMN 2 : Chart
         // ============================================================
         {
+          KanVasX::ScopedColor frameBg(ImGuiCol_FrameBg, KanVasX::Color::BackgroundLight);
+          
           ImGui::TableSetColumnIndex(1);
           KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.395);
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.395);
+
+          KanVasX::UI::ShiftCursor({10.0f, 10.0f});
+          ImGui::SetNextItemWidth(100);
+          if (ImGui::Combo("##IntervalCombo", &intervalIndex, inteval, IM_ARRAYSIZE(inteval)))
+          {
+            UpdateStockData(stockData.symbol);
+          }
+
+          ImGui::SameLine();
+          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Chart", KanVasX::UI::AlignX::Center, {-90.0, -10.0f});
           
+          ImGui::SameLine();
+          KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x - 120);
+          ImGui::SetNextItemWidth(100);
+          if (ImGui::Combo("##RangeCombo", &rangeIndex, range, IM_ARRAYSIZE(range)))
+          {
+            UpdateStockData(stockData.symbol);
+          }
 //          KanVasX::Date::RangeSelectorUI(startDate, endDate);
         }
         
         // ============================================================
-        // 📊 COLUMN 2 : Analytics / Date Range
+        // 📊 COLUMN 3 : Analytics / Date Range
         // ============================================================
         {
           ImGui::TableSetColumnIndex(2);
@@ -208,6 +239,4 @@ namespace KanVest
       KanVasX::Panel::End();
     }
   }
-
-
 } // namespace KanVest
