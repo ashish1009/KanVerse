@@ -67,6 +67,17 @@ namespace KanVest
       // 🔒 Non-resizable, borderless, fixed-size table
       if (ImGui::BeginTable("StockAnalyzerTable", 3, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
       {
+        // Check if data captured
+        static bool ValidData = false;
+
+        // Stock Data
+        static StockData stockData{""};
+
+        // History date range
+        static KanVasX::Date startDate{2024, 1, 1};
+        static KanVasX::Date endDate{2024, 3, 31};
+        
+        // UI
         float totalWidth = ImGui::GetContentRegionAvail().x;
         float firstColWidth = totalWidth * 0.3f;
         float secondColWidth = totalWidth * 0.4f;
@@ -85,9 +96,6 @@ namespace KanVest
           ImGui::TableSetColumnIndex(0);
           KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.295);
           
-          static StockData stockData{""};
-          static bool ValidData = false;
-          
           static char searchedString[128] = "BEL";
           
           if (KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.2839f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
@@ -100,7 +108,21 @@ namespace KanVest
           if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {-8.0, 6.0}) ||
               ImGui::IsKeyDown(ImGuiKey_Enter))
           {
-            stockData = StockController::UpdateStockData(searchedString);
+            time_t startTime = StockParser::ParseDateYYYYMMDD(startDate.ToString());
+            time_t endTime = StockParser::ParseDateYYYYMMDD(endDate.ToString());
+            
+            if (startTime == 0 || endTime == 0 || endTime <= startTime)
+            {
+              endTime = time(nullptr);
+              startTime = endTime - 60*60*24*90;
+            }
+            
+            // Use period1= start (UTC), period2 = end (UTC) + one day to include end date
+            long period1 = static_cast<long>(startTime);
+            long period2 = static_cast<long>(endTime + 60*60*24);
+
+            stockData = StockController::UpdateStockData(searchedString, std::to_string(period1), std::to_string(period2));
+
             ValidData = true;
           }
           
@@ -158,9 +180,6 @@ namespace KanVest
         {
           ImGui::TableSetColumnIndex(1);
           KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.395);
-          
-          static KanVasX::Date startDate{2024, 1, 1};
-          static KanVasX::Date endDate{2024, 3, 31};
           
           KanVasX::Date::RangeSelectorUI(startDate, endDate);
         }

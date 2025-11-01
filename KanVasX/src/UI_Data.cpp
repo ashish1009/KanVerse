@@ -7,13 +7,14 @@
 
 #include "UI_Data.hpp"
 #include "UI_Utils.hpp"
+#include "UI_Scoped.hpp"
 
 namespace KanVasX
 {
   std::string Date::ToString()
   {
     std::ostringstream oss;
-    oss << std::setfill('0') << std::setw(2) << day << "-" << std::setw(2) << month << "-" << std::setw(4) << year;
+    oss << std::setfill('0') << std::setw(4) << year << "-" << std::setw(2) << month << "-" << std::setw(2) << day;
     return oss.str();
   }
   
@@ -192,7 +193,7 @@ namespace KanVasX
   void Date::RangeSelectorUI(Date& startDate, Date& endDate)
   {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 6));
-    
+
     // --- Start Date ---
     if (ImGui::Button(startDate.ToString().c_str(), ImVec2(110, 0)))
     {

@@ -322,8 +322,8 @@ namespace KanVest
       marketState = StockParser::ExtractString(liveData, "marketState");
       
       // --- Historical range (user controlled) ---
-      time_t s = parseDateYYYYMMDD(startDate);
-      time_t e = parseDateYYYYMMDD(endDate);
+      time_t s = StockParser::ParseDateYYYYMMDD(startDate);
+      time_t e = StockParser::ParseDateYYYYMMDD(endDate);
       if (s == 0 || e == 0 || e <= s) {
         // If bad input, fallback to default 90 days
         e = time(nullptr);

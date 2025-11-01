@@ -23,5 +23,8 @@ namespace KanVest
     ///   - text: parsing text
     ///   - key: key parser
     static std::string ExtractString(const std::string& text, const std::string& key);
+    /// This function parse time as tring into time_t
+    /// - Parameter timeString: time string
+    static time_t ParseDateYYYYMMDD(const std::string &timeString);
   };
 } // namespace KanVest
