@@ -74,8 +74,8 @@ namespace KanVest
         static StockData stockData{""};
 
         // History date range
-        static KanVasX::Date startDate{2024, 1, 1};
-        static KanVasX::Date endDate{2024, 3, 31};
+        static KanVasX::Date startDate{2024, 1, 30};
+        static KanVasX::Date endDate{2024, 1, 31};
         
         // UI
         float totalWidth = ImGui::GetContentRegionAvail().x;
@@ -136,6 +136,7 @@ namespace KanVest
             // Stock Name and Value
             std::string name = stockData.shortName + " (" + stockData.currency + ")";
             KanVasX::UI::Text(Font::Get(FontType::Header_36), name.c_str(), alignLeft, {30.0f, 10.0f}, textColor);
+            KanVasX::UI::Text(Font::Get(FontType::Header_24), stockData.longName .c_str(), alignLeft, {30.0f, 0.0f}, textColor);
             KanVasX::UI::Text(Font::Get(FontType::Header_48), Utils::FormatDoubleToString(stockData.livePrice), alignLeft, {30.0f, 10.0f}, textColor);
             
             // Change
@@ -164,13 +165,19 @@ namespace KanVest
             ImGui::SameLine();
             KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), dayRange, alignLeft, {50.0f, 0.0f}, textColor);
             
-            // Voldume
+            // Volume
             KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), "Volume        ", alignLeft, {30.0f, 10.0f}, textColor);
             ImGui::SameLine();
             KanVasX::UI::Text(Font::Get(FontType::FixedWidthHeader_20), Utils::FormatLargeNumber(stockData.volume), alignLeft, {50.0f, 0.0f}, textColor);
             
             KanVasX::UI::ShiftCursorY(10);
             KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.2, {20.0, 5.0});
+            
+//            ImGui::Text("exchangeName : %s", stockData.exchangeName.c_str());
+//            ImGui::Text("instrumentType : %s", stockData.instrumentType.c_str());
+//            ImGui::Text("timezone : %s", stockData.timezone.c_str());
+//            ImGui::Text("range : %s", stockData.range.c_str());
+//            ImGui::Text("dataGranularity : %s", stockData.dataGranularity.c_str());
           }
         }
         
@@ -181,7 +188,7 @@ namespace KanVest
           ImGui::TableSetColumnIndex(1);
           KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.395);
           
-          KanVasX::Date::RangeSelectorUI(startDate, endDate);
+//          KanVasX::Date::RangeSelectorUI(startDate, endDate);
         }
         
         // ============================================================

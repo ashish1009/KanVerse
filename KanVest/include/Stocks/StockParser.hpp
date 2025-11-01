@@ -26,5 +26,10 @@ namespace KanVest
     /// This function parse time as tring into time_t
     /// - Parameter timeString: time string
     static time_t ParseDateYYYYMMDD(const std::string &timeString);
+    /// This extract arrya
+    /// - Parameters:
+    ///   - text: text key
+    ///   - key: key
+    static std::vector<double> ExtractArray(const std::string& text, const std::string& key);
   };
 } // namespace KanVest

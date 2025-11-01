@@ -40,15 +40,18 @@ namespace KanVest
         liveData = altData;
       }
     }
-    
-    // Fetc Historyh data from URL -----------------------------
-    std::string historyData = StockAPI::FetchHistoryData(symbol, period1, period2);
-    
+        
     // Update Stock data
     StockData stockData(symbolName);
     
     stockData.shortName = StockParser::StockParser::ExtractString(liveData, keys.shortName);
     stockData.longName = StockParser::StockParser::ExtractString(liveData, keys.longName);
+    
+    stockData.instrumentType = StockParser::StockParser::ExtractString(liveData, keys.instrumentType);
+    stockData.timezone = StockParser::StockParser::ExtractString(liveData, keys.timezone);
+    stockData.range = StockParser::StockParser::ExtractString(liveData, keys.range);
+    stockData.dataGranularity = StockParser::StockParser::ExtractString(liveData, keys.dataGranularity);
+    
     stockData.currency = StockParser::StockParser::ExtractString(liveData, keys.currency);
     stockData.exchangeName = StockParser::StockParser::ExtractString(liveData, keys.exchangeName);
 
@@ -67,6 +70,26 @@ namespace KanVest
     stockData.fiftyTwoLow = StockParser::ExtractValue(liveData, keys.fiftyTwoLow);
     stockData.dayHigh = StockParser::ExtractValue(liveData, keys.dayHigh);
     stockData.dayLow = StockParser::ExtractValue(liveData, keys.dayLow);
+    
+    // History data
+    std::vector<double> timestamps = StockParser::ExtractArray(liveData, "timestamp");
+    std::vector<double> closes     = StockParser::ExtractArray(liveData, "close");
+    std::vector<double> lows       = StockParser::ExtractArray(liveData, "low");
+    std::vector<double> highs      = StockParser::ExtractArray(liveData, "high");
+    std::vector<double> volumes    = StockParser::ExtractArray(liveData, "volume");
+    
+    size_t count = std::min({timestamps.size(), closes.size(), lows.size(), volumes.size()});
+    
+    for (size_t i = 0; i < count; ++i)
+    {
+      StockPoint p;
+      p.timestamp = timestamps[i];
+      p.close     = closes[i];
+      p.low       = lows[i];
+      p.high      = highs[i];
+      p.volume    = volumes[i];
+      stockData.history.push_back(p);
+    }
 
     return stockData;
   }

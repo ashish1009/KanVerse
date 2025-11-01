@@ -22,6 +22,10 @@ namespace KanVest
     std::string volume = "";
     std::string shortName = "";
     std::string longName = "";
+    std::string instrumentType = "";
+    std::string timezone = "";
+    std::string range = "";
+    std::string dataGranularity = "";
     std::string currency = "";
     std::string exchangeName = "";
     std::string fiftyTwoHigh = "";
@@ -38,6 +42,7 @@ namespace KanVest
     static std::string GetURL();
     static std::string GetValueParserPattern(const std::string& key);
     static std::string GetStringParserPattern(const std::string& key);
+    static std::string GetArrayParserPattern(const std::string& key);
     static APIKeys GetAPIKeys();
     
   private:

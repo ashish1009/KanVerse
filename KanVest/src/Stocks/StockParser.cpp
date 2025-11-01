@@ -38,6 +38,25 @@ namespace KanVest
     
     return "";
   }
+  
+  std::vector<double> StockParser::ExtractArray(const std::string& text, const std::string& key)
+  {
+    std::vector<double> values;
+    std::string patternStr = API_Provider::GetArrayParserPattern(key); 
+    std::regex pattern(patternStr);
+    std::smatch match;
+    if (std::regex_search(text, match, pattern))
+    {
+      std::string arr = match[1].str();
+      std::regex numPattern("([-+]?[0-9]*\\.?[0-9]+)");
+      for (std::sregex_iterator it(arr.begin(), arr.end(), numPattern), end; it != end; ++it)
+      {
+        values.push_back(std::stod((*it)[1].str()));
+      }
+    }
+    return values;
+  }
+
 
   time_t StockParser::ParseDateYYYYMMDD(const std::string &timeString)
   {

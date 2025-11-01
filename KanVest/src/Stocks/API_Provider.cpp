@@ -34,7 +34,11 @@ namespace KanVest
   {
     return "\"" + key + "\"\\s*:\\s*\"([^\"]+)\"";
   }
-  
+  std::string API_Provider::GetArrayParserPattern(const std::string& key)
+  {
+    return "\"" + key + "\"\\s*:\\s*\\[([^\\]]+)\\]";
+  }
+
   APIKeys API_Provider::GetAPIKeys()
   {
     APIKeys keys;
@@ -51,6 +55,11 @@ namespace KanVest
         keys.longName         = "longName";
         keys.currency         = "currency";
         keys.exchangeName     = "exchangeName";
+        
+        keys.instrumentType   = "instrumentType";
+        keys.dataGranularity  = "dataGranularity";
+        keys.range            = "range";
+        keys.timezone         = "timezone";
         
         keys.fiftyTwoHigh     = "fiftyTwoWeekHigh";
         keys.fiftyTwoLow      = "fiftyTwoWeekLow";

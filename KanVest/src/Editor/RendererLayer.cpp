@@ -343,11 +343,11 @@ namespace KanVest
 //      std::string histData = StockAPI::FetchURL(histURL);
       
       // parse arrays
-      closes = extractArray(histData, "close");
-      opens = extractArray(histData, "open");
-      highs = extractArray(histData, "high");
-      lows = extractArray(histData, "low");
-      vols = extractArray(histData, "volume"); // returns as double but volumes are ints
+      closes = StockParser::ExtractArray(histData, "close");
+      opens = StockParser::ExtractArray(histData, "open");
+      highs = StockParser::ExtractArray(histData, "high");
+      lows = StockParser::ExtractArray(histData, "low");
+      vols = StockParser::ExtractArray(histData, "volume"); // returns as double but volumes are ints
       
       if (!closes.empty()) {
         customHigh = *std::max_element(closes.begin(), closes.end());
