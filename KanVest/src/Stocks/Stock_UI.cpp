@@ -57,9 +57,11 @@ namespace KanVest
     s_reloadIconID = reloadIconID;
   }
   
-  void DrawCandleChart(const std::vector<StockPoint>& history) {
-    if (history.empty()) {
-      ImGui::Text("No data to display.");
+  void DrawCandleChart(const std::vector<StockPoint>& history)
+  {
+    if (history.empty())
+    {
+      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22), "No Chart Available", KanVasX::UI::AlignX::Left);
       return;
     }
     
@@ -77,7 +79,8 @@ namespace KanVest
     closes.reserve(history.size());
     
     double ymin = DBL_MAX, ymax = -DBL_MAX;
-    for (auto& h : history) {
+    for (auto& h : history)
+    {
       double normx = (h.timestamp - t0) / range * (double)(history.size() - 1);
       xs.push_back(normx);
       opens.push_back(h.open);
@@ -89,7 +92,8 @@ namespace KanVest
       ymax = std::max({ymax, h.high});
     }
     
-    if (ImPlot::BeginPlot("Candlestick Chart", ImVec2(-1, 400))) {
+    if (ImPlot::BeginPlot("Candlestick Chart", ImVec2(-1, 400)))
+    {
       // Force axis limits to data range
       ImPlot::SetupAxes("Time", "Price");
       ImPlot::SetupAxisLimits(ImAxis_X1, xs.front() - 1, xs.back() + 1, ImGuiCond_Always);
@@ -99,9 +103,9 @@ namespace KanVest
       ImPlot::PlotLine("", xs.data(), closes.data(), (int)xs.size(), ImPlotLineFlags_None, 0, 0);
       
       ImDrawList* draw_list = ImPlot::GetPlotDrawList();
-      double half_width = 0.3;
       
-      for (size_t i = 0; i < xs.size(); ++i) {
+      for (size_t i = 0; i < xs.size(); ++i)
+      {
         double x = xs[i];
         double o = opens[i];
         double c = closes[i];
@@ -133,7 +137,6 @@ namespace KanVest
     }
   }
 
-  
   void StockUI::StockAnalyzer()
   {
     KanVasX::Panel::Begin("Stock Analyzer");
@@ -152,7 +155,7 @@ namespace KanVest
       {
         "1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"
       };
-      static int32_t intervalIndex = 0;
+      static int32_t intervalIndex = 2;
       
       static const char* range[] =
       {
@@ -160,7 +163,8 @@ namespace KanVest
       };
       static int32_t rangeIndex = 0;
 
-      auto UpdateStockData = [](const std::string& symbol) {
+      auto UpdateStockData = [](const std::string& symbol)
+      {
         time_t startTime = StockParser::ParseDateYYYYMMDD(startDate.ToString());
         time_t endTime = StockParser::ParseDateYYYYMMDD(endDate.ToString());
         
@@ -202,7 +206,7 @@ namespace KanVest
 
           static char searchedString[128] = "BEL";
           
-          if (KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.2839f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
+          if (KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.278f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
           {
             Utils::ConvertUpper(searchedString);
           }
@@ -273,31 +277,40 @@ namespace KanVest
         // 📊 COLUMN 2 : Chart
         // ============================================================
         {
-          KanVasX::ScopedColor frameBg(ImGuiCol_FrameBg, KanVasX::Color::BackgroundLight);
-          
           ImGui::TableSetColumnIndex(1);
           KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.395);
           KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.395);
 
-          KanVasX::UI::ShiftCursor({10.0f, 10.0f});
-          ImGui::SetNextItemWidth(100);
-          if (ImGui::Combo("##IntervalCombo", &intervalIndex, inteval, IM_ARRAYSIZE(inteval)))
+          if (stockData.IsValid())
           {
-            UpdateStockData(stockData.symbol);
+            KanVasX::UI::ShiftCursorY(8.0f);
           }
-
-          ImGui::SameLine();
-          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Chart", KanVasX::UI::AlignX::Center, {-70.0, -10.0f});
+          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Chart", KanVasX::UI::AlignX::Center);
           
-          ImGui::SameLine();
-          KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x - 120);
-          ImGui::SetNextItemWidth(100);
-          if (ImGui::Combo("##RangeCombo", &rangeIndex, range, IM_ARRAYSIZE(range)))
+          if (stockData.IsValid())
           {
-            UpdateStockData(stockData.symbol);
+            KanVasX::UI::ShiftCursor({0.0f, 15.0f});
+            DrawCandleChart(stockData.history);
+            
+            bool modify = false;
+            for (int i = 0; i < IM_ARRAYSIZE(range); ++i)
+            {
+              if (KanVasX::UI::DrawButton(range[i], nullptr))
+              {
+                rangeIndex = i;
+                modify = true;
+              }
+              if (i < IM_ARRAYSIZE(range) - 1)
+              {
+                ImGui::SameLine();
+              }
+            }
+            
+            if (modify)
+            {
+              UpdateStockData(stockData.symbol);
+            }
           }
-
-          DrawCandleChart(stockData.history);
           
 //          KanVasX::Date::RangeSelectorUI(startDate, endDate);
         }
