@@ -28,6 +28,7 @@
 #include <fstream>
 #include <cxxabi.h>
 #include <stack>
+#include <sstream>
 
 // glm math library
 #define GLM_ENABLE_EXPERIMENTAL
