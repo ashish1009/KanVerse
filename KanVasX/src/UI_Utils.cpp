@@ -74,6 +74,23 @@ namespace KanVasX
     return textureID ? (ImTextureID)INT2VOIDP(textureID) : 0;
   }
 
+  void UI::Tooltip(const std::string& desc)
+  {
+    if (ImGui::IsItemHovered())
+    {
+      ImGui::BeginTooltip();
+      ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+      ImGui::TextUnformatted(desc.c_str());
+      ImGui::PopTextWrapPos();
+      ImGui::EndTooltip();
+    }
+  }
+  void UI::HelpMarker(const char* desc)
+  {
+    ImGui::TextDisabled("(?)");
+    Tooltip(desc);
+  }
+
   void UI::ShiftCursorX(float distance)
   {
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + distance);

@@ -56,6 +56,13 @@ namespace KanVasX
     /// - Parameter ID: Client texture textureID
     static ImTextureID GetTextureID(uint32_t textureID);
 
+    /// This function show tooltip
+    /// - Parameter desc: hint
+    static void HelpMarker(const char* desc);
+    /// This function show tooltip
+    /// - Parameter desc: hint
+    static void Tooltip(const std::string& desc);
+
     // Cursor ------------------------------------------------------------------------------------------------------------------------------------------
     /// This function shift the cursor position for x
     /// - Parameter distance: distance x

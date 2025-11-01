@@ -6,6 +6,7 @@
 //
 
 #include "UI_Data.hpp"
+#include "UI_Utils.hpp"
 
 namespace KanVasX
 {
@@ -34,19 +35,19 @@ namespace KanVasX
     
     if (ImGui::BeginPopup(popupId))
     {
-      ImGui::TextUnformatted("Select Date");
+      UI::Text(nullptr, "Select Data", UI::AlignX::Center);
       ImGui::Separator();
       
-      const float cellWidth = 28.0f;   // fixed width for each day column
-      const float cellHeight = 26.0f;
+      const float cellWidth = 38.0f;   // fixed width for each day column
+      const float cellHeight = 30.0f;
       const float calendarWidth = 7 * (cellWidth + ImGui::GetStyle().ItemSpacing.x);
       
       // --- Month / Year Selectors with Arrow Controls ---
       ImGui::PushItemWidth(100);
       
       static const char* months[] = {
-        "Jan","Feb","Mar","Apr","May","Jun",
-        "Jul","Aug","Sep","Oct","Nov","Dec"
+        "January","February","March","April","May","June",
+        "July","August","September","October","November","December"
       };
       
       // --- Row: Navigation Buttons + Month / Year Selection ---
@@ -59,6 +60,7 @@ namespace KanVasX
           day = std::min(day, DaysInMonth(year, month));
           changed = true;
         }
+        UI::Tooltip("Previour Year");
         ImGui::SameLine();
         
         // Month decrement
@@ -73,8 +75,9 @@ namespace KanVasX
           day = std::min(day, DaysInMonth(year, month));
           changed = true;
         }
-        
+        UI::Tooltip("Previour Month");
         ImGui::SameLine();
+        
         ImGui::SetNextItemWidth(90);
         int monthIndex = month - 1;
         if (ImGui::Combo("##MonthCombo", &monthIndex, months, IM_ARRAYSIZE(months)))
@@ -109,7 +112,7 @@ namespace KanVasX
           day = std::min(day, DaysInMonth(year, month));
           changed = true;
         }
-        
+        UI::Tooltip("Next Month");
         ImGui::SameLine();
         
         // Year increment
@@ -120,6 +123,8 @@ namespace KanVasX
           changed = true;
         }
       }
+      UI::Tooltip("Next Year");
+
       ImGui::EndGroup();
       
       ImGui::PopItemWidth();
@@ -183,35 +188,28 @@ namespace KanVasX
     return changed;
   }
 
-
-  
   // --- Main range selector ---
   void Date::RangeSelectorUI(Date& startDate, Date& endDate)
   {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 6));
     
     // --- Start Date ---
-    ImGui::TextUnformatted("Start:");
-    ImGui::SameLine();
-    
     if (ImGui::Button(startDate.ToString().c_str(), ImVec2(110, 0)))
     {
       ImGui::OpenPopup("StartDatePopup");
     }
+    UI::Tooltip("Start Date");
     
     startDate.ShowCalendarPopup("StartDatePopup");
     
-    ImGui::SameLine(0, 20.0f);
-    
-    // --- End Date ---
-    ImGui::TextUnformatted("End:");
     ImGui::SameLine();
     
+    // --- End Date ---
     if (ImGui::Button(endDate.ToString().c_str(), ImVec2(110, 0)))
     {
       ImGui::OpenPopup("EndDatePopup");
     }
-    
+    UI::Tooltip("End Date");
     endDate.ShowCalendarPopup("EndDatePopup");
     
     ImGui::PopStyleVar();
@@ -222,7 +220,7 @@ namespace KanVasX
         (endDate.year == startDate.year && endDate.month == startDate.month && endDate.day < startDate.day))
     {
       ImGui::Spacing();
-      ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "⚠️ Invalid range (End before Start)");
+      ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "Invalid range (End before Start)");
     }
   }
 

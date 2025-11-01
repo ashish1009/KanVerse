@@ -135,16 +135,14 @@ namespace KanVest
         // Under line
         KanVasX::UI::ShiftCursorY(10);
         KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.2, {20.0, 5.0});
-        
-        
-        static KanVasX::Date startDate{2024, 1, 1};
-        static KanVasX::Date endDate{2024, 3, 31};
-        
-        KanVasX::Date::RangeSelectorUI(startDate, endDate);
-        ImGui::Text("Start Dtaa : %s", startDate.ToString().c_str());
-        ImGui::Text("Start Dtaa : %s", endDate.ToString().c_str());
-
       }
+      
+      static KanVasX::Date startDate{2024, 1, 1};
+      static KanVasX::Date endDate{2024, 3, 31};
+      
+      KanVasX::Date::RangeSelectorUI(startDate, endDate);
+      ImGui::Text("Start Dtaa : %s", startDate.ToString().c_str());
+      ImGui::Text("Start Dtaa : %s", endDate.ToString().c_str());
     }
     KanVasX::Panel::End();
   }
