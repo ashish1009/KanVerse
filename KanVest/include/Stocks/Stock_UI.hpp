@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "Stocks/StockData.hpp"
+
 namespace KanVest
 {
   /// This class responsible for Stock UI Panel
@@ -20,6 +22,9 @@ namespace KanVest
     static void StockAnalyzer();
     
   private:
-    inline static ImTextureID s_reloadIconID = 0;                     
+    static void DrawCandleChart(const std::vector<StockPoint>& history);
+
+    inline static ImTextureID s_reloadIconID = 0;
+    inline static bool s_showCandle = true;
   };
 } // namespace KanVest

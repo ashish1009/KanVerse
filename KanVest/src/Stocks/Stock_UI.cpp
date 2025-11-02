@@ -50,6 +50,11 @@ namespace KanVest
       
       return oss.str();
     }
+    static inline time_t ToMarketTime(time_t utcTimestamp)
+    {
+      // IST = UTC + 5 hours 30 minutes = +19800 seconds
+      return utcTimestamp + 5 * 3600 + 30 * 60;
+    }
   } // namespace Utils
   
   void StockUI::Initialize(ImTextureID reloadIconID)
@@ -57,7 +62,7 @@ namespace KanVest
     s_reloadIconID = reloadIconID;
   }
   
-  void DrawCandleChart(const std::vector<StockPoint>& history)
+  void StockUI::DrawCandleChart(const std::vector<StockPoint>& history)
   {
     if (history.empty())
     {
@@ -65,42 +70,54 @@ namespace KanVest
       return;
     }
     
-    // Normalize timestamps
-    double t0 = history.front().timestamp;
-    double t1 = history.back().timestamp;
-    double range = (t1 - t0);
-    if (range == 0) range = 1.0;
+    // Filter out non-trading days (weekends/holidays)
+    std::vector<StockPoint> filtered;
+    filtered.reserve(history.size());
+    
+    for (const auto& h : history)
+    {
+      time_t t = (time_t)h.timestamp;
+      struct tm* tm_info = localtime(&t);
+      int wday = tm_info->tm_wday; // 0 = Sunday, 6 = Saturday
+      if (wday == 0 || wday == 6) continue; // skip weekends
+      // (optional) add your holiday skip logic here
+      filtered.push_back(h);
+    }
+    
+    if (filtered.empty())
+    {
+      ImGui::Text("No trading days in this range");
+      return;
+    }
     
     std::vector<double> xs, opens, highs, lows, closes;
-    xs.reserve(history.size());
-    opens.reserve(history.size());
-    highs.reserve(history.size());
-    lows.reserve(history.size());
-    closes.reserve(history.size());
+    xs.reserve(filtered.size());
+    opens.reserve(filtered.size());
+    highs.reserve(filtered.size());
+    lows.reserve(filtered.size());
+    closes.reserve(filtered.size());
     
     double ymin = DBL_MAX, ymax = -DBL_MAX;
-    for (auto& h : history)
+    for (auto& h : filtered)
     {
-      double normx = (h.timestamp - t0) / range * (double)(history.size() - 1);
-      xs.push_back(normx);
+      xs.push_back((double)Utils::ToMarketTime(h.timestamp));
       opens.push_back(h.open);
       highs.push_back(h.high);
       lows.push_back(h.low);
       closes.push_back(h.close);
       
-      ymin = std::min({ymin, h.low});
-      ymax = std::max({ymax, h.high});
+      ymin = std::min(ymin, h.low);
+      ymax = std::max(ymax, h.high);
     }
     
-    if (ImPlot::BeginPlot("Candlestick Chart", ImVec2(-1, 400)))
+    if (ImPlot::BeginPlot("", ImVec2(-1, 400)))
     {
-      // Force axis limits to data range
-      ImPlot::SetupAxes("Time", "Price");
-      ImPlot::SetupAxisLimits(ImAxis_X1, xs.front() - 1, xs.back() + 1, ImGuiCond_Always);
+      ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
+      ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time); // ⏰ real-time axis!
       ImPlot::SetupAxisLimits(ImAxis_Y1, ymin - 1, ymax + 1, ImGuiCond_Always);
       
-      // ⚠️ Important: Plot invisible data so ImPlot initializes coordinate transform
-      ImPlot::PlotLine("", xs.data(), closes.data(), (int)xs.size(), ImPlotLineFlags_None, 0, 0);
+      // Invisible plot for transform
+      ImPlot::PlotLine("", xs.data(), closes.data(), (int)xs.size());
       
       ImDrawList* draw_list = ImPlot::GetPlotDrawList();
       
@@ -112,25 +129,27 @@ namespace KanVest
         double h = highs[i];
         double l = lows[i];
         
-        ImU32 color = (c >= o) ? IM_COL32(0, 200, 0, 255) : IM_COL32(200, 60, 60, 255);
+        ImU32 color = (c >= o) ? IM_COL32(0, 255, 0, 255) : IM_COL32(255, 80, 80, 255);
         
-        // Convert to pixel coordinates (now works because axis is initialized)
-        ImVec2 p_high = ImPlot::PlotToPixels(ImPlotPoint(x, h));
-        ImVec2 p_low  = ImPlot::PlotToPixels(ImPlotPoint(x, l));
-        ImVec2 p_open = ImPlot::PlotToPixels(ImPlotPoint(x, o));
+        ImVec2 p_high  = ImPlot::PlotToPixels(ImPlotPoint(x, h));
+        ImVec2 p_low   = ImPlot::PlotToPixels(ImPlotPoint(x, l));
+        ImVec2 p_open  = ImPlot::PlotToPixels(ImPlotPoint(x, o));
         ImVec2 p_close = ImPlot::PlotToPixels(ImPlotPoint(x, c));
         
         // Wick
-        draw_list->AddLine(p_low, p_high, IM_COL32(180, 180, 180, 255));
+        draw_list->AddLine(p_low, p_high, IM_COL32(200, 200, 200, 255));
         
-        // Body
+        // Candle body
         float top = std::min(p_open.y, p_close.y);
         float bottom = std::max(p_open.y, p_close.y);
-        float cx = (p_open.x + p_close.x) * 0.5f;
-        float w = 5.0f; // fixed pixel width for clarity
+        float cx = p_open.x;
+        float w = 4.0f;
         
-        draw_list->AddRectFilled(ImVec2(cx - w, top), ImVec2(cx + w, bottom), color);
-        draw_list->AddRect(ImVec2(cx - w, top), ImVec2(cx + w, bottom), IM_COL32(50, 50, 50, 255));
+        if (s_showCandle)
+        {
+          draw_list->AddRectFilled(ImVec2(cx - w, top), ImVec2(cx + w, bottom), color);
+          draw_list->AddRect(ImVec2(cx - w, top), ImVec2(cx + w, bottom), IM_COL32(40, 40, 40, 255));
+        }
       }
       
       ImPlot::EndPlot();
@@ -142,7 +161,6 @@ namespace KanVest
     KanVasX::Panel::Begin("Stock Analyzer");
     {
       const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
-      const float contentRegionAvailY = ImGui::GetContentRegionAvail().y;
       
       // Stock Data
       static StockData stockData{""};
@@ -197,6 +215,7 @@ namespace KanVest
       if (ImGui::BeginTable("StockAnalyzerTable", 2, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
       {
         // UI
+        float topYArea = ImGui::GetContentRegionAvail().y * 0.45f;
         float totalWidth = ImGui::GetContentRegionAvail().x;
         float firstColWidth = totalWidth * 0.3f;
         float secondColWidth = totalWidth  - firstColWidth;
@@ -211,11 +230,18 @@ namespace KanVest
         // ============================================================
         {
           ImGui::TableSetColumnIndex(0);
-          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.295);
-          KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.295);
-
-          static char searchedString[128] = "BEL";
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.2985);
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.2985);
           
+          static char searchedString[128] = "Nifty";
+          
+          static bool firstUpdate = true;
+          if (firstUpdate)
+          {
+            UpdateStockData(searchedString);
+            firstUpdate = false;
+          }
+
           if (KanVasX::Widget::Search(searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.278f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
           {
             Utils::ConvertUpper(searchedString);
@@ -250,7 +276,7 @@ namespace KanVest
             KanVasX::UI::Text(Font::Get(FontType::Header_30), change, alignLeft, {30.0f, 10.0f}, changeColor);
             
             // Under line
-            KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.2, {20.0, 5.0});
+            KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.24, {20.0, 5.0});
             KanVasX::UI::ShiftCursorY(10);
             
             // 52-Week
@@ -282,24 +308,17 @@ namespace KanVest
         // ============================================================
         {
           ImGui::TableSetColumnIndex(1);
-          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.688);
-          KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.688);
-
-          if (stockData.IsValid())
-          {
-            KanVasX::UI::ShiftCursorY(8.0f);
-          }
-          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Chart", KanVasX::UI::AlignX::Center);
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.688);
           
           if (stockData.IsValid())
-          {
-            KanVasX::UI::ShiftCursor({0.0f, 15.0f});
+          {            
             DrawCandleChart(stockData.history);
             
             bool modify = false;
             for (int i = 0; i < IM_ARRAYSIZE(range); ++i)
             {
-              if (KanVasX::UI::DrawButton(range[i], nullptr))
+              auto buttonColor = range[i] == currentRange ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+              if (KanVasX::UI::DrawButton(range[i], nullptr, buttonColor))
               {
                 currentRange = range[i];
                 currentInterval = rangeIntervalMap[currentRange][0].c_str();
@@ -311,13 +330,18 @@ namespace KanVest
                 ImGui::SameLine();
               }
             }
+            
+            ImGui::SameLine();
+            KanVasX::UI::ShiftCursorX(50);
+            ImGui::Checkbox(" Show Candle", &s_showCandle);
 
             ImGui::SameLine();
             std::vector<std::string> intervalValues = rangeIntervalMap[currentRange];
             KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x - (intervalValues.size() * 40));
             for (int i = 0; i < intervalValues.size(); ++i)
             {
-              if (KanVasX::UI::DrawButton(intervalValues[i], nullptr))
+              auto buttonColor = intervalValues[i] == currentInterval ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+              if (KanVasX::UI::DrawButton(intervalValues[i], nullptr, buttonColor))
               {
                 currentInterval = intervalValues[i].c_str();
                 modify = true;
@@ -337,10 +361,38 @@ namespace KanVest
       }
       ImGui::EndTable();
 
+      // 🔒 Non-resizable, borderless, fixed-size table
+      KanVasX::UI::ShiftCursorY(5);
+      if (ImGui::BeginTable("Portfolio Manager", 2, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
       {
-        KanVasX::UI::SetCursorPosY(contentRegionAvailY * 0.765f);
-        KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y);
+        // UI
+        float topYArea = ImGui::GetContentRegionAvail().y;
+        float totalWidth = ImGui::GetContentRegionAvail().x;
+        float firstColWidth = totalWidth * 0.3f;
+        float secondColWidth = totalWidth  - firstColWidth;
+        
+        ImGui::TableSetupColumn(" DATA 1", ImGuiTableColumnFlags_WidthFixed, firstColWidth);
+        ImGui::TableSetupColumn(" DATA 2", ImGuiTableColumnFlags_WidthFixed, secondColWidth);
+        
+        ImGui::TableNextRow();
+        
+        // ============================================================
+        // 🧭 COLUMN 1 :
+        // ============================================================
+        {
+          ImGui::TableSetColumnIndex(0);
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.2985);
+        }
+        
+        // ============================================================
+        // 📊 COLUMN 2 :
+        // ============================================================
+        {
+          ImGui::TableSetColumnIndex(1);
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.688);
+        }
       }
+      ImGui::EndTable();
       KanVasX::Panel::End();
     }
   }

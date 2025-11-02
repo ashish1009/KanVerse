@@ -14,15 +14,30 @@
 
 namespace KanVest
 {
+  std::string ToUpper(const std::string& input)
+  {
+    std::string result = input;
+    for (char& c : result)
+      c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+    return result;
+  }
+
   StockData StockController::UpdateStockData(const std::string& symbolName, const std::string& period1, const std::string& period2, const std::string& interval, const std::string& range)
   {
-    // Ensure symbol has a suffix (.NS, .BO, etc.)
-    std::string symbol = symbolName;
-    if (symbol.find('.') == std::string::npos)
+    std::string symbol = ToUpper(symbolName);
+    if (symbol == "NIFTY")
     {
-      symbol += ".NS";
+      symbol = "%5ENSEI";
     }
-
+    else
+    {
+      // Ensure symbol has a suffix (.NS, .BO, etc.)
+      if (symbol.find('.') == std::string::npos)
+      {
+        symbol += ".NS";
+      }
+    }
+    
     APIKeys keys = API_Provider::GetAPIKeys();
 
     // Fetch data from URL ------------------------------------
