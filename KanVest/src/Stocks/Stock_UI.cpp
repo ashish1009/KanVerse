@@ -155,13 +155,25 @@ namespace KanVest
       {
         "1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"
       };
-      static int32_t intervalIndex = 2;
-      
+      static const char* currentInterval = "1m";
+
       static const char* range[] =
       {
-        "1d", "5d", "1mo", "6mo", "1y", "5y", "max"
+        "1d", "5d", "1mo", "6mo", "ytd", "1y", "5y", "max"
       };
-      static int32_t rangeIndex = 0;
+      static const char* currentRange = "1d";
+      
+      static std::unordered_map<std::string, std::vector<std::string>> rangeIntervalMap =
+      {
+        {"1d",  {"1m", "2m", "5m", "15m", "30m", "60m"}},
+        {"5d",  {"1m", "2m", "5m", "15m", "30m", "60m"}},
+        {"1mo", {"5m", "15m", "30m", "60m", "1d"}},
+        {"6mo", {"1h", "1d", "1wk"}},
+        {"ytd", {"1h", "1wk", "1mo"}},
+        {"1y",  {"1d", "1wk", "1mo"}},
+        {"5y",  {"1d", "1wk", "1mo"}},
+        {"max", {"1d", "1wk", "1mo"}},
+      };
 
       auto UpdateStockData = [](const std::string& symbol)
       {
@@ -178,21 +190,19 @@ namespace KanVest
         long period1 = static_cast<long>(startTime);
         long period2 = static_cast<long>(endTime + 60*60*24);
         
-        stockData = StockController::UpdateStockData(symbol, std::to_string(period1), std::to_string(period2), inteval[intervalIndex], range[rangeIndex]);
+        stockData = StockController::UpdateStockData(symbol, std::to_string(period1), std::to_string(period2), currentInterval, currentRange);
       };
 
       // 🔒 Non-resizable, borderless, fixed-size table
-      if (ImGui::BeginTable("StockAnalyzerTable", 3, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
+      if (ImGui::BeginTable("StockAnalyzerTable", 2, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
       {
         // UI
         float totalWidth = ImGui::GetContentRegionAvail().x;
         float firstColWidth = totalWidth * 0.3f;
-        float secondColWidth = totalWidth * 0.4f;
-        float thirdColWidth = totalWidth * 0.3f;
+        float secondColWidth = totalWidth  - firstColWidth;
         
         ImGui::TableSetupColumn("Stock Info", ImGuiTableColumnFlags_WidthFixed, firstColWidth);
         ImGui::TableSetupColumn("Chart", ImGuiTableColumnFlags_WidthFixed, secondColWidth);
-        ImGui::TableSetupColumn("Analytics", ImGuiTableColumnFlags_WidthFixed, thirdColWidth);
         
         ImGui::TableNextRow();
         
@@ -264,12 +274,6 @@ namespace KanVest
             
             KanVasX::UI::ShiftCursorY(10);
             KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.2, {20.0, 5.0});
-            
-//            ImGui::Text("exchangeName : %s", stockData.exchangeName.c_str());
-//            ImGui::Text("instrumentType : %s", stockData.instrumentType.c_str());
-//            ImGui::Text("timezone : %s", stockData.timezone.c_str());
-//            ImGui::Text("range : %s", stockData.range.c_str());
-//            ImGui::Text("dataGranularity : %s", stockData.dataGranularity.c_str());
           }
         }
         
@@ -278,8 +282,8 @@ namespace KanVest
         // ============================================================
         {
           ImGui::TableSetColumnIndex(1);
-          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.395);
-          KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.395);
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.688);
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.688);
 
           if (stockData.IsValid())
           {
@@ -297,7 +301,9 @@ namespace KanVest
             {
               if (KanVasX::UI::DrawButton(range[i], nullptr))
               {
-                rangeIndex = i;
+                currentRange = range[i];
+                currentInterval = rangeIntervalMap[currentRange][0].c_str();
+
                 modify = true;
               }
               if (i < IM_ARRAYSIZE(range) - 1)
@@ -305,22 +311,28 @@ namespace KanVest
                 ImGui::SameLine();
               }
             }
-            
+
+            ImGui::SameLine();
+            std::vector<std::string> intervalValues = rangeIntervalMap[currentRange];
+            KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x - (intervalValues.size() * 40));
+            for (int i = 0; i < intervalValues.size(); ++i)
+            {
+              if (KanVasX::UI::DrawButton(intervalValues[i], nullptr))
+              {
+                currentInterval = intervalValues[i].c_str();
+                modify = true;
+              }
+              if (i < IM_ARRAYSIZE(inteval) - 1)
+              {
+                ImGui::SameLine();
+              }
+            }
+
             if (modify)
             {
               UpdateStockData(stockData.symbol);
             }
           }
-          
-//          KanVasX::Date::RangeSelectorUI(startDate, endDate);
-        }
-        
-        // ============================================================
-        // 📊 COLUMN 3 : Analytics / Date Range
-        // ============================================================
-        {
-          ImGui::TableSetColumnIndex(2);
-          KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, ImGui::GetContentRegionAvail().y * 0.75f, 0.295);
         }
       }
       ImGui::EndTable();
