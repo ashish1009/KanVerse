@@ -14,87 +14,90 @@
 
 namespace KanVest
 {
-  std::string ToUpper(const std::string& input)
+  // ------------------------------
+  // 1. SYMBOL RESOLVER
+  // ------------------------------
+  static std::string NormalizeSymbol(const std::string& input)
   {
-    std::string result = input;
-    for (char& c : result)
-      c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
-    return result;
+    std::string symbol = input;
+    std::transform(symbol.begin(), symbol.end(), symbol.begin(),
+                   [](unsigned char c) { return std::toupper(c); });
+    
+    if (symbol == "NIFTY") return "%5ENSEI";
+    
+    if (symbol.find('.') == std::string::npos)
+      symbol += ".NS";  // Default to NSE
+    
+    return symbol;
   }
-
-  StockData StockController::UpdateStockData(const std::string& symbolName, const std::string& period1, const std::string& period2, const std::string& interval, const std::string& range)
+  
+  // ------------------------------
+  // 2. DATA FETCHER
+  // ------------------------------
+  static std::string FetchStockData(const std::string& symbol,
+                                    const std::string& interval,
+                                    const std::string& range,
+                                    const APIKeys& keys)
   {
-    std::string symbol = ToUpper(symbolName);
-    if (symbol == "NIFTY")
-    {
-      symbol = "%5ENSEI";
-    }
-    else
-    {
-      // Ensure symbol has a suffix (.NS, .BO, etc.)
-      if (symbol.find('.') == std::string::npos)
-      {
-        symbol += ".NS";
-      }
-    }
+    std::string data = StockAPI::FetchLiveData(symbol, interval, range);
     
-    APIKeys keys = API_Provider::GetAPIKeys();
-
-    // Fetch data from URL ------------------------------------
-    std::string liveData = StockAPI::FetchLiveData(symbol, interval, range);
-    
-    // If liveData doesn't contain usual fields, try .BO fallback for Indian stocks
-    if (liveData.find("\"" + keys.price + "\"") == std::string::npos and symbolName.find(".NS") != std::string::npos)
+    // Fallback: try .BO if .NS fails
+    if (data.find("\"" + keys.price + "\"") == std::string::npos &&
+        symbol.find(".NS") != std::string::npos)
     {
       std::string altSymbol = symbol.substr(0, symbol.find(".NS")) + ".BO";
       std::string altData = StockAPI::FetchLiveData(altSymbol, interval, range);
-
+      
       if (altData.find("\"" + keys.price + "\"") != std::string::npos)
-      {
-        symbol = altSymbol;
-        liveData = altData;
-      }
+        return altData;  // Return alternate data
     }
-        
-    // Update Stock data
-    StockData stockData(symbolName);
     
-    stockData.shortName = StockParser::StockParser::ExtractString(liveData, keys.shortName);
-    stockData.longName = StockParser::StockParser::ExtractString(liveData, keys.longName);
-    
-    stockData.instrumentType = StockParser::StockParser::ExtractString(liveData, keys.instrumentType);
-    stockData.timezone = StockParser::StockParser::ExtractString(liveData, keys.timezone);
-    stockData.range = StockParser::StockParser::ExtractString(liveData, keys.range);
-    stockData.dataGranularity = StockParser::StockParser::ExtractString(liveData, keys.dataGranularity);
-    
-    stockData.currency = StockParser::StockParser::ExtractString(liveData, keys.currency);
-    stockData.exchangeName = StockParser::StockParser::ExtractString(liveData, keys.exchangeName);
-
-    stockData.livePrice = StockParser::ExtractValue(liveData, keys.price);
-    stockData.prevClose = StockParser::ExtractValue(liveData, keys.prevClose);
-    stockData.change = stockData.livePrice - stockData.prevClose;
-    stockData.changePercent = StockParser::ExtractValue(liveData, keys.changePercent);
+    return data;
+  }
+  
+  // ------------------------------
+  // 3. DATA PARSER
+  // ------------------------------
+  static void ParseBasicInfo(StockData& stockData, const std::string& json, const APIKeys& keys)
+  {
+    stockData.shortName       = StockParser::StockParser::ExtractString(json, keys.shortName);
+    stockData.longName        = StockParser::StockParser::ExtractString(json, keys.longName);
+    stockData.instrumentType  = StockParser::StockParser::ExtractString(json, keys.instrumentType);
+    stockData.timezone        = StockParser::StockParser::ExtractString(json, keys.timezone);
+    stockData.range           = StockParser::StockParser::ExtractString(json, keys.range);
+    stockData.dataGranularity = StockParser::StockParser::ExtractString(json, keys.dataGranularity);
+    stockData.currency        = StockParser::StockParser::ExtractString(json, keys.currency);
+    stockData.exchangeName    = StockParser::StockParser::ExtractString(json, keys.exchangeName);
+  }
+  
+  static void ParseLiveMetrics(StockData& stockData, const std::string& json, const APIKeys& keys)
+  {
+    stockData.livePrice     = StockParser::ExtractValue(json, keys.price);
+    stockData.prevClose     = StockParser::ExtractValue(json, keys.prevClose);
+    stockData.change        = stockData.livePrice - stockData.prevClose;
+    stockData.changePercent = StockParser::ExtractValue(json, keys.changePercent);
     
     if (stockData.changePercent == -1 && stockData.prevClose > 0)
-    {
       stockData.changePercent = (stockData.change / stockData.prevClose) * 100.0;
-    }
-    stockData.volume = StockParser::ExtractValue(liveData, keys.volume);
-
-    stockData.fiftyTwoHigh = StockParser::ExtractValue(liveData, keys.fiftyTwoHigh);
-    stockData.fiftyTwoLow = StockParser::ExtractValue(liveData, keys.fiftyTwoLow);
-    stockData.dayHigh = StockParser::ExtractValue(liveData, keys.dayHigh);
-    stockData.dayLow = StockParser::ExtractValue(liveData, keys.dayLow);
     
-    // History data
-    std::vector<double> timestamps = StockParser::ExtractArray(liveData, "timestamp");
-    std::vector<double> closes     = StockParser::ExtractArray(liveData, "close");
-    std::vector<double> opens      = StockParser::ExtractArray(liveData, "open");
-    std::vector<double> lows       = StockParser::ExtractArray(liveData, "low");
-    std::vector<double> highs      = StockParser::ExtractArray(liveData, "high");
-    std::vector<double> volumes    = StockParser::ExtractArray(liveData, "volume");
+    stockData.volume       = StockParser::ExtractValue(json, keys.volume);
+    stockData.fiftyTwoHigh = StockParser::ExtractValue(json, keys.fiftyTwoHigh);
+    stockData.fiftyTwoLow  = StockParser::ExtractValue(json, keys.fiftyTwoLow);
+    stockData.dayHigh      = StockParser::ExtractValue(json, keys.dayHigh);
+    stockData.dayLow       = StockParser::ExtractValue(json, keys.dayLow);
+  }
+  
+  static void ParseHistory(StockData& stockData, const std::string& json)
+  {
+    std::vector<double> timestamps = StockParser::ExtractArray(json, "timestamp");
+    std::vector<double> closes     = StockParser::ExtractArray(json, "close");
+    std::vector<double> opens      = StockParser::ExtractArray(json, "open");
+    std::vector<double> lows       = StockParser::ExtractArray(json, "low");
+    std::vector<double> highs      = StockParser::ExtractArray(json, "high");
+    std::vector<double> volumes    = StockParser::ExtractArray(json, "volume");
     
     size_t count = std::min({timestamps.size(), closes.size(), lows.size(), volumes.size()});
+    stockData.history.reserve(count);
     
     for (size_t i = 0; i < count; ++i)
     {
@@ -107,7 +110,28 @@ namespace KanVest
       p.volume    = volumes[i];
       stockData.history.push_back(p);
     }
-
+  }
+  
+  // ------------------------------
+  // 4. STOCK CONTROLLER MAIN
+  // ------------------------------
+  StockData StockController::UpdateStockData(const std::string& symbolName,
+                                             const std::string& period1,
+                                             const std::string& period2,
+                                             const std::string& interval,
+                                             const std::string& range)
+  {
+    APIKeys keys = API_Provider::GetAPIKeys();
+    std::string symbol = NormalizeSymbol(symbolName);
+    
+    std::string json = FetchStockData(symbol, interval, range, keys);
+    
+    StockData stockData(symbolName);
+    ParseBasicInfo(stockData, json, keys);
+    ParseLiveMetrics(stockData, json, keys);
+    ParseHistory(stockData, json);
+    
     return stockData;
   }
+  
 } // namespace KanVest

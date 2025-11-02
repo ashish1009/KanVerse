@@ -16,7 +16,7 @@ namespace KanVest
   {
   public:
     /// This function initializes Stock UI
-    static void Initialize(ImTextureID s_reloadIconID);
+    static void Initialize(ImTextureID reloadIconID);
     
     /// This is primary stock UI panel
     static void StockAnalyzer();
