@@ -132,7 +132,17 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       
       return KanVasX::Color::White;
     }
-    
+
+    ImU32 GetConfidenceColor(double value)
+    {
+      if (value < 0.25) return KanVasX::Color::Red;
+      if (value < 0.5)  return KanVasX::Color::Yellow;
+      if (value < 0.75)  return KanVasX::Color::Blue;
+      if (value < 1.0)  return KanVasX::Color::Cyan;
+
+      return KanVasX::Color::White;
+    }
+
     ImU32 GetSummaryColor(const std::string& summary)
     {
       if (summary.find("Buy") != std::string::npos)
@@ -495,48 +505,57 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.15, {20.0f, 5.0f});
     KanVasX::UI::ShiftCursorY(10.0f);
 
+    static const float secondC0lumnShift = 80.0f;
+    
     // Trend
-    KanVest_Text(FixedWidthHeader_20, "Trend     ", glm::vec2(30.0f, 10.0f), textColor);
+    const auto& [action, reason] = Utils::SplitSuggestion(summary.suggestion);
+    KanVest_Text(FixedWidthHeader_18, "Action     ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_20, summary.trend.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetTrendColor(summary.trend.value));
+    KanVest_Text(FixedWidthHeader_18, action.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetTrendColor(summary.trend.value));
+    KanVasX::UI::Tooltip(reason);
+
+    KanVest_Text(FixedWidthHeader_18, "Trend      ", glm::vec2(30.0f, 10.0f), textColor);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_18, summary.trend.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetTrendColor(summary.trend.value));
     KanVasX::UI::Tooltip(summary.trend.reason);
 
     // Momentum
-    KanVest_Text(FixedWidthHeader_20, "Momentum  ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Momentum   ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_20, summary.momentum.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetMomentumColor(summary.momentum.value));
+    KanVest_Text(FixedWidthHeader_18, summary.momentum.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetMomentumColor(summary.momentum.value));
     KanVasX::UI::Tooltip(summary.momentum.reason);
 
     // Voltality
-    KanVest_Text(FixedWidthHeader_20, "Voltality ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Voltality  ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_20, summary.volatility.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetVoltalityColor(summary.volatility.value));
+    KanVest_Text(FixedWidthHeader_18, summary.volatility.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetVoltalityColor(summary.volatility.value));
     KanVasX::UI::Tooltip(summary.volatility.reason);
 
     // Volume
-    KanVest_Text(FixedWidthHeader_20, "Volume    ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Volume     ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_20, summary.volume.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetVolumeColor(summary.volume.value));
+    KanVest_Text(FixedWidthHeader_18, summary.volume.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetVolumeColor(summary.volume.value));
     KanVasX::UI::Tooltip(summary.volume.reason);
 
     // VWAM
-    KanVest_Text(FixedWidthHeader_20, "VWAP      ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "VWAP       ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_20, summary.vwapBias.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetVWAPColor(summary.vwapBias.value));
+    KanVest_Text(FixedWidthHeader_18, summary.vwapBias.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetVWAPColor(summary.vwapBias.value));
     KanVasX::UI::Tooltip(summary.vwapBias.reason);
 
     // Voltality
-    KanVest_Text(FixedWidthHeader_20, "Valuation ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Valuation  ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_20, summary.valuation.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetValuationColor(summary.valuation.value));
+    KanVest_Text(FixedWidthHeader_18, summary.valuation.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetValuationColor(summary.valuation.value));
     KanVasX::UI::Tooltip(summary.valuation.reason);
 
+    // Voltality
+    KanVest_Text(FixedWidthHeader_18, "Confidence ", glm::vec2(30.0f, 10.0f), textColor);
+    ImGui::SameLine();
+    std::string confidenceString = Utils::FormatDoubleToString(summary.score * 100.0f) + "%";
+    KanVest_Text(FixedWidthHeader_18, confidenceString.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetConfidenceColor(summary.score));
+
     KanVasX::UI::ShiftCursorY(10.0f);
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.28, {20.0f, 5.0f});
-
-    KanVest_Text(Header_30, Utils::SplitSuggestion(summary.suggestion).first.c_str(), glm::vec2(30, 10.0f), Utils::GetSummaryColor(summary.suggestion));
-    KanVest_Text(Header_22, Utils::SplitSuggestion(summary.suggestion).second.c_str(), glm::vec2(30, 10.0f), Utils::GetSummaryColor(summary.suggestion));
-
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.28, {20.0f, 5.0f});
   }
 } // namespace KanVest
