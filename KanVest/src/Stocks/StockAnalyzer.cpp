@@ -135,6 +135,50 @@ namespace KanVest
     return sum / period;
   }
   
+  double StockAnalyzer::ComputeMACD(const std::vector<StockPoint>& h, int shortPeriod, int longPeriod)
+  {
+    if (h.size() < static_cast<size_t>(longPeriod))
+    {
+      return 0.0; // Not enough data
+    }
+    
+    // --- Step 1: Compute short and long EMAs ---
+    double emaShort = ComputeEMA(h, shortPeriod);
+    double emaLong  = ComputeEMA(h, longPeriod);
+    
+    // --- Step 2: Compute MACD line ---
+    double macdLine = emaShort - emaLong;
+    
+    // --- Step 3: Compute signal line (9-period EMA of MACD values) ---
+    // To do this properly, we need recent MACD values — we’ll generate them.
+    std::vector<double> macdValues;
+    macdValues.reserve(h.size() - longPeriod + 1);
+    
+    for (size_t i = longPeriod - 1; i < h.size(); ++i)
+    {
+      std::vector<StockPoint> subset(h.begin(), h.begin() + i + 1);
+      double emaS = ComputeEMA(subset, shortPeriod);
+      double emaL = ComputeEMA(subset, longPeriod);
+      macdValues.push_back(emaS - emaL);
+    }
+    
+    // Apply EMA to MACD values to get signal line
+    if (macdValues.size() < 9) return macdLine; // fallback
+    double k = 2.0 / (9.0 + 1.0);
+    double signal = macdValues.front();
+    for (size_t i = 1; i < macdValues.size(); ++i)
+    {
+      signal = macdValues[i] * k + signal * (1 - k);
+    }
+    
+    // --- Step 4: Histogram (momentum strength indicator) ---
+    double histogram = macdLine - signal;
+    
+    // Optionally: you can store these into StockSummary later
+    // For now, we just return the MACD histogram for directional strength
+    return histogram;
+  }
+
   static time_t portable_timegm(struct tm *tm)
   {
 #if defined(_WIN32)
@@ -260,142 +304,133 @@ namespace KanVest
     
     return cfg;
   }
-
-  StockSummary StockAnalyzer::AnalyzeInternal(const std::vector<StockPoint>& history, const std::string& interval, const std::string& range, const IndicatorConfig& cfg)
+  StockSummary StockAnalyzer::AnalyzeInternal(const std::vector<StockPoint>& h,
+                                              const IndicatorConfig& cfg,
+                                              const std::string& interval)
   {
-    StockSummary out;
-    if (history.size() < (size_t)cfg.smaPeriod)
+    StockSummary result;
+    if (h.size() < static_cast<size_t>(cfg.smaPeriod))
     {
-      out.conclusion = "Insufficient candles for analysis.";
-      return out;
+      result.suggestion = "Not enough data.";
+      return result;
     }
     
-    // compute indicators
-    double sma = ComputeSMA(history, cfg.smaPeriod);
-    double ema = ComputeEMA(history, cfg.emaPeriod);
-    double rsi = ComputeRSI(history, cfg.rsiPeriod);
-    double atr = ComputeATR(history, cfg.atrPeriod);
-    double vwap = ComputeVWAP(history);
-    double avgVol = ComputeAverageVolume(history, cfg.volPeriod);
-    double latestVol = static_cast<double>(history.back().volume);
-    double close = history.back().close;
+    double close = h.back().close;
+    double sma = ComputeSMA(h, cfg.smaPeriod);
+    double ema = ComputeEMA(h, cfg.emaPeriod);
+    double rsi = ComputeRSI(h, cfg.rsiPeriod);
+    double atr = ComputeATR(h, cfg.atrPeriod);
+    double vwap = ComputeVWAP(h);
+    double macd = ComputeMACD(h, 12, 26);
+    double avgVol = ComputeAverageVolume(h, cfg.volPeriod);
+    double latestVol = h.back().volume;
     
-    // adaptive thresholds based on volatility (ATR percent)
-    double atrPct = (atr > 0.0 && close != 0.0) ? (atr / close) * 100.0 : 0.0;
-    double trendThreshold = 1.0 + (atrPct / 200.0); // adapt to volatility
-    
-    // short-term confirmation: compare current close with close 3 candles ago when available
-    bool recentUp = false, recentDown = false;
-    if (history.size() >= 4)
-    {
-      recentUp = history.back().close > history[history.size() - 4].close;
-      recentDown = history.back().close < history[history.size() - 4].close;
-    }
-    
-    // Trend detection (multi-factor)
-    if (close > sma * trendThreshold && ema > sma && (vwap < 0.0 || close > vwap) && recentUp)
-      out.trend = "Uptrend";
-    else if (close < sma / trendThreshold && ema < sma && (vwap < 0.0 || close < vwap) && recentDown)
-      out.trend = "Downtrend";
+    // Trend
+    if (close > ema * 1.01 && ema > sma)
+      result.trend = "Uptrend";
+    else if (close < ema * 0.99 && ema < sma)
+      result.trend = "Downtrend";
     else
-      out.trend = "Sideways";
+      result.trend = "Sideways";
     
-    // Momentum - EMA vs SMA divergence
-    double emaDiff = std::fabs(ema - sma) / (sma > 0.0 ? sma : 1.0);
-    if (emaDiff > cfg.momentumSensitivity * 2.0) out.momentum = "Strong";
-    else if (emaDiff > cfg.momentumSensitivity) out.momentum = "Moderate";
-    else out.momentum = "Weak";
+    // Momentum
+    double emaDiff = std::fabs(ema - sma) / sma;
+    if (emaDiff > cfg.momentumSensitivity * 2)
+      result.momentum = "Strong";
+    else if (emaDiff > cfg.momentumSensitivity)
+      result.momentum = "Moderate";
+    else
+      result.momentum = "Weak";
     
-    // Volatility classification
-    if (atrPct > 3.0) out.volatility = "High";
-    else if (atrPct > 1.5) out.volatility = "Medium";
-    else out.volatility = "Low";
+    // Volatility
+    double atrPercent = (atr / close) * 100.0;
+    if (atrPercent > 3.0)
+      result.volatility = "High";
+    else if (atrPercent > 1.5)
+      result.volatility = "Medium";
+    else
+      result.volatility = "Low";
     
-    // Volume classification
-    double volRatio = SafeDiv(latestVol, avgVol + 1.0, 1.0);
-    if (volRatio > cfg.volHighFactor) out.volume = "High";
-    else if (volRatio < cfg.volLowFactor) out.volume = "Low";
-    else out.volume = "Normal";
+    // Volume
+    double volRatio = SafeDiv(latestVol, avgVol, 1.0);
+    if (volRatio > cfg.volHighFactor)
+      result.volume = "High";
+    else if (volRatio < cfg.volLowFactor)
+      result.volume = "Low";
+    else
+      result.volume = "Normal";
     
-    // Valuation using RSI + VWAP (if VWAP available)
-    if (rsi > 70 && (vwap < 0.0 || close > vwap)) out.valuation = "Overbought";
-    else if (rsi < 30 && (vwap < 0.0 || close < vwap)) out.valuation = "Oversold";
-    else out.valuation = "Fair";
+    // RSI
+    if (rsi > 70)
+      result.valuation = "Overbought";
+    else if (rsi < 30)
+      result.valuation = "Oversold";
+    else
+      result.valuation = "Fair";
     
-    // Compose human-readable summary
-    std::ostringstream oss;
-    oss << "Timeframe: " << interval << " / " << range << ". ";
-    oss << "Trend: " << out.trend << ", Momentum: " << out.momentum << ", Volatility: " << out.volatility << ", Volume: " << out.volume << ". ";
-    if (out.valuation == "Overbought") oss << "Price above VWAP & RSI elevated — caution for pullback.";
-    else if (out.valuation == "Oversold") oss << "Price below VWAP & RSI low — possible rebound.";
-    else oss << "Price near VWAP — balanced sentiment.";
+    // score score
+    double trendScore = (result.trend == "Uptrend") ? 1.0 :
+    (result.trend == "Downtrend") ? -1.0 : 0.0;
+    double rsiScore = (rsi - 50.0) / 50.0;
+    double macdScore = macd / (close * 0.01);
     
-    // Simple scoring heuristic (0..100)
-    double score = 50.0;
-    if (out.trend == "Uptrend") score += 20.0;
-    else if (out.trend == "Downtrend") score -= 20.0;
-    if (out.momentum == "Strong") score += 10.0;
-    else if (out.momentum == "Weak") score -= 5.0;
-    if (out.volume == "High") score += 5.0;
-    if (out.valuation == "Overbought") score -= 8.0;
-    else if (out.valuation == "Oversold") score += 8.0;
-    if (out.volatility == "High") score -= 3.0;
-    score = std::max(0.0, std::min(100.0, score));
+    double score = (trendScore * 0.4 + rsiScore * 0.3 + macdScore * 0.3);
+    result.score = std::clamp(score, -1.0, 1.0);
     
-    out.score = score;
-    oss << " Score: " << static_cast<int>(score) << "/100.";
-    out.conclusion = oss.str();
+    if (result.score > 0.4)
+      result.suggestion = "Buy — bullish momentum.";
+    else if (result.score < -0.4)
+      result.suggestion = "Sell — bearish pressure.";
+    else
+      result.suggestion = "Hold — uncertain phase.";
     
-    return out;
+    return result;
   }
   
-  StockSummary StockAnalyzer::AnalyzeSingleTimeframe(const StockData& data, const std::string& interval, const std::string& range)
+  // ---------------- Public APIs ----------------
+  StockSummary StockAnalyzer::AnalyzeSingleTimeframe(const StockData& data,
+                                                     const std::string& interval,
+                                                     const std::string& range)
   {
-    // Defensive copy: we only need history for analysis
-    IndicatorConfig cfg = ChooseConfig(interval, range);
-    return AnalyzeInternal(data.history, interval, range, cfg);
+    auto cfg = ChooseConfig(interval, range);
+    return AnalyzeInternal(data.history, cfg, interval);
   }
   
-  StockSummary StockAnalyzer::AnalyzeHybrid(const StockData& baseData, const std::string& baseInterval, const std::string& baseRange)
+  StockSummary StockAnalyzer::AnalyzeHybrid(const StockData& shortTerm,
+                                            const StockData& longTerm,
+                                            const std::string& shortInterval,
+                                            const std::string& longInterval)
   {
-    // Choose config based on base interval/range
-    IndicatorConfig cfg = ChooseConfig(baseInterval, baseRange);
+    auto shortCfg = ChooseConfig(shortInterval, "short");
+    auto longCfg  = ChooseConfig(longInterval, "long");
     
-    // Aggregate baseData.history to daily and weekly
-    std::vector<StockPoint> daily = Aggregate(baseData.history, "1d");
-    std::vector<StockPoint> weekly = Aggregate(baseData.history, "1wk");
+    auto shortSummary = AnalyzeInternal(shortTerm.history, shortCfg, shortInterval);
+    auto longSummary  = AnalyzeInternal(longTerm.history, longCfg, longInterval);
     
-    // If aggregated frames are empty or too short, callers should fetch more data, but we guard inside AnalyzeInternal
-    StockSummary shortRes = AnalyzeInternal(baseData.history, baseInterval, baseRange, cfg);
-    StockSummary midRes = AnalyzeInternal(daily, "1d", "1mo", cfg);
-    StockSummary longRes = AnalyzeInternal(weekly, "1wk", "3mo", cfg);
+    StockSummary hybrid;
     
-    // Fuse results: weighted scoring (medium heavy)
-    double finalScore = 0.0;
-    finalScore += midRes.score * 0.5;
-    finalScore += longRes.score * 0.3;
-    finalScore += shortRes.score * 0.2;
-    finalScore = std::max(0.0, std::min(100.0, finalScore));
+    // Blend conclusions
+    hybrid.trend =
+    (shortSummary.trend == longSummary.trend)
+    ? shortSummary.trend
+    : "Mixed";
     
-    StockSummary final;
-    final.trend = shortRes.trend + " (short) / " + midRes.trend + " (mid) / " + longRes.trend + " (long)";
-    final.momentum = shortRes.momentum + " | " + midRes.momentum;
-    final.volatility = midRes.volatility;
-    final.volume = midRes.volume;
-    final.valuation = midRes.valuation;
-    std::ostringstream oss;
-    oss << "Hybrid summary: short=" << shortRes.trend << ", mid=" << midRes.trend << ", long=" << longRes.trend << ". ";
-    if (shortRes.trend == midRes.trend && midRes.trend == longRes.trend)
-      oss << "All timeframes agree (" << midRes.trend << ").";
+    hybrid.momentum = shortSummary.momentum;
+    hybrid.volatility = shortSummary.volatility;
+    hybrid.volume = shortSummary.volume;
+    hybrid.valuation = shortSummary.valuation;
+    
+    // score fusion
+    hybrid.score = (shortSummary.score * 0.6 + longSummary.score * 0.4);
+    
+    // Suggestion
+    if (hybrid.score > 0.5)
+      hybrid.suggestion = "Buy — both short and long trends bullish.";
+    else if (hybrid.score < -0.5)
+      hybrid.suggestion = "Sell — both trends bearish.";
     else
-    {
-      oss << "Mixed signals — medium-term view: " << midRes.trend << ". ";
-      if (shortRes.trend != midRes.trend) oss << "Short-term shows " << shortRes.trend << ". ";
-      if (longRes.trend != midRes.trend) oss << "Long-term shows " << longRes.trend << ". ";
-    }
-    oss << "Overall score: " << static_cast<int>(finalScore) << "/100.";
-    final.conclusion = oss.str();
-    final.score = finalScore;
-    return final;
+      hybrid.suggestion = "Hold — timeframes disagree.";
+    
+    return hybrid;
   }
 } // namespace KanVest

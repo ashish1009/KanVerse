@@ -42,8 +42,9 @@ namespace KanVest
     ///   - data: Stock data
     ///   - interval: interval of rURL
     ///   - range: Range of URL
-    static StockSummary AnalyzeHybrid(const StockData& baseData, const std::string& baseInterval, const std::string& baseRange);
-    
+    static StockSummary AnalyzeHybrid(const StockData& shortTermData, const StockData& longTermData,
+                                      const std::string& shortInterval, const std::string& longInterval);
+
   private:
     static double SafeDiv(double a, double b, double fallback = 0.0);
     
@@ -54,7 +55,8 @@ namespace KanVest
     static double ComputeATR(const std::vector<StockPoint>& h, int period);
     static double ComputeVWAP(const std::vector<StockPoint>& h);
     static double ComputeAverageVolume(const std::vector<StockPoint>& h, int period);
-    
+    static double ComputeMACD(const std::vector<StockPoint>& h, int shortPeriod, int longPeriod);
+
     // ----------------- Time Aggregation -----------------
     static time_t DayKey(double ts);
     static time_t WeekKey(double ts);
@@ -64,6 +66,8 @@ namespace KanVest
     static IndicatorConfig ChooseConfig(const std::string& interval, const std::string& range);
     
     // ----------------- Analysis Core -----------------
-    static StockSummary AnalyzeInternal(const std::vector<StockPoint>& history, const std::string& interval, const std::string& range, const IndicatorConfig& cfg);
+    static StockSummary AnalyzeInternal(const std::vector<StockPoint>& history,
+                                        const IndicatorConfig& cfg,
+                                        const std::string& interval);
   };
 } // namespace KanVest

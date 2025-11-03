@@ -137,7 +137,7 @@ namespace KanVest
   void StockController::AnalyzeStock()
   {
     s_dailySummary = StockAnalyzer::AnalyzeSingleTimeframe(s_activeStockData, s_currentInterval, s_currentRange);
-    s_hybridSummary = StockAnalyzer::AnalyzeHybrid(s_activeStockData, s_currentInterval, s_currentRange);
+//    s_hybridSummary = StockAnalyzer:  :AnalyzeHybrid(s_activeStockData, s_currentInterval, s_currentRange);
   }
 
   void StockController::SetRefreshInterval(float refreshInterval)

@@ -17,6 +17,7 @@ namespace KanVest
     std::string volume;
     std::string valuation;
     std::string conclusion;
+    std::string suggestion;
     double score = 50.0;
   };
 } // namespace KanVest
