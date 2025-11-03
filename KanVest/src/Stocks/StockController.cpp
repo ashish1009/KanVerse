@@ -129,5 +129,14 @@ namespace KanVest
     
     return stockData;
   }
-  
+
+  void StockController::SetRefreshInterval(float refreshInterval)
+  {
+    s_refreshInterval = refreshInterval;
+  }
+
+  float StockController::GetRefreshInterval()
+  {
+    return s_refreshInterval;
+  }
 } // namespace KanVest

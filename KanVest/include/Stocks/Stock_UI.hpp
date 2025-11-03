@@ -22,7 +22,7 @@ namespace KanVest
     static void StockPanel();
     
   private:
-    [[nodiscard("Stock data discarded")]] static StockData UpdateStockData(const std::string& symbol);
+    static void UpdateStockData(const std::string& symbol);
     
     static void StockAnalyzer();
     static void StockVestData();
@@ -35,5 +35,8 @@ namespace KanVest
     
     inline static ImTextureID s_reloadIconID = 0;
     inline static bool s_showCandle = true;
+    
+    inline static double s_lastUpdateTime = 0.0;
+    inline static std::string s_lastUpdatedString = "Never";
   };
 } // namespace KanVest

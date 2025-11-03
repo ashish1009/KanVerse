@@ -81,10 +81,10 @@ namespace KanVest
   void StockUI::Initialize(ImTextureID reloadIconID)
   {
     s_reloadIconID = reloadIconID;    
-    StockManager::SetActiveStockData(UpdateStockData(s_searchedString));
+    UpdateStockData(s_searchedString);
   }
   
-  StockData StockUI::UpdateStockData(const std::string& symbol)
+  void StockUI::UpdateStockData(const std::string& symbol)
   {
 #if 0
     time_t startTime = StockParser::ParseDateYYYYMMDD(startDate.ToString());
@@ -98,7 +98,20 @@ namespace KanVest
     long period1 = static_cast<long>(startTime);
     long period2 = static_cast<long>(endTime + 60 * 60 * 24);
 #endif
-    return StockController::UpdateStockData(symbol, StockManager::GetCurrentInterval(), StockManager::GetCurrentRange());
+    // Helper to convert & format timestamp -> readable
+    auto CurrentTimeString = []() -> std::string
+    {
+      time_t now = time(nullptr);
+      char buf[128];
+      strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S", localtime(&now));
+      return std::string(buf);
+    };
+
+    s_lastUpdatedString = CurrentTimeString();
+    s_lastUpdateTime = ImGui::GetTime();
+
+    StockData stockData = StockController::UpdateStockData(symbol, StockManager::GetCurrentInterval(), StockManager::GetCurrentRange());
+    StockManager::SetActiveStockData(stockData);
   };
 
   void StockUI::StockPanel()
@@ -123,7 +136,7 @@ namespace KanVest
     float iconSize = ImGui::GetItemRectSize().y - 12;
     if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {0.0, 6.0}) || ImGui::IsKeyDown(ImGuiKey_Enter))
     {
-      StockManager::SetActiveStockData(UpdateStockData(s_searchedString));
+      UpdateStockData(s_searchedString);
     }
   }
   
@@ -270,8 +283,30 @@ namespace KanVest
       }
 
       ImGui::SameLine();
-      KanVasX::UI::ShiftCursorX(50);
+      KanVasX::UI::ShiftCursorX(20);
       ImGui::Checkbox(" Show Candle", &s_showCandle);
+      
+      ImGui::SameLine();
+      KanVasX::UI::ShiftCursorX(20);
+
+      float refreshInterval = StockController::GetRefreshInterval();
+      if (ImGui::SmallButton("-"))
+      {
+        refreshInterval = std::max(1.0f, refreshInterval - 5.0f);
+        StockController::SetRefreshInterval(refreshInterval);
+      }
+
+      ImGui::SameLine();
+      KanVasX::UI::ShiftCursorX(20);
+      ImGui::Text("Refresh Time Interval %.1f s", StockController::GetRefreshInterval());
+      ImGui::SameLine();
+      KanVasX::UI::ShiftCursorX(20);
+
+      if (ImGui::SmallButton("+"))
+      {
+        refreshInterval += 5.0f;
+        StockController::SetRefreshInterval(refreshInterval);
+      }
 
       ImGui::SameLine();
       std::vector<std::string> intervalValues = StockManager::RangeIntervalMap[StockManager::GetCurrentRange()];
@@ -292,13 +327,21 @@ namespace KanVest
       
       if (modify)
       {
-        StockManager::SetActiveStockData(UpdateStockData(stockData.symbol));
+        UpdateStockData(stockData.symbol);
       }
     }
   }
   
   void StockUI::StockAnalyzer()
   {
+    // Auto Update
+    double currentTime = ImGui::GetTime();
+    float timeSinceUpdate = static_cast<float>(currentTime - s_lastUpdateTime);
+    if (timeSinceUpdate >= StockController::GetRefreshInterval())
+    {
+      UpdateStockData(StockManager::GetActiveStockData().symbol);
+    }
+
     if (ImGui::BeginTable("StockAnalyzerTable", 2, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
     {
       float topYArea = ImGui::GetContentRegionAvail().y * 0.45f;
@@ -319,6 +362,12 @@ namespace KanVest
       
         SearchBar();
         ShowStcokBasicData(stockData);
+        
+//        float timeLeft = std::max(0.0f, StockController::GetRefreshInterval() - timeSinceUpdate);
+//        
+//        ImGui::Separator();
+//        ImGui::Text("Last Updated: %s", s_lastUpdatedString.c_str());
+//        ImGui::TextColored(timeLeft > 5 ? ImVec4(0.4f,0.9f,0.4f,1.0f) : ImVec4(1.0f,0.7f,0.3f,1.0f), "Next Update In: %.1f s", timeLeft);
       }
       
       // Column 2 Chart

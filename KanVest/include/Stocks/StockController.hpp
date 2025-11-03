@@ -20,5 +20,11 @@ namespace KanVest
     /// - Parameter interval: intervel of data
     /// - Parameter range: range of data
     static StockData UpdateStockData(const std::string& symbolName, const std::string& interval, const std::string& range);
+    
+    static void SetRefreshInterval(float refreshInterval);
+    static float GetRefreshInterval();
+    
+  private:
+    inline static float s_refreshInterval = 1.0f;
   };
 } // namespace KanVest
