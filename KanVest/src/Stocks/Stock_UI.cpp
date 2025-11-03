@@ -346,8 +346,8 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         for (size_t i = 0; i < xs.size(); ++i)
         {
           ImU32 color = (closes[i] >= opens[i])
-          ? IM_COL32(0, 255, 0, 255)
-          : IM_COL32(255, 80, 80, 255);
+          ? KanVasX::Color::Cyan
+          : KanVasX::Color::Red;
           
           ImVec2 pHigh  = ImPlot::PlotToPixels(ImPlotPoint(xs[i], highs[i]));
           ImVec2 pLow   = ImPlot::PlotToPixels(ImPlotPoint(xs[i], lows[i]));
@@ -427,7 +427,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       {
         auto buttonColor = intervalValues[i] == StockController::GetCurrentInterval() ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
         
-        std::string displayText = StockController::ValidRange[i];
+        std::string displayText = intervalValues[i];
         std::string uniqueLabel = displayText + "##Interval" + std::to_string(i);
 
         if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
