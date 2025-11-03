@@ -22,19 +22,18 @@ namespace KanVest
     static void StockPanel();
     
   private:
-    static StockData UpdateStockData(const std::string& symbol);
+    [[nodiscard("Stock data discarded")]] static StockData UpdateStockData(const std::string& symbol);
     
     static void StockAnalyzer();
     static void StockVestData();
 
     static void SearchBar();
-    static void ShowStcokBasicData();
+    static void ShowStcokBasicData(const StockData& stockData);
 
-//    static void DrawCandleChart(const std::vector<StockPoint>& history);
-//    static void ShowBasicStockData(const StockData& stockData);
-//    static void ChartHelper(const StockData& stockData);
+    static void DrawCandleChart(const StockData& stockData);
+    static void DrawChartController(const StockData& stockData);
     
     inline static ImTextureID s_reloadIconID = 0;
-//    inline static bool s_showCandle = true;
+    inline static bool s_showCandle = true;
   };
 } // namespace KanVest
