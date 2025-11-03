@@ -21,6 +21,7 @@ namespace KanVest
   
   struct StockData
   {
+    // Basic Data
     std::string symbol = "";
     std::string currency = "";
     std::string exchangeName = "";
@@ -31,21 +32,28 @@ namespace KanVest
     std::string range = "";
     std::string dataGranularity = "";
 
+    // Price Data
     double livePrice = -1;
     double prevClose = -1;
     
+    // Change data
     double change = -1;
     double changePercent = -1;
     
+    // Volume
     double volume = -1;
     
+    // High low
     double fiftyTwoHigh = -1;
     double fiftyTwoLow = -1;
     double dayHigh = -1;
     double dayLow = -1;
     
-    // --- Historical Data ---
+    // History
     std::vector<StockPoint> history;
+    
+    // SMA (Simple)
+    
 
     StockData(const std::string& name) : symbol(name) {}
     bool IsValid() const { return !symbol.empty() && !history.empty(); }

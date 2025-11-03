@@ -231,7 +231,7 @@ namespace KanVest
   void RendererLayer::UI_StockAnalyzer()
   {
     IK_PERFORMANCE_FUNC("RendererLayer::UI_StockAnalyzer");
-    StockUI::StockAnalyzer();
+    StockUI::StockPanel();
   }
   
   void RendererLayer::UI_PrimaryViewportPanel_DEMO()

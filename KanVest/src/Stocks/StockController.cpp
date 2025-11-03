@@ -115,11 +115,7 @@ namespace KanVest
   // ------------------------------
   // 4. STOCK CONTROLLER MAIN
   // ------------------------------
-  StockData StockController::UpdateStockData(const std::string& symbolName,
-                                             const std::string& period1,
-                                             const std::string& period2,
-                                             const std::string& interval,
-                                             const std::string& range)
+  StockData StockController::UpdateStockData(const std::string& symbolName, const std::string& interval, const std::string& range)
   {
     APIKeys keys = API_Provider::GetAPIKeys();
     std::string symbol = NormalizeSymbol(symbolName);

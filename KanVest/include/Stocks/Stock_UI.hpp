@@ -19,12 +19,21 @@ namespace KanVest
     static void Initialize(ImTextureID reloadIconID);
     
     /// This is primary stock UI panel
-    static void StockAnalyzer();
+    static void StockPanel();
     
   private:
-    static void DrawCandleChart(const std::vector<StockPoint>& history);
+    static StockData UpdateStockData(const std::string& symbol);
+    
+    static void StockAnalyzer();
+    static void StockVestData();
 
+    static void SearchBar();
+
+//    static void DrawCandleChart(const std::vector<StockPoint>& history);
+//    static void ShowBasicStockData(const StockData& stockData);
+//    static void ChartHelper(const StockData& stockData);
+    
     inline static ImTextureID s_reloadIconID = 0;
-    inline static bool s_showCandle = true;
+//    inline static bool s_showCandle = true;
   };
 } // namespace KanVest
