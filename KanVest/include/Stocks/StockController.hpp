@@ -56,15 +56,15 @@ namespace KanVest
     
     /// This function update url time itnerval
     /// - Parameter interval:  url range
-    static void SetCurrentInterval(const char* interval);
+    static void SetCurrentInterval(const std::string& interval);
     /// This function returns the update refresh time
-    static const char* GetCurrentInterval();
+    static const std::string& GetCurrentInterval();
 
     /// This function update url range
     /// - Parameter range: new range
-    static void SetCurrentRange(const char* range);
+    static void SetCurrentRange(const std::string& range);
     /// This function returns the url range
-    static const char* GetCurrentRange();
+    static const std::string& GetCurrentRange();
     
     /// This function returns the stock summary
     static const StockSummary& GetStockSummary();
@@ -72,8 +72,8 @@ namespace KanVest
   private:
     inline static float s_refreshInterval = 100.0f;
     
-    inline static const char* s_currentInterval = "1d";
-    inline static const char* s_currentRange = "1mo";
+    inline static std::string s_currentInterval = "1d";
+    inline static std::string s_currentRange = "1mo";
     
     inline static StockData s_activeStockData = {"Nifty"};
 

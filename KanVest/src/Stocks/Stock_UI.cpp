@@ -332,7 +332,10 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       for (int i = 0; i < IM_ARRAYSIZE(StockController::ValidRange); ++i)
       {
         auto buttonColor = StockController::ValidRange[i] == StockController::GetCurrentRange() ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
-        if (KanVasX::UI::DrawButton(StockController::ValidRange[i], nullptr, buttonColor))
+
+        std::string displayText = StockController::ValidRange[i];
+        std::string uniqueLabel = displayText + "##Range" + std::to_string(i);
+        if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
         {
           StockController::SetCurrentRange(StockController::ValidRange[i]);
           StockController::SetCurrentInterval(StockController::RangeIntervalMap[StockController::GetCurrentRange()][0].c_str());
@@ -377,7 +380,11 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       for (int i = 0; i < intervalValues.size(); ++i)
       {
         auto buttonColor = intervalValues[i] == StockController::GetCurrentInterval() ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
-        if (KanVasX::UI::DrawButton(intervalValues[i], nullptr, buttonColor))
+        
+        std::string displayText = StockController::ValidRange[i];
+        std::string uniqueLabel = displayText + "##Interval" + std::to_string(i);
+
+        if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
         {
           StockController::SetCurrentInterval(intervalValues[i].c_str());
           modify = true;

@@ -143,7 +143,7 @@ namespace KanVest
   // ------------------------------
   void StockController::UpdateStockData(const std::string& symbolName)
   {
-    auto FetchData = [](const std::string& symbolName, const char* interval, const char* range) -> StockData {
+    auto FetchData = [](const std::string& symbolName, const std::string& interval, const std::string& range) -> StockData {
       IK_PROFILE();
 
       APIKeys keys = API_Provider::GetAPIKeys();
@@ -194,20 +194,20 @@ namespace KanVest
     s_activeStockData = stockData;
   }
   
-  void StockController::SetCurrentInterval(const char* interval)
+  void StockController::SetCurrentInterval(const std::string& interval)
   {
     s_currentInterval = interval;
   }
-  void StockController::SetCurrentRange(const char* range)
+  void StockController::SetCurrentRange(const std::string& range)
   {
     s_currentRange = range;
   }
   
-  const char* StockController::GetCurrentInterval()
+  const std::string& StockController::GetCurrentInterval()
   {
     return s_currentInterval;
   }
-  const char* StockController::GetCurrentRange()
+  const std::string& StockController::GetCurrentRange()
   {
     return s_currentRange;
   }

@@ -25,7 +25,7 @@ namespace KanVest
     if (curl)
     {
       std::string url = API_Provider::GetURL() + symbolName + "?interval=" + interval + "&range=" + range;
-      std::cout << url;
+      std::cout << "URL : " << url << "\n";
       
       curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);

@@ -41,7 +41,7 @@ namespace KanVasX
     // Window
     inline static ImU32 Background            = IM_COL32(55, 35, 12, 255);
     inline static ImU32 BackgroundDark        = IM_COL32(55, 35, 12, 255);
-    inline static ImU32 BackgroundLight       = IM_COL32(55, 35, 12, 255);
+    inline static ImU32 BackgroundLight       = IM_COL32(25, 35, 52, 255);
     inline static ImU32 ChildBackground       = IM_COL32(55, 35, 12, 255);
     inline static ImU32 PopupBackground       = IM_COL32(55, 35, 12, 255);
     inline static ImU32 Border                = IM_COL32(55, 35, 12, 255);
