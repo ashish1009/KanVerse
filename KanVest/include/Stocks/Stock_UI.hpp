@@ -28,6 +28,7 @@ namespace KanVest
     static void StockVestData();
 
     static void SearchBar();
+    static void ShowStcokBasicData();
 
 //    static void DrawCandleChart(const std::vector<StockPoint>& history);
 //    static void ShowBasicStockData(const StockData& stockData);

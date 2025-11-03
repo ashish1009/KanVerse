@@ -9,7 +9,7 @@
 
 namespace KanVest
 {
-  void StockManager::SetActiveStock(const StockData &stockData)
+  void StockManager::SetActiveStockData(const StockData &stockData)
   {
     s_activeStockData = stockData;
   }
@@ -32,7 +32,7 @@ namespace KanVest
     return s_currentRange;
   }
   
-  const StockData& StockManager::GetActiveStock()
+  const StockData& StockManager::GetActiveStockData()
   {
     return s_activeStockData;
   }

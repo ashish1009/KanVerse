@@ -14,7 +14,7 @@
 
 namespace KanVest
 {
-  static char s_searchedString[128];
+  static char s_searchedString[128] = "Nifty";
 
 #if 0
   static KanVasX::Date startDate{2024, 1, 30};
@@ -28,12 +28,38 @@ namespace KanVest
       for (char* p = string; *p; ++p)
         *p = static_cast<char>(toupper(*p));
     }
+    
+    std::string FormatDoubleToString(double value)
+    {
+      char buf[32];
+      std::snprintf(buf, sizeof(buf), "%.2f", value);
+      return std::string(buf);
+    }
+    
+    std::string FormatLargeNumber(double value)
+    {
+      const double billion = 1e9, million = 1e6, thousand = 1e3;
+      std::ostringstream oss;
+      oss << std::fixed << std::setprecision(2);
+
+      if (value >= billion)
+        oss << (value / billion) << "B";
+      else if (value >= million)
+        oss << (value / million) << "M";
+      else if (value >= thousand)
+        oss << (value / thousand) << "K";
+      else
+        oss << value;
+
+      return oss.str();
+    }
+
   } // namespace Utils
   
   void StockUI::Initialize(ImTextureID reloadIconID)
   {
     s_reloadIconID = reloadIconID;    
-    StockManager::SetActiveStock(UpdateStockData(s_searchedString));
+    StockManager::SetActiveStockData(UpdateStockData(s_searchedString));
   }
   
   StockData StockUI::UpdateStockData(const std::string& symbol)
@@ -75,8 +101,55 @@ namespace KanVest
     float iconSize = ImGui::GetItemRectSize().y - 12;
     if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {0.0, 6.0}) || ImGui::IsKeyDown(ImGuiKey_Enter))
     {
-      StockManager::SetActiveStock(UpdateStockData(s_searchedString));
+      StockManager::SetActiveStockData(UpdateStockData(s_searchedString));
     }
+  }
+  
+  void StockUI::ShowStcokBasicData()
+  {
+    const StockData& stockData = StockManager::GetActiveStockData();
+    
+    const ImU32 textColor = KanVasX::Color::TextBright;
+    const auto alignLeft = KanVasX::UI::AlignX::Left;
+
+    // Name & price
+    std::string name = stockData.shortName + " (" + stockData.currency + ")";
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_36), name.c_str(), alignLeft, {30.0f, 10.0f}, textColor);
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_24), stockData.longName.c_str(), alignLeft, {30.0f, 0.0f}, textColor);
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_48), Utils::FormatDoubleToString(stockData.livePrice), alignLeft, {30.0f, 10.0f}, textColor);
+    
+    // Change
+    std::string change = (stockData.change > 0 ? "+" : "") +
+    Utils::FormatDoubleToString(stockData.change) +
+    (stockData.change > 0 ? " ( +" : " ( ") +
+    Utils::FormatDoubleToString(stockData.changePercent) + "%)";
+    
+    ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_30), change, alignLeft, {30.0f, 10.0f}, changeColor);
+
+    static const float UnderLineSize = 0.28;
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
+    KanVasX::UI::ShiftCursorY(10);
+
+    // 52-Week Range
+    std::string fiftyTwoWeek = Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " + Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), "52-Week Range ", alignLeft, {30.0f, 10.0f}, textColor);
+    ImGui::SameLine();
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), fiftyTwoWeek, alignLeft, {50.0f, 0.0f}, textColor);
+
+    // Day Range
+    std::string dayRange = Utils::FormatDoubleToString(stockData.dayLow) + " - " + Utils::FormatDoubleToString(stockData.dayHigh);
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), "Day Range     ", alignLeft, {30.0f, 10.0f}, textColor);
+    ImGui::SameLine();
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), dayRange, alignLeft, {50.0f, 0.0f}, textColor);
+
+    // Volume
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), "Volume        ", alignLeft, {30.0f, 10.0f}, textColor);
+    ImGui::SameLine();
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), Utils::FormatLargeNumber(stockData.volume), alignLeft, {50.0f, 0.0f}, textColor);
+
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
+    KanVasX::UI::ShiftCursorY(10);
   }
   
   void StockUI::StockAnalyzer()
@@ -97,6 +170,7 @@ namespace KanVest
       KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.2985);
       
       SearchBar();
+      ShowStcokBasicData();
       
       ImGui::TableSetColumnIndex(1);
       KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.688);
@@ -129,41 +203,7 @@ namespace KanVest
   }
 } // namespace KanVest
 
-//namespace KanVest
-//{
-//  namespace Utils
-//  {
-//    void ConvertUpper(char* string)
-//    {
-//      for (char* p = string; *p; ++p)
-//        *p = static_cast<char>(toupper(*p));
-//    }
-//    
-//    std::string FormatDoubleToString(double value)
-//    {
-//      char buf[32];
-//      std::snprintf(buf, sizeof(buf), "%.2f", value);
-//      return std::string(buf);
-//    }
-//    
-//    std::string FormatLargeNumber(double value)
-//    {
-//      const double billion = 1e9, million = 1e6, thousand = 1e3;
-//      std::ostringstream oss;
-//      oss << std::fixed << std::setprecision(2);
-//      
-//      if (value >= billion)
-//        oss << (value / billion) << "B";
-//      else if (value >= million)
-//        oss << (value / million) << "M";
-//      else if (value >= thousand)
-//        oss << (value / thousand) << "K";
-//      else
-//        oss << value;
-//      
-//      return oss.str();
-//    }
-//    
+//
 //    static inline time_t ToMarketTime(time_t utcTimestamp)
 //    {
 //      // UTC + 5 hours 30 minutes (IST)
@@ -275,53 +315,6 @@ namespace KanVest
 //      ImPlot::EndPlot();
 //    }
 //  }
-//  
-//  // ============================================================
-//  // 📋 DISPLAY STOCK DETAILS (LEFT PANEL)
-//  // ============================================================
-//  static void DisplayStockDetails(const StockData& stockData)
-//  {
-//    const ImU32 textColor = KanVasX::Color::TextBright;
-//    const auto alignLeft = KanVasX::UI::AlignX::Left;
-//    
-//    // Name & price
-//    std::string name = stockData.shortName + " (" + stockData.currency + ")";
-//    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_36), name.c_str(), alignLeft, {30.0f, 10.0f}, textColor);
-//    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_24), stockData.longName.c_str(), alignLeft, {30.0f, 0.0f}, textColor);
-//    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_48), Utils::FormatDoubleToString(stockData.livePrice), alignLeft, {30.0f, 10.0f}, textColor);
-//    
-//    // Change
-//    std::string change = (stockData.change > 0 ? "+" : "") +
-//    Utils::FormatDoubleToString(stockData.change) +
-//    (stockData.change > 0 ? " ( +" : " ( ") +
-//    Utils::FormatDoubleToString(stockData.changePercent) + "%)";
-//    ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
-//    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_30), change, alignLeft, {30.0f, 10.0f}, changeColor);
-//    
-//    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.24, {20.0f, 5.0f});
-//    KanVasX::UI::ShiftCursorY(10);
-//    
-//    // 52-Week Range
-//    std::string fiftyTwoWeek = Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " + Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
-//    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), "52-Week Range ", alignLeft, {30.0f, 10.0f}, textColor);
-//    ImGui::SameLine();
-//    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), fiftyTwoWeek, alignLeft, {50.0f, 0.0f}, textColor);
-//    
-//    // Day Range
-//    std::string dayRange = Utils::FormatDoubleToString(stockData.dayLow) + " - " + Utils::FormatDoubleToString(stockData.dayHigh);
-//    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), "Day Range     ", alignLeft, {30.0f, 10.0f}, textColor);
-//    ImGui::SameLine();
-//    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), dayRange, alignLeft, {50.0f, 0.0f}, textColor);
-//    
-//    // Volume
-//    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), "Volume        ", alignLeft, {30.0f, 10.0f}, textColor);
-//    ImGui::SameLine();
-//    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), Utils::FormatLargeNumber(stockData.volume), alignLeft, {50.0f, 0.0f}, textColor);
-//    
-//    KanVasX::UI::ShiftCursorY(10);
-//    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.2, {20.0f, 5.0f});
-//  }
-//  
 //  // ============================================================
 //  // 🧭 MAIN PANEL — STOCK ANALYZER
 //  // ============================================================

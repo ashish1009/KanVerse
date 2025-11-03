@@ -37,7 +37,7 @@ namespace KanVest
   class StockManager
   {
   public:
-    static void SetActiveStock(const StockData& stockData);
+    static void SetActiveStockData(const StockData& stockData);
 
     static void SetCurrentInterval(const char* interval);
     static void SetCurrentRange(const char* range);
@@ -45,7 +45,7 @@ namespace KanVest
     static const char* GetCurrentInterval();
     static const char* GetCurrentRange();
     
-    static const StockData& GetActiveStock();
+    static const StockData& GetActiveStockData();
     
   private:
     inline static const char* s_currentInterval = "1m";
