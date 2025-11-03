@@ -397,20 +397,20 @@ namespace KanVest
     if (result.score > 0.4)
     {
       if (close > vwap)
-        result.suggestion = "Buy — bullish momentum confirmed above VWAP.";
+        result.suggestion = "Buy : Bullish momentum confirmed above VWAP.";
       else
-        result.suggestion = "Hold — trend bullish but below VWAP (confirmation needed).";
+        result.suggestion = "Hold : Trend bullish but below VWAP (confirmation needed).";
     }
     else if (result.score < -0.4)
     {
       if (close < vwap)
-        result.suggestion = "Sell — bearish trend confirmed below VWAP.";
+        result.suggestion = "Sell : Bearish trend confirmed below VWAP.";
       else
-        result.suggestion = "Hold — bearish indicators but price above VWAP.";
+        result.suggestion = "Hold : Bearish indicators but price above VWAP.";
     }
     else
     {
-      result.suggestion = "Hold — market indecisive or consolidating.";
+      result.suggestion = "Hold : Market indecisive or consolidating.";
     }
     
     // --- Optional short summary ---
@@ -446,10 +446,7 @@ namespace KanVest
     StockSummary hybrid;
     
     // Blend conclusions
-    hybrid.trend =
-    (shortSummary.trend == longSummary.trend)
-    ? shortSummary.trend
-    : "Mixed";
+    hybrid.trend = (shortSummary.trend == longSummary.trend) ? shortSummary.trend : "Mixed";
     
     hybrid.momentum = shortSummary.momentum;
     hybrid.volatility = shortSummary.volatility;
@@ -461,11 +458,17 @@ namespace KanVest
     
     // Suggestion
     if (hybrid.score > 0.5)
-      hybrid.suggestion = "Buy — both short and long trends bullish.";
+    {
+      hybrid.suggestion = "Buy : Both short and long trends bullish.";
+    }
     else if (hybrid.score < -0.5)
-      hybrid.suggestion = "Sell — both trends bearish.";
+    {
+      hybrid.suggestion = "Sell : Both trends bearish.";
+    }
     else
-      hybrid.suggestion = "Hold — timeframes disagree.";
+    {
+      hybrid.suggestion = "Hold : Timeframes disagree.";
+    }
     
     return hybrid;
   }

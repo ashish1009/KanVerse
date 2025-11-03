@@ -13,6 +13,12 @@
 
 namespace KanVest
 {
+//#define KanVest_Text(Size, string, offset, color) \
+//KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_22), string, , offset, color);
+
+#define KanVest_Text(font, string, offset, textColor) \
+KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, KanVasX::UI::AlignX::Left, offset, textColor);
+  
   static char s_searchedString[128] = "Nifty";
 
 #if 0
@@ -75,6 +81,64 @@ namespace KanVest
       return filtered;
     }
 
+    ImU32 GetTrendColor(const std::string& trend)
+    {
+      if (trend == "Uptrend") return KanVasX::Color::Cyan;
+      if (trend == "Downtrend") return KanVasX::Color::Red;
+      if (trend == "Sideways") return KanVasX::Color::White;
+      if (trend == "Mixed") return KanVasX::Color::Yellow;
+      
+      return KanVasX::Color::White;
+    }
+
+    ImU32 GetMomentumColor(const std::string& momentum)
+    {
+      if (momentum == "Strong") return KanVasX::Color::Cyan;
+      if (momentum == "Weak") return KanVasX::Color::Red;
+      if (momentum == "Moderate") return KanVasX::Color::White;
+      
+      return KanVasX::Color::White;
+    }
+
+    ImU32 GetVoltalityColor(const std::string& voltality)
+    {
+      if (voltality == "High") return KanVasX::Color::Cyan;
+      if (voltality == "Low") return KanVasX::Color::Red;
+      if (voltality == "Medium") return KanVasX::Color::White;
+      
+      return KanVasX::Color::White;
+    }
+    
+    ImU32 GetVolumeColor(const std::string& volume)
+    {
+      if (volume == "High") return KanVasX::Color::Cyan;
+      if (volume == "Low") return KanVasX::Color::Red;
+      if (volume == "Normal") return KanVasX::Color::White;
+      
+      return KanVasX::Color::White;
+    }
+    
+    ImU32 GetValuationColor(const std::string& valuation)
+    {
+      if (valuation == "Oversold") return KanVasX::Color::Cyan;
+      if (valuation == "Overbought") return KanVasX::Color::Red;
+      if (valuation == "Fair") return KanVasX::Color::White;
+      
+      return KanVasX::Color::White;
+    }
+    
+    ImU32 GetSummaryColor(const std::string& summary)
+    {
+      if (summary.find("Buy") != std::string::npos)
+        return KanVasX::Color::Cyan;
+      if (summary.find("Sell") != std::string::npos)
+        return KanVasX::Color::Red;
+      if (summary.find("Hold") != std::string::npos)
+        return KanVasX::Color::White;
+      
+      return KanVasX::Color::White; // fallback
+    }
+
   } // namespace Utils
   
   void StockUI::Initialize(ImTextureID reloadIconID)
@@ -119,9 +183,6 @@ namespace KanVest
     
     ShowStockData();
     
-    KanVasX::UI::ShiftCursorY(4.0f);
-    ShowStockAnalyzeData();
-    
     KanVasX::Panel::End();
   }
   
@@ -145,13 +206,13 @@ namespace KanVest
   void StockUI::ShowStcokBasicData(const StockData& stockData)
   {
     const ImU32 textColor = KanVasX::Color::TextBright;
-    const auto alignLeft = KanVasX::UI::AlignX::Left;
 
     // Name & price
     std::string name = stockData.shortName + " (" + stockData.currency + ")";
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_36), name.c_str(), alignLeft, {30.0f, 10.0f}, textColor);
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_24), stockData.longName.c_str(), alignLeft, {30.0f, 0.0f}, textColor);
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_48), Utils::FormatDoubleToString(stockData.livePrice), alignLeft, {30.0f, 10.0f}, textColor);
+
+    KanVest_Text(Header_36, name.c_str(), glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(Header_24, stockData.longName.c_str(), glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(Header_48, Utils::FormatDoubleToString(stockData.livePrice), glm::vec2(30.0f, 10.0f), textColor);
     
     // Change
     std::string change = (stockData.change > 0 ? "+" : "") +
@@ -160,7 +221,7 @@ namespace KanVest
     Utils::FormatDoubleToString(stockData.changePercent) + "%)";
     
     ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_30), change, alignLeft, {30.0f, 10.0f}, changeColor);
+    KanVest_Text(Header_30, change, glm::vec2(30.0f, 10.0f), changeColor);
 
     static const float UnderLineSize = 0.28;
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
@@ -168,20 +229,20 @@ namespace KanVest
 
     // 52-Week Range
     std::string fiftyTwoWeek = Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " + Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), "52-Week Range ", alignLeft, {30.0f, 10.0f}, textColor);
+    KanVest_Text(FixedWidthHeader_18, "52-Week Range ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), fiftyTwoWeek, alignLeft, {50.0f, 0.0f}, textColor);
+    KanVest_Text(FixedWidthHeader_18, fiftyTwoWeek, glm::vec2(50.0f, 10.0f), textColor);
 
     // Day Range
     std::string dayRange = Utils::FormatDoubleToString(stockData.dayLow) + " - " + Utils::FormatDoubleToString(stockData.dayHigh);
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), "Day Range     ", alignLeft, {30.0f, 10.0f}, textColor);
+    KanVest_Text(FixedWidthHeader_18, "Day Range     ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), dayRange, alignLeft, {50.0f, 0.0f}, textColor);
+    KanVest_Text(FixedWidthHeader_18, dayRange, glm::vec2(50.0f, 10.0f), textColor);
 
     // Volume
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), "Volume        ", alignLeft, {30.0f, 10.0f}, textColor);
+    KanVest_Text(FixedWidthHeader_18, "Volume        ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::FixedWidthHeader_20), Utils::FormatLargeNumber(stockData.volume), alignLeft, {50.0f, 0.0f}, textColor);
+    KanVest_Text(FixedWidthHeader_18, Utils::FormatLargeNumber(stockData.volume), glm::vec2(50.0f, 10.0f), textColor);
 
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
     KanVasX::UI::ShiftCursorY(10);
@@ -346,7 +407,7 @@ namespace KanVest
 
     if (ImGui::BeginTable("StockAnalyzerTable", 2, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
     {
-      float topYArea = ImGui::GetContentRegionAvail().y * 0.45f;
+      float topYArea = ImGui::GetContentRegionAvail().y * 0.99f;
       float totalWidth = ImGui::GetContentRegionAvail().x;
       float firstColWidth = totalWidth * 0.3f;
       float secondColWidth = totalWidth  - firstColWidth;
@@ -364,6 +425,8 @@ namespace KanVest
       
         SearchBar();
         ShowStcokBasicData(stockData);
+        
+        ShowStockAnalyzeData();
       }
       
       // Column 2 Chart
@@ -380,40 +443,43 @@ namespace KanVest
   
   void StockUI::ShowStockAnalyzeData()
   {
-    if (ImGui::BeginTable("Portfolio Manager", 2, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
-    {
-      // UI
-      float topYArea = ImGui::GetContentRegionAvail().y;
-      float totalWidth = ImGui::GetContentRegionAvail().x;
-      float firstColWidth = totalWidth * 0.3f;
-      float secondColWidth = totalWidth  - firstColWidth;
-      
-      ImGui::TableSetupColumn(" Stock Analyzer", ImGuiTableColumnFlags_WidthFixed, firstColWidth);
-      ImGui::TableSetupColumn(" DATA 2", ImGuiTableColumnFlags_WidthFixed, secondColWidth);
-      
-      ImGui::TableNextRow();
-      
-      {
-        ImGui::TableSetColumnIndex(0);
-        KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.2985);
-        
-        StockSummary summary = StockController::GetStockSummary();
+    KanVasX::UI::ShiftCursorY(10.0f);
+    StockSummary summary = StockController::GetStockSummary();
+    
+    const ImU32 textColor = KanVasX::Color::TextBright;
 
-        ImGui::Text("trend : %s", summary.trend.c_str());
-        ImGui::Text("momentum : %s", summary.momentum.c_str() );
-        ImGui::Text("volatility : %s", summary.volatility.c_str() );
-        ImGui::Text("volume : %s", summary.volume.c_str() );
-        ImGui::Text("valuation : %s", summary.valuation.c_str() );
-        ImGui::Text("vwapBias : %s", summary.vwapBias.c_str() );
-        ImGui::Text("conclusion : %s", summary.conclusion.c_str());
-        ImGui::Text("score : %f", summary.score);
-        ImGui::Text("suggestion : %s", summary.suggestion.c_str());
+    KanVest_Text(Header_34, "Stock Insights ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.15, {20.0f, 5.0f});
+    KanVasX::UI::ShiftCursorY(10.0f);
 
-      }
-      
-      ImGui::TableSetColumnIndex(1);
-      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.688);
-    }
-    ImGui::EndTable();
+    // Trend
+    KanVest_Text(FixedWidthHeader_20, "Trend     ", glm::vec2(30.0f, 10.0f), textColor);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_20, summary.trend.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetTrendColor(summary.trend));
+
+    // Momentum
+    KanVest_Text(FixedWidthHeader_20, "Momentum  ", glm::vec2(30.0f, 10.0f), textColor);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_20, summary.momentum.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetMomentumColor(summary.momentum));
+
+    // Voltality
+    KanVest_Text(FixedWidthHeader_20, "Voltality ", glm::vec2(30.0f, 10.0f), textColor);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_20, summary.volatility.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetVoltalityColor(summary.volatility));
+
+    // Volume
+    KanVest_Text(FixedWidthHeader_20, "Volume    ", glm::vec2(30.0f, 10.0f), textColor);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_20, summary.volume.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetVolumeColor(summary.volume));
+
+    // Voltality
+    KanVest_Text(FixedWidthHeader_20, "Valuation ", glm::vec2(30.0f, 10.0f), textColor);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_20, summary.valuation.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetValuationColor(summary.valuation));
+
+    KanVasX::UI::ShiftCursorY(10.0f);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.15, {20.0f, 5.0f});
+
+    KanVest_Text(Header_30, summary.suggestion.c_str(), glm::vec2(30, 10.0f), Utils::GetSummaryColor(summary.suggestion));
   }
 } // namespace KanVest
