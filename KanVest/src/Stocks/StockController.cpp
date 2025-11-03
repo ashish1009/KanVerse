@@ -9,7 +9,7 @@
 
 #include "Stocks/StockAPI.hpp"
 #include "Stocks/StockParser.hpp"
-
+#include "Stocks/StockAnalyzer.hpp"
 #include "Stocks/API_Provider.hpp"
 
 namespace KanVest
@@ -117,20 +117,27 @@ namespace KanVest
   // ------------------------------
   // 4. STOCK CONTROLLER MAIN
   // ------------------------------
-  StockData StockController::UpdateStockData(const std::string& symbolName, const std::string& interval, const std::string& range)
+  void StockController::UpdateStockData(const std::string& symbolName)
   {
     IK_PROFILE();
     APIKeys keys = API_Provider::GetAPIKeys();
     std::string symbol = NormalizeSymbol(symbolName);
     
-    std::string json = FetchStockData(symbol, interval, range, keys);
+    std::string json = FetchStockData(symbol, s_currentInterval, s_currentRange, keys);
     
     StockData stockData(symbolName);
+    
     ParseBasicInfo(stockData, json, keys);
     ParseLiveMetrics(stockData, json, keys);
     ParseHistory(stockData, json);
     
-    return stockData;
+    s_activeStockData = stockData;
+  }
+  
+  void StockController::AnalyzeStock()
+  {
+    s_dailySummary = StockAnalyzer::AnalyzeSingleTimeframe(s_activeStockData, s_currentInterval, s_currentRange);
+    s_hybridSummary = StockAnalyzer::AnalyzeHybrid(s_activeStockData, s_currentInterval, s_currentRange);
   }
 
   void StockController::SetRefreshInterval(float refreshInterval)

@@ -109,8 +109,9 @@ namespace KanVest
     s_lastUpdatedString = CurrentTimeString();
     s_lastUpdateTime = ImGui::GetTime();
 
-    StockData stockData = StockController::UpdateStockData(symbol, StockController::GetCurrentInterval(), StockController::GetCurrentRange());
-    StockController::SetActiveStockData(stockData);
+    // Update Stock Data
+    StockController::UpdateStockData(symbol);
+    StockController::AnalyzeStock();
   };
 
   void StockUI::StockPanel()

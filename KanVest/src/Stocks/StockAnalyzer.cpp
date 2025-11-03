@@ -218,42 +218,49 @@ namespace KanVest
     return out;
   }
   
-  IndicatorConfig StockAnalyzer::ChooseConfig(const std::string& interval, const std::string& range)
+  IndicatorConfig StockAnalyzer::ChooseConfig(const std::string& interval,
+                                              const std::string& range)
   {
-    IndicatorConfig cfg; // defaults
-    if (interval == "1m" && (range == "1d" || range == "5d"))
-    {
-      cfg.smaPeriod = 10; cfg.emaPeriod = 10; cfg.rsiPeriod = 7; cfg.atrPeriod = 7; cfg.volPeriod = 10;
+    IndicatorConfig cfg;
+    
+    if (interval == "1m" || interval == "2m" || interval == "5m") {
+      // Intraday
+      cfg.smaPeriod = 50;  // more smoothing
+      cfg.emaPeriod = 50;
+      cfg.rsiPeriod = 14;
+      cfg.atrPeriod = 14;
+      cfg.volPeriod = 50;
+      cfg.momentumSensitivity = 0.008;
+    }
+    else if (interval == "1h" || interval == "15m") {
+      // Short-term swing
+      cfg.smaPeriod = 30;
+      cfg.emaPeriod = 30;
+      cfg.rsiPeriod = 14;
+      cfg.atrPeriod = 14;
+      cfg.volPeriod = 30;
+    }
+    else if (interval == "1d") {
+      // Standard daily analysis
+      cfg.smaPeriod = 20;
+      cfg.emaPeriod = 20;
+      cfg.rsiPeriod = 14;
+      cfg.atrPeriod = 14;
+      cfg.volPeriod = 20;
+    }
+    else if (interval == "1wk") {
+      // Long-term
+      cfg.smaPeriod = 10;
+      cfg.emaPeriod = 10;
+      cfg.rsiPeriod = 10;
+      cfg.atrPeriod = 10;
+      cfg.volPeriod = 10;
       cfg.momentumSensitivity = 0.02;
     }
-    else if (interval == "5m")
-    {
-      cfg.smaPeriod = 20; cfg.emaPeriod = 20; cfg.rsiPeriod = 14; cfg.atrPeriod = 14;
-      cfg.momentumSensitivity = 0.015;
-    }
-    else if (interval == "15m")
-    {
-      cfg.smaPeriod = 30; cfg.emaPeriod = 30; cfg.rsiPeriod = 14; cfg.atrPeriod = 14;
-      cfg.momentumSensitivity = 0.012;
-    }
-    else if (interval == "1h")
-    {
-      cfg.smaPeriod = 40; cfg.emaPeriod = 40; cfg.rsiPeriod = 14; cfg.atrPeriod = 14;
-      cfg.momentumSensitivity = 0.01;
-    }
-    else if (interval == "1d")
-    {
-      if (range == "1mo") { cfg.smaPeriod = 20; cfg.emaPeriod = 20; cfg.rsiPeriod = 14; cfg.atrPeriod = 14; }
-      else if (range == "3mo" || range == "6mo") { cfg.smaPeriod = 50; cfg.emaPeriod = 50; cfg.rsiPeriod = 20; cfg.atrPeriod = 20; }
-    }
-    else if (interval == "1wk")
-    {
-      cfg.smaPeriod = 20; cfg.emaPeriod = 20; cfg.rsiPeriod = 14; cfg.atrPeriod = 14;
-      cfg.volHighFactor = 2.0;
-    }
+    
     return cfg;
   }
-  
+
   StockSummary StockAnalyzer::AnalyzeInternal(const std::vector<StockPoint>& history, const std::string& interval, const std::string& range, const IndicatorConfig& cfg)
   {
     StockSummary out;
