@@ -44,8 +44,8 @@ namespace KanVest
     /// - Parameter range: range of data
     static StockData UpdateStockData(const std::string& symbolName, const std::string& interval, const std::string& range);
     
-    /// This function analyze the stock
-   static StockSummary AnalyzeStock();
+//    /// This function analyze the stock
+//   static StockSummary AnalyzeStock();
 
     /// This function update stock data
     /// - Parameter stockData: stock data

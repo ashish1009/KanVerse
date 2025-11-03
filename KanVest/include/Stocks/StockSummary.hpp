@@ -11,11 +11,12 @@ namespace KanVest
 {
   struct StockSummary
   {
-    std::string trend;        // Uptrend / Downtrend / Sideways
-    std::string momentum;     // Strong / Weak / Neutral
-    std::string volatility;   // High / Medium / Low
-    std::string volume;       // High / Normal / Low
-    std::string valuation;    // Overbought / Oversold / Fair
-    std::string conclusion;   // Final AI-like sentence summary
+    std::string trend;
+    std::string momentum;
+    std::string volatility;
+    std::string volume;
+    std::string valuation;
+    std::string conclusion;
+    double score = 50.0;
   };
 } // namespace KanVest
