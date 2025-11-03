@@ -442,28 +442,29 @@ namespace KanVest
   //  • Whether price seems too high or low (RSI valuation)
   // Then it blends everything into a simple score and suggestion.
   // -------------------------------------------------------------
-  StockSummary StockAnalyzer::AnalyzeInternal(const std::vector<StockPoint>& h,
+  std::pair<StockSummary, StockTechnicals> StockAnalyzer::AnalyzeInternal(const std::vector<StockPoint>& h,
                                               const IndicatorConfig& cfg,
                                               const std::string& interval)
   {
-    StockSummary result;
-    
+    StockSummary summaryResult;
+    StockTechnicals tecnicalResult;
+
     if (h.size() < static_cast<size_t>(cfg.smaPeriod))
     {
-      result.suggestion = "Not enough data to analyze.";
-      return result;
+      summaryResult.suggestion = "Not enough data to analyze.";
+      return {summaryResult, tecnicalResult};
     }
     
     // --- Compute indicators ---
-    double close     = h.back().close;
-    double sma       = ComputeSMA(h, cfg.smaPeriod);
-    double ema       = ComputeEMA(h, cfg.emaPeriod);
-    double rsi       = ComputeRSI(h, cfg.rsiPeriod);
-    double atr       = ComputeATR(h, cfg.atrPeriod);
-    double vwap      = ComputeVWAP(h);
-    double macd      = ComputeMACD(h, 12, 26);
-    double avgVol    = ComputeAverageVolume(h, cfg.volPeriod);
-    double latestVol = h.back().volume;
+    tecnicalResult.close     = h.back().close;
+    tecnicalResult.sma       = ComputeSMA(h, cfg.smaPeriod);
+    tecnicalResult.ema       = ComputeEMA(h, cfg.emaPeriod);
+    tecnicalResult.rsi       = ComputeRSI(h, cfg.rsiPeriod);
+    tecnicalResult.atr       = ComputeATR(h, cfg.atrPeriod);
+    tecnicalResult.vwap      = ComputeVWAP(h);
+    tecnicalResult.macd      = ComputeMACD(h, 12, 26);
+    tecnicalResult.avgVol    = ComputeAverageVolume(h, cfg.volPeriod);
+    tecnicalResult.latestVol = h.back().volume;
     
     
     // ---------------------------------------------------------
@@ -472,134 +473,134 @@ namespace KanVest
     // Check if price is generally going up or down by comparing
     // current price vs moving averages and VWAP.
     // ---------------------------------------------------------
-    if (close > ema * 1.01 && ema > sma && close > vwap)
+    if (tecnicalResult.close > tecnicalResult.ema * 1.01 && tecnicalResult.ema > tecnicalResult.sma && tecnicalResult.close > tecnicalResult.vwap)
     {
-      result.trend.value = "Uptrend";
-      result.trend.reason = "Price is above recent averages : Buyers are stronger.";
+      summaryResult.trend.value = "Uptrend";
+      summaryResult.trend.reason = "Price is above recent averages : Buyers are stronger.";
     }
-    else if (close < ema * 0.99 && ema < sma && close < vwap)
+    else if (tecnicalResult.close < tecnicalResult.ema * 0.99 && tecnicalResult.ema < tecnicalResult.sma && tecnicalResult.close < tecnicalResult.vwap)
     {
-      result.trend.value = "Downtrend";
-      result.trend.reason = "Price is below recent averages : Sellers are in control.";
+      summaryResult.trend.value = "Downtrend";
+      summaryResult.trend.reason = "Price is below recent averages : Sellers are in control.";
     }
     else
     {
-      result.trend.value = "Sideways";
-      result.trend.reason = "Price is moving near its averages : No clear direction.";
+      summaryResult.trend.value = "Sideways";
+      summaryResult.trend.reason = "Price is moving near its averages : No clear direction.";
     }
     
     
     // ---------------------------------------------------------
     // ⚡ Momentum (trend strength)
     // ---------------------------------------------------------
-    double emaDiff = std::fabs(ema - sma) / sma;
+    double emaDiff = std::fabs(tecnicalResult.ema - tecnicalResult.sma) / tecnicalResult.sma;
     if (emaDiff > cfg.momentumSensitivity * 2)
     {
-      result.momentum.value  = "Strong";
-      result.momentum.reason = "Price is moving quickly in one direction : Strong push from traders.";
+      summaryResult.momentum.value  = "Strong";
+      summaryResult.momentum.reason = "Price is moving quickly in one direction : Strong push from traders.";
     }
     else if (emaDiff > cfg.momentumSensitivity)
     {
-      result.momentum.value  = "Moderate";
-      result.momentum.reason = "Price is trending steadily : Decent strength.";
+      summaryResult.momentum.value  = "Moderate";
+      summaryResult.momentum.reason = "Price is trending steadily : Decent strength.";
     }
     else
     {
-      result.momentum.value  = "Weak";
-      result.momentum.reason = "Price barely moving away from average : Market resting.";
+      summaryResult.momentum.value  = "Weak";
+      summaryResult.momentum.reason = "Price barely moving away from average : Market resting.";
     }
     
     
     // ---------------------------------------------------------
     // 🌊 Volatility (how wild the swings are)
     // ---------------------------------------------------------
-    double atrPercent = SafeDiv(atr, close) * 100.0;
+    double atrPercent = SafeDiv(tecnicalResult.atr, tecnicalResult.close) * 100.0;
     if (atrPercent > 3.0)
     {
-      result.volatility.value  = "High";
-      result.volatility.reason = "Price is jumping around a lot : Unpredictable moves.";
+      summaryResult.volatility.value  = "High";
+      summaryResult.volatility.reason = "Price is jumping around a lot : Unpredictable moves.";
     }
     else if (atrPercent > 1.5)
     {
-      result.volatility.value  = "Medium";
-      result.volatility.reason = "Price moves moderately : Some swings but manageable.";
+      summaryResult.volatility.value  = "Medium";
+      summaryResult.volatility.reason = "Price moves moderately : Some swings but manageable.";
     }
     else
     {
-      result.volatility.value  = "Low";
-      result.volatility.reason = "Price is calm : Small day to day changes.";
+      summaryResult.volatility.value  = "Low";
+      summaryResult.volatility.reason = "Price is calm : Small day to day changes.";
     }
     
     
     // ---------------------------------------------------------
     // 🔊 Volume (trading activity)
     // ---------------------------------------------------------
-    double volRatio = SafeDiv(latestVol, avgVol, 1.0);
+    double volRatio = SafeDiv(tecnicalResult.latestVol, tecnicalResult.avgVol, 1.0);
     if (volRatio > cfg.volHighFactor)
     {
-      result.volume.value  = "High";
-      result.volume.reason = "Unusually large trading today : Lots of participation.";
+      summaryResult.volume.value  = "High";
+      summaryResult.volume.reason = "Unusually large trading today : Lots of participation.";
     }
     else if (volRatio < cfg.volLowFactor)
     {
-      result.volume.value  = "Low";
-      result.volume.reason = "Fewer trades than normal : Low interest right now.";
+      summaryResult.volume.value  = "Low";
+      summaryResult.volume.reason = "Fewer trades than normal : Low interest right now.";
     }
     else
     {
-      result.volume.value  = "Normal";
-      result.volume.reason = "Trading volume looks typical for this stock.";
+      summaryResult.volume.value  = "Normal";
+      summaryResult.volume.reason = "Trading volume looks typical for this stock.";
     }
     
     
     // ---------------------------------------------------------
     // 💰 Valuation via RSI
     // ---------------------------------------------------------
-    if (rsi > 70)
+    if (tecnicalResult.rsi > 70)
     {
-      result.valuation.value  = "Overbought";
-      result.valuation.reason = "Price rose quickly : May be due for a small pullback.";
+      summaryResult.valuation.value  = "Overbought";
+      summaryResult.valuation.reason = "Price rose quickly : May be due for a small pullback.";
     }
-    else if (rsi < 30)
+    else if (tecnicalResult.rsi < 30)
     {
-      result.valuation.value  = "Oversold";
-      result.valuation.reason = "Price fell sharply : May bounce back soon.";
+      summaryResult.valuation.value  = "Oversold";
+      summaryResult.valuation.reason = "Price fell sharply : May bounce back soon.";
     }
     else
     {
-      result.valuation.value  = "Fair";
-      result.valuation.reason = "Price moves balanced : Neither too high nor too low.";
+      summaryResult.valuation.value  = "Fair";
+      summaryResult.valuation.reason = "Price moves balanced : Neither too high nor too low.";
     }
     
     
     // ---------------------------------------------------------
     // 📍 VWAP Bias (where price sits relative to real average)
     // ---------------------------------------------------------
-    double vwapDiff = SafeDiv(close - vwap, vwap);
+    double vwapDiff = SafeDiv(tecnicalResult.close - tecnicalResult.vwap, tecnicalResult.vwap);
     if (vwapDiff > 0.01)
     {
-      result.vwapBias.value  = "Above VWAP";
-      result.vwapBias.reason = "Price stays above the average paid price : Buyers dominant.";
+      summaryResult.vwapBias.value  = "Above VWAP";
+      summaryResult.vwapBias.reason = "Price stays above the average paid price : Buyers dominant.";
     }
     else if (vwapDiff < -0.01)
     {
-      result.vwapBias.value  = "Below VWAP";
-      result.vwapBias.reason = "Price below the average paid price : Sellers dominant.";
+      summaryResult.vwapBias.value  = "Below VWAP";
+      summaryResult.vwapBias.reason = "Price below the average paid price : Sellers dominant.";
     }
     else
     {
-      result.vwapBias.value  = "Near VWAP";
-      result.vwapBias.reason = "Price is around the fair average : Neutral area.";
+      summaryResult.vwapBias.value  = "Near VWAP";
+      summaryResult.vwapBias.reason = "Price is around the fair average : Neutral area.";
     }
     
     
     // ---------------------------------------------------------
     // 🧮 Combine everything into one confidence score
     // ---------------------------------------------------------
-    double trendScore = (result.trend.value == "Uptrend") ? 1.0 :
-    (result.trend.value == "Downtrend") ? -1.0 : 0.0;
-    double rsiScore  = (rsi - 50.0) / 50.0;
-    double macdScore = macd / (close * 0.01);
+    double trendScore = (summaryResult.trend.value == "Uptrend") ? 1.0 :
+    (summaryResult.trend.value == "Downtrend") ? -1.0 : 0.0;
+    double rsiScore  = (tecnicalResult.rsi - 50.0) / 50.0;
+    double macdScore = tecnicalResult.macd / (tecnicalResult.close * 0.01);
     double vwapScore = std::clamp(vwapDiff * 100.0, -1.0, 1.0);
     
     double score = (trendScore * 0.35 +
@@ -607,46 +608,46 @@ namespace KanVest
                     macdScore  * 0.25 +
                     vwapScore  * 0.15);
     
-    result.score = std::clamp(score, -1.0, 1.0);
+    summaryResult.score = std::clamp(score, -1.0, 1.0);
     
     
     // ---------------------------------------------------------
     // 💡 Final suggestion based on score
     // ---------------------------------------------------------
-    if (result.score > 0.4)
+    if (summaryResult.score > 0.4)
     {
-      if (close > vwap)
-        result.suggestion = "Buy : Uptrend looks strong and price is above the fair average.";
+      if (tecnicalResult.close > tecnicalResult.vwap)
+        summaryResult.suggestion = "Buy : Uptrend looks strong and price is above the fair average.";
       else
-        result.suggestion = "Hold : Looks positive but price slightly under average : Wait for confirmation.";
+        summaryResult.suggestion = "Hold : Looks positive but price slightly under average : Wait for confirmation.";
     }
-    else if (result.score < -0.4)
+    else if (summaryResult.score < -0.4)
     {
-      if (close < vwap)
-        result.suggestion = "Sell : Downtrend clear and price is below average : Sellers leading.";
+      if (tecnicalResult.close < tecnicalResult.vwap)
+        summaryResult.suggestion = "Sell : Downtrend clear and price is below average : Sellers leading.";
       else
-        result.suggestion = "Hold : Downtrend forming but price still high : Caution.";
+        summaryResult.suggestion = "Hold : Downtrend forming but price still high : Caution.";
     }
     else
     {
-      result.suggestion = "Hold : Market is calm or indecisive : No clear signal yet.";
+      summaryResult.suggestion = "Hold : Market is calm or indecisive : No clear signal yet.";
     }
     
     // Short summary for UI
-    result.conclusion = "Trend: " + result.trend.value +
-    " | Momentum: " + result.momentum.value +
-    " | Volatility: " + result.volatility.value +
-    " | RSI: " + std::to_string(static_cast<int>(rsi)) +
-    " | VWAP: " + std::to_string(vwap);
+    summaryResult.conclusion = "Trend: " + summaryResult.trend.value +
+    " | Momentum: " + summaryResult.momentum.value +
+    " | Volatility: " + summaryResult.volatility.value +
+    " | RSI: " + std::to_string(static_cast<int>(tecnicalResult.rsi)) +
+    " | VWAP: " + std::to_string(tecnicalResult.vwap);
     
-    return result;
+    return {summaryResult, tecnicalResult};
   }
   
   
   // -------------------------------------------------------------
   // 🔹 Public helper — single-interval analysis
   // -------------------------------------------------------------
-  StockSummary StockAnalyzer::AnalyzeSingleTimeframe(const StockData& data,
+  std::pair<StockSummary, StockTechnicals> StockAnalyzer::AnalyzeSingleTimeframe(const StockData& data,
                                                      const std::string& interval,
                                                      const std::string& range)
   {
@@ -661,7 +662,7 @@ namespace KanVest
   // Compares two timeframes to confirm bigger picture trend.
   // Example: 15-minute data (short) + daily data (long).
   // -------------------------------------------------------------
-  StockSummary StockAnalyzer::AnalyzeHybrid(const StockData& shortTerm,
+  std::pair<StockSummary, StockTechnicals> StockAnalyzer::AnalyzeHybrid(const StockData& shortTerm,
                                             const StockData& longTerm,
                                             const std::string& shortInterval,
                                             const std::string& longInterval)
@@ -669,8 +670,8 @@ namespace KanVest
     auto shortCfg = ChooseConfig(shortInterval, "short");
     auto longCfg  = ChooseConfig(longInterval, "long");
     
-    auto shortSummary = AnalyzeInternal(shortTerm.history, shortCfg, shortInterval);
-    auto longSummary  = AnalyzeInternal(longTerm.history,  longCfg,  longInterval);
+    auto [shortSummary, shortTechnicals] = AnalyzeInternal(shortTerm.history, shortCfg, shortInterval);
+    auto [longSummary, longTechnicals]  = AnalyzeInternal(longTerm.history,  longCfg,  longInterval);
     
     StockSummary hybrid;
     
@@ -705,6 +706,6 @@ namespace KanVest
       hybrid.suggestion = "Hold : Mixed signals : Better to wait.";
     }
     
-    return hybrid;
+    return {hybrid,shortTechnicals};
   }
 } // namespace KanVest

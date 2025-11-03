@@ -28,4 +28,17 @@ namespace KanVest
     std::string suggestion;
     double score = 50.0;
   };
+  
+  struct StockTechnicals
+  {
+    double close;
+    double sma;
+    double ema;
+    double rsi;
+    double atr;
+    double vwap;
+    double macd;
+    double avgVol;
+    double latestVol;
+  };
 } // namespace KanVest

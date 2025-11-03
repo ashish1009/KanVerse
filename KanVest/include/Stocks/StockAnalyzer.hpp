@@ -36,13 +36,13 @@ namespace KanVest
     ///   - data: Stock data
     ///   - interval: interval of rURL
     ///   - range: Range of URL
-    static StockSummary AnalyzeSingleTimeframe(const StockData& data, const std::string& interval, const std::string& range);
+    static std::pair<StockSummary, StockTechnicals> AnalyzeSingleTimeframe(const StockData& data, const std::string& interval, const std::string& range);
     /// This function returns the stock summary as hybrid
     /// - Parameters:
     ///   - data: Stock data
     ///   - interval: interval of rURL
     ///   - range: Range of URL
-    static StockSummary AnalyzeHybrid(const StockData& shortTermData, const StockData& longTermData,
+    static std::pair<StockSummary, StockTechnicals> AnalyzeHybrid(const StockData& shortTermData, const StockData& longTermData,
                                       const std::string& shortInterval, const std::string& longInterval);
 
   private:
@@ -66,7 +66,7 @@ namespace KanVest
     static IndicatorConfig ChooseConfig(const std::string& interval, const std::string& range);
     
     // ----------------- Analysis Core -----------------
-    static StockSummary AnalyzeInternal(const std::vector<StockPoint>& history,
+    static std::pair<StockSummary, StockTechnicals> AnalyzeInternal(const std::vector<StockPoint>& history,
                                         const IndicatorConfig& cfg,
                                         const std::string& interval);
   };

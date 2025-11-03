@@ -68,7 +68,10 @@ namespace KanVest
     
     /// This function returns the stock summary
     static const StockSummary& GetStockSummary();
-    
+
+    /// This function returns the StockTechnicals
+    static const StockTechnicals& GetStockTechnicals();
+
   private:
     inline static float s_refreshInterval = 100.0f;
     
@@ -78,5 +81,6 @@ namespace KanVest
     inline static StockData s_activeStockData = {"Nifty"};
 
     inline static StockSummary s_stockSummary;
+    inline static StockTechnicals s_stockTechnicals;
   };
 } // namespace KanVest

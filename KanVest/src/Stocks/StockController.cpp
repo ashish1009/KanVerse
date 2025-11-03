@@ -145,7 +145,7 @@ namespace KanVest
   {
     auto FetchData = [](const std::string& symbolName, const std::string& interval, const std::string& range) -> StockData {
       IK_PROFILE();
-
+      
       APIKeys keys = API_Provider::GetAPIKeys();
       std::string symbol = NormalizeSymbol(symbolName);
       
@@ -156,13 +156,13 @@ namespace KanVest
       ParseBasicInfo(stockData, json, keys);
       ParseLiveMetrics(stockData, json, keys);
       ParseHistory(stockData, json);
-
+      
       return stockData;
     };
     
     // Short temr data
     s_activeStockData = FetchData(symbolName, s_currentInterval, s_currentRange);
-        
+    
     if (s_activeStockData.IsValid())
     {
       auto map = Utils::GetHybridMapping(s_currentInterval);
@@ -170,11 +170,15 @@ namespace KanVest
       if (!map.higherInterval.empty())
       {
         StockData higher = FetchData(symbolName, map.higherInterval.c_str(), map.higherRange.c_str());
-        s_stockSummary = StockAnalyzer::AnalyzeHybrid(s_activeStockData, higher, s_currentInterval, map.higherInterval.c_str());
+        const auto& [stockSummary, stockTechnicals] = StockAnalyzer::AnalyzeHybrid(s_activeStockData, higher, s_currentInterval, map.higherInterval.c_str());
+        s_stockSummary = stockSummary;
+        s_stockTechnicals = stockTechnicals;
       }
       else
       {
-        s_stockSummary = StockAnalyzer::AnalyzeSingleTimeframe(s_activeStockData, s_currentInterval, s_currentRange);
+        const auto& [stockSummary, stockTechnicals] = StockAnalyzer::AnalyzeSingleTimeframe(s_activeStockData, s_currentInterval, s_currentRange);
+        s_stockSummary = stockSummary;
+        s_stockTechnicals = stockTechnicals;
       }
     }
   }
@@ -183,7 +187,7 @@ namespace KanVest
   {
     s_refreshInterval = refreshInterval;
   }
-
+  
   float StockController::GetRefreshInterval()
   {
     return s_refreshInterval;
@@ -220,5 +224,10 @@ namespace KanVest
   const StockSummary& StockController::GetStockSummary()
   {
     return s_stockSummary;
+  }
+  
+  const StockTechnicals& StockController::GetStockTechnicals()
+  {
+    return s_stockTechnicals;
   }
 } // namespace KanVest

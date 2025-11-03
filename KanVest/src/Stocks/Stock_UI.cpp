@@ -271,24 +271,24 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 
     static const float UnderLineSize = 0.28;
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
-    KanVasX::UI::ShiftCursorY(10);
+    KanVasX::UI::ShiftCursorY(20);
 
     // 52-Week Range
     std::string fiftyTwoWeek = Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " + Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
-    KanVest_Text(FixedWidthHeader_18, "52-Week Range ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "52-Week Range ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_18, fiftyTwoWeek, glm::vec2(50.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, fiftyTwoWeek, glm::vec2(50.0f, 0.0f), textColor);
 
     // Day Range
     std::string dayRange = Utils::FormatDoubleToString(stockData.dayLow) + " - " + Utils::FormatDoubleToString(stockData.dayHigh);
-    KanVest_Text(FixedWidthHeader_18, "Day Range     ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Day Range     ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_18, dayRange, glm::vec2(50.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, dayRange, glm::vec2(50.0f, 0.0f), textColor);
 
     // Volume
-    KanVest_Text(FixedWidthHeader_18, "Volume        ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Volume        ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_18, Utils::FormatLargeNumber(stockData.volume), glm::vec2(50.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, Utils::FormatLargeNumber(stockData.volume), glm::vec2(50.0f, 0.0f), textColor);
 
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
     KanVasX::UI::ShiftCursorY(10);
@@ -479,7 +479,8 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         SearchBar();
         ShowStcokBasicData(stockData);
         
-        ShowStockAnalyzeData();
+        ShowStockTechnicals();
+        ShowStockInsights();
       }
       
       // Column 2 Chart
@@ -494,14 +495,44 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     ImGui::EndTable();
   }
   
-  void StockUI::ShowStockAnalyzeData()
+  void StockUI::ShowStockTechnicals()
   {
+    StockTechnicals technicals = StockController::GetStockTechnicals();
+    
+    KanVest_Text(Header_26, "Technicals ", glm::vec2(30.0f, 0.0f), KanVasX::Color::TextBright);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.10, {20.0f, 5.0f});
+    KanVasX::UI::ShiftCursorY(5.0f);
+    
+    static const float secondC0lumnShift = 80.0f;
+
+    // close
+    auto ShowTechnicels = [](const std::string& title, double value) {
+      KanVest_Text(FixedWidthHeader_14, title.c_str(), glm::vec2(30.0f, 10.0f), KanVasX::Color::TextBright);
+      ImGui::SameLine();
+      KanVest_Text(FixedWidthHeader_14, Utils::FormatDoubleToString(value), glm::vec2(secondC0lumnShift, 0.0f), KanVasX::Color::TextBright);
+    };
+    
+    ShowTechnicels("Close          ", technicals.close);
+    ShowTechnicels("SMA            ", technicals.sma);
+    ShowTechnicels("EMA            ", technicals.ema);
+    ShowTechnicels("RSI            ", technicals.rsi);
+    ShowTechnicels("ATR            ", technicals.atr);
+    ShowTechnicels("VWAM           ", technicals.vwap);
+    ShowTechnicels("MACD           ", technicals.macd);
+    ShowTechnicels("Average Volume ", technicals.avgVol);
+    ShowTechnicels("Latest Volume  ", technicals.latestVol);
+  
     KanVasX::UI::ShiftCursorY(10.0f);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.28, {20.0f, 5.0f});
+  }
+
+  void StockUI::ShowStockInsights()
+  {
     StockSummary summary = StockController::GetStockSummary();
     
     const ImU32 textColor = KanVasX::Color::TextBright;
 
-    KanVest_Text(Header_34, "Stock Insights ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(Header_30, "Stock Insights ", glm::vec2(30.0f, 10.0f), textColor);
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.15, {20.0f, 5.0f});
     KanVasX::UI::ShiftCursorY(10.0f);
 
@@ -509,48 +540,48 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     
     // Trend
     const auto& [action, reason] = Utils::SplitSuggestion(summary.suggestion);
-    KanVest_Text(FixedWidthHeader_18, "Action     ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Action     ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, action.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetTrendColor(summary.trend.value));
     KanVasX::UI::Tooltip(reason);
 
-    KanVest_Text(FixedWidthHeader_18, "Trend      ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Trend      ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, summary.trend.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetTrendColor(summary.trend.value));
     KanVasX::UI::Tooltip(summary.trend.reason);
 
     // Momentum
-    KanVest_Text(FixedWidthHeader_18, "Momentum   ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Momentum   ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, summary.momentum.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetMomentumColor(summary.momentum.value));
     KanVasX::UI::Tooltip(summary.momentum.reason);
 
     // Voltality
-    KanVest_Text(FixedWidthHeader_18, "Voltality  ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Voltality  ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, summary.volatility.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetVoltalityColor(summary.volatility.value));
     KanVasX::UI::Tooltip(summary.volatility.reason);
 
     // Volume
-    KanVest_Text(FixedWidthHeader_18, "Volume     ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Volume     ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, summary.volume.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetVolumeColor(summary.volume.value));
     KanVasX::UI::Tooltip(summary.volume.reason);
 
     // VWAM
-    KanVest_Text(FixedWidthHeader_18, "VWAP       ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "VWAP       ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, summary.vwapBias.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetVWAPColor(summary.vwapBias.value));
     KanVasX::UI::Tooltip(summary.vwapBias.reason);
 
     // Voltality
-    KanVest_Text(FixedWidthHeader_18, "Valuation  ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Valuation  ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, summary.valuation.value.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetValuationColor(summary.valuation.value));
     KanVasX::UI::Tooltip(summary.valuation.reason);
 
     // Voltality
-    KanVest_Text(FixedWidthHeader_18, "Confidence ", glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Confidence ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
     std::string confidenceString = Utils::FormatDoubleToString(summary.score * 100.0f) + "%";
     KanVest_Text(FixedWidthHeader_18, confidenceString.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetConfidenceColor(summary.score));
