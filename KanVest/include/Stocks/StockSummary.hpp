@@ -22,8 +22,8 @@ namespace KanVest
     SummaryData volatility;
     SummaryData volume;
     SummaryData valuation;
+    SummaryData vwapBias;
     
-    std::string vwapBias;
     std::string conclusion;
     std::string suggestion;
     double score = 50.0;

@@ -114,7 +114,16 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       
       return KanVasX::Color::White;
     }
-    
+
+    ImU32 GetVWAPColor(const std::string& vwap)
+    {
+      if (vwap == "Above VWAP") return KanVasX::Color::Cyan;
+      if (vwap == "Below VWAP") return KanVasX::Color::Red;
+      if (vwap == "Near VWAP") return KanVasX::Color::White;
+      
+      return KanVasX::Color::White;
+    }
+
     ImU32 GetValuationColor(const std::string& valuation)
     {
       if (valuation == "Oversold") return KanVasX::Color::Cyan;
@@ -460,26 +469,37 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     KanVest_Text(FixedWidthHeader_20, "Trend     ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_20, summary.trend.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetTrendColor(summary.trend.value));
+    KanVasX::UI::Tooltip(summary.trend.reason);
 
     // Momentum
     KanVest_Text(FixedWidthHeader_20, "Momentum  ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_20, summary.momentum.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetMomentumColor(summary.momentum.value));
+    KanVasX::UI::Tooltip(summary.momentum.reason);
 
     // Voltality
     KanVest_Text(FixedWidthHeader_20, "Voltality ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_20, summary.volatility.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetVoltalityColor(summary.volatility.value));
+    KanVasX::UI::Tooltip(summary.volatility.reason);
 
     // Volume
     KanVest_Text(FixedWidthHeader_20, "Volume    ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_20, summary.volume.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetVolumeColor(summary.volume.value));
+    KanVasX::UI::Tooltip(summary.volume.reason);
+
+    // VWAM
+    KanVest_Text(FixedWidthHeader_20, "VWAP      ", glm::vec2(30.0f, 10.0f), textColor);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_20, summary.vwapBias.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetVWAPColor(summary.vwapBias.value));
+    KanVasX::UI::Tooltip(summary.vwapBias.reason);
 
     // Voltality
     KanVest_Text(FixedWidthHeader_20, "Valuation ", glm::vec2(30.0f, 10.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_20, summary.valuation.value.c_str(), glm::vec2(150.0f, 0.0f), Utils::GetValuationColor(summary.valuation.value));
+    KanVasX::UI::Tooltip(summary.valuation.reason);
 
     KanVasX::UI::ShiftCursorY(10.0f);
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.15, {20.0f, 5.0f});

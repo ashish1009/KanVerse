@@ -304,6 +304,7 @@ namespace KanVest
     
     return cfg;
   }
+  
   StockSummary StockAnalyzer::AnalyzeInternal(
                                               const std::vector<StockPoint>& h,
                                               const IndicatorConfig& cfg,
@@ -331,14 +332,17 @@ namespace KanVest
     if (close > ema * 1.01 && ema > sma && close > vwap)
     {
       result.trend.value = "Uptrend";
+      result.trend.reason = "Price trading above EMA and VWAP with higher highs — bullish confirmation.";
     }
     else if (close < ema * 0.99 && ema < sma && close < vwap)
     {
       result.trend.value = "Downtrend";
+      result.trend.reason = "Price below EMA and VWAP with lower lows — bearish confirmation.";
     }
     else
     {
       result.trend.value = "Sideways";
+      result.trend.reason = "Price oscillating near averages — no clear directional bias.";
     }
     
     // --- Momentum strength ---
@@ -346,14 +350,17 @@ namespace KanVest
     if (emaDiff > cfg.momentumSensitivity * 2)
     {
       result.momentum.value = "Strong";
+      result.momentum.reason = "EMA diverging sharply from SMA — strong directional momentum detected.";
     }
     else if (emaDiff > cfg.momentumSensitivity)
     {
       result.momentum.value = "Moderate";
+      result.momentum.reason = "EMA moderately diverging from SMA — stable trend strength.";
     }
     else
     {
       result.momentum.value = "Weak";
+      result.momentum.reason = "EMA close to SMA — momentum fading or range-bound market.";
     }
     
     // --- Volatility (ATR%) ---
@@ -361,14 +368,17 @@ namespace KanVest
     if (atrPercent > 3.0)
     {
       result.volatility.value = "High";
+      result.volatility.reason = "ATR above 3% of price — wide daily ranges, increased risk.";
     }
     else if (atrPercent > 1.5)
     {
       result.volatility.value = "Medium";
+      result.volatility.reason = "ATR between 1.5% and 3% — moderate price swings.";
     }
     else
     {
       result.volatility.value = "Low";
+      result.volatility.reason = "ATR below 1.5% — tight price movement, low volatility.";
     }
     
     // --- Volume status ---
@@ -376,43 +386,52 @@ namespace KanVest
     if (volRatio > cfg.volHighFactor)
     {
       result.volume.value = "High";
+      result.volume.reason = "Current volume significantly above average — strong trader participation.";
     }
     else if (volRatio < cfg.volLowFactor)
     {
       result.volume.value = "Low";
+      result.volume.reason = "Current volume below average — weak interest or low liquidity.";
     }
     else
     {
       result.volume.value = "Normal";
+      result.volume.reason = "Volume near historical average — steady trading activity.";
     }
     
     // --- RSI valuation ---
     if (rsi > 70)
     {
       result.valuation.value = "Overbought";
+      result.valuation.reason = "RSI above 70 — asset may be overextended to the upside.";
     }
     else if (rsi < 30)
     {
       result.valuation.value = "Oversold";
+      result.valuation.reason = "RSI below 30 — asset may be undervalued or due for rebound.";
     }
     else
     {
       result.valuation.value = "Fair";
+      result.valuation.reason = "RSI between 30 and 70 — balanced momentum, fair valuation.";
     }
     
     // --- VWAP bias (relative to current price) ---
     double vwapDiff = SafeDiv(close - vwap, vwap);
     if (vwapDiff > 0.01)
     {
-      result.vwapBias = "Above VWAP";
+      result.vwapBias.value = "Above VWAP";
+      result.vwapBias.reason = "Price sustained above VWAP — buyers in control.";
     }
     else if (vwapDiff < -0.01)
     {
-      result.vwapBias = "Below VWAP";
+      result.vwapBias.value = "Below VWAP";
+      result.vwapBias.reason = "Price trading below VWAP — sellers dominating.";
     }
     else
     {
-      result.vwapBias = "Near VWAP";
+      result.vwapBias.value = "Near VWAP";
+      result.vwapBias.reason = "Price hovering near VWAP — neutral intraday bias.";
     }
     
     // --- Compute scoring system (blended technical confidence) ---
@@ -458,7 +477,7 @@ namespace KanVest
     
     return result;
   }
-
+  
   // ---------------- Public APIs ----------------
   StockSummary StockAnalyzer::AnalyzeSingleTimeframe(const StockData& data,
                                                      const std::string& interval,
@@ -483,22 +502,23 @@ namespace KanVest
     
     // Blend conclusions
     hybrid.trend.value = (shortSummary.trend.value == longSummary.trend.value) ? shortSummary.trend.value : "Mixed";
+    hybrid.trend.reason = "Short-term trend: " + shortSummary.trend.value + ", Long-term trend: " + longSummary.trend.value + ".";
     
     hybrid.momentum = shortSummary.momentum;
     hybrid.volatility = shortSummary.volatility;
     hybrid.volume = shortSummary.volume;
+    hybrid.vwapBias = shortSummary.vwapBias;
     hybrid.valuation = shortSummary.valuation;
     
     // score fusion
     hybrid.score = (shortSummary.score * 0.6 + longSummary.score * 0.4);
     
     // Suggestion
-    
-    if (shortSummary.vwapBias.find("Above") != std::string::npos && longSummary.trend.value == "Uptrend")
+    if (shortSummary.vwapBias.value.find("Above") != std::string::npos && longSummary.trend.value == "Uptrend")
     {
       hybrid.suggestion = "Buy : Strong bullish bias (price above VWAP).";
     }
-    else if (shortSummary.vwapBias.find("Below") != std::string::npos && longSummary.trend.value == "Downtrend")
+    else if (shortSummary.vwapBias.value.find("Below") != std::string::npos && longSummary.trend.value == "Downtrend")
     {
       hybrid.suggestion = "Sell : Confirmed downtrend below VWAP.";
     }
@@ -506,19 +526,6 @@ namespace KanVest
     {
       hybrid.suggestion = "Hold : Market undecided, VWAP neutral.";
     }
-    
-//    if (hybrid.score > 0.5)
-//    {
-//      hybrid.suggestion = "Buy : Both short and long trends bullish.";
-//    }
-//    else if (hybrid.score < -0.5)
-//    {
-//      hybrid.suggestion = "Sell : Both trends bearish.";
-//    }
-//    else
-//    {
-//      hybrid.suggestion = "Hold : Timeframes disagree.";
-//    }
     
     return hybrid;
   }
