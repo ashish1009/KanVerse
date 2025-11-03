@@ -72,7 +72,7 @@ namespace KanVest
     static const char* GetCurrentRange();
     
   private:
-    inline static float s_refreshInterval = 1.0f;
+    inline static float s_refreshInterval = 100.0f;
     
     inline static const char* s_currentInterval = "1d";
     inline static const char* s_currentRange = "1mo";

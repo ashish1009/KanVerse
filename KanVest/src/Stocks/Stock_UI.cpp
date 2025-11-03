@@ -398,17 +398,6 @@ namespace KanVest
         KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.2985);
         
         StockSummary summary = StockController::AnalyzeStock();
-        
-
-//        ImGui::Text("close %f", StockController::GetActiveStockData().history.back().close);
-//        ImGui::Text("sma %f", StockController::GetActiveStockData().sma);
-//        ImGui::Text("ema %f", StockController::GetActiveStockData().ema);
-//        ImGui::Text("atr %f", StockController::GetActiveStockData().atr);
-//        ImGui::Text("rsi %f", StockController::GetActiveStockData().rsi);
-//        ImGui::Text("macd %f", StockController::GetActiveStockData().macd);
-//        ImGui::Text("averageVolume %f", StockController::GetActiveStockData().averageVolume);
-//        ImGui::Text("vwap %f", StockController::GetActiveStockData().vwap);
-//        ImGui::Text("vol %f", StockController::GetActiveStockData().history.back().volume);
 
         ImGui::Text("trend : %s", summary.trend.c_str());
         ImGui::Text("momentum : %s", summary.momentum.c_str() );

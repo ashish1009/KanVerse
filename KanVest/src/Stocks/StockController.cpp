@@ -119,6 +119,7 @@ namespace KanVest
   // ------------------------------
   StockData StockController::UpdateStockData(const std::string& symbolName, const std::string& interval, const std::string& range)
   {
+    IK_PROFILE();
     APIKeys keys = API_Provider::GetAPIKeys();
     std::string symbol = NormalizeSymbol(symbolName);
     
@@ -189,54 +190,87 @@ namespace KanVest
   // ============================================================================
   StockSummary StockController::AnalyzeStock()
   {
+    IK_PROFILE();
     StockSummary result;
-    
     const auto& h = s_activeStockData.history;
     
-    // Require at least 30 candles to make statistically meaningful calculations.
-    if (h.size() < 20)
+    // --- Step 0: Early exit if data too short ---
+    if (h.size() < 10)
     {
       result.conclusion = "Not enough data for analysis.";
       return result;
     }
     
-    // --------------------------------------------------------------------------
-    // 🧩 Step 1: Extract essential computed values
-    // --------------------------------------------------------------------------
-    double close      = h.back().close;             // Latest closing price
-    double sma20      = s_activeStockData.ComputeSMA(20);        // 20-period Simple Moving Average
-    double ema20      = s_activeStockData.ComputeEMA(20);        // 20-period Exponential Moving Average
-    double rsi14      = s_activeStockData.ComputeRSI(14);        // 14-period Relative Strength Index
-    double atr14      = s_activeStockData.ComputeATR(14);        // 14-period Average True Range
-    double vwap       = s_activeStockData.ComputeVWAP();         // Volume Weighted Average Price
-    double avgVol     = s_activeStockData.ComputeAverageVolume(20); // 20-period Average Volume
-    double latestVol  = h.back().volume;            // Most recent trading volume
-
-    // --------------------------------------------------------------------------
-    // 📈 Step 2: Detect the overall trend (now also compared with VWAP)
-    // --------------------------------------------------------------------------
-    if (close > sma20 * 1.01 && ema20 > sma20 && close > vwap)
+    // --- Step 1: Adaptive parameter tuning ---
+    int smaPeriod = 20, rsiPeriod = 14, atrPeriod = 14;
+    double momentumSensitivity = 0.012;
+    double volHigh = 1.5, volLow = 0.7;
+    
+    // Decide based on interval and range
+    if (s_currentInterval == "1m" && s_currentRange == "1d") {
+      smaPeriod = 10; rsiPeriod = 7; atrPeriod = 7;
+      momentumSensitivity = 0.02;
+    }
+    else if (s_currentInterval == "5m" && s_currentRange == "5d") {
+      smaPeriod = 20; rsiPeriod = 14; atrPeriod = 14;
+      momentumSensitivity = 0.015;
+    }
+    else if (s_currentInterval == "15m" && s_currentRange == "5d") {
+      smaPeriod = 30; rsiPeriod = 14;
+    }
+    else if (s_currentInterval == "1d" && s_currentRange == "1mo") {
+      smaPeriod = 20; rsiPeriod = 14;
+    }
+    else if (s_currentInterval == "1d" && (s_currentRange == "3mo" || s_currentRange == "6mo")) {
+      smaPeriod = 50; rsiPeriod = 20; atrPeriod = 20;
+    }
+    else if (s_currentInterval == "1wk" || s_currentRange == "1y") {
+      smaPeriod = 20; rsiPeriod = 14; atrPeriod = 14;
+      volHigh = 2.0; // weekly data volume varies more
+    }
+    
+    if (h.size() < smaPeriod)
+    {
+      result.conclusion = "Insufficient data for current timeframe.";
+      return result;
+    }
+    
+    // --- Step 2: Compute key indicators ---
+    double close = h.back().close;
+    double sma   = s_activeStockData.ComputeSMA(smaPeriod);
+    double ema   = s_activeStockData.ComputeEMA(smaPeriod);
+    double rsi   = s_activeStockData.ComputeRSI(rsiPeriod);
+    double atr   = s_activeStockData.ComputeATR(atrPeriod);
+    double vwap  = s_activeStockData.ComputeVWAP();
+    double avgVol = s_activeStockData.ComputeAverageVolume(smaPeriod);
+    double latestVol = h.back().volume;
+    
+    // --- Step 3: Adaptive thresholds based on volatility ---
+    double atrPercent = (atr / close) * 100.0;
+    double trendThreshold = 1.0 + (atrPercent / 200.0);
+    
+    // --- Step 4: Short-term direction confirmation ---
+    bool recentRise = h.back().close > h[h.size() - 3].close;
+    bool recentDrop = h.back().close < h[h.size() - 3].close;
+    
+    // --- Step 5: Determine trend (price vs SMA/EMA/VWAP) ---
+    if (close > sma * trendThreshold && ema > sma && close > vwap && recentRise)
       result.trend = "Uptrend";
-    else if (close < sma20 * 0.99 && ema20 < sma20 && close < vwap)
+    else if (close < sma / trendThreshold && ema < sma && close < vwap && recentDrop)
       result.trend = "Downtrend";
     else
       result.trend = "Sideways";
     
-    // --------------------------------------------------------------------------
-    // ⚡ Step 3: Determine momentum strength (based on SMA/EMA divergence)
-    // --------------------------------------------------------------------------
-    double emaDiff = fabs(ema20 - sma20) / sma20;
-    if (emaDiff > 0.02)
+    // --- Step 6: Momentum detection ---
+    double emaDiff = fabs(ema - sma) / sma;
+    if (emaDiff > momentumSensitivity * 2)
       result.momentum = "Strong";
-    else if (emaDiff > 0.01)
+    else if (emaDiff > momentumSensitivity)
       result.momentum = "Moderate";
     else
       result.momentum = "Weak";
     
-    // --------------------------------------------------------------------------
-    // 🌊 Step 4: Measure volatility using ATR (percentage of price range)
-    // --------------------------------------------------------------------------
-    double atrPercent = (atr14 / close) * 100.0;
+    // --- Step 7: Volatility classification ---
     if (atrPercent > 3.0)
       result.volatility = "High";
     else if (atrPercent > 1.5)
@@ -244,47 +278,36 @@ namespace KanVest
     else
       result.volatility = "Low";
     
-    // --------------------------------------------------------------------------
-    // 📊 Step 5: Evaluate volume activity (compared to recent average)
-    // --------------------------------------------------------------------------
-    double volRatio = latestVol / (avgVol + 1.0); // +1 prevents divide-by-zero
-    if (volRatio > 1.5)
+    // --- Step 8: Volume classification ---
+    double volRatio = latestVol / (avgVol + 1.0);
+    if (volRatio > volHigh)
       result.volume = "High";
-    else if (volRatio < 0.7)
+    else if (volRatio < volLow)
       result.volume = "Low";
     else
       result.volume = "Normal";
     
-    // --------------------------------------------------------------------------
-    // 💰 Step 6: Valuation — combine RSI & VWAP for better signal
-    // --------------------------------------------------------------------------
-    if (rsi14 > 70 && close > vwap)
+    // --- Step 9: Valuation (RSI + VWAP) ---
+    if (rsi > 70 && close > vwap)
       result.valuation = "Overbought";
-    else if (rsi14 < 30 && close < vwap)
+    else if (rsi < 30 && close < vwap)
       result.valuation = "Oversold";
     else
       result.valuation = "Fair";
     
-    // --------------------------------------------------------------------------
-    // 🧠 Step 7: Combine everything into a human-readable summary
-    // --------------------------------------------------------------------------
-    std::string base = "The stock is in a " + result.trend + " with " +
+    // --- Step 10: Human-readable conclusion ---
+    std::string base =
+    "Timeframe: " + std::string(s_currentInterval) + " / " + std::string(s_currentRange) + ". "
+    "The stock is in a " + result.trend + " with " +
     result.momentum + " momentum, " + result.volatility +
     " volatility, and " + result.volume + " trading volume. ";
     
-    // Add VWAP-based contextual message for valuation insight
     if (result.valuation == "Overbought")
-    {
-      base += "It is trading above VWAP, showing bullish enthusiasm but potential short-term exhaustion.";
-    }
+      base += "Trading above VWAP with extended momentum — caution for pullback.";
     else if (result.valuation == "Oversold")
-    {
-      base += "It is trading below VWAP, showing discounted levels and possible rebound opportunity.";
-    }
+      base += "Trading below VWAP with potential rebound setup.";
     else
-    {
-      base += "Price is near VWAP, suggesting fair valuation and balanced market sentiment.";
-    }
+      base += "Near VWAP, suggesting fair value equilibrium.";
     
     result.conclusion = base;
     return result;
