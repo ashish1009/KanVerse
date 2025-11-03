@@ -111,7 +111,6 @@ namespace KanVest
 
     // Update Stock Data
     StockController::UpdateStockData(symbol);
-    StockController::AnalyzeStock();
   };
 
   void StockUI::StockPanel()
@@ -398,15 +397,18 @@ namespace KanVest
         ImGui::TableSetColumnIndex(0);
         KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.2985);
         
-//        StockSummary summary = StockController::AnalyzeStock();
-//
-//        ImGui::Text("trend : %s", summary.trend.c_str());
-//        ImGui::Text("momentum : %s", summary.momentum.c_str() );
-//        ImGui::Text("volatility : %s", summary.volatility.c_str() );
-//        ImGui::Text("volume : %s", summary.volume.c_str() );
-//        ImGui::Text("valuation : %s", summary.valuation.c_str() );
-//        ImGui::Text("conclusion : %s", summary.conclusion.c_str());
-        
+        StockSummary summary = StockController::GetStockSummary();
+
+        ImGui::Text("trend : %s", summary.trend.c_str());
+        ImGui::Text("momentum : %s", summary.momentum.c_str() );
+        ImGui::Text("volatility : %s", summary.volatility.c_str() );
+        ImGui::Text("volume : %s", summary.volume.c_str() );
+        ImGui::Text("valuation : %s", summary.valuation.c_str() );
+        ImGui::Text("vwapBias : %s", summary.vwapBias.c_str() );
+        ImGui::Text("conclusion : %s", summary.conclusion.c_str());
+        ImGui::Text("score : %f", summary.score);
+        ImGui::Text("suggestion : %s", summary.suggestion.c_str());
+
       }
       
       ImGui::TableSetColumnIndex(1);

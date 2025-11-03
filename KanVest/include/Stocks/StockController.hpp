@@ -41,8 +41,6 @@ namespace KanVest
     /// This function fetches real time data for stock and returns the stock data
     /// - Parameter symbolName: symbol name
     static void UpdateStockData(const std::string& symbolName);
-    /// This function analyze Stock
-    static void AnalyzeStock();
     
     /// This function update stock data
     /// - Parameter stockData: stock data
@@ -68,6 +66,9 @@ namespace KanVest
     /// This function returns the url range
     static const char* GetCurrentRange();
     
+    /// This function returns the stock summary
+    static const StockSummary& GetStockSummary();
+    
   private:
     inline static float s_refreshInterval = 100.0f;
     
@@ -75,8 +76,7 @@ namespace KanVest
     inline static const char* s_currentRange = "1mo";
     
     inline static StockData s_activeStockData = {"Nifty"};
-    
-    inline static StockSummary s_dailySummary;
-    inline static StockSummary s_hybridSummary;    
+
+    inline static StockSummary s_stockSummary;
   };
 } // namespace KanVest

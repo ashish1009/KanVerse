@@ -16,6 +16,7 @@ namespace KanVest
     std::string volatility;
     std::string volume;
     std::string valuation;
+    std::string vwapBias;
     std::string conclusion;
     std::string suggestion;
     double score = 50.0;

@@ -14,6 +14,30 @@
 
 namespace KanVest
 {
+  namespace Utils
+  {
+    struct IntervalMapping
+    {
+      std::string higherInterval;
+      std::string higherRange;
+    };
+    
+    IntervalMapping GetHybridMapping(const std::string& interval)
+    {
+      if (interval == "1m" || interval == "5m" || interval == "15m")
+        return {"1d", "1mo"};
+      if (interval == "30m" || interval == "60m" || interval == "90m")
+        return {"1d", "3mo"};
+      if (interval == "1d")
+        return {"1wk", "6mo"};
+      if (interval == "1wk")
+        return {"1mo", "1y"};
+      
+      // For 1mo or higher → no hybrid
+      return {"", ""};
+    }
+  } // namespace Utils
+  
   // ------------------------------
   // 1. SYMBOL RESOLVER
   // ------------------------------
@@ -119,27 +143,42 @@ namespace KanVest
   // ------------------------------
   void StockController::UpdateStockData(const std::string& symbolName)
   {
-    IK_PROFILE();
-    APIKeys keys = API_Provider::GetAPIKeys();
-    std::string symbol = NormalizeSymbol(symbolName);
+    auto FetchData = [](const std::string& symbolName, const char* interval, const char* range) -> StockData {
+      IK_PROFILE();
+
+      APIKeys keys = API_Provider::GetAPIKeys();
+      std::string symbol = NormalizeSymbol(symbolName);
+      
+      std::string json = FetchStockData(symbol, interval, range, keys);
+      
+      StockData stockData(symbolName);
+      
+      ParseBasicInfo(stockData, json, keys);
+      ParseLiveMetrics(stockData, json, keys);
+      ParseHistory(stockData, json);
+
+      return stockData;
+    };
     
-    std::string json = FetchStockData(symbol, s_currentInterval, s_currentRange, keys);
-    
-    StockData stockData(symbolName);
-    
-    ParseBasicInfo(stockData, json, keys);
-    ParseLiveMetrics(stockData, json, keys);
-    ParseHistory(stockData, json);
-    
-    s_activeStockData = stockData;
+    // Short temr data
+    s_activeStockData = FetchData(symbolName, s_currentInterval, s_currentRange);
+        
+    if (s_activeStockData.IsValid())
+    {
+      auto map = Utils::GetHybridMapping(s_currentInterval);
+      
+      if (!map.higherInterval.empty())
+      {
+        StockData higher = FetchData(symbolName, map.higherInterval.c_str(), map.higherRange.c_str());
+        s_stockSummary = StockAnalyzer::AnalyzeHybrid(s_activeStockData, higher, s_currentInterval, map.higherInterval.c_str());
+      }
+      else
+      {
+        s_stockSummary = StockAnalyzer::AnalyzeSingleTimeframe(s_activeStockData, s_currentInterval, s_currentRange);
+      }
+    }
   }
   
-  void StockController::AnalyzeStock()
-  {
-    s_dailySummary = StockAnalyzer::AnalyzeSingleTimeframe(s_activeStockData, s_currentInterval, s_currentRange);
-//    s_hybridSummary = StockAnalyzer:  :AnalyzeHybrid(s_activeStockData, s_currentInterval, s_currentRange);
-  }
-
   void StockController::SetRefreshInterval(float refreshInterval)
   {
     s_refreshInterval = refreshInterval;
@@ -178,145 +217,8 @@ namespace KanVest
     return s_activeStockData;
   }
   
-  // ============================================================================
-  //  Function: AnalyzeStock
-  //  Purpose : Analyze a given stock's historical data and summarize its trend,
-  //            momentum, volatility, volume activity, and valuation.
-  //
-  //  Enhancement: VWAP (Volume Weighted Average Price) is now included to assess
-  //               whether the stock is trading at a premium or discount to
-  //               average traded price — a strong institutional indicator.
-  //
-  //  Dependencies: The StockData class must implement the following methods:
-  //                - ComputeSMA(int period)
-  //                - ComputeEMA(int period)
-  //                - ComputeRSI(int period)
-  //                - ComputeATR(int period)
-  //                - ComputeVWAP()
-  //                - ComputeAverageVolume(int period)
-  // ============================================================================
-//  StockSummary StockController::AnalyzeStock()
-//  {
-//    IK_PROFILE();
-//    StockSummary result;
-//    const auto& h = s_activeStockData.history;
-//    
-//    // --- Step 0: Early exit if data too short ---
-//    if (h.size() < 10)
-//    {
-//      result.conclusion = "Not enough data for analysis.";
-//      return result;
-//    }
-//    
-//    // --- Step 1: Adaptive parameter tuning ---
-//    int smaPeriod = 20, rsiPeriod = 14, atrPeriod = 14;
-//    double momentumSensitivity = 0.012;
-//    double volHigh = 1.5, volLow = 0.7;
-//    
-//    // Decide based on interval and range
-//    if (s_currentInterval == "1m" && s_currentRange == "1d") {
-//      smaPeriod = 10; rsiPeriod = 7; atrPeriod = 7;
-//      momentumSensitivity = 0.02;
-//    }
-//    else if (s_currentInterval == "5m" && s_currentRange == "5d") {
-//      smaPeriod = 20; rsiPeriod = 14; atrPeriod = 14;
-//      momentumSensitivity = 0.015;
-//    }
-//    else if (s_currentInterval == "15m" && s_currentRange == "5d") {
-//      smaPeriod = 30; rsiPeriod = 14;
-//    }
-//    else if (s_currentInterval == "1d" && s_currentRange == "1mo") {
-//      smaPeriod = 20; rsiPeriod = 14;
-//    }
-//    else if (s_currentInterval == "1d" && (s_currentRange == "3mo" || s_currentRange == "6mo")) {
-//      smaPeriod = 50; rsiPeriod = 20; atrPeriod = 20;
-//    }
-//    else if (s_currentInterval == "1wk" || s_currentRange == "1y") {
-//      smaPeriod = 20; rsiPeriod = 14; atrPeriod = 14;
-//      volHigh = 2.0; // weekly data volume varies more
-//    }
-//    
-//    if (h.size() < smaPeriod)
-//    {
-//      result.conclusion = "Insufficient data for current timeframe.";
-//      return result;
-//    }
-//    
-//    // --- Step 2: Compute key indicators ---
-//    double close = h.back().close;
-//    double sma   = s_activeStockData.ComputeSMA(smaPeriod);
-//    double ema   = s_activeStockData.ComputeEMA(smaPeriod);
-//    double rsi   = s_activeStockData.ComputeRSI(rsiPeriod);
-//    double atr   = s_activeStockData.ComputeATR(atrPeriod);
-//    double vwap  = s_activeStockData.ComputeVWAP();
-//    double avgVol = s_activeStockData.ComputeAverageVolume(smaPeriod);
-//    double latestVol = h.back().volume;
-//    
-//    // --- Step 3: Adaptive thresholds based on volatility ---
-//    double atrPercent = (atr / close) * 100.0;
-//    double trendThreshold = 1.0 + (atrPercent / 200.0);
-//    
-//    // --- Step 4: Short-term direction confirmation ---
-//    bool recentRise = h.back().close > h[h.size() - 3].close;
-//    bool recentDrop = h.back().close < h[h.size() - 3].close;
-//    
-//    // --- Step 5: Determine trend (price vs SMA/EMA/VWAP) ---
-//    if (close > sma * trendThreshold && ema > sma && close > vwap && recentRise)
-//      result.trend = "Uptrend";
-//    else if (close < sma / trendThreshold && ema < sma && close < vwap && recentDrop)
-//      result.trend = "Downtrend";
-//    else
-//      result.trend = "Sideways";
-//    
-//    // --- Step 6: Momentum detection ---
-//    double emaDiff = fabs(ema - sma) / sma;
-//    if (emaDiff > momentumSensitivity * 2)
-//      result.momentum = "Strong";
-//    else if (emaDiff > momentumSensitivity)
-//      result.momentum = "Moderate";
-//    else
-//      result.momentum = "Weak";
-//    
-//    // --- Step 7: Volatility classification ---
-//    if (atrPercent > 3.0)
-//      result.volatility = "High";
-//    else if (atrPercent > 1.5)
-//      result.volatility = "Medium";
-//    else
-//      result.volatility = "Low";
-//    
-//    // --- Step 8: Volume classification ---
-//    double volRatio = latestVol / (avgVol + 1.0);
-//    if (volRatio > volHigh)
-//      result.volume = "High";
-//    else if (volRatio < volLow)
-//      result.volume = "Low";
-//    else
-//      result.volume = "Normal";
-//    
-//    // --- Step 9: Valuation (RSI + VWAP) ---
-//    if (rsi > 70 && close > vwap)
-//      result.valuation = "Overbought";
-//    else if (rsi < 30 && close < vwap)
-//      result.valuation = "Oversold";
-//    else
-//      result.valuation = "Fair";
-//    
-//    // --- Step 10: Human-readable conclusion ---
-//    std::string base =
-//    "Timeframe: " + std::string(s_currentInterval) + " / " + std::string(s_currentRange) + ". "
-//    "The stock is in a " + result.trend + " with " +
-//    result.momentum + " momentum, " + result.volatility +
-//    " volatility, and " + result.volume + " trading volume. ";
-//    
-//    if (result.valuation == "Overbought")
-//      base += "Trading above VWAP with extended momentum — caution for pullback.";
-//    else if (result.valuation == "Oversold")
-//      base += "Trading below VWAP with potential rebound setup.";
-//    else
-//      base += "Near VWAP, suggesting fair value equilibrium.";
-//    
-//    result.conclusion = base;
-//    return result;
-//  }
+  const StockSummary& StockController::GetStockSummary()
+  {
+    return s_stockSummary;
+  }
 } // namespace KanVest

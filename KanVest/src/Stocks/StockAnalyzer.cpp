@@ -304,36 +304,38 @@ namespace KanVest
     
     return cfg;
   }
-  StockSummary StockAnalyzer::AnalyzeInternal(const std::vector<StockPoint>& h,
+  StockSummary StockAnalyzer::AnalyzeInternal(
+                                              const std::vector<StockPoint>& h,
                                               const IndicatorConfig& cfg,
                                               const std::string& interval)
   {
     StockSummary result;
     if (h.size() < static_cast<size_t>(cfg.smaPeriod))
     {
-      result.suggestion = "Not enough data.";
+      result.suggestion = "Not enough data to analyze.";
       return result;
     }
     
+    // --- Compute all indicators ---
     double close = h.back().close;
-    double sma = ComputeSMA(h, cfg.smaPeriod);
-    double ema = ComputeEMA(h, cfg.emaPeriod);
-    double rsi = ComputeRSI(h, cfg.rsiPeriod);
-    double atr = ComputeATR(h, cfg.atrPeriod);
-    double vwap = ComputeVWAP(h);
-    double macd = ComputeMACD(h, 12, 26);
+    double sma   = ComputeSMA(h, cfg.smaPeriod);
+    double ema   = ComputeEMA(h, cfg.emaPeriod);
+    double rsi   = ComputeRSI(h, cfg.rsiPeriod);
+    double atr   = ComputeATR(h, cfg.atrPeriod);
+    double vwap  = ComputeVWAP(h);
+    double macd  = ComputeMACD(h, 12, 26);
     double avgVol = ComputeAverageVolume(h, cfg.volPeriod);
     double latestVol = h.back().volume;
     
-    // Trend
-    if (close > ema * 1.01 && ema > sma)
+    // --- Trend analysis with VWAP confirmation ---
+    if (close > ema * 1.01 && ema > sma && close > vwap)
       result.trend = "Uptrend";
-    else if (close < ema * 0.99 && ema < sma)
+    else if (close < ema * 0.99 && ema < sma && close < vwap)
       result.trend = "Downtrend";
     else
       result.trend = "Sideways";
     
-    // Momentum
+    // --- Momentum strength ---
     double emaDiff = std::fabs(ema - sma) / sma;
     if (emaDiff > cfg.momentumSensitivity * 2)
       result.momentum = "Strong";
@@ -342,8 +344,8 @@ namespace KanVest
     else
       result.momentum = "Weak";
     
-    // Volatility
-    double atrPercent = (atr / close) * 100.0;
+    // --- Volatility (ATR%) ---
+    double atrPercent = SafeDiv(atr, close) * 100.0;
     if (atrPercent > 3.0)
       result.volatility = "High";
     else if (atrPercent > 1.5)
@@ -351,7 +353,7 @@ namespace KanVest
     else
       result.volatility = "Low";
     
-    // Volume
+    // --- Volume status ---
     double volRatio = SafeDiv(latestVol, avgVol, 1.0);
     if (volRatio > cfg.volHighFactor)
       result.volume = "High";
@@ -360,7 +362,7 @@ namespace KanVest
     else
       result.volume = "Normal";
     
-    // RSI
+    // --- RSI valuation ---
     if (rsi > 70)
       result.valuation = "Overbought";
     else if (rsi < 30)
@@ -368,25 +370,59 @@ namespace KanVest
     else
       result.valuation = "Fair";
     
-    // score score
+    // --- VWAP bias (relative to current price) ---
+    double vwapDiff = SafeDiv(close - vwap, vwap);
+    if (vwapDiff > 0.01)
+      result.vwapBias = "Above VWAP";
+    else if (vwapDiff < -0.01)
+      result.vwapBias = "Below VWAP";
+    else
+      result.vwapBias = "Near VWAP";
+    
+    // --- Compute scoring system (blended technical confidence) ---
     double trendScore = (result.trend == "Uptrend") ? 1.0 :
     (result.trend == "Downtrend") ? -1.0 : 0.0;
-    double rsiScore = (rsi - 50.0) / 50.0;
-    double macdScore = macd / (close * 0.01);
+    double rsiScore  = (rsi - 50.0) / 50.0;             // normalized RSI
+    double macdScore = macd / (close * 0.01);           // MACD scaled
+    double vwapScore = std::clamp(vwapDiff * 100.0, -1.0, 1.0); // VWAP scaled
     
-    double score = (trendScore * 0.4 + rsiScore * 0.3 + macdScore * 0.3);
+    double score = (trendScore * 0.35 +
+                    rsiScore   * 0.25 +
+                    macdScore  * 0.25 +
+                    vwapScore  * 0.15);
+    
     result.score = std::clamp(score, -1.0, 1.0);
     
+    // --- Smart suggestion logic ---
     if (result.score > 0.4)
-      result.suggestion = "Buy — bullish momentum.";
+    {
+      if (close > vwap)
+        result.suggestion = "Buy — bullish momentum confirmed above VWAP.";
+      else
+        result.suggestion = "Hold — trend bullish but below VWAP (confirmation needed).";
+    }
     else if (result.score < -0.4)
-      result.suggestion = "Sell — bearish pressure.";
+    {
+      if (close < vwap)
+        result.suggestion = "Sell — bearish trend confirmed below VWAP.";
+      else
+        result.suggestion = "Hold — bearish indicators but price above VWAP.";
+    }
     else
-      result.suggestion = "Hold — uncertain phase.";
+    {
+      result.suggestion = "Hold — market indecisive or consolidating.";
+    }
+    
+    // --- Optional short summary ---
+    result.conclusion = "Trend: " + result.trend +
+    " | Momentum: " + result.momentum +
+    " | Volatility: " + result.volatility +
+    " | RSI: " + std::to_string(static_cast<int>(rsi)) +
+    " | VWAP: " + std::to_string(vwap);
     
     return result;
   }
-  
+
   // ---------------- Public APIs ----------------
   StockSummary StockAnalyzer::AnalyzeSingleTimeframe(const StockData& data,
                                                      const std::string& interval,
