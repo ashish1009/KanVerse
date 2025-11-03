@@ -141,4 +141,32 @@ namespace KanVest
   {
     return s_refreshInterval;
   }
+  
+  void StockController::SetActiveStockData(const StockData &stockData)
+  {
+    s_activeStockData = stockData;
+  }
+  
+  void StockController::SetCurrentInterval(const char* interval)
+  {
+    s_currentInterval = interval;
+  }
+  void StockController::SetCurrentRange(const char* range)
+  {
+    s_currentRange = range;
+  }
+  
+  const char* StockController::GetCurrentInterval()
+  {
+    return s_currentInterval;
+  }
+  const char* StockController::GetCurrentRange()
+  {
+    return s_currentRange;
+  }
+  
+  const StockData& StockController::GetActiveStockData()
+  {
+    return s_activeStockData;
+  }
 } // namespace KanVest

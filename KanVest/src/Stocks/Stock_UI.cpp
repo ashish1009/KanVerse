@@ -10,7 +10,6 @@
 #include "Stocks/StockController.hpp"
 #include "Stocks/StockAPI.hpp"
 #include "Stocks/StockParser.hpp"
-#include "Stocks/StockManager.hpp"
 
 namespace KanVest
 {
@@ -110,8 +109,8 @@ namespace KanVest
     s_lastUpdatedString = CurrentTimeString();
     s_lastUpdateTime = ImGui::GetTime();
 
-    StockData stockData = StockController::UpdateStockData(symbol, StockManager::GetCurrentInterval(), StockManager::GetCurrentRange());
-    StockManager::SetActiveStockData(stockData);
+    StockData stockData = StockController::UpdateStockData(symbol, StockController::GetCurrentInterval(), StockController::GetCurrentRange());
+    StockController::SetActiveStockData(stockData);
   };
 
   void StockUI::StockPanel()
@@ -266,17 +265,17 @@ namespace KanVest
     if (stockData.IsValid())
     {
       bool modify = false;
-      for (int i = 0; i < IM_ARRAYSIZE(StockManager::ValidRange); ++i)
+      for (int i = 0; i < IM_ARRAYSIZE(StockController::ValidRange); ++i)
       {
-        auto buttonColor = StockManager::ValidRange[i] == StockManager::GetCurrentRange() ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
-        if (KanVasX::UI::DrawButton(StockManager::ValidRange[i], nullptr, buttonColor))
+        auto buttonColor = StockController::ValidRange[i] == StockController::GetCurrentRange() ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+        if (KanVasX::UI::DrawButton(StockController::ValidRange[i], nullptr, buttonColor))
         {
-          StockManager::SetCurrentRange(StockManager::ValidRange[i]);
-          StockManager::SetCurrentInterval(StockManager::RangeIntervalMap[StockManager::GetCurrentRange()][0].c_str());
+          StockController::SetCurrentRange(StockController::ValidRange[i]);
+          StockController::SetCurrentInterval(StockController::RangeIntervalMap[StockController::GetCurrentRange()][0].c_str());
           
           modify = true;
         }
-        if (i < IM_ARRAYSIZE(StockManager::ValidRange) - 1)
+        if (i < IM_ARRAYSIZE(StockController::ValidRange) - 1)
         {
           ImGui::SameLine();
         }
@@ -309,14 +308,14 @@ namespace KanVest
       }
 
       ImGui::SameLine();
-      std::vector<std::string> intervalValues = StockManager::RangeIntervalMap[StockManager::GetCurrentRange()];
+      std::vector<std::string> intervalValues = StockController::RangeIntervalMap[StockController::GetCurrentRange()];
       KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x - (intervalValues.size() * 40));
       for (int i = 0; i < intervalValues.size(); ++i)
       {
-        auto buttonColor = intervalValues[i] == StockManager::GetCurrentInterval() ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+        auto buttonColor = intervalValues[i] == StockController::GetCurrentInterval() ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
         if (KanVasX::UI::DrawButton(intervalValues[i], nullptr, buttonColor))
         {
-          StockManager::SetCurrentInterval(intervalValues[i].c_str());
+          StockController::SetCurrentInterval(intervalValues[i].c_str());
           modify = true;
         }
         if (i < intervalValues.size())
@@ -339,7 +338,7 @@ namespace KanVest
     float timeSinceUpdate = static_cast<float>(currentTime - s_lastUpdateTime);
     if (timeSinceUpdate >= StockController::GetRefreshInterval())
     {
-      UpdateStockData(StockManager::GetActiveStockData().symbol);
+      UpdateStockData(StockController::GetActiveStockData().symbol);
     }
 
     if (ImGui::BeginTable("StockAnalyzerTable", 2, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
@@ -354,7 +353,7 @@ namespace KanVest
       
       ImGui::TableNextRow();
       
-      const StockData& stockData = StockManager::GetActiveStockData();
+      const StockData& stockData = StockController::GetActiveStockData();
       // Column 1 Stock Details
       {
         ImGui::TableSetColumnIndex(0);
