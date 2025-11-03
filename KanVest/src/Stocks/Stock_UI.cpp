@@ -145,6 +145,36 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       return KanVasX::Color::White; // fallback
     }
 
+    std::pair<std::string, std::string> SplitSuggestion(const std::string& suggestion)
+    {
+      size_t pos = suggestion.find(':');
+      if (pos != std::string::npos)
+      {
+        // Trim spaces around the colon
+        std::string action  = suggestion.substr(0, pos);
+        std::string message = suggestion.substr(pos + 1);
+        
+        // Trim extra spaces
+        auto trim = [](std::string& s)
+        {
+          size_t start = s.find_first_not_of(" \t");
+          size_t end   = s.find_last_not_of(" \t");
+          if (start == std::string::npos || end == std::string::npos)
+            s.clear();
+          else
+            s = s.substr(start, end - start + 1);
+        };
+        
+        trim(action);
+        trim(message);
+        
+        return { action, message };
+      }
+      
+      // If no colon found, treat everything as message
+      return { "Unknown", suggestion };
+    }
+
   } // namespace Utils
   
   void StockUI::Initialize(ImTextureID reloadIconID)
@@ -502,9 +532,10 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     KanVasX::UI::Tooltip(summary.valuation.reason);
 
     KanVasX::UI::ShiftCursorY(10.0f);
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.15, {20.0f, 5.0f});
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.28, {20.0f, 5.0f});
 
-    KanVest_Text(Header_30, summary.suggestion.c_str(), glm::vec2(30, 10.0f), Utils::GetSummaryColor(summary.suggestion));
+    KanVest_Text(Header_30, Utils::SplitSuggestion(summary.suggestion).first.c_str(), glm::vec2(30, 10.0f), Utils::GetSummaryColor(summary.suggestion));
+    KanVest_Text(Header_22, Utils::SplitSuggestion(summary.suggestion).second.c_str(), glm::vec2(30, 10.0f), Utils::GetSummaryColor(summary.suggestion));
 
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.28, {20.0f, 5.0f});
   }
