@@ -13,29 +13,46 @@ namespace KanVest
   {
     return (b == 0.0) ? fallback : (a / b);
   }
-  
+    
+  // -------------------------------------------------------------
+  // 📊 Simple Moving Average (SMA)
+  // -------------------------------------------------------------
+  // SMA means “average closing price over the last N days”.
+  // It shows the general direction of the market:
+  //  - If current price > SMA → price trending up
+  //  - If current price < SMA → price trending down
+  // -------------------------------------------------------------
   double StockAnalyzer::ComputeSMA(const std::vector<StockPoint>& h, int period)
   {
     if (period <= 0 || h.size() < (size_t)period)
     {
-      return -1.0;
+      return -1.0; // Not enough data
     }
+    
     double sum = 0.0;
+    // Sum up the last 'period' closing prices
     for (size_t i = h.size() - period; i < h.size(); ++i)
     {
       sum += h[i].close;
     }
+    // Divide total by how many days (the period)
     return sum / period;
   }
   
+  // -------------------------------------------------------------
+  // 📈 Exponential Moving Average (EMA)
+  // -------------------------------------------------------------
+  // EMA is similar to SMA, but gives more weight to recent prices.
+  // So it reacts faster when price starts rising or falling.
+  // -------------------------------------------------------------
   double StockAnalyzer::ComputeEMA(const std::vector<StockPoint>& h, int period)
   {
     if (period <= 0 || h.size() < (size_t)period)
     {
-      return -1.0;
+      return -1.0; // Not enough data
     }
     
-    // seed EMA with SMA of the first period window
+    // Start by taking the simple average of the first few prices
     double ema = 0.0;
     size_t start = h.size() - period;
     for (size_t i = start; i < start + (size_t)period; ++i)
@@ -44,14 +61,26 @@ namespace KanVest
     }
     
     ema /= period;
-    double k = 2.0 / (period + 1.0);
+    double k = 2.0 / (period + 1.0); // weight factor (recent data gets more importance)
+    
+    // Gradually adjust EMA based on new prices
     for (size_t i = start + 1; i < h.size(); ++i)
     {
       ema = (h[i].close * k) + (ema * (1.0 - k));
     }
+    
     return ema;
   }
   
+  // -------------------------------------------------------------
+  // 💪 Relative Strength Index (RSI)
+  // -------------------------------------------------------------
+  // RSI shows how strong or weak recent price movements are.
+  //
+  // - RSI > 70 → price has gone up too fast (overbought)
+  // - RSI < 30 → price has dropped too fast (oversold)
+  // - RSI ≈ 50 → balanced movement, no strong direction
+  // -------------------------------------------------------------
   double StockAnalyzer::ComputeRSI(const std::vector<StockPoint>& h, int period)
   {
     if (period <= 0 || h.size() <= (size_t)period)
@@ -60,66 +89,111 @@ namespace KanVest
     }
     
     double gain = 0.0, loss = 0.0;
-    // Wilder-style simple initial average (not smoothed carry-forward)
+    
+    // Look at each price difference and separate up moves (gain)
+    // from down moves (loss)
     for (size_t i = h.size() - period + 1; i < h.size(); ++i)
     {
       double diff = h[i].close - h[i - 1].close;
-      if (diff > 0) gain += diff; else loss -= diff;
+      if (diff > 0)
+      {
+        gain += diff;
+      }
+      else
+      {
+        loss -= diff;
+      }
     }
     
     if (gain == 0.0 && loss == 0.0)
     {
-      return 50.0;
+      return 50.0; // No movement at all
     }
     if (loss == 0.0)
     {
-      return 100.0;
+      return 100.0; // Only gains
     }
     
-    double rs = gain / loss;
+    double rs = gain / loss; // ratio of up vs down movement
     return 100.0 - (100.0 / (1.0 + rs));
   }
   
+  
+  // -------------------------------------------------------------
+  // 🌊 Average True Range (ATR)
+  // -------------------------------------------------------------
+  // ATR tells us how much prices move (on average) each day.
+  // It doesn’t care whether the price went up or down,
+  // just how *big* the daily changes were.
+  //
+  // Higher ATR → more volatility (price jumping around)
+  // Lower ATR → calmer price movement
+  // -------------------------------------------------------------
   double StockAnalyzer::ComputeATR(const std::vector<StockPoint>& h, int period)
   {
     if (period <= 0 || h.size() < (size_t)period + 1)
     {
       return -1.0;
     }
-    std::vector<double> tr;
+    
+    std::vector<double> tr; // true range values (daily price range measure)
     tr.reserve(h.size() - 1);
+    
     for (size_t i = 1; i < h.size(); ++i)
     {
-      double hl = h[i].high - h[i].low;
-      double hc = std::fabs(h[i].high - h[i - 1].close);
-      double lc = std::fabs(h[i].low - h[i - 1].close);
+      double hl = h[i].high - h[i].low;                       // high-low range for the day
+      double hc = std::fabs(h[i].high - h[i - 1].close);      // high to previous close
+      double lc = std::fabs(h[i].low - h[i - 1].close);       // low to previous close
       tr.push_back(std::max({hl, hc, lc}));
     }
+    
     double sum = 0.0;
     for (size_t i = tr.size() - period; i < tr.size(); ++i)
     {
       sum += tr[i];
     }
+    
+    // Average of last N true ranges
     return sum / period;
   }
   
+  // -------------------------------------------------------------
+  // ⚖️ VWAP (Volume Weighted Average Price)
+  // -------------------------------------------------------------
+  // VWAP is like the “average price people actually paid,”
+  // because it weights each price by the amount traded.
+  // So a price with high trading volume counts more.
+  //
+  // - Price above VWAP → more buyers, strong market
+  // - Price below VWAP → more sellers, weak market
+  // -------------------------------------------------------------
   double StockAnalyzer::ComputeVWAP(const std::vector<StockPoint>& h)
   {
     if (h.empty())
     {
       return -1.0;
     }
-    double pv = 0.0;
-    double vol = 0.0;
+    
+    double pv = 0.0;  // total price * volume
+    double vol = 0.0; // total volume
+    
     for (const auto &p : h)
     {
-      double typical = (p.high + p.low + p.close) / 3.0;
+      double typical = (p.high + p.low + p.close) / 3.0; // average price of the day
       pv += typical * static_cast<double>(p.volume);
       vol += static_cast<double>(p.volume);
     }
+    
+    // If no volume data, return invalid
     return vol == 0.0 ? -1.0 : pv / vol;
   }
   
+  // -------------------------------------------------------------
+  // 🔊 Average Volume
+  // -------------------------------------------------------------
+  // Measures how much trading activity happens over time.
+  // Helps detect if recent trading is unusually high or low.
+  // -------------------------------------------------------------
   double StockAnalyzer::ComputeAverageVolume(const std::vector<StockPoint>& h, int period)
   {
     if (period <= 0 || h.size() < (size_t)period)
@@ -132,9 +206,22 @@ namespace KanVest
     {
       sum += static_cast<double>(h[i].volume);
     }
+    
     return sum / period;
   }
   
+  // -------------------------------------------------------------
+  // 📉 MACD (Moving Average Convergence Divergence)
+  // -------------------------------------------------------------
+  // MACD compares a short-term EMA vs a long-term EMA.
+  // It shows how momentum (speed of price changes) is shifting.
+  //
+  // If short-term average rises above long-term → uptrend starting.
+  // If short-term falls below long-term → downtrend starting.
+  //
+  // MACD also calculates a "signal line" (a smoothed version)
+  // and a histogram that shows how strong the shift is.
+  // -------------------------------------------------------------
   double StockAnalyzer::ComputeMACD(const std::vector<StockPoint>& h, int shortPeriod, int longPeriod)
   {
     if (h.size() < static_cast<size_t>(longPeriod))
@@ -146,11 +233,11 @@ namespace KanVest
     double emaShort = ComputeEMA(h, shortPeriod);
     double emaLong  = ComputeEMA(h, longPeriod);
     
-    // --- Step 2: Compute MACD line ---
+    // --- Step 2: MACD line = difference between short & long EMAs ---
     double macdLine = emaShort - emaLong;
     
     // --- Step 3: Compute signal line (9-period EMA of MACD values) ---
-    // To do this properly, we need recent MACD values — we’ll generate them.
+    // To do this properly, we build a history of MACD values first.
     std::vector<double> macdValues;
     macdValues.reserve(h.size() - longPeriod + 1);
     
@@ -162,8 +249,10 @@ namespace KanVest
       macdValues.push_back(emaS - emaL);
     }
     
-    // Apply EMA to MACD values to get signal line
-    if (macdValues.size() < 9) return macdLine; // fallback
+    if (macdValues.size() < 9)
+      return macdLine; // Not enough MACD data to smooth out
+    
+    // Smooth MACD with EMA for the signal line
     double k = 2.0 / (9.0 + 1.0);
     double signal = macdValues.front();
     for (size_t i = 1; i < macdValues.size(); ++i)
@@ -171,30 +260,37 @@ namespace KanVest
       signal = macdValues[i] * k + signal * (1 - k);
     }
     
-    // --- Step 4: Histogram (momentum strength indicator) ---
+    // Histogram = how far MACD is from signal → strength of shift
     double histogram = macdLine - signal;
     
-    // Optionally: you can store these into StockSummary later
-    // For now, we just return the MACD histogram for directional strength
+    // We return histogram here (positive = strong up, negative = down)
     return histogram;
   }
-
+  
+  // -------------------------------------------------------------
+  // 🕒 Portable UTC time conversion helper
+  // -------------------------------------------------------------
+  // Converts a 'tm' structure (calendar date) into a time_t value
+  // representing seconds since 1970-01-01 UTC.
+  // Works on Windows and macOS/Linux.
+  // -------------------------------------------------------------
   static time_t portable_timegm(struct tm *tm)
   {
 #if defined(_WIN32)
-    // Windows has _mkgmtime
     return _mkgmtime(tm);
 #else
-#ifdef __USE_BSD
     return timegm(tm);
-#else
-    // fallback: adjust mktime using timezone (less perfect; acceptable for grouping)
-    // create local tm then reverse? Simpler fallback: use mktime (assumes system tz is UTC)
-    return timegm(tm); // on posix should exist; if not, build a safe alternative
-#endif
 #endif
   }
   
+  
+  // -------------------------------------------------------------
+  // 📅 DayKey — group by calendar day
+  // -------------------------------------------------------------
+  // Takes a timestamp (in seconds) and returns a new timestamp
+  // that represents midnight UTC of that same day.
+  // Used to group many minute-based data points into one day.
+  // -------------------------------------------------------------
   time_t StockAnalyzer::DayKey(double ts)
   {
     time_t t = static_cast<time_t>(ts);
@@ -208,6 +304,13 @@ namespace KanVest
     return portable_timegm(&tm);
   }
   
+  
+  // -------------------------------------------------------------
+  // 📆 WeekKey — group by week (starting Monday)
+  // -------------------------------------------------------------
+  // Finds which week the timestamp belongs to and returns
+  // a timestamp pointing to Monday 00:00 UTC of that week.
+  // -------------------------------------------------------------
   time_t StockAnalyzer::WeekKey(double ts)
   {
     time_t t = static_cast<time_t>(ts);
@@ -217,23 +320,35 @@ namespace KanVest
 #else
     gmtime_r(&t, &tm);
 #endif
-    // convert to Monday = 0
-    int wday = (tm.tm_wday + 6) % 7;
+    int wday = (tm.tm_wday + 6) % 7; // shift so Monday = 0
     tm.tm_mday -= wday;
     tm.tm_hour = tm.tm_min = tm.tm_sec = 0;
     return portable_timegm(&tm);
   }
   
-  std::vector<StockPoint> StockAnalyzer::Aggregate(const std::vector<StockPoint>& input, const std::string& targetInterval)
+  
+  // -------------------------------------------------------------
+  // 🧮 Aggregate — combine small intervals into days/weeks
+  // -------------------------------------------------------------
+  // Takes many small data points (like every minute) and combines
+  // them into one value per chosen interval (“1d”, “1wk”, etc.).
+  // For each group, we compute:
+  //   - open  → first price in the group
+  //   - close → last price
+  //   - high  → highest price reached
+  //   - low   → lowest price reached
+  //   - volume→ total shares traded
+  // -------------------------------------------------------------
+  std::vector<StockPoint> StockAnalyzer::Aggregate(const std::vector<StockPoint>& input,
+                                                   const std::string& targetInterval)
   {
     std::vector<StockPoint> out;
     if (input.empty())
-    {
       return out;
-    }
     
     std::function<time_t(double)> keyFn = (targetInterval == "1wk") ? WeekKey : DayKey;
     std::map<time_t, std::vector<StockPoint>> groups;
+    
     for (const auto &p : input)
     {
       groups[keyFn(static_cast<double>(p.timestamp))].push_back(p);
@@ -243,33 +358,46 @@ namespace KanVest
     {
       const auto &vec = kv.second;
       if (vec.empty()) continue;
+      
       StockPoint agg{};
       agg.timestamp = static_cast<uint64_t>(kv.first);
-      agg.open = vec.front().open;
+      agg.open  = vec.front().open;
       agg.close = vec.back().close;
-      agg.high = vec.front().high;
-      agg.low = vec.front().low;
+      agg.high  = vec.front().high;
+      agg.low   = vec.front().low;
       agg.volume = 0;
+      
       for (const auto &c : vec)
       {
-        agg.high = std::max(agg.high, c.high);
-        agg.low = std::min(agg.low, c.low);
+        agg.high   = std::max(agg.high, c.high);
+        agg.low    = std::min(agg.low, c.low);
         agg.volume += c.volume;
       }
+      
       out.push_back(agg);
     }
-    std::sort(out.begin(), out.end(), [](const StockPoint &a, const StockPoint &b){ return a.timestamp < b.timestamp; });
+    
+    std::sort(out.begin(), out.end(),
+              [](const StockPoint &a, const StockPoint &b){ return a.timestamp < b.timestamp; });
+    
     return out;
   }
   
+  
+  // -------------------------------------------------------------
+  // ⚙️ ChooseConfig — pick indicator periods depending on interval
+  // -------------------------------------------------------------
+  // Different time intervals need different smoothing levels.
+  // Example: minute data changes fast, weekly data moves slow.
+  // This function sets default periods for SMA, EMA, RSI, etc.
+  // -------------------------------------------------------------
   IndicatorConfig StockAnalyzer::ChooseConfig(const std::string& interval,
                                               const std::string& range)
   {
     IndicatorConfig cfg;
     
     if (interval == "1m" || interval == "2m" || interval == "5m") {
-      // Intraday
-      cfg.smaPeriod = 50;  // more smoothing
+      cfg.smaPeriod = 50;
       cfg.emaPeriod = 50;
       cfg.rsiPeriod = 14;
       cfg.atrPeriod = 14;
@@ -277,7 +405,6 @@ namespace KanVest
       cfg.momentumSensitivity = 0.008;
     }
     else if (interval == "1h" || interval == "15m") {
-      // Short-term swing
       cfg.smaPeriod = 30;
       cfg.emaPeriod = 30;
       cfg.rsiPeriod = 14;
@@ -285,7 +412,6 @@ namespace KanVest
       cfg.volPeriod = 30;
     }
     else if (interval == "1d") {
-      // Standard daily analysis
       cfg.smaPeriod = 20;
       cfg.emaPeriod = 20;
       cfg.rsiPeriod = 14;
@@ -293,7 +419,6 @@ namespace KanVest
       cfg.volPeriod = 20;
     }
     else if (interval == "1wk") {
-      // Long-term
       cfg.smaPeriod = 10;
       cfg.emaPeriod = 10;
       cfg.rsiPeriod = 10;
@@ -305,141 +430,177 @@ namespace KanVest
     return cfg;
   }
   
-  StockSummary StockAnalyzer::AnalyzeInternal(
-                                              const std::vector<StockPoint>& h,
+  
+  // -------------------------------------------------------------
+  // 🔍 AnalyzeInternal — main brain of the analyzer
+  // -------------------------------------------------------------
+  // This function looks at all calculated indicators and decides:
+  //  • What the trend looks like (up / down / sideways)
+  //  • How strong it is (momentum)
+  //  • How much the price moves daily (volatility)
+  //  • Whether trading activity is high or low (volume)
+  //  • Whether price seems too high or low (RSI valuation)
+  // Then it blends everything into a simple score and suggestion.
+  // -------------------------------------------------------------
+  StockSummary StockAnalyzer::AnalyzeInternal(const std::vector<StockPoint>& h,
                                               const IndicatorConfig& cfg,
                                               const std::string& interval)
   {
     StockSummary result;
+    
     if (h.size() < static_cast<size_t>(cfg.smaPeriod))
     {
       result.suggestion = "Not enough data to analyze.";
       return result;
     }
     
-    // --- Compute all indicators ---
-    double close = h.back().close;
-    double sma   = ComputeSMA(h, cfg.smaPeriod);
-    double ema   = ComputeEMA(h, cfg.emaPeriod);
-    double rsi   = ComputeRSI(h, cfg.rsiPeriod);
-    double atr   = ComputeATR(h, cfg.atrPeriod);
-    double vwap  = ComputeVWAP(h);
-    double macd  = ComputeMACD(h, 12, 26);
-    double avgVol = ComputeAverageVolume(h, cfg.volPeriod);
+    // --- Compute indicators ---
+    double close     = h.back().close;
+    double sma       = ComputeSMA(h, cfg.smaPeriod);
+    double ema       = ComputeEMA(h, cfg.emaPeriod);
+    double rsi       = ComputeRSI(h, cfg.rsiPeriod);
+    double atr       = ComputeATR(h, cfg.atrPeriod);
+    double vwap      = ComputeVWAP(h);
+    double macd      = ComputeMACD(h, 12, 26);
+    double avgVol    = ComputeAverageVolume(h, cfg.volPeriod);
     double latestVol = h.back().volume;
     
-    // --- Trend analysis with VWAP confirmation ---
+    
+    // ---------------------------------------------------------
+    // 📈 Trend Analysis
+    // ---------------------------------------------------------
+    // Check if price is generally going up or down by comparing
+    // current price vs moving averages and VWAP.
+    // ---------------------------------------------------------
     if (close > ema * 1.01 && ema > sma && close > vwap)
     {
       result.trend.value = "Uptrend";
-      result.trend.reason = "Price trading above EMA and VWAP with higher highs — bullish confirmation.";
+      result.trend.reason = "Price is above recent averages : Buyers are stronger.";
     }
     else if (close < ema * 0.99 && ema < sma && close < vwap)
     {
       result.trend.value = "Downtrend";
-      result.trend.reason = "Price below EMA and VWAP with lower lows — bearish confirmation.";
+      result.trend.reason = "Price is below recent averages : Sellers are in control.";
     }
     else
     {
       result.trend.value = "Sideways";
-      result.trend.reason = "Price oscillating near averages — no clear directional bias.";
+      result.trend.reason = "Price is moving near its averages : No clear direction.";
     }
     
-    // --- Momentum strength ---
+    
+    // ---------------------------------------------------------
+    // ⚡ Momentum (trend strength)
+    // ---------------------------------------------------------
     double emaDiff = std::fabs(ema - sma) / sma;
     if (emaDiff > cfg.momentumSensitivity * 2)
     {
-      result.momentum.value = "Strong";
-      result.momentum.reason = "EMA diverging sharply from SMA — strong directional momentum detected.";
+      result.momentum.value  = "Strong";
+      result.momentum.reason = "Price is moving quickly in one direction : Strong push from traders.";
     }
     else if (emaDiff > cfg.momentumSensitivity)
     {
-      result.momentum.value = "Moderate";
-      result.momentum.reason = "EMA moderately diverging from SMA — stable trend strength.";
+      result.momentum.value  = "Moderate";
+      result.momentum.reason = "Price is trending steadily : Decent strength.";
     }
     else
     {
-      result.momentum.value = "Weak";
-      result.momentum.reason = "EMA close to SMA — momentum fading or range-bound market.";
+      result.momentum.value  = "Weak";
+      result.momentum.reason = "Price barely moving away from average : Market resting.";
     }
     
-    // --- Volatility (ATR%) ---
+    
+    // ---------------------------------------------------------
+    // 🌊 Volatility (how wild the swings are)
+    // ---------------------------------------------------------
     double atrPercent = SafeDiv(atr, close) * 100.0;
     if (atrPercent > 3.0)
     {
-      result.volatility.value = "High";
-      result.volatility.reason = "ATR above 3% of price — wide daily ranges, increased risk.";
+      result.volatility.value  = "High";
+      result.volatility.reason = "Price is jumping around a lot : Unpredictable moves.";
     }
     else if (atrPercent > 1.5)
     {
-      result.volatility.value = "Medium";
-      result.volatility.reason = "ATR between 1.5% and 3% — moderate price swings.";
+      result.volatility.value  = "Medium";
+      result.volatility.reason = "Price moves moderately : Some swings but manageable.";
     }
     else
     {
-      result.volatility.value = "Low";
-      result.volatility.reason = "ATR below 1.5% — tight price movement, low volatility.";
+      result.volatility.value  = "Low";
+      result.volatility.reason = "Price is calm : Small day to day changes.";
     }
     
-    // --- Volume status ---
+    
+    // ---------------------------------------------------------
+    // 🔊 Volume (trading activity)
+    // ---------------------------------------------------------
     double volRatio = SafeDiv(latestVol, avgVol, 1.0);
     if (volRatio > cfg.volHighFactor)
     {
-      result.volume.value = "High";
-      result.volume.reason = "Current volume significantly above average — strong trader participation.";
+      result.volume.value  = "High";
+      result.volume.reason = "Unusually large trading today : Lots of participation.";
     }
     else if (volRatio < cfg.volLowFactor)
     {
-      result.volume.value = "Low";
-      result.volume.reason = "Current volume below average — weak interest or low liquidity.";
+      result.volume.value  = "Low";
+      result.volume.reason = "Fewer trades than normal : Low interest right now.";
     }
     else
     {
-      result.volume.value = "Normal";
-      result.volume.reason = "Volume near historical average — steady trading activity.";
+      result.volume.value  = "Normal";
+      result.volume.reason = "Trading volume looks typical for this stock.";
     }
     
-    // --- RSI valuation ---
+    
+    // ---------------------------------------------------------
+    // 💰 Valuation via RSI
+    // ---------------------------------------------------------
     if (rsi > 70)
     {
-      result.valuation.value = "Overbought";
-      result.valuation.reason = "RSI above 70 — asset may be overextended to the upside.";
+      result.valuation.value  = "Overbought";
+      result.valuation.reason = "Price rose quickly : May be due for a small pullback.";
     }
     else if (rsi < 30)
     {
-      result.valuation.value = "Oversold";
-      result.valuation.reason = "RSI below 30 — asset may be undervalued or due for rebound.";
+      result.valuation.value  = "Oversold";
+      result.valuation.reason = "Price fell sharply : May bounce back soon.";
     }
     else
     {
-      result.valuation.value = "Fair";
-      result.valuation.reason = "RSI between 30 and 70 — balanced momentum, fair valuation.";
+      result.valuation.value  = "Fair";
+      result.valuation.reason = "Price moves balanced : Neither too high nor too low.";
     }
     
-    // --- VWAP bias (relative to current price) ---
+    
+    // ---------------------------------------------------------
+    // 📍 VWAP Bias (where price sits relative to real average)
+    // ---------------------------------------------------------
     double vwapDiff = SafeDiv(close - vwap, vwap);
     if (vwapDiff > 0.01)
     {
-      result.vwapBias.value = "Above VWAP";
-      result.vwapBias.reason = "Price sustained above VWAP — buyers in control.";
+      result.vwapBias.value  = "Above VWAP";
+      result.vwapBias.reason = "Price stays above the average paid price : Buyers dominant.";
     }
     else if (vwapDiff < -0.01)
     {
-      result.vwapBias.value = "Below VWAP";
-      result.vwapBias.reason = "Price trading below VWAP — sellers dominating.";
+      result.vwapBias.value  = "Below VWAP";
+      result.vwapBias.reason = "Price below the average paid price : Sellers dominant.";
     }
     else
     {
-      result.vwapBias.value = "Near VWAP";
-      result.vwapBias.reason = "Price hovering near VWAP — neutral intraday bias.";
+      result.vwapBias.value  = "Near VWAP";
+      result.vwapBias.reason = "Price is around the fair average : Neutral area.";
     }
     
-    // --- Compute scoring system (blended technical confidence) ---
+    
+    // ---------------------------------------------------------
+    // 🧮 Combine everything into one confidence score
+    // ---------------------------------------------------------
     double trendScore = (result.trend.value == "Uptrend") ? 1.0 :
     (result.trend.value == "Downtrend") ? -1.0 : 0.0;
-    double rsiScore  = (rsi - 50.0) / 50.0;             // normalized RSI
-    double macdScore = macd / (close * 0.01);           // MACD scaled
-    double vwapScore = std::clamp(vwapDiff * 100.0, -1.0, 1.0); // VWAP scaled
+    double rsiScore  = (rsi - 50.0) / 50.0;
+    double macdScore = macd / (close * 0.01);
+    double vwapScore = std::clamp(vwapDiff * 100.0, -1.0, 1.0);
     
     double score = (trendScore * 0.35 +
                     rsiScore   * 0.25 +
@@ -448,27 +609,30 @@ namespace KanVest
     
     result.score = std::clamp(score, -1.0, 1.0);
     
-    // --- Smart suggestion logic ---
+    
+    // ---------------------------------------------------------
+    // 💡 Final suggestion based on score
+    // ---------------------------------------------------------
     if (result.score > 0.4)
     {
       if (close > vwap)
-        result.suggestion = "Buy : Bullish momentum confirmed above VWAP.";
+        result.suggestion = "Buy : Uptrend looks strong and price is above the fair average.";
       else
-        result.suggestion = "Hold : Trend bullish but below VWAP (confirmation needed).";
+        result.suggestion = "Hold : Looks positive but price slightly under average : Wait for confirmation.";
     }
     else if (result.score < -0.4)
     {
       if (close < vwap)
-        result.suggestion = "Sell : Bearish trend confirmed below VWAP.";
+        result.suggestion = "Sell : Downtrend clear and price is below average : Sellers leading.";
       else
-        result.suggestion = "Hold : Bearish indicators but price above VWAP.";
+        result.suggestion = "Hold : Downtrend forming but price still high : Caution.";
     }
     else
     {
-      result.suggestion = "Hold : Market indecisive or consolidating.";
+      result.suggestion = "Hold : Market is calm or indecisive : No clear signal yet.";
     }
     
-    // --- Optional short summary ---
+    // Short summary for UI
     result.conclusion = "Trend: " + result.trend.value +
     " | Momentum: " + result.momentum.value +
     " | Volatility: " + result.volatility.value +
@@ -478,7 +642,10 @@ namespace KanVest
     return result;
   }
   
-  // ---------------- Public APIs ----------------
+  
+  // -------------------------------------------------------------
+  // 🔹 Public helper — single-interval analysis
+  // -------------------------------------------------------------
   StockSummary StockAnalyzer::AnalyzeSingleTimeframe(const StockData& data,
                                                      const std::string& interval,
                                                      const std::string& range)
@@ -487,6 +654,13 @@ namespace KanVest
     return AnalyzeInternal(data.history, cfg, interval);
   }
   
+  
+  // -------------------------------------------------------------
+  // 🔸 Public helper — hybrid (short + long term) analysis
+  // -------------------------------------------------------------
+  // Compares two timeframes to confirm bigger picture trend.
+  // Example: 15-minute data (short) + daily data (long).
+  // -------------------------------------------------------------
   StockSummary StockAnalyzer::AnalyzeHybrid(const StockData& shortTerm,
                                             const StockData& longTerm,
                                             const std::string& shortInterval,
@@ -496,35 +670,39 @@ namespace KanVest
     auto longCfg  = ChooseConfig(longInterval, "long");
     
     auto shortSummary = AnalyzeInternal(shortTerm.history, shortCfg, shortInterval);
-    auto longSummary  = AnalyzeInternal(longTerm.history, longCfg, longInterval);
+    auto longSummary  = AnalyzeInternal(longTerm.history,  longCfg,  longInterval);
     
     StockSummary hybrid;
     
-    // Blend conclusions
-    hybrid.trend.value = (shortSummary.trend.value == longSummary.trend.value) ? shortSummary.trend.value : "Mixed";
-    hybrid.trend.reason = "Short-term trend: " + shortSummary.trend.value + ", Long-term trend: " + longSummary.trend.value + ".";
+    // Combine both results
+    hybrid.trend.value  = (shortSummary.trend.value == longSummary.trend.value)
+    ? shortSummary.trend.value : "Mixed";
+    hybrid.trend.reason = "Short-term: " + shortSummary.trend.value +
+    ", Long-term: " + longSummary.trend.value + ".";
     
-    hybrid.momentum = shortSummary.momentum;
+    hybrid.momentum   = shortSummary.momentum;
     hybrid.volatility = shortSummary.volatility;
-    hybrid.volume = shortSummary.volume;
-    hybrid.vwapBias = shortSummary.vwapBias;
-    hybrid.valuation = shortSummary.valuation;
+    hybrid.volume     = shortSummary.volume;
+    hybrid.vwapBias   = shortSummary.vwapBias;
+    hybrid.valuation  = shortSummary.valuation;
     
-    // score fusion
+    // Blend scores
     hybrid.score = (shortSummary.score * 0.6 + longSummary.score * 0.4);
     
-    // Suggestion
-    if (shortSummary.vwapBias.value.find("Above") != std::string::npos && longSummary.trend.value == "Uptrend")
+    // Simplified combined suggestion
+    if (shortSummary.vwapBias.value.find("Above") != std::string::npos &&
+        longSummary.trend.value == "Uptrend")
     {
-      hybrid.suggestion = "Buy : Strong bullish bias (price above VWAP).";
+      hybrid.suggestion = "Buy : Both short and long trends are rising : Strong bullish setup.";
     }
-    else if (shortSummary.vwapBias.value.find("Below") != std::string::npos && longSummary.trend.value == "Downtrend")
+    else if (shortSummary.vwapBias.value.find("Below") != std::string::npos &&
+             longSummary.trend.value == "Downtrend")
     {
-      hybrid.suggestion = "Sell : Confirmed downtrend below VWAP.";
+      hybrid.suggestion = "Sell : Both timeframes point down : Sellers leading.";
     }
     else if (std::fabs(hybrid.score) < 0.4)
     {
-      hybrid.suggestion = "Hold : Market undecided, VWAP neutral.";
+      hybrid.suggestion = "Hold : Mixed signals : Better to wait.";
     }
     
     return hybrid;
