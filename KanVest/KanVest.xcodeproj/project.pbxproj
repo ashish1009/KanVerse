@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B23EFE2D2EB8B0CF007AE379 /* StockSummary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23EFE2C2EB8B0CF007AE379 /* StockSummary.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -38,7 +37,6 @@
 
 /* Begin PBXFileReference section */
 		B23EFE2B2EB8B0CF007AE379 /* StockSummary.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockSummary.hpp; sourceTree = "<group>"; };
-		B23EFE2C2EB8B0CF007AE379 /* StockSummary.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockSummary.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -218,7 +216,6 @@
 				B289EE562EB4D2F600937D0B /* StockAPI.cpp */,
 				B289EE5C2EB4D5E100937D0B /* StockParser.cpp */,
 				B289EE602EB4FA8300937D0B /* Stock_UI.cpp */,
-				B23EFE2C2EB8B0CF007AE379 /* StockSummary.cpp */,
 			);
 			path = Stocks;
 			sourceTree = "<group>";
@@ -290,7 +287,6 @@
 				B289EE612EB4FA8300937D0B /* Stock_UI.cpp in Sources */,
 				B289EE572EB4D2F600937D0B /* StockAPI.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
-				B23EFE2D2EB8B0CF007AE379 /* StockSummary.cpp in Sources */,
 				B289EE542EB4CE7300937D0B /* StockController.cpp in Sources */,
 				B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,

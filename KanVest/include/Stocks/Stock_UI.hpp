@@ -24,8 +24,8 @@ namespace KanVest
   private:
     static void UpdateStockData(const std::string& symbol);
     
-    static void StockAnalyzer();
-    static void StockVestData();
+    static void ShowStockData();
+    static void ShowStockAnalyzeData();
 
     static void SearchBar();
     static void ShowStcokBasicData(const StockData& stockData);

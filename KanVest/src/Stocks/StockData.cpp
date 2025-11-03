@@ -29,7 +29,8 @@ namespace KanVest
     {
       sum += history[i].close;
     }
-    return sum / period;
+    sma = sum / period;;
+    return sma;
   }
   
   double StockData::ComputeEMA(int period)
@@ -40,11 +41,12 @@ namespace KanVest
     }
     
     double k = 2.0 / (period + 1.0);
-    double ema = history[history.size() - period].close;
+    ema = history[history.size() - period].close;
     for (size_t i = history.size() - period + 1; i < history.size(); ++i)
     {
       ema = (history[i].close * k) + (ema * (1.0 - k));
     }
+    
     return ema;
   }
 
@@ -68,7 +70,9 @@ namespace KanVest
     {
       sum += tr[i];
     }
-    return sum / period;
+    
+    atr = sum / period;
+    return atr;
   }
   
   double StockData::ComputeAverageVolume(int period)
@@ -83,7 +87,8 @@ namespace KanVest
     {
       sum += history[i].volume;
     }
-    return sum / period;
+    averageVolume = sum / period;
+    return averageVolume;
   }
 
   double StockData::ComputeRSI(int period)
@@ -108,14 +113,16 @@ namespace KanVest
     }
     
     double rs = avgGain / avgLoss;
-    return 100.0 - (100.0 / (1.0 + rs));
+    rsi = 100.0 - (100.0 / (1.0 + rs));
+    return rsi;
   }
   
   double StockData::ComputeMACD()
   {
     double ema12 = ComputeEMA(12);
     double ema26 = ComputeEMA(26);
-    return ema12 - ema26;
+    macd = ema12 - ema26;
+    return macd;
   }
   
   double StockData::ComputeVWAP()
@@ -127,6 +134,7 @@ namespace KanVest
       totalPV += typical * p.volume;
       totalVol += p.volume;
     }
-    return totalVol > 0 ? totalPV / totalVol : 0.0;
+    vwap = totalVol > 0 ? totalPV / totalVol : 0.0;
+    return vwap;
   }
 } // namespace KanVest

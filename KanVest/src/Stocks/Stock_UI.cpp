@@ -117,7 +117,10 @@ namespace KanVest
   {
     KanVasX::Panel::Begin("Stock Analyzer");
     
-    StockAnalyzer();
+    ShowStockData();
+    
+    KanVasX::UI::ShiftCursorY(4.0f);
+    ShowStockAnalyzeData();
     
     KanVasX::Panel::End();
   }
@@ -331,7 +334,7 @@ namespace KanVest
     }
   }
   
-  void StockUI::StockAnalyzer()
+  void StockUI::ShowStockData()
   {
     // Auto Update
     double currentTime = ImGui::GetTime();
@@ -361,12 +364,6 @@ namespace KanVest
       
         SearchBar();
         ShowStcokBasicData(stockData);
-        
-//        float timeLeft = std::max(0.0f, StockController::GetRefreshInterval() - timeSinceUpdate);
-//        
-//        ImGui::Separator();
-//        ImGui::Text("Last Updated: %s", s_lastUpdatedString.c_str());
-//        ImGui::TextColored(timeLeft > 5 ? ImVec4(0.4f,0.9f,0.4f,1.0f) : ImVec4(1.0f,0.7f,0.3f,1.0f), "Next Update In: %.1f s", timeLeft);
       }
       
       // Column 2 Chart
@@ -381,7 +378,7 @@ namespace KanVest
     ImGui::EndTable();
   }
   
-  void StockUI::StockVestData()
+  void StockUI::ShowStockAnalyzeData()
   {
     if (ImGui::BeginTable("Portfolio Manager", 2, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
     {
@@ -391,13 +388,36 @@ namespace KanVest
       float firstColWidth = totalWidth * 0.3f;
       float secondColWidth = totalWidth  - firstColWidth;
       
-      ImGui::TableSetupColumn(" DATA 1", ImGuiTableColumnFlags_WidthFixed, firstColWidth);
+      ImGui::TableSetupColumn(" Stock Analyzer", ImGuiTableColumnFlags_WidthFixed, firstColWidth);
       ImGui::TableSetupColumn(" DATA 2", ImGuiTableColumnFlags_WidthFixed, secondColWidth);
       
       ImGui::TableNextRow();
       
-      ImGui::TableSetColumnIndex(0);
-      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.2985);
+      {
+        ImGui::TableSetColumnIndex(0);
+        KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.2985);
+        
+        StockSummary summary = StockController::AnalyzeStock();
+        
+
+//        ImGui::Text("close %f", StockController::GetActiveStockData().history.back().close);
+//        ImGui::Text("sma %f", StockController::GetActiveStockData().sma);
+//        ImGui::Text("ema %f", StockController::GetActiveStockData().ema);
+//        ImGui::Text("atr %f", StockController::GetActiveStockData().atr);
+//        ImGui::Text("rsi %f", StockController::GetActiveStockData().rsi);
+//        ImGui::Text("macd %f", StockController::GetActiveStockData().macd);
+//        ImGui::Text("averageVolume %f", StockController::GetActiveStockData().averageVolume);
+//        ImGui::Text("vwap %f", StockController::GetActiveStockData().vwap);
+//        ImGui::Text("vol %f", StockController::GetActiveStockData().history.back().volume);
+
+        ImGui::Text("trend : %s", summary.trend.c_str());
+        ImGui::Text("momentum : %s", summary.momentum.c_str() );
+        ImGui::Text("volatility : %s", summary.volatility.c_str() );
+        ImGui::Text("volume : %s", summary.volume.c_str() );
+        ImGui::Text("valuation : %s", summary.valuation.c_str() );
+        ImGui::Text("conclusion : %s", summary.conclusion.c_str());
+        
+      }
       
       ImGui::TableSetColumnIndex(1);
       KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.688);
