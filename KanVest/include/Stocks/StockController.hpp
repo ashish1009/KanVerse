@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Stocks/StockData.hpp"
+#include "Stocks/StockSummary.hpp"
 
 namespace KanVest
 {            
@@ -21,6 +22,10 @@ namespace KanVest
     /// - Parameter range: range of data
     static StockData UpdateStockData(const std::string& symbolName, const std::string& interval, const std::string& range);
     
+    /// This function analyze the stock
+    /// - Parameter data: stock data
+    static StockSummary AnalyzeStock(const StockData& data);
+
     static void SetRefreshInterval(float refreshInterval);
     static float GetRefreshInterval();
     
