@@ -108,6 +108,8 @@ namespace KanVest
       p.low       = lows[i];
       p.high      = highs[i];
       p.volume    = volumes[i];
+      p.range     = highs[i] - lows[i];
+      
       stockData.history.push_back(p);
     }
   }
