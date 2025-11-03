@@ -329,59 +329,95 @@ namespace KanVest
     
     // --- Trend analysis with VWAP confirmation ---
     if (close > ema * 1.01 && ema > sma && close > vwap)
-      result.trend = "Uptrend";
+    {
+      result.trend.value = "Uptrend";
+    }
     else if (close < ema * 0.99 && ema < sma && close < vwap)
-      result.trend = "Downtrend";
+    {
+      result.trend.value = "Downtrend";
+    }
     else
-      result.trend = "Sideways";
+    {
+      result.trend.value = "Sideways";
+    }
     
     // --- Momentum strength ---
     double emaDiff = std::fabs(ema - sma) / sma;
     if (emaDiff > cfg.momentumSensitivity * 2)
-      result.momentum = "Strong";
+    {
+      result.momentum.value = "Strong";
+    }
     else if (emaDiff > cfg.momentumSensitivity)
-      result.momentum = "Moderate";
+    {
+      result.momentum.value = "Moderate";
+    }
     else
-      result.momentum = "Weak";
+    {
+      result.momentum.value = "Weak";
+    }
     
     // --- Volatility (ATR%) ---
     double atrPercent = SafeDiv(atr, close) * 100.0;
     if (atrPercent > 3.0)
-      result.volatility = "High";
+    {
+      result.volatility.value = "High";
+    }
     else if (atrPercent > 1.5)
-      result.volatility = "Medium";
+    {
+      result.volatility.value = "Medium";
+    }
     else
-      result.volatility = "Low";
+    {
+      result.volatility.value = "Low";
+    }
     
     // --- Volume status ---
     double volRatio = SafeDiv(latestVol, avgVol, 1.0);
     if (volRatio > cfg.volHighFactor)
-      result.volume = "High";
+    {
+      result.volume.value = "High";
+    }
     else if (volRatio < cfg.volLowFactor)
-      result.volume = "Low";
+    {
+      result.volume.value = "Low";
+    }
     else
-      result.volume = "Normal";
+    {
+      result.volume.value = "Normal";
+    }
     
     // --- RSI valuation ---
     if (rsi > 70)
-      result.valuation = "Overbought";
+    {
+      result.valuation.value = "Overbought";
+    }
     else if (rsi < 30)
-      result.valuation = "Oversold";
+    {
+      result.valuation.value = "Oversold";
+    }
     else
-      result.valuation = "Fair";
+    {
+      result.valuation.value = "Fair";
+    }
     
     // --- VWAP bias (relative to current price) ---
     double vwapDiff = SafeDiv(close - vwap, vwap);
     if (vwapDiff > 0.01)
+    {
       result.vwapBias = "Above VWAP";
+    }
     else if (vwapDiff < -0.01)
+    {
       result.vwapBias = "Below VWAP";
+    }
     else
+    {
       result.vwapBias = "Near VWAP";
+    }
     
     // --- Compute scoring system (blended technical confidence) ---
-    double trendScore = (result.trend == "Uptrend") ? 1.0 :
-    (result.trend == "Downtrend") ? -1.0 : 0.0;
+    double trendScore = (result.trend.value == "Uptrend") ? 1.0 :
+    (result.trend.value == "Downtrend") ? -1.0 : 0.0;
     double rsiScore  = (rsi - 50.0) / 50.0;             // normalized RSI
     double macdScore = macd / (close * 0.01);           // MACD scaled
     double vwapScore = std::clamp(vwapDiff * 100.0, -1.0, 1.0); // VWAP scaled
@@ -414,9 +450,9 @@ namespace KanVest
     }
     
     // --- Optional short summary ---
-    result.conclusion = "Trend: " + result.trend +
-    " | Momentum: " + result.momentum +
-    " | Volatility: " + result.volatility +
+    result.conclusion = "Trend: " + result.trend.value +
+    " | Momentum: " + result.momentum.value +
+    " | Volatility: " + result.volatility.value +
     " | RSI: " + std::to_string(static_cast<int>(rsi)) +
     " | VWAP: " + std::to_string(vwap);
     
@@ -446,7 +482,7 @@ namespace KanVest
     StockSummary hybrid;
     
     // Blend conclusions
-    hybrid.trend = (shortSummary.trend == longSummary.trend) ? shortSummary.trend : "Mixed";
+    hybrid.trend.value = (shortSummary.trend.value == longSummary.trend.value) ? shortSummary.trend.value : "Mixed";
     
     hybrid.momentum = shortSummary.momentum;
     hybrid.volatility = shortSummary.volatility;
@@ -457,18 +493,32 @@ namespace KanVest
     hybrid.score = (shortSummary.score * 0.6 + longSummary.score * 0.4);
     
     // Suggestion
-    if (hybrid.score > 0.5)
+    
+    if (shortSummary.vwapBias.find("Above") != std::string::npos && longSummary.trend.value == "Uptrend")
     {
-      hybrid.suggestion = "Buy : Both short and long trends bullish.";
+      hybrid.suggestion = "Buy : Strong bullish bias (price above VWAP).";
     }
-    else if (hybrid.score < -0.5)
+    else if (shortSummary.vwapBias.find("Below") != std::string::npos && longSummary.trend.value == "Downtrend")
     {
-      hybrid.suggestion = "Sell : Both trends bearish.";
+      hybrid.suggestion = "Sell : Confirmed downtrend below VWAP.";
     }
-    else
+    else if (std::fabs(hybrid.score) < 0.4)
     {
-      hybrid.suggestion = "Hold : Timeframes disagree.";
+      hybrid.suggestion = "Hold : Market undecided, VWAP neutral.";
     }
+    
+//    if (hybrid.score > 0.5)
+//    {
+//      hybrid.suggestion = "Buy : Both short and long trends bullish.";
+//    }
+//    else if (hybrid.score < -0.5)
+//    {
+//      hybrid.suggestion = "Sell : Both trends bearish.";
+//    }
+//    else
+//    {
+//      hybrid.suggestion = "Hold : Timeframes disagree.";
+//    }
     
     return hybrid;
   }

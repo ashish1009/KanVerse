@@ -9,13 +9,20 @@
 
 namespace KanVest
 {
+  struct SummaryData
+  {
+    std::string value;
+    std::string reason;
+  };
+  
   struct StockSummary
   {
-    std::string trend;
-    std::string momentum;
-    std::string volatility;
-    std::string volume;
-    std::string valuation;
+    SummaryData trend;
+    SummaryData momentum;
+    SummaryData volatility;
+    SummaryData volume;
+    SummaryData valuation;
+    
     std::string vwapBias;
     std::string conclusion;
     std::string suggestion;
