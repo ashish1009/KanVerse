@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		B26BB08C2EB8C30D00E19493 /* StockAnalyzer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26BB08B2EB8C2AD00E19493 /* StockAnalyzer.cpp */; };
+		B26BB0982EB98E4800E19493 /* Portfolio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26BB0972EB98E4800E19493 /* Portfolio.cpp */; };
+		B26BB09B2EB9902E00E19493 /* UserProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26BB09A2EB9902E00E19493 /* UserProfile.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -40,6 +42,10 @@
 		B23EFE2B2EB8B0CF007AE379 /* StockSummary.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockSummary.hpp; sourceTree = "<group>"; };
 		B26BB08A2EB8C2AD00E19493 /* StockAnalyzer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockAnalyzer.hpp; sourceTree = "<group>"; };
 		B26BB08B2EB8C2AD00E19493 /* StockAnalyzer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockAnalyzer.cpp; sourceTree = "<group>"; };
+		B26BB0962EB98E4800E19493 /* Portfolio.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Portfolio.hpp; sourceTree = "<group>"; };
+		B26BB0972EB98E4800E19493 /* Portfolio.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Portfolio.cpp; sourceTree = "<group>"; };
+		B26BB0992EB9902E00E19493 /* UserProfile.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UserProfile.hpp; sourceTree = "<group>"; };
+		B26BB09A2EB9902E00E19493 /* UserProfile.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UserProfile.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -84,6 +90,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B26BB0932EB98D9600E19493 /* Portfolio */ = {
+			isa = PBXGroup;
+			children = (
+				B26BB0962EB98E4800E19493 /* Portfolio.hpp */,
+				B26BB0992EB9902E00E19493 /* UserProfile.hpp */,
+			);
+			path = Portfolio;
+			sourceTree = "<group>";
+		};
+		B26BB0952EB98E0900E19493 /* Portfolio */ = {
+			isa = PBXGroup;
+			children = (
+				B26BB0972EB98E4800E19493 /* Portfolio.cpp */,
+				B26BB09A2EB9902E00E19493 /* UserProfile.cpp */,
+			);
+			path = Portfolio;
+			sourceTree = "<group>";
+		};
 		B289E6192EB0E01600937D0B = {
 			isa = PBXGroup;
 			children = (
@@ -112,6 +136,7 @@
 				B289EDF02EB2559500937D0B /* Editor */,
 				B289EE3C2EB3ACDD00937D0B /* UI */,
 				B289EE4D2EB4CD2C00937D0B /* Stocks */,
+				B26BB0932EB98D9600E19493 /* Portfolio */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -123,6 +148,7 @@
 				B289EDEF2EB2558E00937D0B /* Editor */,
 				B289EE3D2EB3ACE300937D0B /* UI */,
 				B289EE4E2EB4CD3600937D0B /* Stocks */,
+				B26BB0952EB98E0900E19493 /* Portfolio */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -295,8 +321,10 @@
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
 				B289EE542EB4CE7300937D0B /* StockController.cpp in Sources */,
 				B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */,
+				B26BB09B2EB9902E00E19493 /* UserProfile.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
 				B289EE5A2EB4D43700937D0B /* API_Provider.cpp in Sources */,
+				B26BB0982EB98E4800E19493 /* Portfolio.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

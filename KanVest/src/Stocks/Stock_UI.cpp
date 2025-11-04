@@ -56,7 +56,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       return oss.str();
     }
 
-    static inline time_t ToMarketTime(time_t utcTimestamp)
+    [[maybe_unused]] static inline time_t ToMarketTime(time_t utcTimestamp)
     {
       return utcTimestamp + 5 * 3600 + 30 * 60;
     }
