@@ -40,7 +40,7 @@ namespace KanVest
     IK_LOG_INFO("RendererLayer", "Creating '{0}' Layer instance", GetName());
     
     // Load Textures -----------------------------------------------------------------------------
-    m_welcomeIcon = CreateTexture("Textures/Logo/KanVest.png");
+    m_welcomeIcon = CreateTexture("Textures/Logo/WelcomeIKan.png");
     m_applicationIcon = CreateTexture("Textures/Logo/IKan.png");
 
     // Window Icons
@@ -142,7 +142,7 @@ namespace KanVest
 //    StockUI::Initialize(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
     
     // Login popup
-    m_loginPopup.Set("KanVest Logic", true /* open flag */, 600, 420, true /* center */);
+    m_loginPopup.Set("KanVest Logic", true /* open flag */, 600, 400, true /* center */);
   }
   
   void RendererLayer::OnDetach() noexcept
@@ -243,20 +243,23 @@ namespace KanVest
       // Kreator Logo and title ----
       {
         // Icon
-        static constexpr ImVec2 logoSize {600, 300};
+        static constexpr ImVec2 logoSize {200, 200};
         KanVasX::UI::SetCursorAt(KanVasX::UI::AlignX::Center, logoSize.x);
         KanVasX::UI::Image(KanVasX::UI::GetTextureID(m_welcomeIcon->GetRendererID()), logoSize, KanVasX::Color::TextBright);
         
-        static KanVasX::InputBuffer<256> pathBuffer{"##UserName"};
-        static KanVasX::InputBuffer<256> searchBuffer{"##Password"};
-
+        // Welcome Header
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::HugeHeader), "Welcome to KanVest", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::Text);
+        KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 600);
+        
+        static KanVasX::InputBuffer<256> usernameBuffer{"##UserName"};
+        static KanVasX::InputBuffer<256> passwordBuffer{"##Password"};
+        
         // Username
         KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Username", KanVasX::UI::AlignX::Center, {-50.0f, 20.0f});
         ImGui::SameLine();
         KanVasX::UI::ShiftCursorY(-8.0f);
-        pathBuffer.TextInput(false, 100, "Username ...");
+        usernameBuffer.TextInput(false, 100, "Username ...");
         KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Password", KanVasX::UI::AlignX::Center, {-50.0f, 15.0f});
-
 
         // Passeord
         static bool showPassword = false;
@@ -264,7 +267,7 @@ namespace KanVest
 
         ImGui::SameLine();
         KanVasX::UI::ShiftCursorY(-8.0f);
-        searchBuffer.TextInput(false, 100, "Password ...", showPassword ? 0 : ImGuiInputTextFlags_Password);
+        passwordBuffer.TextInput(false, 100, "Password ...", showPassword ? 0 : ImGuiInputTextFlags_Password);
         
         ImGui::SameLine();
         if (KanVasX::UI::DrawButtonImage("##ShowPassword", KanVasX::UI::GetTextureID(eyeTexture->GetRendererID()), false, {20.0f, 20.0f}))
