@@ -24,6 +24,26 @@ namespace KanVest
     lastLoginTime = std::asctime(std::localtime(&now));
   }
   
+  void User::LoadPortfolio()
+  {
+    if (!std::filesystem::exists(portfolioPath))
+    {
+      portfolio = std::make_shared<Portfolio>();
+      return;
+    }
+    
+    portfolio = std::make_shared<Portfolio>();
+    PortfolioSerializer::LoadFromYAML(portfolioPath, *portfolio);
+  }
+  
+  void User::SavePortfolio() const
+  {
+    if (portfolio)
+    {
+      PortfolioSerializer::SaveToYAML(portfolioPath, *portfolio);
+    }
+  }
+
   bool User::VerifyPassword(const std::string& password) const
   {
     return passwordHash == HashPassword(password);

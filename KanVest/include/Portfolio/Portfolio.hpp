@@ -22,6 +22,11 @@ namespace KanVest
   class Portfolio
   {
   public:
+    void AddHolding(const InvestmentHorizon& holding);
+    
+    std::vector<InvestmentHorizon>& GetHoldings();
+    const std::vector<InvestmentHorizon>& GetHoldings() const;
+
   private:
     std::vector<InvestmentHorizon> m_holdings;
   };
