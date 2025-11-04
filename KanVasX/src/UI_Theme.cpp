@@ -73,7 +73,7 @@ namespace KanVasX
     BackgroundHighlight   = Value(Background, 1.6);
     
     // Model
-    WindowDimBg           = Alpha(Background, 0.5f);
+    WindowDimBg           = Alpha(BackgroundDark, 1.0f);
     
     // Frame : Checkbox BG, Text BG, Drop Menu
     FrameBgHovered        = MultipliedValue(FrameBg, 1.2f);

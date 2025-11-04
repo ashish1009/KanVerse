@@ -28,11 +28,11 @@ namespace KanVasX
       if (readOnly)
       {
         flag |= ImGuiInputTextFlags_ReadOnly;
-        ImGui::PushStyleColor(ImGuiCol_Text, UI::Color::TextMuted);
+        ImGui::PushStyleColor(ImGuiCol_Text, Color::TextMuted);
       }
       else
       {
-        ImGui::PushStyleColor(ImGuiCol_Text, UI::Color::Text);
+        ImGui::PushStyleColor(ImGuiCol_Text, Color::Text);
       }
       ImGui::SetNextItemWidth(width);
       if (hint != "")

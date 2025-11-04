@@ -55,6 +55,10 @@ namespace KanVest
     m_settingIcon = CreateTexture("Textures/Icons/Gear.png");
 
     m_reloadIcon = CreateTexture("Textures/Icons/Rotate.png");
+
+    // Eye
+    m_closeEyeIcon = CreateTexture("Textures/Icons/CloseEye.png");
+    m_openEyeIcon = CreateTexture("Textures/Icons/Eye.png");
   }
   
   RendererLayer::~RendererLayer()
@@ -138,9 +142,7 @@ namespace KanVest
 //    StockUI::Initialize(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
     
     // Login popup
-    const auto& windowWidth = KanViz::Application::Get().GetWindow()->GetWidth();
-    const auto& windowHeight = KanViz::Application::Get().GetWindow()->GetHeight();
-    m_loginPopup.Set("KanVest Logic", true /* open flag */, windowWidth, windowHeight, true /* center */);
+    m_loginPopup.Set("KanVest Logic", true /* open flag */, 600, 420, true /* center */);
   }
   
   void RendererLayer::OnDetach() noexcept
@@ -237,19 +239,46 @@ namespace KanVest
     m_loginPopup.Show(ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar, [this]()
                         {
       KanVasX::ScopedColor bgColor(ImGuiCol_ChildBg, KanVasX::Color::Background);
-      KanVasX::ScopedColor separatorColor(ImGuiCol_TableBorderLight, KanVasX::Color::Alpha(KanVasX::Color::Highlight, 0.2));
 
       // Kreator Logo and title ----
       {
         // Icon
         static constexpr ImVec2 logoSize {600, 300};
-        KanVasX::UI::ShiftCursorY(ImGui::GetContentRegionAvail().y * 0.5f - logoSize.y);
         KanVasX::UI::SetCursorAt(KanVasX::UI::AlignX::Center, logoSize.x);
         KanVasX::UI::Image(KanVasX::UI::GetTextureID(m_welcomeIcon->GetRendererID()), logoSize, KanVasX::Color::TextBright);
         
+        static KanVasX::InputBuffer<256> pathBuffer{"##UserName"};
+        static KanVasX::InputBuffer<256> searchBuffer{"##Password"};
+
+        // Username
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Username", KanVasX::UI::AlignX::Center, {-50.0f, 20.0f});
+        ImGui::SameLine();
+        KanVasX::UI::ShiftCursorY(-8.0f);
+        pathBuffer.TextInput(false, 100, "Username ...");
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Password", KanVasX::UI::AlignX::Center, {-50.0f, 15.0f});
+
+
+        // Passeord
+        static bool showPassword = false;
+        const auto& eyeTexture = showPassword ? m_openEyeIcon : m_closeEyeIcon;
+
+        ImGui::SameLine();
+        KanVasX::UI::ShiftCursorY(-8.0f);
+        searchBuffer.TextInput(false, 100, "Password ...", showPassword ? 0 : ImGuiInputTextFlags_Password);
         
+        ImGui::SameLine();
+        if (KanVasX::UI::DrawButtonImage("##ShowPassword", KanVasX::UI::GetTextureID(eyeTexture->GetRendererID()), false, {20.0f, 20.0f}))
+        {
+          showPassword ^= 1;
+        }
+        
+        // Buttons
+        KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x * 0.5f - 50.0f);
+        KanVasX::UI::DrawButton("Login", UI::Font::Get(UI::FontType::Bold));
+        ImGui::SameLine();
+        KanVasX::UI::DrawButton("Sign Up", UI::Font::Get(UI::FontType::Bold));
+
       }
-      KanVasX::UI::DrawShadowAllDirection(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
     });
   }
   

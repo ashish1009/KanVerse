@@ -49,7 +49,7 @@ namespace KanVasX
     inline static ImU32 BackgroundHighlight   = IM_COL32(55, 35, 12, 255);
     
     // Models
-    inline static ImU32 WindowDimBg           = IM_COL32(55, 35, 12, 255);
+    inline static ImU32 WindowDimBg           = IM_COL32(155, 35, 12, 255);
     
     // Frame : Checkbox BG, Text BG, Drop Menu
     inline static ImU32 FrameBg               = IM_COL32(55, 35, 12, 255);
