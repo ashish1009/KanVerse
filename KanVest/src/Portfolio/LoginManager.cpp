@@ -46,6 +46,7 @@ namespace KanVest
       // Verify password
       if (user.VerifyPassword(password))
       {
+        UserDatabase::SetCurrentUser(user);
         return true;
       }
       else

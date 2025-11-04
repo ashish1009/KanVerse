@@ -13,6 +13,7 @@
 #include "Stocks/Stock_UI.hpp"
 
 #include "Portfolio/LoginManager.hpp"
+#include "Portfolio/UserDatabase.hpp"
 
 namespace KanVest
 {
@@ -141,7 +142,7 @@ namespace KanVest
     KanVasX::Widget::SetSearchIcon(KanVasX::UI::GetTextureID(m_searchIcon->GetRendererID()));
     KanVasX::Widget::SetSettingIcon(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
     
-//    StockUI::Initialize(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
+    StockUI::Initialize(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
     
     // Login popup
     m_loginPopup.Set("KanVest Logic", true /* open flag */, 600, 410, true /* center */);
@@ -162,10 +163,13 @@ namespace KanVest
   {
     UI_LoginPage();
     UI_SignupPage();
-
-//    UI_StartMainWindowDocking();
-//    UI_StockAnalyzer();
-//    UI_EndMainWindowDocking();
+    
+    if (UserDatabase::GetCurrentUser().Valid())
+    {
+      UI_StartMainWindowDocking();
+      UI_StockAnalyzer();
+      UI_EndMainWindowDocking();
+    }
   }
   
   void RendererLayer::OnEvent(KanViz::Event& event)
@@ -286,6 +290,7 @@ namespace KanVest
         if (KanVasX::UI::DrawButton("Login", UI::Font::Get(UI::FontType::Bold)) or ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
         {
           loginSuccess = LoginManager::HandleLogin(usernameBuffer, passwordBuffer, loginMessage);
+          ImGui::CloseCurrentPopup();
         }
         
         // Sign Up

@@ -20,6 +20,7 @@ namespace KanVest
     UserProfile() = default;
     UserProfile(const std::string& user, const std::string& passHash);
 
+    bool Valid() const;
     bool VerifyPassword(const std::string& password) const;
     void SetPassword(const std::string& newPassword);
   };

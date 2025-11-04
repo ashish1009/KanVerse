@@ -36,12 +36,19 @@ namespace KanVest {
     
     /// Checks if a user exists
     static bool HasUser(const std::string& username);
+
+    /// This function updates current user
+    static void SetCurrentUser(const UserProfile& user);
     
+    /// This function returns current user
+    static const UserProfile& GetCurrentUser();
+
     /// Returns all users (read-only)
     static const std::unordered_map<std::string, UserProfile>& GetAllUsers();
     
   private:
     inline static std::unordered_map<std::string, UserProfile> s_userProfileMap;
+    inline static UserProfile s_currentUser;
     inline static std::filesystem::path s_databaseFilePath;
   };
   

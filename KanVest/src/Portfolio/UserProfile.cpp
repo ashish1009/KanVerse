@@ -70,4 +70,8 @@ namespace KanVest
     return true;
   }
 
+  bool UserProfile::Valid() const
+  {
+    return username != "";
+  }
 } // namespace KanVest

@@ -50,6 +50,16 @@ namespace KanVest
     return s_userProfileMap.find(username) != s_userProfileMap.end();
   }
   
+  void UserDatabase::SetCurrentUser(const UserProfile& user)
+  {
+    s_currentUser = user;
+  }
+  
+  const UserProfile& UserDatabase::GetCurrentUser()
+  {
+    return s_currentUser;
+  }
+  
   const std::unordered_map<std::string, UserProfile>& UserDatabase::GetAllUsers()
   {
     return s_userProfileMap;
