@@ -9,7 +9,7 @@
 
 #include "RendererLayer.hpp"
 
-#include "Portfolio/UserDatabase.hpp"
+#include "Portfolio/UserManager.hpp"
 
 namespace KanVest
 {
@@ -31,18 +31,18 @@ namespace KanVest
     IK_PROFILE();
     
     std::filesystem::path userDataPath = "../../../KanVest/UserData";
-    UserDatabase::SetDatabaseFilePath(userDataPath / "UserDatabase.yaml");
+    UserManager::SetDatabaseFilePath(userDataPath / "UserDatabase.yaml");
     if (!exists(userDataPath))
     {
       std::filesystem::create_directory(userDataPath);
     }
     if (!exists(userDataPath / "UserDatabase.yaml"))
     {
-      UserDatabase::SaveDatabase();
+      UserManager::SaveDatabase();
     }
     else
     {
-      UserDatabase::LoadDatabase();
+      UserManager::LoadDatabase();
     }
 
     // Creating a renderer layer and pushing it onto the application stack.

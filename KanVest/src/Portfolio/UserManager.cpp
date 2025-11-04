@@ -5,31 +5,31 @@
 //  Created by Ashish . on 04/11/25.
 //
 
-#include "UserDatabase.hpp"
+#include "UserManager.hpp"
 
 namespace KanVest
 {
-  void UserDatabase::SetDatabaseFilePath(const std::filesystem::path& filePath)
+  void UserManager::SetDatabaseFilePath(const std::filesystem::path& filePath)
   {
     s_databaseFilePath = filePath;
   }
-  const std::filesystem::path& UserDatabase::GetDatabaseFilePath()
+  const std::filesystem::path& UserManager::GetDatabaseFilePath()
   {
     return s_databaseFilePath;
   }
 
-  bool UserDatabase::LoadDatabase()
+  bool UserManager::LoadDatabase()
   {
     s_userProfileMap.clear();
     return UserDatabaseSerializer::LoadFromYAML(s_userProfileMap, s_databaseFilePath);
   }
   
-  bool UserDatabase::SaveDatabase()
+  bool UserManager::SaveDatabase()
   {
     return UserDatabaseSerializer::SaveToYAML(s_userProfileMap, s_databaseFilePath);
   }
   
-  const UserProfile& UserDatabase::GetUser(const std::string& username)
+  const User& UserManager::GetUser(const std::string& username)
   {
     auto it = s_userProfileMap.find(username);
     if (it == s_userProfileMap.end())
@@ -39,34 +39,34 @@ namespace KanVest
     return it->second;
   }
   
-  void UserDatabase::AddUser(const UserProfile& user)
+  void UserManager::AddUser(const User& user)
   {
     s_userProfileMap[user.username] = user;
     SaveDatabase(); // update YAML whenever new user is added
   }
   
-  bool UserDatabase::HasUser(const std::string& username)
+  bool UserManager::HasUser(const std::string& username)
   {
     return s_userProfileMap.find(username) != s_userProfileMap.end();
   }
   
-  void UserDatabase::SetCurrentUser(const UserProfile& user)
+  void UserManager::SetCurrentUser(const User& user)
   {
     s_currentUser = user;
   }
   
-  const UserProfile& UserDatabase::GetCurrentUser()
+  const User& UserManager::GetCurrentUser()
   {
     return s_currentUser;
   }
   
-  const std::unordered_map<std::string, UserProfile>& UserDatabase::GetAllUsers()
+  const std::unordered_map<std::string, User>& UserManager::GetAllUsers()
   {
     return s_userProfileMap;
   }
   
   bool UserDatabaseSerializer::SaveToYAML(
-                                          const std::unordered_map<std::string, UserProfile>& map,
+                                          const std::unordered_map<std::string, User>& map,
                                           const std::string& filePath)
   {
     YAML::Emitter out;
@@ -93,7 +93,7 @@ namespace KanVest
   }
   
   bool UserDatabaseSerializer::LoadFromYAML(
-                                            std::unordered_map<std::string, UserProfile>& map,
+                                            std::unordered_map<std::string, User>& map,
                                             const std::string& filePath)
   {
     std::ifstream fin(filePath);
@@ -109,7 +109,7 @@ namespace KanVest
       if (!n["username"] || !n["passwordHash"])
         continue;
       
-      UserProfile profile;
+      User profile;
       profile.username = n["username"].as<std::string>();
       profile.passwordHash = n["passwordHash"].as<std::string>();
       profile.portfolioPath = n["portfolioPath"] ? n["portfolioPath"].as<std::string>() : "";

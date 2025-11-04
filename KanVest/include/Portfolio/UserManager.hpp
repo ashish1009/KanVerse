@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include "Portfolio/UserProfile.hpp"
+#include "Portfolio/User.hpp"
 
 namespace KanVest {
   
   /// Database for all user profiles (loaded from YAML)
-  class UserDatabase
+  class UserManager
   {
   public:
     /// This function sets the data base file path
@@ -29,26 +29,26 @@ namespace KanVest {
     static bool SaveDatabase();
     
     /// Returns a const reference to a user (throws if not found)
-    static const UserProfile& GetUser(const std::string& username);
+    static const User& GetUser(const std::string& username);
     
     /// Adds a new user (and updates the database)
-    static void AddUser(const UserProfile& user);
+    static void AddUser(const User& user);
     
     /// Checks if a user exists
     static bool HasUser(const std::string& username);
 
     /// This function updates current user
-    static void SetCurrentUser(const UserProfile& user);
+    static void SetCurrentUser(const User& user);
     
     /// This function returns current user
-    static const UserProfile& GetCurrentUser();
+    static const User& GetCurrentUser();
 
     /// Returns all users (read-only)
-    static const std::unordered_map<std::string, UserProfile>& GetAllUsers();
+    static const std::unordered_map<std::string, User>& GetAllUsers();
     
   private:
-    inline static std::unordered_map<std::string, UserProfile> s_userProfileMap;
-    inline static UserProfile s_currentUser;
+    inline static std::unordered_map<std::string, User> s_userProfileMap;
+    inline static User s_currentUser;
     inline static std::filesystem::path s_databaseFilePath;
   };
   
@@ -56,10 +56,10 @@ namespace KanVest {
   class UserDatabaseSerializer
   {
   public:
-    static bool SaveToYAML(const std::unordered_map<std::string, UserProfile>& map,
+    static bool SaveToYAML(const std::unordered_map<std::string, User>& map,
                            const std::string& filePath);
     
-    static bool LoadFromYAML(std::unordered_map<std::string, UserProfile>& map,
+    static bool LoadFromYAML(std::unordered_map<std::string, User>& map,
                              const std::string& filePath);
   };
   

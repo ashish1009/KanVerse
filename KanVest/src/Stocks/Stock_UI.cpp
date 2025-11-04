@@ -133,6 +133,15 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       return KanVasX::Color::White;
     }
 
+    ImU32 GetActionColor(const std::string& actiom)
+    {
+      if (actiom == "Buy") return KanVasX::Color::Cyan;
+      if (actiom == "Sell") return KanVasX::Color::Red;
+      if (actiom == "Hold") return KanVasX::Color::White;
+      
+      return KanVasX::Color::White;
+    }
+
     ImU32 GetConfidenceColor(double value)
     {
       if (value < 0.25) return KanVasX::Color::Red;
@@ -187,6 +196,8 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 
   } // namespace Utils
   
+  static float FirstColumnSize = 0.2685f;
+  
   void StockUI::Initialize(ImTextureID reloadIconID)
   {
     s_reloadIconID = reloadIconID;    
@@ -234,7 +245,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::SearchBar()
   {
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.2985);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, FirstColumnSize);
     const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
     if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.92f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
     {
@@ -376,7 +387,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       labelPtrs.push_back(s.c_str());
     
     // Start plotting
-    if (ImPlot::BeginPlot("", ImVec2(-1, 400)))
+    if (ImPlot::BeginPlot("", ImVec2(-1, 300)))
     {
       // We use AutoFit for X and set Y limits explicitly
       ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
@@ -496,10 +507,10 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       }
 
       ImGui::SameLine();
-      KanVasX::UI::ShiftCursorX(20);
-      ImGui::Text("Refresh Time Interval %.1f s", StockController::GetRefreshInterval());
+      KanVasX::UI::ShiftCursorX(10);
+      ImGui::Text(" %.1f s ", StockController::GetRefreshInterval());
       ImGui::SameLine();
-      KanVasX::UI::ShiftCursorX(20);
+      KanVasX::UI::ShiftCursorX(10);
 
       if (ImGui::SmallButton("+"))
       {
@@ -545,16 +556,18 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       UpdateStockData(StockController::GetActiveStockData().symbol);
     }
 
-    if (ImGui::BeginTable("StockAnalyzerTable", 2, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
+    if (ImGui::BeginTable("StockAnalyzerTable", 3, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
     {
       float topYArea = ImGui::GetContentRegionAvail().y * 0.99f;
       float totalWidth = ImGui::GetContentRegionAvail().x;
-      float firstColWidth = totalWidth * 0.3f;
-      float secondColWidth = totalWidth  - firstColWidth;
+      float firstColWidth = totalWidth * FirstColumnSize;
+      float thirdColWidth = totalWidth * FirstColumnSize;
+      float secondColWidth = totalWidth - firstColWidth - thirdColWidth;
       
       ImGui::TableSetupColumn("Stock Info", ImGuiTableColumnFlags_WidthFixed, firstColWidth);
       ImGui::TableSetupColumn("Chart", ImGuiTableColumnFlags_WidthFixed, secondColWidth);
-      
+      ImGui::TableSetupColumn("Portfolio", ImGuiTableColumnFlags_WidthFixed, thirdColWidth);
+
       ImGui::TableNextRow();
       
       const StockData& stockData = StockController::GetActiveStockData();
@@ -573,11 +586,26 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       // Column 2 Chart
       {
         ImGui::TableSetColumnIndex(1);
-        KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.688);
+        KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.46);
         
-        DrawCandleChart(stockData);
-        DrawChartController(stockData);
+//        DrawCandleChart(stockData);
+//        DrawChartController(stockData);
+//        ImGui::NewLine();
+//        KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, secondColWidth);
+//        KanVasX::UI::ShiftCursorY(5.0f);
+        
+        KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.46);
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Portfolio", KanVasX::UI::AlignX::Center, {0.0f, 10.0f});
+        
+        
       }
+      
+      // Column 3 Chart
+      {
+        ImGui::TableSetColumnIndex(2);
+        KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.688);
+      }
+
     }
     ImGui::EndTable();
   }
@@ -629,7 +657,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     const auto& [action, reason] = Utils::SplitSuggestion(summary.suggestion);
     KanVest_Text(FixedWidthHeader_18, "Action     ", glm::vec2(30.0f, 5.0f), textColor);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_18, action.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetTrendColor(summary.trend.value));
+    KanVest_Text(FixedWidthHeader_18, action.c_str(), glm::vec2(secondC0lumnShift, 0.0f), Utils::GetActionColor(action));
     KanVasX::UI::Tooltip(reason);
 
     KanVest_Text(FixedWidthHeader_18, "Trend      ", glm::vec2(30.0f, 5.0f), textColor);

@@ -7,7 +7,7 @@
 
 #include "LoginManager.hpp"
 
-#include "Portfolio/UserDatabase.hpp"
+#include "Portfolio/UserManager.hpp"
 
 namespace KanVest
 {
@@ -17,7 +17,7 @@ namespace KanVest
   bool LoginManager::HandleLogin(const std::string& username, const std::string& password, std::string& loginMessage)
   {
     // Ensure database is loaded (do this once at startup)
-    if (!UserDatabase::LoadDatabase())
+    if (!UserManager::LoadDatabase())
     {
       loginMessage = "User database not found";
       return false;
@@ -31,7 +31,7 @@ namespace KanVest
     }
 
     // Step 1: Check if user exists
-    if (UserDatabase::HasUser(username))
+    if (UserManager::HasUser(username))
     {
       // Password Empty
       if (password == "")
@@ -41,12 +41,12 @@ namespace KanVest
       }
 
       // Get the existing profile
-      const auto& user = UserDatabase::GetUser(username);
+      const auto& user = UserManager::GetUser(username);
       
       // Verify password
       if (user.VerifyPassword(password))
       {
-        UserDatabase::SetCurrentUser(user);
+        UserManager::SetCurrentUser(user);
         return true;
       }
       else
@@ -66,7 +66,7 @@ namespace KanVest
   bool LoginManager::HandleSignUp(const std::string& username, const std::string& password, std::string& signUpMessage)
   {
     // Ensure database is loaded (do this once at startup)
-    if (!UserDatabase::LoadDatabase())
+    if (!UserManager::LoadDatabase())
     {
       signUpMessage = "User database not found";
       return false;
@@ -87,18 +87,18 @@ namespace KanVest
     }
     
     // Step 1: Check if user exists
-    if (UserDatabase::HasUser(username))
+    if (UserManager::HasUser(username))
     {
       signUpMessage = "User already exists.";
       return false;
     }
     else
     {
-      UserProfile newUser(username, "");
+      User newUser(username, "");
       newUser.SetPassword(password);
       newUser.portfolioPath = UserDataPath / "Portfolios" / username / "_portfolio.yaml";
 
-      UserDatabase::AddUser(newUser);
+      UserManager::AddUser(newUser);
     }
     
     return true;

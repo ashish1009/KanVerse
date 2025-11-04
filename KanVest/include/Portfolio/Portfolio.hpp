@@ -9,7 +9,7 @@
 
 namespace KanVest
 {
-  struct Holding
+  struct InvestmentHorizon
   {
     enum class Vision {LongTerm, MidTerm, ShortTerm};
     
@@ -23,6 +23,14 @@ namespace KanVest
   {
   public:
   private:
-    std::vector<Holding> m_holdings;
+    std::vector<InvestmentHorizon> m_holdings;
   };
+  
+  class PortfolioSerializer
+  {
+  public:
+    static bool SaveToYAML(const std::filesystem::path& path, const Portfolio& portfolio);
+    static bool LoadFromYAML(const std::filesystem::path& path, Portfolio& portfolio);
+  };
+
 } // namespace KanVest
