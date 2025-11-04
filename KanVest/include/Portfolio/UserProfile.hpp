@@ -14,8 +14,8 @@ namespace KanVest
   public:
     std::string username;
     std::string passwordHash;   // store hashed password, not plain text
-    std::string portfolioPath;  // optional: where user's portfolio YAML is stored
     std::string lastLoginTime;
+    std::filesystem::path portfolioPath;  // optional: where user's portfolio YAML is stored
 
     UserProfile() = default;
     UserProfile(const std::string& user, const std::string& passHash);

@@ -1,1 +1,4 @@
-[]
+- username: ashish
+  passwordHash: 2826401479913020041
+  portfolioPath: ../../../KanVest/UserData/Portfolios/ashish/_portfolio.yaml
+  lastLoginTime: "Tue Nov  4 20:03:10 2025\n"

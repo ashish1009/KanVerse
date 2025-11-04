@@ -161,7 +161,8 @@ namespace KanVest
   void RendererLayer::OnImGuiRender()
   {
     UI_LoginPage();
-    
+    UI_SignupPage();
+
 //    UI_StartMainWindowDocking();
 //    UI_StockAnalyzer();
 //    UI_EndMainWindowDocking();
@@ -260,7 +261,7 @@ namespace KanVest
         KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Username", KanVasX::UI::AlignX::Center, {-50.0f, 20.0f});
         ImGui::SameLine();
         KanVasX::UI::ShiftCursorY(-8.0f);
-        usernameBuffer.TextInput(false, 100, "Username ...");
+        usernameBuffer.TextInput(false, 100, " ");
         KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Password", KanVasX::UI::AlignX::Center, {-50.0f, 15.0f});
 
         // Passeord
@@ -269,7 +270,7 @@ namespace KanVest
 
         ImGui::SameLine();
         KanVasX::UI::ShiftCursorY(-8.0f);
-        passwordBuffer.TextInput(false, 100, "Password ...", showPassword ? 0 : ImGuiInputTextFlags_Password);
+        passwordBuffer.TextInput(false, 100, " ", showPassword ? 0 : ImGuiInputTextFlags_Password);
         
         ImGui::SameLine();
         if (KanVasX::UI::DrawButtonImage("##ShowPassword", KanVasX::UI::GetTextureID(eyeTexture->GetRendererID()), false, {20.0f, 20.0f}))
@@ -277,8 +278,8 @@ namespace KanVest
           showPassword ^= 1;
         }
         
-        // Log in
-        KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x * 0.5f - 50.0f);
+        // Login
+        KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x * 0.5f - 105.0f);
 
         static std::string loginMessage;
         static bool loginSuccess = false;
@@ -289,12 +290,112 @@ namespace KanVest
         
         // Sign Up
         ImGui::SameLine();
-        KanVasX::UI::DrawButton("Sign Up", UI::Font::Get(UI::FontType::Bold));
-        
+        if (KanVasX::UI::DrawButton("Sign Up", UI::Font::Get(UI::FontType::Bold)))
+        {
+          ImGui::CloseCurrentPopup();
+          m_signUpPopup.Set("KanVest Signup", true /* open flag */, 600, 450, true /* center */);
+        }
+
+        // Forget pasword
+        ImGui::SameLine();
+        if (KanVasX::UI::DrawButton("Forget password", UI::Font::Get(UI::FontType::Regular)))
+        {
+
+        }
+
         KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 600);
         if (!loginSuccess)
         {
           KanVasX::UI::Text(UI::Font::Get(UI::FontType::Regular), loginMessage.c_str(), KanVasX::UI::AlignX::Center, {0, 5.0}, KanVasX::Color::Red);
+        }
+      }
+      
+      KanVasX::UI::DrawShadowAllDirection(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
+    });
+  }
+  
+  void RendererLayer::UI_SignupPage()
+  {
+    m_signUpPopup.Show(ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar, [this]()
+                      {
+      KanVasX::ScopedColor bgColor(ImGuiCol_ChildBg, KanVasX::Color::Background);
+      
+      // Kreator Logo and title ----
+      {
+        // Icon
+        static constexpr ImVec2 logoSize {200, 200};
+        KanVasX::UI::SetCursorAt(KanVasX::UI::AlignX::Center, logoSize.x);
+        KanVasX::UI::Image(KanVasX::UI::GetTextureID(m_welcomeIcon->GetRendererID()), logoSize, KanVasX::Color::TextBright);
+        
+        // Welcome Header
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::HugeHeader), "Welcome to KanVest", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::Text);
+        KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 600);
+        
+        static KanVasX::InputBuffer<256> usernameBuffer{"##UserName"};
+        static KanVasX::InputBuffer<256> passwordBuffer{"##Password"};
+        static KanVasX::InputBuffer<256> confirmPasswordBuffer{"##ConfirmPassword"};
+
+        // Username
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Username", KanVasX::UI::AlignX::Center, {-50.0f, 20.0f});
+        ImGui::SameLine();
+        KanVasX::UI::ShiftCursorY(-8.0f);
+        usernameBuffer.TextInput(false, 100, " ");
+        
+        // Passeord
+        static bool showPassword = false;
+        const auto& eyeTexture = showPassword ? m_openEyeIcon : m_closeEyeIcon;
+        
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Password", KanVasX::UI::AlignX::Center, {-50.0f, 15.0f});
+        ImGui::SameLine();
+        KanVasX::UI::ShiftCursorY(-8.0f);
+        passwordBuffer.TextInput(false, 100, " ", showPassword ? 0 : ImGuiInputTextFlags_Password);
+
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Confirm Password", KanVasX::UI::AlignX::Center, {-82.0f, 15.0f});
+        ImGui::SameLine();
+        KanVasX::UI::ShiftCursorY(-8.0f);
+        confirmPasswordBuffer.TextInput(false, 100, " ", showPassword ? 0 : ImGuiInputTextFlags_Password);
+
+        ImGui::SameLine();
+        if (KanVasX::UI::DrawButtonImage("##ShowPassword", KanVasX::UI::GetTextureID(eyeTexture->GetRendererID()), false, {20.0f, 20.0f}))
+        {
+          showPassword ^= 1;
+        }
+        
+        // Sign Up
+        KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x * 0.5f - 50.0f);
+        
+        static std::string signUpMessage;
+        static bool signUpSuccess = false;
+        if (KanVasX::UI::DrawButton("Sign Up", UI::Font::Get(UI::FontType::Bold)) or ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
+        {
+          if (passwordBuffer != confirmPasswordBuffer)
+          {
+            signUpSuccess = false;
+            signUpMessage = "Password do not match";
+          }
+          else
+          {
+            signUpSuccess = LoginManager::HandleSignUp(usernameBuffer, passwordBuffer, signUpMessage);
+          }
+        }
+
+        // Cancel
+        ImGui::SameLine();
+        if (KanVasX::UI::DrawButton("Cancel", UI::Font::Get(UI::FontType::Bold)) or ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Escape))
+        {
+          ImGui::CloseCurrentPopup();
+          m_loginPopup.Set("KanVest Login", true /* open flag */, 600, 410, true /* center */);
+        }
+
+        KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 600);
+        if (signUpSuccess)
+        {
+          ImGui::CloseCurrentPopup();
+          m_loginPopup.Set("KanVest Login", true /* open flag */, 600, 410, true /* center */);
+        }
+        else
+        {
+          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Regular), signUpMessage.c_str(), KanVasX::UI::AlignX::Center, {0, 5.0}, KanVasX::Color::Red);
         }
       }
       

@@ -72,7 +72,17 @@ namespace KanVasX
     {
       return static_cast<std::string>(m_buffer);
     }
-    
+
+    bool operator ==(const InputBuffer& other)
+    {
+      return static_cast<std::string>(m_buffer) == static_cast<std::string>(other.m_buffer);
+    }
+
+    bool operator !=(const InputBuffer& other)
+    {
+      return static_cast<std::string>(m_buffer) != static_cast<std::string>(other.m_buffer);
+    }
+
     constexpr uint32_t Size() const
     {
       return SIZE;
