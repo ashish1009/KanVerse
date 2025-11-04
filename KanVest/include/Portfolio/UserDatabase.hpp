@@ -15,17 +15,24 @@ namespace KanVest {
   class UserDatabase
   {
   public:
+    /// This function sets the data base file path
+    /// - Parameter filePath: new file path
+    static void SetDatabaseFilePath(const std::filesystem::path& filePath);
+    
+    /// This function returns the file path
+    static const std::filesystem::path& GetDatabaseFilePath();
+    
     /// Loads all users from YAML file
-    static bool LoadDatabase(const std::string& filePath);
+    static bool LoadDatabase();
     
     /// Saves all users back to YAML file
-    static bool SaveDatabase(const std::string& filePath);
+    static bool SaveDatabase();
     
     /// Returns a const reference to a user (throws if not found)
     static const UserProfile& GetUser(const std::string& username);
     
     /// Adds a new user (and updates the database)
-    static void AddUser(const UserProfile& user, const std::string& filePath);
+    static void AddUser(const UserProfile& user);
     
     /// Checks if a user exists
     static bool HasUser(const std::string& username);
@@ -35,6 +42,7 @@ namespace KanVest {
     
   private:
     inline static std::unordered_map<std::string, UserProfile> s_userProfileMap;
+    inline static std::filesystem::path s_databaseFilePath;
   };
   
   /// Handles YAML serialization/deserialization of UserDatabase

@@ -9,29 +9,40 @@
 
 namespace KanVest
 {
-  bool UserDatabase::LoadDatabase(const std::string& filePath)
+  void UserDatabase::SetDatabaseFilePath(const std::filesystem::path& filePath)
+  {
+    s_databaseFilePath = filePath;
+  }
+  const std::filesystem::path& UserDatabase::GetDatabaseFilePath()
+  {
+    return s_databaseFilePath;
+  }
+
+  bool UserDatabase::LoadDatabase()
   {
     s_userProfileMap.clear();
-    return UserDatabaseSerializer::LoadFromYAML(s_userProfileMap, filePath);
+    return UserDatabaseSerializer::LoadFromYAML(s_userProfileMap, s_databaseFilePath);
   }
   
-  bool UserDatabase::SaveDatabase(const std::string& filePath)
+  bool UserDatabase::SaveDatabase()
   {
-    return UserDatabaseSerializer::SaveToYAML(s_userProfileMap, filePath);
+    return UserDatabaseSerializer::SaveToYAML(s_userProfileMap, s_databaseFilePath);
   }
   
   const UserProfile& UserDatabase::GetUser(const std::string& username)
   {
     auto it = s_userProfileMap.find(username);
     if (it == s_userProfileMap.end())
+    {
       throw std::runtime_error("User not found: " + username);
+    }
     return it->second;
   }
   
-  void UserDatabase::AddUser(const UserProfile& user, const std::string& filePath)
+  void UserDatabase::AddUser(const UserProfile& user)
   {
     s_userProfileMap[user.username] = user;
-    SaveDatabase(filePath); // update YAML whenever new user is added
+    SaveDatabase(); // update YAML whenever new user is added
   }
   
   bool UserDatabase::HasUser(const std::string& username)
