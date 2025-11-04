@@ -12,6 +12,8 @@
 #include "Stocks/StockParser.hpp"
 #include "Stocks/Stock_UI.hpp"
 
+#include "Portfolio/UserDatabase.hpp"
+
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
@@ -275,13 +277,19 @@ namespace KanVest
           showPassword ^= 1;
         }
         
-        // Buttons
+        // Log in
         KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x * 0.5f - 50.0f);
-        KanVasX::UI::DrawButton("Login", UI::Font::Get(UI::FontType::Bold));
+        if (KanVasX::UI::DrawButton("Login", UI::Font::Get(UI::FontType::Bold)))
+        {
+          const UserProfile& userProfile = UserDatabase::GetUser(usernameBuffer);
+        }
+        
+        // Sign Up
         ImGui::SameLine();
         KanVasX::UI::DrawButton("Sign Up", UI::Font::Get(UI::FontType::Bold));
-
       }
+      
+      KanVasX::UI::DrawShadowAllDirection(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
     });
   }
   

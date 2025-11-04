@@ -10,6 +10,7 @@
 		B26BB08C2EB8C30D00E19493 /* StockAnalyzer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26BB08B2EB8C2AD00E19493 /* StockAnalyzer.cpp */; };
 		B26BB0982EB98E4800E19493 /* Portfolio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26BB0972EB98E4800E19493 /* Portfolio.cpp */; };
 		B26BB09B2EB9902E00E19493 /* UserProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26BB09A2EB9902E00E19493 /* UserProfile.cpp */; };
+		B26BB0A62EBA155300E19493 /* UserDatabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26BB0A52EBA155300E19493 /* UserDatabase.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -46,6 +47,8 @@
 		B26BB0972EB98E4800E19493 /* Portfolio.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Portfolio.cpp; sourceTree = "<group>"; };
 		B26BB0992EB9902E00E19493 /* UserProfile.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UserProfile.hpp; sourceTree = "<group>"; };
 		B26BB09A2EB9902E00E19493 /* UserProfile.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UserProfile.cpp; sourceTree = "<group>"; };
+		B26BB0A42EBA155300E19493 /* UserDatabase.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UserDatabase.hpp; sourceTree = "<group>"; };
+		B26BB0A52EBA155300E19493 /* UserDatabase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UserDatabase.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -95,6 +98,7 @@
 			children = (
 				B26BB0962EB98E4800E19493 /* Portfolio.hpp */,
 				B26BB0992EB9902E00E19493 /* UserProfile.hpp */,
+				B26BB0A42EBA155300E19493 /* UserDatabase.hpp */,
 			);
 			path = Portfolio;
 			sourceTree = "<group>";
@@ -104,6 +108,7 @@
 			children = (
 				B26BB0972EB98E4800E19493 /* Portfolio.cpp */,
 				B26BB09A2EB9902E00E19493 /* UserProfile.cpp */,
+				B26BB0A52EBA155300E19493 /* UserDatabase.cpp */,
 			);
 			path = Portfolio;
 			sourceTree = "<group>";
@@ -312,6 +317,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B289EE512EB4CDFD00937D0B /* StockData.cpp in Sources */,
+				B26BB0A62EBA155300E19493 /* UserDatabase.cpp in Sources */,
 				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B289EE5D2EB4D5E100937D0B /* StockParser.cpp in Sources */,
