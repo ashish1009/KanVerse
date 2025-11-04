@@ -12,7 +12,7 @@
 #include "Stocks/StockParser.hpp"
 #include "Stocks/Stock_UI.hpp"
 
-#include "Portfolio/UserDatabase.hpp"
+#include "Portfolio/LoginManager.hpp"
 
 namespace KanVest
 {
@@ -144,7 +144,7 @@ namespace KanVest
 //    StockUI::Initialize(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
     
     // Login popup
-    m_loginPopup.Set("KanVest Logic", true /* open flag */, 600, 400, true /* center */);
+    m_loginPopup.Set("KanVest Logic", true /* open flag */, 600, 410, true /* center */);
   }
   
   void RendererLayer::OnDetach() noexcept
@@ -279,14 +279,23 @@ namespace KanVest
         
         // Log in
         KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x * 0.5f - 50.0f);
-        if (KanVasX::UI::DrawButton("Login", UI::Font::Get(UI::FontType::Bold)))
+
+        static std::string loginMessage;
+        static bool loginSuccess = false;
+        if (KanVasX::UI::DrawButton("Login", UI::Font::Get(UI::FontType::Bold)) or ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
         {
-          const UserProfile& userProfile = UserDatabase::GetUser(usernameBuffer);
+          loginSuccess = LoginManager::HandleLogin(usernameBuffer, passwordBuffer, loginMessage);
         }
         
         // Sign Up
         ImGui::SameLine();
         KanVasX::UI::DrawButton("Sign Up", UI::Font::Get(UI::FontType::Bold));
+        
+        KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 600);
+        if (!loginSuccess)
+        {
+          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Regular), loginMessage.c_str(), KanVasX::UI::AlignX::Center, {0, 5.0}, KanVasX::Color::Red);
+        }
       }
       
       KanVasX::UI::DrawShadowAllDirection(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));

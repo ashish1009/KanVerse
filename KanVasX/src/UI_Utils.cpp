@@ -367,7 +367,7 @@ namespace KanVasX
       ImGui::PushStyleColor(ImGuiCol_BorderShadow, Color::Lerp(Color::BackgroundShadow, Color::ButtonMuted, 0.9));
       ImGui::PushStyleColor(ImGuiCol_Border, Color::Lerp(Color::Border, Color::ButtonMuted, 0.9));
       
-      ImGui::PushStyleColor(ImGuiCol_Text, Color::TextMuted);
+      ImGui::PushStyleColor(ImGuiCol_Text, Color::Text);
     }
     else
     {

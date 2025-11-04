@@ -36,6 +36,7 @@ namespace KanVest
       std::filesystem::create_directory(userDataPath);
     }
     UserDatabase::SetDatabaseFilePath(userDataPath / "UserDatabase.yaml");
+    UserDatabaseSerializer::SaveToYAML({}, userDataPath / "UserDatabase.yaml"); // Empty file
 
     // Creating a renderer layer and pushing it onto the application stack.
     m_layer = KanViz::CreateScope<RendererLayer>();
