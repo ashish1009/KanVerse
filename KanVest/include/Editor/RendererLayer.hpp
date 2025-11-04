@@ -47,6 +47,8 @@ namespace KanVest
     /// This function ends Main ImGui window with Docking
     void UI_EndMainWindowDocking();
     
+    /// This function show login page
+    void UI_LoginPage();
     /// This function shows stock analyzer panel
     void UI_StockAnalyzer();
     

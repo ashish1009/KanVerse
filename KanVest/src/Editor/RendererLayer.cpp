@@ -152,9 +152,8 @@ namespace KanVest
   {
     UI_StartMainWindowDocking();
     
-//        UI_PrimaryViewportPanel_DEMO();
-    UI_StockAnalyzer();
-    //    UI_PerformancePanel();
+    UI_LoginPage();
+//    UI_StockAnalyzer();
     
     UI_EndMainWindowDocking();
   }
@@ -226,6 +225,11 @@ namespace KanVest
   {
     IK_PERFORMANCE_FUNC("RendererLayer::UI_EndMainWindowDocking");
     ImGui::End();
+  }
+  
+  void RendererLayer::UI_LoginPage()
+  {
+    
   }
   
   void RendererLayer::UI_StockAnalyzer()

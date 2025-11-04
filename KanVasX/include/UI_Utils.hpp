@@ -63,6 +63,12 @@ namespace KanVasX
     /// - Parameter desc: hint
     static void Tooltip(const std::string& desc);
 
+    /// This function set the next imgui window at center
+    static void SetNextWindowAtCenter();
+    /// This function set the next imgui window size
+    /// - Parameter size: size of next window
+    static void SetNextWindowSize(const ImVec2& size);
+
     // Cursor ------------------------------------------------------------------------------------------------------------------------------------------
     /// This function shift the cursor position for x
     /// - Parameter distance: distance x
