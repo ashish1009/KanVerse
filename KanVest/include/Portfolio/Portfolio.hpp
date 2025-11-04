@@ -38,4 +38,10 @@ namespace KanVest
     static bool LoadFromYAML(const std::filesystem::path& path, Portfolio& portfolio);
   };
 
+  namespace PortfolioUtils
+  {
+    // Helper conversion for Vision enum
+    std::string VisionToString(InvestmentHorizon::Vision vision);
+    InvestmentHorizon::Vision StringToVision(const std::string& str);
+  } // namespace PortfolioUtils
 } // namespace KanVest

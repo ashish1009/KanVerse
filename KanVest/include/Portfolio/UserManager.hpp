@@ -39,9 +39,9 @@ namespace KanVest {
 
     /// This function updates current user
     static void SetCurrentUser(const User& user);
-    
+
     /// This function returns current user
-    static const User& GetCurrentUser();
+    static User& GetCurrentUser();
 
     /// Returns all users (read-only)
     static const std::unordered_map<std::string, User>& GetAllUsers();

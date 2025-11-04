@@ -55,11 +55,11 @@ namespace KanVest
     s_currentUser = user;
   }
   
-  const User& UserManager::GetCurrentUser()
+  User& UserManager::GetCurrentUser()
   {
     return s_currentUser;
   }
-  
+
   const std::unordered_map<std::string, User>& UserManager::GetAllUsers()
   {
     return s_userProfileMap;

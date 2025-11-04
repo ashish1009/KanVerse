@@ -11,6 +11,9 @@
 #include "Stocks/StockAPI.hpp"
 #include "Stocks/StockParser.hpp"
 
+#include "Portfolio/Portfolio.hpp"
+#include "Portfolio/UserManager.hpp"
+
 namespace KanVest
 {
 #define KanVest_Text(font, string, offset, textColor) \
@@ -597,7 +600,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.46);
         KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Portfolio", KanVasX::UI::AlignX::Center, {0.0f, 10.0f});
         
-        
+        ShowPortfolio();
       }
       
       // Column 3 Chart
@@ -608,6 +611,88 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 
     }
     ImGui::EndTable();
+  }
+  
+  void StockUI::ShowPortfolio()
+  {
+    KanViz::Ref<Portfolio> portfolio = UserManager::GetCurrentUser().portfolio;
+    
+    auto& holdings = portfolio->GetHoldings();
+    
+    // Define table
+    ImGuiTableFlags flags =
+    ImGuiTableFlags_Borders |
+    ImGuiTableFlags_RowBg |
+    ImGuiTableFlags_Sortable |
+    ImGuiTableFlags_Resizable |
+    ImGuiTableFlags_Reorderable;
+
+    if (ImGui::BeginTable("PortfolioTable", 7, flags))
+    {
+      ImGui::TableSetupColumn("Symbol", ImGuiTableColumnFlags_DefaultSort);
+      ImGui::TableSetupColumn("Average Price", ImGuiTableColumnFlags_PreferSortAscending);
+      ImGui::TableSetupColumn("Quantity", ImGuiTableColumnFlags_PreferSortDescending);
+      ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_PreferSortDescending);
+      ImGui::TableSetupColumn("P & L", ImGuiTableColumnFlags_PreferSortDescending);
+      ImGui::TableSetupColumn("P & L %", ImGuiTableColumnFlags_PreferSortDescending);
+      ImGui::TableSetupColumn("Vision");
+      ImGui::TableHeadersRow();
+
+      if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs())
+      {
+        if (sortSpecs->SpecsDirty && sortSpecs->SpecsCount > 0)
+        {
+          const ImGuiTableColumnSortSpecs& spec = sortSpecs->Specs[0];
+          auto comparator = [&](const InvestmentHorizon& a, const InvestmentHorizon& b)
+          {
+            switch (spec.ColumnIndex)
+            {
+              case 0: // Symbol
+                return (spec.SortDirection == ImGuiSortDirection_Ascending)
+                ? (a.symbol < b.symbol)
+                : (a.symbol > b.symbol);
+              case 1: // Average Price
+                return (spec.SortDirection == ImGuiSortDirection_Ascending)
+                ? (a.averagePrice < b.averagePrice)
+                : (a.averagePrice > b.averagePrice);
+              case 2: // Quantity
+                return (spec.SortDirection == ImGuiSortDirection_Ascending)
+                ? (a.quantity < b.quantity)
+                : (a.quantity > b.quantity);
+              case 3: // Vision
+                return (spec.SortDirection == ImGuiSortDirection_Ascending)
+                ? (static_cast<int>(a.vision) < static_cast<int>(b.vision))
+                : (static_cast<int>(a.vision) > static_cast<int>(b.vision));
+              default:
+                return false;
+            }
+          };
+          
+          std::sort(holdings.begin(), holdings.end(), comparator);
+          sortSpecs->SpecsDirty = false;
+        }
+      }
+      
+      // Render table rows
+      for (const auto& h : holdings)
+      {
+        ImGui::TableNextRow();
+        
+        ImGui::TableSetColumnIndex(0);
+        ImGui::TextUnformatted(h.symbol.c_str());
+        
+        ImGui::TableSetColumnIndex(1);
+        ImGui::Text("%.2f", h.averagePrice);
+        
+        ImGui::TableSetColumnIndex(2);
+        ImGui::Text("%d", h.quantity);
+        
+        ImGui::TableSetColumnIndex(3);
+        ImGui::TextUnformatted(PortfolioUtils::VisionToString(h.vision).c_str());
+      }
+
+      ImGui::EndTable();
+    }
   }
   
   void StockUI::ShowStockTechnicals()

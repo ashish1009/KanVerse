@@ -51,24 +51,26 @@ namespace KanVest
   }
 
   // Helper conversion for Vision enum
-  static std::string VisionToString(InvestmentHorizon::Vision vision)
+  namespace PortfolioUtils
   {
-    switch (vision)
+    std::string VisionToString(InvestmentHorizon::Vision vision)
     {
-      case InvestmentHorizon::Vision::LongTerm:  return "LongTerm";
-      case InvestmentHorizon::Vision::MidTerm:   return "MidTerm";
-      case InvestmentHorizon::Vision::ShortTerm: return "ShortTerm";
+      switch (vision)
+      {
+        case InvestmentHorizon::Vision::LongTerm:  return "LongTerm";
+        case InvestmentHorizon::Vision::MidTerm:   return "MidTerm";
+        case InvestmentHorizon::Vision::ShortTerm: return "ShortTerm";
+      }
+      return "Unknown";
     }
-    return "Unknown";
-  }
-  
-  static InvestmentHorizon::Vision StringToVision(const std::string& str)
-  {
-    if (str == "LongTerm")  return InvestmentHorizon::Vision::LongTerm;
-    if (str == "MidTerm")   return InvestmentHorizon::Vision::MidTerm;
-    if (str == "ShortTerm") return InvestmentHorizon::Vision::ShortTerm;
-    return InvestmentHorizon::Vision::LongTerm;
-  }
+    InvestmentHorizon::Vision StringToVision(const std::string& str)
+    {
+      if (str == "LongTerm")  return InvestmentHorizon::Vision::LongTerm;
+      if (str == "MidTerm")   return InvestmentHorizon::Vision::MidTerm;
+      if (str == "ShortTerm") return InvestmentHorizon::Vision::ShortTerm;
+      return InvestmentHorizon::Vision::LongTerm;
+    }
+  } // namespace PortfolioUtils
   
   //--------------------------------------------
   // Save Portfolio → YAML
@@ -87,7 +89,7 @@ namespace KanVest
         out << YAML::Key << "Symbol"       << YAML::Value << h.symbol;
         out << YAML::Key << "AveragePrice" << YAML::Value << h.averagePrice;
         out << YAML::Key << "Quantity"     << YAML::Value << h.quantity;
-        out << YAML::Key << "Vision"       << YAML::Value << VisionToString(h.vision);
+        out << YAML::Key << "Vision"       << YAML::Value << PortfolioUtils::VisionToString(h.vision);
         out << YAML::EndMap;
       }
       
@@ -140,7 +142,7 @@ namespace KanVest
         h.symbol       = node["Symbol"].as<std::string>();
         h.averagePrice = node["AveragePrice"].as<double>();
         h.quantity     = node["Quantity"].as<int32_t>();
-        h.vision       = StringToVision(node["Vision"].as<std::string>());
+        h.vision       = PortfolioUtils::StringToVision(node["Vision"].as<std::string>());
         portfolio.AddHolding(h);
       }
       

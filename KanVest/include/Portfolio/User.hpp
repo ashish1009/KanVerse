@@ -20,7 +20,7 @@ namespace KanVest
     std::filesystem::path portfolioPath;  // optional: where user's portfolio YAML is stored
 
     // Runtime-only data, not serialized
-    std::shared_ptr<Portfolio> portfolio;
+    KanViz::Ref<Portfolio> portfolio;
 
     User() = default;
     User(const std::string& user, const std::string& passHash);

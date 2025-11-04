@@ -34,6 +34,8 @@ namespace KanVest
     static void DrawCandleChart(const StockData& stockData);
     static void DrawChartController(const StockData& stockData);
     
+    static void ShowPortfolio();
+    
     inline static ImTextureID s_reloadIconID = 0;
     inline static bool s_showCandle = true;
     

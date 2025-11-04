@@ -8,6 +8,7 @@
 #include "LoginManager.hpp"
 
 #include "Portfolio/UserManager.hpp"
+#include "Portfolio/Portfolio.hpp"
 
 namespace KanVest
 {
@@ -47,6 +48,10 @@ namespace KanVest
       if (user.VerifyPassword(password))
       {
         UserManager::SetCurrentUser(user);
+        
+        auto& currentUser = UserManager::GetCurrentUser();
+        currentUser.LoadPortfolio();
+
         return true;
       }
       else
@@ -96,7 +101,15 @@ namespace KanVest
     {
       User newUser(username, "");
       newUser.SetPassword(password);
-      newUser.portfolioPath = UserDataPath / "Portfolios" / username / "_portfolio.yaml";
+
+      std::filesystem::path directory =  UserDataPath / "Portfolios";
+      std::string filePath =  username + "_portfolio.yaml";
+      if (!std::filesystem::exists(directory))
+      {
+        std::filesystem::create_directory(directory);
+      }
+      
+      newUser.portfolioPath = directory / filePath;
 
       UserManager::AddUser(newUser);
     }

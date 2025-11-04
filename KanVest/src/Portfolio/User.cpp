@@ -26,14 +26,16 @@ namespace KanVest
   
   void User::LoadPortfolio()
   {
+    portfolio = std::make_shared<Portfolio>();
+    // If file doesn’t exist, create a new empty one
     if (!std::filesystem::exists(portfolioPath))
     {
-      portfolio = std::make_shared<Portfolio>();
-      return;
+      PortfolioSerializer::SaveToYAML(portfolioPath, *portfolio);
     }
-    
-    portfolio = std::make_shared<Portfolio>();
-    PortfolioSerializer::LoadFromYAML(portfolioPath, *portfolio);
+    else
+    {
+      PortfolioSerializer::LoadFromYAML(portfolioPath, *portfolio);
+    }
   }
   
   void User::SavePortfolio() const
