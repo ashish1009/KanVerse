@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B26BB09E2EB991F800E19493 /* UI_Popup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26BB09D2EB991F800E19493 /* UI_Popup.cpp */; };
 		B26BB09F2EB991F800E19493 /* UI_Popup.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B26BB09C2EB991F800E19493 /* UI_Popup.hpp */; };
+		B26BB0A32EB99AD300E19493 /* UI_InputManager.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B26BB0A02EB99AD300E19493 /* UI_InputManager.hpp */; };
 		B289EE342EB37FE500937D0B /* UI_Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE2D2EB37E3500937D0B /* UI_Utils.cpp */; };
 		B289EE3B2EB3A5FA00937D0B /* UI_Theme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE3A2EB3A5FA00937D0B /* UI_Theme.cpp */; };
 		B289EE432EB3AE2C00937D0B /* UI_Scoped.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B289EE412EB3AE2C00937D0B /* UI_Scoped.hpp */; };
@@ -23,6 +24,7 @@
 /* Begin PBXFileReference section */
 		B26BB09C2EB991F800E19493 /* UI_Popup.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Popup.hpp; sourceTree = "<group>"; };
 		B26BB09D2EB991F800E19493 /* UI_Popup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Popup.cpp; sourceTree = "<group>"; };
+		B26BB0A02EB99AD300E19493 /* UI_InputManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_InputManager.hpp; sourceTree = "<group>"; };
 		B289EE1B2EB37D6600937D0B /* libKanVasX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libKanVasX.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289EE2B2EB37E0900937D0B /* KanVasX.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KanVasX.h; sourceTree = "<group>"; };
 		B289EE2C2EB37E3500937D0B /* UI_Utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Utils.hpp; sourceTree = "<group>"; };
@@ -81,6 +83,7 @@
 				B289EE492EB4470400937D0B /* UI_Widget.hpp */,
 				B289EE622EB5EC4F00937D0B /* UI_Date.hpp */,
 				B26BB09C2EB991F800E19493 /* UI_Popup.hpp */,
+				B26BB0A02EB99AD300E19493 /* UI_InputManager.hpp */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -110,6 +113,7 @@
 				B289EE472EB3BEBE00937D0B /* UI_Panel.hpp in Headers */,
 				B26BB09F2EB991F800E19493 /* UI_Popup.hpp in Headers */,
 				B289EE4B2EB4470400937D0B /* UI_Widget.hpp in Headers */,
+				B26BB0A32EB99AD300E19493 /* UI_InputManager.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

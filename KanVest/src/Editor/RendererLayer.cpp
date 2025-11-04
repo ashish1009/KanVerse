@@ -40,8 +40,9 @@ namespace KanVest
     IK_LOG_INFO("RendererLayer", "Creating '{0}' Layer instance", GetName());
     
     // Load Textures -----------------------------------------------------------------------------
-    m_applicationIcon = CreateTexture("Textures/Logo/KanVest.png");
-    
+    m_welcomeIcon = CreateTexture("Textures/Logo/KanVest.png");
+    m_applicationIcon = CreateTexture("Textures/Logo/IKan.png");
+
     // Window Icons
     m_iconClose = CreateTexture("Textures/Icons/Close.png");
     m_iconMinimize = CreateTexture("Textures/Icons/Minimize.png");
@@ -134,7 +135,12 @@ namespace KanVest
     KanVasX::Widget::SetSearchIcon(KanVasX::UI::GetTextureID(m_searchIcon->GetRendererID()));
     KanVasX::Widget::SetSettingIcon(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
     
-    StockUI::Initialize(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
+//    StockUI::Initialize(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
+    
+    // Login popup
+    const auto& windowWidth = KanViz::Application::Get().GetWindow()->GetWidth();
+    const auto& windowHeight = KanViz::Application::Get().GetWindow()->GetHeight();
+    m_loginPopup.Set("KanVest Logic", true /* open flag */, windowWidth, windowHeight, true /* center */);
   }
   
   void RendererLayer::OnDetach() noexcept
@@ -150,12 +156,11 @@ namespace KanVest
   
   void RendererLayer::OnImGuiRender()
   {
-    UI_StartMainWindowDocking();
-    
     UI_LoginPage();
-//    UI_StockAnalyzer();
     
-    UI_EndMainWindowDocking();
+//    UI_StartMainWindowDocking();
+//    UI_StockAnalyzer();
+//    UI_EndMainWindowDocking();
   }
   
   void RendererLayer::OnEvent(KanViz::Event& event)
@@ -229,7 +234,23 @@ namespace KanVest
   
   void RendererLayer::UI_LoginPage()
   {
-    
+    m_loginPopup.Show(ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar, [this]()
+                        {
+      KanVasX::ScopedColor bgColor(ImGuiCol_ChildBg, KanVasX::Color::Background);
+      KanVasX::ScopedColor separatorColor(ImGuiCol_TableBorderLight, KanVasX::Color::Alpha(KanVasX::Color::Highlight, 0.2));
+
+      // Kreator Logo and title ----
+      {
+        // Icon
+        static constexpr ImVec2 logoSize {600, 300};
+        KanVasX::UI::ShiftCursorY(ImGui::GetContentRegionAvail().y * 0.5f - logoSize.y);
+        KanVasX::UI::SetCursorAt(KanVasX::UI::AlignX::Center, logoSize.x);
+        KanVasX::UI::Image(KanVasX::UI::GetTextureID(m_welcomeIcon->GetRendererID()), logoSize, KanVasX::Color::TextBright);
+        
+        
+      }
+      KanVasX::UI::DrawShadowAllDirection(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
+    });
   }
   
   void RendererLayer::UI_StockAnalyzer()

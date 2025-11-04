@@ -28,3 +28,5 @@
 #include <UI_Panel.hpp>
 #include <UI_Widget.hpp>
 #include <UI_Date.hpp>
+#include <UI_Popup.hpp>
+#include <UI_InputManager.hpp>

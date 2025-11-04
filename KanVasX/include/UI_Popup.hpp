@@ -52,7 +52,10 @@ namespace KanVasX
       }
       
       // Set size of popup
-      UI::SetNextWindowSize({m_width, m_height});
+      if (m_width > 0 and m_height > 0)
+      {
+        UI::SetNextWindowSize({m_width, m_height});
+      }
       
       // Begin popup model
       if (ImGui::BeginPopupModal(m_title.data(), nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | popupFlags))
@@ -64,6 +67,9 @@ namespace KanVasX
         ImGui::EndPopup();
       }
     }
+    
+    float GetWidgth() const;
+    float GetHeight() const;
     
   private:
     std::string m_title {""};

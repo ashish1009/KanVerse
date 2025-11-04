@@ -100,6 +100,11 @@ namespace KanVasX
     static void NewLine();
     /// This function create separtor
     static void Separator(float alpha = 0.08f);
+    
+    /// This function aligns the cursor
+    /// - Parameter align: Cursor alignment
+    /// - Parameter itemSize: size of item
+    static void SetCursorAt(AlignX align, float itemSize);
 
     // Rectangles API --------------------------------------------------------------------------------------------------------------------------------
     /// This function returns the ImGui Item Rectangle vertex

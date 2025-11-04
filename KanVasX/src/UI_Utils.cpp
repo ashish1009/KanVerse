@@ -139,6 +139,14 @@ namespace KanVasX
     UI::ShiftCursorY(5.0f);
     ImGui::Separator();
   }
+  
+  void UI::SetCursorAt(AlignX align, float itemSize)
+  {
+    float factor = (ImGui::GetColumnWidth() - itemSize) / 2;
+    float finalShift = (uint32_t)(align) * (factor);
+    UI::SetCursorPosX(finalShift);
+  }
+  
   void UI::NewLine()
   {
     ImGui::NewLine();

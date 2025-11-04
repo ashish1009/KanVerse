@@ -28,4 +28,14 @@ namespace KanVasX
   {
     m_openFlag = flag;
   }
+  
+  float Popup::GetWidgth() const
+  {
+    return m_width;
+  }
+  float Popup::GetHeight() const
+  {
+    return m_height;
+  }
+
 } // namespace KanVasX
