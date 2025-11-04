@@ -40,22 +40,19 @@ namespace KanVest
         return false;
       }
 
-//      IK_ASSERT(false);
-//      // Step 2: Get the existing profile
-//      const auto& user = UserDatabase::GetUser(username);
-//      
-//      // Step 3: Verify password
-//      if (user.VerifyPassword(password))
-//      {
-//        std::cout << "✅ Login successful for " << username << "\n";
-//        
-//        // Example: You can now load portfolio or set current user
-//        // g_CurrentUser = user;
-//      }
-//      else
-//      {
-//        std::cout << "❌ Invalid password for " << username << "\n";
-//      }
+      // Get the existing profile
+      const auto& user = UserDatabase::GetUser(username);
+      
+      // Verify password
+      if (user.VerifyPassword(password))
+      {
+        return true;
+      }
+      else
+      {
+        loginMessage = "Invalid password !!!";
+        return false;
+      }
     }
     else
     {

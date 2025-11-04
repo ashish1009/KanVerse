@@ -31,12 +31,19 @@ namespace KanVest
     IK_PROFILE();
     
     std::filesystem::path userDataPath = "../../../KanVest/UserData";
+    UserDatabase::SetDatabaseFilePath(userDataPath / "UserDatabase.yaml");
     if (!exists(userDataPath))
     {
       std::filesystem::create_directory(userDataPath);
     }
-    UserDatabase::SetDatabaseFilePath(userDataPath / "UserDatabase.yaml");
-    UserDatabaseSerializer::SaveToYAML({}, userDataPath / "UserDatabase.yaml"); // Empty file
+    if (!exists(userDataPath / "UserDatabase.yaml"))
+    {
+      UserDatabase::SaveDatabase();
+    }
+    else
+    {
+      UserDatabase::LoadDatabase();
+    }
 
     // Creating a renderer layer and pushing it onto the application stack.
     m_layer = KanViz::CreateScope<RendererLayer>();
