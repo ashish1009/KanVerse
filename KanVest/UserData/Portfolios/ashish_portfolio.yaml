@@ -1,17 +1,2 @@
 Holdings:
-  - Symbol: BEL
-    AveragePrice: 280
-    Quantity: 1
-    Vision: LongTerm
-  - Symbol: ANGELONE
-    AveragePrice: 1200
-    Quantity: 1
-    Vision: LongTerm
-  - Symbol: BDL
-    AveragePrice: 1500
-    Quantity: 1
-    Vision: LongTerm
-  - Symbol: BHARTIARTL
-    AveragePrice: 1500
-    Quantity: 1
-    Vision: LongTerm
+  []

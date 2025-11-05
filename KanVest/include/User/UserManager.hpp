@@ -17,7 +17,7 @@ namespace KanVest
   public:
     /// This function sets the data base file path
     /// - Parameter filePath: new file path
-    static void SetDatabaseFilePath(const std::filesystem::path& filePath);
+    static void SetDatabaseFilePath(const std::filesystem::path& databaseDirectory);
 
     /// This function returns the file path
     static const std::filesystem::path& GetDatabaseFilePath();
@@ -46,10 +46,21 @@ namespace KanVest
     /// Returns all users (read-only)
     static const std::unordered_map<std::string, User>& GetAllUsers();
     
+    /// This function handles the login
+    /// - Parameters:
+    ///   - username: username
+    ///   - password: password
+    static bool HandleLogin(const std::string& username, const std::string& password, std::string& loginMessage);
+    /// This function handles the login
+    /// - Parameters:
+    ///   - username: username
+    ///   - password: password
+    static bool HandleSignUp(const std::string& username, const std::string& password, std::string& signUpMessage);
+
   private:
     inline static std::unordered_map<std::string, User> s_userProfileMap;
     inline static User s_currentUser;
-    inline static std::filesystem::path s_databaseFilePath;
+    inline static std::filesystem::path s_databaseDirectory, s_databaseFilePath;
   };
   
   /// Handles YAML serialization/deserialization of UserDatabase

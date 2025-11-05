@@ -7,6 +7,8 @@
 
 #include "RendererLayer.hpp"
 
+#include "User/UserManager.hpp"
+
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
@@ -156,10 +158,10 @@ namespace KanVest
     UI_LoginPage();
     UI_SignupPage();
     
-//    if (UserManager::GetCurrentUser().Valid())
+    if (UserManager::GetCurrentUser().Valid())
     {
-//      UI_StartMainWindowDocking();
-//      UI_EndMainWindowDocking();
+      UI_StartMainWindowDocking();
+      UI_EndMainWindowDocking();
     }
   }
   
@@ -282,7 +284,7 @@ namespace KanVest
         static bool loginSuccess = false;
         if (KanVasX::UI::DrawButton("Login", UI::Font::Get(UI::FontType::Bold)) or ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
         {
-//          loginSuccess = LoginManager::HandleLogin(usernameBuffer, passwordBuffer, loginMessage);
+          loginSuccess = UserManager::HandleLogin(usernameBuffer, passwordBuffer, loginMessage);
           if (loginSuccess)
           {
             ImGui::CloseCurrentPopup();
@@ -376,7 +378,7 @@ namespace KanVest
           }
           else
           {
-//            signUpSuccess = LoginManager::HandleSignUp(usernameBuffer, passwordBuffer, signUpMessage);
+            signUpSuccess = UserManager::HandleSignUp(usernameBuffer, passwordBuffer, signUpMessage);
           }
         }
 

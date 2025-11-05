@@ -9,9 +9,24 @@
 
 namespace KanVest
 {
-  void UserManager::SetDatabaseFilePath(const std::filesystem::path& filePath)
+  void UserManager::SetDatabaseFilePath(const std::filesystem::path& databaseDirectory)
   {
-    s_databaseFilePath = filePath;
+    s_databaseDirectory = databaseDirectory;
+    if (!exists(s_databaseDirectory))
+    {
+      std::filesystem::create_directory(s_databaseDirectory);
+    }
+    
+    s_databaseFilePath = s_databaseDirectory / "UserDatabase.yaml";
+    if (exists(s_databaseFilePath))
+    {
+      UserManager::LoadDatabase();
+    }
+    else
+    {
+      UserManager::SaveDatabase();
+    }
+
   }
   const std::filesystem::path& UserManager::GetDatabaseFilePath()
   {
@@ -120,5 +135,107 @@ namespace KanVest
     
     return true;
   }
+
+  bool UserManager::HandleLogin(const std::string& username, const std::string& password, std::string& loginMessage)
+  {
+    // Ensure database is loaded (do this once at startup)
+    if (!LoadDatabase())
+    {
+      loginMessage = "User database not found";
+      return false;
+    }
+    
+    // Empty user name
+    if (username == "")
+    {
+      loginMessage = "Username can not be empty";
+      return false;
+    }
+    
+    // Step 1: Check if user exists
+    if (UserManager::HasUser(username))
+    {
+      // Password Empty
+      if (password == "")
+      {
+        loginMessage = "Password can not be empty";
+        return false;
+      }
+      
+      // Get the existing profile
+      const auto& user = UserManager::GetUser(username);
+      
+      // Verify password
+      if (user.VerifyPassword(password))
+      {
+        UserManager::SetCurrentUser(user);
+        
+        auto& currentUser = UserManager::GetCurrentUser();
+        currentUser.LoadPortfolio();
+        
+        return true;
+      }
+      else
+      {
+        loginMessage = "Invalid password !!!";
+        return false;
+      }
+    }
+    else
+    {
+      loginMessage = "User not found. Sign-up to create new account";
+      return false;
+    }
+    return true;
+  }
   
+  bool UserManager::HandleSignUp(const std::string& username, const std::string& password, std::string& signUpMessage)
+  {
+    // Ensure database is loaded (do this once at startup)
+    if (!LoadDatabase())
+    {
+      signUpMessage = "User database not found";
+      return false;
+    }
+    
+    // Empty Username
+    if (username == "")
+    {
+      signUpMessage = "Username can not be empty";
+      return false;
+    }
+    
+    // Password Username
+    if (password == "")
+    {
+      signUpMessage = "Password can not be empty";
+      return false;
+    }
+    
+    // Step 1: Check if user exists
+    if (UserManager::HasUser(username))
+    {
+      signUpMessage = "User already exists.";
+      return false;
+    }
+    else
+    {
+      User newUser(username, "");
+      newUser.SetPassword(password);
+      
+      std::filesystem::path portfolioDirectory =  s_databaseDirectory / "Portfolios";
+      std::string portfolioFilePath =  username + "_portfolio.yaml";
+      if (!std::filesystem::exists(portfolioDirectory))
+      {
+        std::filesystem::create_directory(portfolioDirectory);
+      }
+      
+      newUser.portfolioPath = portfolioDirectory / portfolioFilePath;
+      
+      UserManager::AddUser(newUser);
+    }
+    
+    return true;
+  }
+
 } // namespace KanVest
