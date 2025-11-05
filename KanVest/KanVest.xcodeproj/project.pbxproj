@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B25162002EBB474800C7FDC3 /* Portfolio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B25161FF2EBB474800C7FDC3 /* Portfolio.cpp */; };
 		B25162032EBB487000C7FDC3 /* User.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B25162022EBB487000C7FDC3 /* User.cpp */; };
+		B25162062EBB48A200C7FDC3 /* UserManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B25162052EBB48A200C7FDC3 /* UserManager.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -36,6 +37,8 @@
 		B25161FF2EBB474800C7FDC3 /* Portfolio.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Portfolio.cpp; sourceTree = "<group>"; };
 		B25162012EBB487000C7FDC3 /* User.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = User.hpp; sourceTree = "<group>"; };
 		B25162022EBB487000C7FDC3 /* User.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = User.cpp; sourceTree = "<group>"; };
+		B25162042EBB48A200C7FDC3 /* UserManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UserManager.hpp; sourceTree = "<group>"; };
+		B25162052EBB48A200C7FDC3 /* UserManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UserManager.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -72,6 +75,7 @@
 			isa = PBXGroup;
 			children = (
 				B25162012EBB487000C7FDC3 /* User.hpp */,
+				B25162042EBB48A200C7FDC3 /* UserManager.hpp */,
 			);
 			path = User;
 			sourceTree = "<group>";
@@ -88,7 +92,6 @@
 			isa = PBXGroup;
 			children = (
 				B25161FF2EBB474800C7FDC3 /* Portfolio.cpp */,
-				B25162022EBB487000C7FDC3 /* User.cpp */,
 			);
 			path = Portfolio;
 			sourceTree = "<group>";
@@ -96,6 +99,8 @@
 		B26BB0952EB98E0900E19493 /* User */ = {
 			isa = PBXGroup;
 			children = (
+				B25162052EBB48A200C7FDC3 /* UserManager.cpp */,
+				B25162022EBB487000C7FDC3 /* User.cpp */,
 			);
 			path = User;
 			sourceTree = "<group>";
@@ -292,6 +297,7 @@
 			files = (
 				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
+				B25162062EBB48A200C7FDC3 /* UserManager.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
 				B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */,
 				B25162032EBB487000C7FDC3 /* User.cpp in Sources */,
