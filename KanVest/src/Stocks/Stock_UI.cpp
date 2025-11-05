@@ -304,7 +304,6 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, Utils::FormatLargeNumber(stockData.volume), glm::vec2(50.0f, 0.0f), textColor);
 
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
     KanVasX::UI::ShiftCursorY(10);
   }
   
@@ -598,8 +597,9 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 //        KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, secondColWidth);
 //        KanVasX::UI::ShiftCursorY(5.0f);
 
-          KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.46);
-          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Portfolio", KanVasX::UI::AlignX::Center, {0.0f, 10.0f});
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, secondColWidth);
+          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Portfolio", KanVasX::UI::AlignX::Center);
+          KanVasX::UI::ShiftCursorY(10.0f);
           
           ShowPortfolio();
         }
