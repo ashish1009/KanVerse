@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B25162002EBB474800C7FDC3 /* Portfolio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B25161FF2EBB474800C7FDC3 /* Portfolio.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -30,6 +31,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B25161FE2EBB474800C7FDC3 /* Portfolio.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Portfolio.hpp; sourceTree = "<group>"; };
+		B25161FF2EBB474800C7FDC3 /* Portfolio.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Portfolio.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -62,18 +65,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B26BB0932EB98D9600E19493 /* Portfolio */ = {
+		B25161FB2EBB46A300C7FDC3 /* User */ = {
 			isa = PBXGroup;
 			children = (
+			);
+			path = User;
+			sourceTree = "<group>";
+		};
+		B25161FC2EBB472E00C7FDC3 /* Portfolio */ = {
+			isa = PBXGroup;
+			children = (
+				B25161FE2EBB474800C7FDC3 /* Portfolio.hpp */,
 			);
 			path = Portfolio;
 			sourceTree = "<group>";
 		};
-		B26BB0952EB98E0900E19493 /* Portfolio */ = {
+		B25161FD2EBB473300C7FDC3 /* Portfolio */ = {
+			isa = PBXGroup;
+			children = (
+				B25161FF2EBB474800C7FDC3 /* Portfolio.cpp */,
+			);
+			path = Portfolio;
+			sourceTree = "<group>";
+		};
+		B26BB0952EB98E0900E19493 /* User */ = {
 			isa = PBXGroup;
 			children = (
 			);
-			path = Portfolio;
+			path = User;
 			sourceTree = "<group>";
 		};
 		B289E6192EB0E01600937D0B = {
@@ -104,7 +123,8 @@
 				B289EDF02EB2559500937D0B /* Editor */,
 				B289EE3C2EB3ACDD00937D0B /* UI */,
 				B289EE4D2EB4CD2C00937D0B /* Stocks */,
-				B26BB0932EB98D9600E19493 /* Portfolio */,
+				B25161FB2EBB46A300C7FDC3 /* User */,
+				B25161FC2EBB472E00C7FDC3 /* Portfolio */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -116,7 +136,8 @@
 				B289EDEF2EB2558E00937D0B /* Editor */,
 				B289EE3D2EB3ACE300937D0B /* UI */,
 				B289EE4E2EB4CD3600937D0B /* Stocks */,
-				B26BB0952EB98E0900E19493 /* Portfolio */,
+				B26BB0952EB98E0900E19493 /* User */,
+				B25161FD2EBB473300C7FDC3 /* Portfolio */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -268,6 +289,7 @@
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
 				B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */,
+				B25162002EBB474800C7FDC3 /* Portfolio.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

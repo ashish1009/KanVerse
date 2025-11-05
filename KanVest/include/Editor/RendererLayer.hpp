@@ -51,8 +51,6 @@ namespace KanVest
     void UI_LoginPage();
     /// This function show login page
     void UI_SignupPage();
-    /// This function shows stock analyzer panel
-    void UI_StockAnalyzer();
     
     /// This function shows Performance pane;
     void UI_PerformancePanel();

@@ -158,9 +158,8 @@ namespace KanVest
     
 //    if (UserManager::GetCurrentUser().Valid())
     {
-      UI_StartMainWindowDocking();
-      UI_StockAnalyzer();
-      UI_EndMainWindowDocking();
+//      UI_StartMainWindowDocking();
+//      UI_EndMainWindowDocking();
     }
   }
   
@@ -403,12 +402,6 @@ namespace KanVest
       
       KanVasX::UI::DrawShadowAllDirection(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
     });
-  }
-  
-  void RendererLayer::UI_StockAnalyzer()
-  {
-    IK_PERFORMANCE_FUNC("RendererLayer::UI_StockAnalyzer");
-//    StockUI::StockPanel();
   }
   
   void RendererLayer::UI_PerformancePanel()
