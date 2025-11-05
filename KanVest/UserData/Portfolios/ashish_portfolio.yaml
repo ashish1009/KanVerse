@@ -1,2 +1,9 @@
 Holdings:
-  []
+  - Symbol: AngelOne
+    AveragePrice: 2868.280029296875
+    Quantity: 1
+    Vision: MidTerm
+  - Symbol: BEL
+    AveragePrice: 398
+    Quantity: 1
+    Vision: LongTerm

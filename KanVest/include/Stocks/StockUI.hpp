@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "Portfolio/Portfolio.hpp"
+
 namespace KanVest
 {
   /// This class responsible for Stock UI Panel
@@ -24,6 +26,7 @@ namespace KanVest
     static void ShowPortfolio();
     static void ShowWatchlist();
 
+    static void DrawPortfolioTable(Portfolio* portfolio);
     static void SearchBar();
 
     inline static ImTextureID s_reloadIconID = 0;
