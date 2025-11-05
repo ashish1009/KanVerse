@@ -3,3 +3,11 @@ Holdings:
     AveragePrice: 314
     Quantity: 1
     Vision: LongTerm
+  - Symbol: BSE
+    AveragePrice: 1200
+    Quantity: 2
+    Vision: LongTerm
+  - Symbol: BDL
+    AveragePrice: 1700
+    Quantity: 3
+    Vision: LongTerm

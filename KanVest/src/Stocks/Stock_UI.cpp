@@ -616,37 +616,30 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   void StockUI::ShowPortfolio()
   {
     KanViz::Ref<Portfolio> portfolio = UserManager::GetCurrentUser().portfolio;
+    if (!portfolio)
+    {
+      ImGui::TextDisabled("No portfolio loaded.");
+      return;
+    }
     
     auto& holdings = portfolio->GetHoldings();
     
-    // Card-like background
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
-    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(6, 4));
-    ImGui::PushStyleColor(ImGuiCol_TableHeaderBg, ImVec4(0.12f, 0.12f, 0.12f, 1.0f));
-    
-    ImGui::Separator();
     ImGui::Spacing();
     
+    // ---- Add New Holding Row ----
     static char symbolBuf[16] = "";
     static float avgPrice = 0.0f;
     static int quantity = 0;
     static int selectedVision = 0;
-    static const char* visions[] = {"Long", "Mid", "Short"};
+    static const char* visions[] = {"Long Term", "Mid Term", "Short Term"};
     
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 4));
-    ImGui::BeginGroup();
+    float availX = ImGui::GetContentRegionAvail().x;
+    ImGui::PushItemWidth(availX * 0.22); ImGui::InputTextWithHint("##symbol", "Symbol", symbolBuf, IM_ARRAYSIZE(symbolBuf)); ImGui::SameLine();
+    ImGui::PushItemWidth(availX * 0.22); ImGui::InputFloat("##avg", &avgPrice, 0, 0, "%.2f"); KanVasX::UI::Tooltip("Average price");  ImGui::SameLine();
+    ImGui::PushItemWidth(availX * 0.22); ImGui::InputInt("##qty", &quantity); KanVasX::UI::Tooltip("Quantity");  ImGui::SameLine();
+    ImGui::PushItemWidth(availX * 0.22); ImGui::Combo("##vision", &selectedVision, visions, IM_ARRAYSIZE(visions)); ImGui::SameLine();
     
-    ImGui::Text("Add New Holding:");
-    ImGui::SameLine(); ImGui::SetNextItemWidth(80);  ImGui::InputTextWithHint("##symbol", "Symbol", symbolBuf, IM_ARRAYSIZE(symbolBuf));
-    ImGui::SameLine(); ImGui::SetNextItemWidth(90);  ImGui::InputFloat("##avg", &avgPrice, 0, 0, "%.2f");
-    ImGui::SameLine(); ImGui::SetNextItemWidth(80);  ImGui::InputInt("##qty", &quantity);
-    ImGui::SameLine(); ImGui::SetNextItemWidth(90);  ImGui::Combo("##vision", &selectedVision, visions, IM_ARRAYSIZE(visions));
-    ImGui::SameLine();
-    
-    ImGui::Text("Portfolio Holdings");
-    ImGui::SameLine();
-    
-    if (ImGui::Button("Add", ImVec2(70, 0)))
+    if (ImGui::Button("Add", ImVec2(60, 0)))
     {
       std::string symbol = symbolBuf;
       if (!symbol.empty() && avgPrice > 0 && quantity > 0)
@@ -656,23 +649,16 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         h.averagePrice = avgPrice;
         h.quantity = quantity;
         h.vision = static_cast<InvestmentHorizon::Vision>(selectedVision);
-        
         portfolio->AddHolding(h);
         UserManager::GetCurrentUser().SavePortfolio();
         
-        // Clear inputs
         symbolBuf[0] = '\0';
         avgPrice = 0.0f;
         quantity = 0;
         selectedVision = 0;
       }
-      else
-      {
-        ImGui::OpenPopup("InvalidInput");
-      }
+      else ImGui::OpenPopup("InvalidInput");
     }
-    ImGui::EndGroup();
-    ImGui::PopStyleVar();
     
     if (ImGui::BeginPopup("InvalidInput"))
     {
@@ -685,9 +671,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     ImGui::Separator();
     ImGui::Spacing();
     
-    //
-    // === Sortable Portfolio Table ===
-    //
+    // ---- Table ----
     ImGuiTableFlags flags =
     ImGuiTableFlags_Borders |
     ImGuiTableFlags_RowBg |
@@ -696,15 +680,17 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     ImGuiTableFlags_Reorderable |
     ImGuiTableFlags_ScrollY;
     
+    static int editIndex = -1;
+    
     if (ImGui::BeginTable("PortfolioTable", 4, flags, ImVec2(-FLT_MIN, 300.0f)))
     {
-      ImGui::TableSetupColumn("Symbol", ImGuiTableColumnFlags_DefaultSort);
-      ImGui::TableSetupColumn("Average Price", ImGuiTableColumnFlags_PreferSortAscending);
-      ImGui::TableSetupColumn("Quantity", ImGuiTableColumnFlags_PreferSortDescending);
+      ImGui::TableSetupColumn("Symbol");
+      ImGui::TableSetupColumn("Average Price");
+      ImGui::TableSetupColumn("Quantity");
       ImGui::TableSetupColumn("Vision");
       ImGui::TableHeadersRow();
       
-      // Sorting
+      // ---- Sorting ----
       if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs())
       {
         if (sortSpecs->SpecsDirty && sortSpecs->SpecsCount > 0)
@@ -717,7 +703,8 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
               case 0: return spec.SortDirection == ImGuiSortDirection_Ascending ? (a.symbol < b.symbol) : (a.symbol > b.symbol);
               case 1: return spec.SortDirection == ImGuiSortDirection_Ascending ? (a.averagePrice < b.averagePrice) : (a.averagePrice > b.averagePrice);
               case 2: return spec.SortDirection == ImGuiSortDirection_Ascending ? (a.quantity < b.quantity) : (a.quantity > b.quantity);
-              case 3: return spec.SortDirection == ImGuiSortDirection_Ascending ? (static_cast<int>(a.vision) < static_cast<int>(b.vision))
+              case 3: return spec.SortDirection == ImGuiSortDirection_Ascending
+                ? (static_cast<int>(a.vision) < static_cast<int>(b.vision))
                 : (static_cast<int>(a.vision) > static_cast<int>(b.vision));
               default: return false;
             }
@@ -727,30 +714,101 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         }
       }
       
-      // Render
-      for (const auto& h : holdings)
+      // ---- Table Rows ----
+      for (int i = 0; i < holdings.size(); ++i)
       {
+        const auto& h = holdings[i];
         ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::Text("%s", h.symbol.c_str());
         
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.2f", h.averagePrice);
+        // Mark the start of the row so we can cover all columns with a selectable region
+        ImGui::TableNextColumn();
+        ImGui::PushID(i);
+        bool rowSelected = false;
         
-        ImGui::TableSetColumnIndex(2);
-        ImGui::Text("%d", h.quantity);
+        // Create an invisible selectable covering the whole row
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, IM_COL32(255,255,255,0));
+        ImGui::Selectable(("##row_select_" + std::to_string(i)).c_str(), &rowSelected,
+                          ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
         
-        ImGui::TableSetColumnIndex(3);
-        ImGui::Text("%s", PortfolioUtils::VisionToString(h.vision).c_str());
+        // Detect right-click on the *entire row selectable*, not just a cell
+        if (ImGui::BeginPopupContextItem(("RightClickMenu_" + std::to_string(i)).c_str()))
+        {
+          if (ImGui::MenuItem("Edit")) editIndex = i;
+          if (ImGui::MenuItem("Delete"))
+          {
+            holdings.erase(holdings.begin() + i);
+            UserManager::GetCurrentUser().SavePortfolio();
+          }
+          ImGui::EndPopup();
+        }
+        
+        // Draw actual text cells AFTER creating the selectable
+        ImGui::SameLine(); ImGui::Text("%s", h.symbol.c_str());
+        ImGui::TableNextColumn(); ImGui::Text("%.2f", h.averagePrice);
+        ImGui::TableNextColumn(); ImGui::Text("%d", h.quantity);
+        ImGui::TableNextColumn(); ImGui::Text("%s", PortfolioUtils::VisionToString(h.vision).c_str());
+        
+        ImGui::PopID();
       }
-      
+
       ImGui::EndTable();
     }
     
-    ImGui::PopStyleColor();
-    ImGui::PopStyleVar(2);
+    // ---- Edit Popup ----
+    if (editIndex >= 0 && editIndex < holdings.size())
+    {
+      ImGui::OpenPopup("Edit Holding");
+      
+      static char editSymbol[16];
+      static float editAvgPrice;
+      static int editQty;
+      static int editVision;
+      static bool init = true;
+      
+      if (init)
+      {
+        strcpy(editSymbol, holdings[editIndex].symbol.c_str());
+        editAvgPrice = holdings[editIndex].averagePrice;
+        editQty = holdings[editIndex].quantity;
+        editVision = static_cast<int>(holdings[editIndex].vision);
+        init = false;
+      }
+      
+      if (ImGui::BeginPopupModal("Edit Holding", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar))
+      {
+        KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 22.0f, 0.96);
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::Large), "Edit Holding", KanVasX::UI::AlignX::Center);
+        
+        ImGui::InputText("Symbol", editSymbol, IM_ARRAYSIZE(editSymbol));
+        ImGui::InputFloat("Average Price", &editAvgPrice, 0, 0, "%.2f");
+        ImGui::InputInt("Quantity", &editQty);
+        ImGui::Combo("Vision", &editVision, visions, IM_ARRAYSIZE(visions));
+        
+        ImGui::Spacing();
+        if (ImGui::Button("Save", ImVec2(80, 0)))
+        {
+          holdings[editIndex].symbol = editSymbol;
+          holdings[editIndex].averagePrice = editAvgPrice;
+          holdings[editIndex].quantity = editQty;
+          holdings[editIndex].vision = static_cast<InvestmentHorizon::Vision>(editVision);
+          
+          UserManager::GetCurrentUser().SavePortfolio();
+          editIndex = -1;
+          init = true;
+          ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(80, 0)))
+        {
+          editIndex = -1;
+          init = true;
+          ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+      }
+    }
   }
-  
+
   void StockUI::ShowStockTechnicals()
   {
     StockTechnicals technicals = StockController::GetStockTechnicals();

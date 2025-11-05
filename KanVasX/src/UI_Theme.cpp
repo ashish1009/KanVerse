@@ -73,7 +73,7 @@ namespace KanVasX
     BackgroundHighlight   = Value(Background, 1.6);
     
     // Model
-    WindowDimBg           = Alpha(BackgroundDark, 1.0f);
+    WindowDimBg           = Alpha(BackgroundDark, 0.3f);
     
     // Frame : Checkbox BG, Text BG, Drop Menu
     FrameBgHovered        = MultipliedValue(FrameBg, 1.2f);
@@ -97,6 +97,7 @@ namespace KanVasX
     // Table
     TableHeaderBg         = Header;
     TableBorderLight      = Separator;
+    TableBorderStrong     = Alpha(Separator, 0.5f);
     TableRowBgAlt         = Alpha(BackgroundDark, 0.6f);
     
     // Button
