@@ -582,8 +582,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         SearchBar();
         ShowStcokBasicData(stockData);
         
-        ShowStockTechnicals();
-        ShowStockInsights();
+        ShowStockDetails();
       }
       
       // Column 2 Chart
@@ -808,12 +807,34 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       }
     }
   }
+  
+  void StockUI::ShowStockDetails()
+  {
+    if (ImGui::BeginTabBar("Stock Details"))
+    {
+      KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::TextBright);
+            
+      if (ImGui::BeginTabItem("Insights"))
+      {
+        ShowStockInsights();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::BeginTabItem("Technicals"))
+      {
+        ShowStockTechnicals();
+        ImGui::EndTabItem();
+      }
+      
+      ImGui::EndTabBar();
+    }
+  }
 
   void StockUI::ShowStockTechnicals()
   {
     StockTechnicals technicals = StockController::GetStockTechnicals();
     
-    KanVest_Text(Header_26, "Technicals ", glm::vec2(30.0f, 0.0f), KanVasX::Color::TextBright);
+    KanVest_Text(Header_30, "Technicals ", glm::vec2(30.0f, 10.0f), KanVasX::Color::TextBright);
+
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.10, {20.0f, 5.0f});
     KanVasX::UI::ShiftCursorY(5.0f);
     
