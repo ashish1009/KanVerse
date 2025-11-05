@@ -57,9 +57,6 @@ namespace KanVest
     /// This function shows Performance pane;
     void UI_PerformancePanel();
     
-    /// This function shows primary Viewport panel
-    void UI_PrimaryViewportPanel_DEMO();
-
     /// This function renders our title bar
     float UI_DrawTitlebar();
     /// This function handle the drag and Click on title bar

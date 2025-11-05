@@ -114,11 +114,11 @@ namespace KanVasX
     inline static ImU32 PlotHistogramHovered  = IM_COL32(55, 35, 12, 255);
     
     // Table
-    inline static ImU32 TableHeaderBg         = IM_COL32(55, 35, 12, 255);
-    inline static ImU32 TableBorderStrong     = IM_COL32(55, 35, 12, 255);
-    inline static ImU32 TableBorderLight      = IM_COL32(55, 35, 12, 255);
-    inline static ImU32 TableRowBg            = IM_COL32(55, 35, 12, 255);
-    inline static ImU32 TableRowBgAlt         = IM_COL32(55, 35, 12, 255);
+    inline static ImU32 TableHeaderBg         = IM_COL32(155, 35, 12, 255);
+    inline static ImU32 TableBorderStrong     = IM_COL32(155, 35, 12, 255);
+    inline static ImU32 TableBorderLight      = IM_COL32(155, 35, 12, 255);
+    inline static ImU32 TableRowBg            = IM_COL32(25, 30, 32, 255);
+    inline static ImU32 TableRowBgAlt         = IM_COL32(25, 30, 32, 255);
     
     // Drag drop
     inline static ImU32 DragDropTarget        = IM_COL32(55, 35, 12, 255);

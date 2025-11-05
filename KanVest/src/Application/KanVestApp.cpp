@@ -9,8 +9,6 @@
 
 #include "RendererLayer.hpp"
 
-#include "Portfolio/UserManager.hpp"
-
 namespace KanVest
 {
   Application::Application(const KanViz::ApplicationSpecification& appSpec)
@@ -30,20 +28,20 @@ namespace KanVest
   {
     IK_PROFILE();
     
-    std::filesystem::path userDataPath = "../../../KanVest/UserData";
-    UserManager::SetDatabaseFilePath(userDataPath / "UserDatabase.yaml");
-    if (!exists(userDataPath))
-    {
-      std::filesystem::create_directory(userDataPath);
-    }
-    if (!exists(userDataPath / "UserDatabase.yaml"))
-    {
-      UserManager::SaveDatabase();
-    }
-    else
-    {
-      UserManager::LoadDatabase();
-    }
+//    std::filesystem::path userDataPath = "../../../KanVest/UserData";
+//    UserManager::SetDatabaseFilePath(userDataPath / "UserDatabase.yaml");
+//    if (!exists(userDataPath))
+//    {
+//      std::filesystem::create_directory(userDataPath);
+//    }
+//    if (!exists(userDataPath / "UserDatabase.yaml"))
+//    {
+//      UserManager::SaveDatabase();
+//    }
+//    else
+//    {
+//      UserManager::LoadDatabase();
+//    }
 
     // Creating a renderer layer and pushing it onto the application stack.
     m_layer = KanViz::CreateScope<RendererLayer>();
