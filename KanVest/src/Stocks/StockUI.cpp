@@ -13,8 +13,10 @@ namespace KanVest
 {
   static int g_sortColumn = 0;
   static bool g_sortAscending = true;
-  static bool g_showAddModal = false;
   static int g_selectedRow = -1;
+  static bool g_showAddModal = false;
+  static bool g_showEditModal = false;
+  static int g_editIndex = -1;
 
   namespace Utils
   {
@@ -126,7 +128,7 @@ namespace KanVest
   {
     auto& holdings = portfolio->GetHoldings();
     
-    // Sort table
+    // ---- Sorting ----
     std::sort(holdings.begin(), holdings.end(), [](const Holding& a, const Holding& b)
               {
       auto cmp = [&](auto& x, auto& y) { return g_sortAscending ? x < y : x > y; };
@@ -141,23 +143,25 @@ namespace KanVest
       }
     });
     
-    // Sci-fi look
-    ImGui::PushStyleColor(ImGuiCol_TableHeaderBg, ImVec4(0.1f, 0.15f, 0.2f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_TableBorderStrong, ImVec4(0.2f, 0.7f, 1.0f, 0.4f));
-    ImGui::PushStyleColor(ImGuiCol_TableRowBgAlt, ImVec4(0.05f, 0.08f, 0.12f, 1.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8, 4));
     
-    if (ImGui::BeginTable("HoldingsTable", 6, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Sortable))
+    if (ImGui::BeginTable("HoldingsTable", 9,
+                          ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
+                          ImGuiTableFlags_ScrollY | ImGuiTableFlags_Sortable))
     {
       ImGui::TableSetupColumn("Symbol", ImGuiTableColumnFlags_DefaultSort);
       ImGui::TableSetupColumn("Avg Price");
       ImGui::TableSetupColumn("Qty");
+      ImGui::TableSetupColumn("Curr Price");
+      ImGui::TableSetupColumn("Investment");
       ImGui::TableSetupColumn("Value");
+      ImGui::TableSetupColumn("P/L");
       ImGui::TableSetupColumn("P/L %");
       ImGui::TableSetupColumn("Vision");
       ImGui::TableHeadersRow();
       
-      // Sortable header
+      // ---- Sort header ----
       if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs())
       {
         if (sortSpecs->SpecsCount > 0)
@@ -167,105 +171,113 @@ namespace KanVest
         }
       }
       
-      // Rows
-      int idx = 0;
-      for (auto& h : holdings)
+      // ---- Rows ----
+      for (int idx = 0; idx < holdings.size(); idx++)
       {
-        ImGui::TableNextRow();
+        auto& h = holdings[idx];
         ImGui::PushID(idx);
+        ImGui::TableNextRow();
         
-        if (ImGui::Selectable("##row", g_selectedRow == idx, ImGuiSelectableFlags_SpanAllColumns))
+        // Selectable (click to select, right-click for popup)
+        ImGui::TableSetColumnIndex(0);
+        auto cursor = ImGui::GetCursorPos();
+        if (ImGui::Selectable(("##row_" + std::to_string(idx)).c_str(), g_selectedRow == idx,
+                              ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap))
+        {
           g_selectedRow = idx;
+        }
         
+        // ---- Right-Click Context Menu ----
         if (ImGui::BeginPopupContextItem())
         {
           if (ImGui::MenuItem("Edit"))
           {
-            // TODO: implement edit modal
+            g_editIndex = idx;
+            g_showEditModal = true;
           }
           if (ImGui::MenuItem("Delete"))
           {
             holdings.erase(holdings.begin() + idx);
+            UserManager::GetCurrentUser().SavePortfolio();
             ImGui::EndPopup();
             ImGui::PopID();
-            break;
+            break; // avoid iterating invalidated vector
           }
           ImGui::EndPopup();
         }
         
+        ImGui::SetCursorPos(cursor);
+        
+        // ---- Row Data ----
         ImGui::TableSetColumnIndex(0); ImGui::Text("%s", h.symbol.c_str());
         ImGui::TableSetColumnIndex(1); ImGui::Text("%.2f", h.averagePrice);
         ImGui::TableSetColumnIndex(2); ImGui::Text("%d", h.quantity);
         ImGui::TableSetColumnIndex(3); ImGui::Text("%.2f", h.value);
         ImGui::TableSetColumnIndex(4);
-        ImGui::TextColored(h.profitLoss >= 0 ? ImVec4(0.2f, 1.0f, 0.3f, 1.0f) : ImVec4(1.0f, 0.2f, 0.3f, 1.0f),
+        ImGui::TextColored(h.profitLoss >= 0 ? ImVec4(0.2f, 1.0f, 0.3f, 1.0f)
+                           : ImVec4(1.0f, 0.2f, 0.3f, 1.0f),
                            "%.2f%%", h.profitLossPercent);
-        ImGui::TableSetColumnIndex(5); ImGui::Text("%s", PortfolioUtils::VisionToString(h.vision).c_str());
+        ImGui::TableSetColumnIndex(5);
+        ImGui::Text("%s", PortfolioUtils::VisionToString(h.vision).c_str());
         
         ImGui::PopID();
-        idx++;
       }
       
       ImGui::EndTable();
     }
     
-    ImGui::PopStyleVar();
-    ImGui::PopStyleColor(3);
+    ImGui::PopStyleVar(2);
     
-    // ---- Floating Add Holding Button (Fixed) ----
-    ImVec2 buttonSize = ImVec2(80, 30);
-    ImVec2 windowPos = ImGui::GetWindowPos();
-    ImVec2 windowSize = ImGui::GetWindowSize();
-    float paddingX = 10.0f;
-    float paddingY = 10.0f;
+    // ---- Floating Add Holding Button ----
+    {
+      ImVec2 buttonSize(80, 30);
+      ImVec2 windowPos = ImGui::GetWindowPos();
+      ImVec2 windowSize = ImGui::GetWindowSize();
+      ImVec2 buttonPos(windowPos.x + windowSize.x - buttonSize.x - 10.0f,
+                       windowPos.y + windowSize.y - buttonSize.y - 10.0f);
+      
+      ImGui::SetNextWindowPos(buttonPos);
+      ImGui::SetNextWindowBgAlpha(0.0f);
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+      ImGui::Begin("AddHoldingOverlay", nullptr,
+                   ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+                   ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings |
+                   ImGuiWindowFlags_AlwaysAutoResize);
+      
+      if (ImGui::Button("+ Add", buttonSize))
+        g_showAddModal = true;
+      
+      ImGui::End();
+      ImGui::PopStyleVar();
+    }
     
-    ImVec2 buttonPos = ImVec2(windowPos.x + windowSize.x - buttonSize.x - paddingX,
-                              windowPos.y + windowSize.y - buttonSize.y - paddingY);
-    
-    // Draw the floating button in overlay
-    ImGui::SetNextWindowPos(buttonPos);
-    ImGui::SetNextWindowBgAlpha(0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::Begin("AddHoldingOverlay", nullptr,
-                 ImGuiWindowFlags_NoDecoration |
-                 ImGuiWindowFlags_NoMove |
-                 ImGuiWindowFlags_NoScrollbar |
-                 ImGuiWindowFlags_NoScrollWithMouse |
-                 ImGuiWindowFlags_NoSavedSettings |
-                 ImGuiWindowFlags_AlwaysAutoResize);
-        
-    if (ImGui::Button("+ Add ", buttonSize))
-      g_showAddModal = true; // 🔥 trigger modal
-    
-    ImGui::End();
-    ImGui::PopStyleVar();
-    
-    // ---- Actual Modal ----
+    // ---- ADD MODAL ----
     if (g_showAddModal)
     {
       ImGui::OpenPopup("AddHoldingModal");
       g_showAddModal = false;
-      
       KanVasX::UI::SetNextWindowAtCenter();
+      KanVasX::UI::SetNextWindowSize({800, 80});
     }
     
     if (ImGui::BeginPopupModal("AddHoldingModal", nullptr,
-                               ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar))
+                               ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                               ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar))
     {
       static char symbolBuf[32] = "";
-      static float avgPrice = 0.0;
+      static float avgPrice = 0.0f;
       static int quantity = 0;
       static int selectedVision = 0;
       static const char* visions[] = {"Long Term", "Mid Term", "Short Term"};
-
+      
       KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 30);
-      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22), "Add Holding", KanVasX::UI::AlignX::Center, {0, 0});
+      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22), "Add Holding", KanVasX::UI::AlignX::Center);
       KanVasX::UI::ShiftCursorY(10.0f);
-            
+      
       float availX = ImGui::GetContentRegionAvail().x;
       ImGui::PushItemWidth(availX * 0.19); ImGui::InputTextWithHint("##symbol", "Symbol", symbolBuf, IM_ARRAYSIZE(symbolBuf)); ImGui::SameLine();
-      ImGui::PushItemWidth(availX * 0.19); ImGui::InputFloat("##avg", &avgPrice, 0, 0, "%.2f"); KanVasX::UI::Tooltip("Average price");  ImGui::SameLine();
-      ImGui::PushItemWidth(availX * 0.19); ImGui::InputInt("##qty", &quantity); KanVasX::UI::Tooltip("Quantity");  ImGui::SameLine();
+      ImGui::PushItemWidth(availX * 0.19); ImGui::InputFloat("##avg", &avgPrice, 0, 0, "%.2f"); ImGui::SameLine();
+      ImGui::PushItemWidth(availX * 0.19); ImGui::InputInt("##qty", &quantity); ImGui::SameLine();
       ImGui::PushItemWidth(availX * 0.19); ImGui::Combo("##vision", &selectedVision, visions, IM_ARRAYSIZE(visions)); ImGui::SameLine();
       
       if (ImGui::Button("Add", ImVec2(60, 0)) || ImGui::IsKeyPressed(ImGuiKey_Enter))
@@ -285,54 +297,78 @@ namespace KanVest
           avgPrice = 0.0f;
           quantity = 0;
           selectedVision = 0;
+          ImGui::CloseCurrentPopup();
         }
-        else ImGui::OpenPopup("InvalidInput");
       }
+      
       ImGui::SameLine();
-      if (ImGui::Button("Cancel", ImVec2(80, 0)) or ImGui::IsKeyPressed(ImGuiKey_Escape))
+      if (ImGui::Button("Cancel", ImVec2(80, 0)) || ImGui::IsKeyPressed(ImGuiKey_Escape))
+        ImGui::CloseCurrentPopup();
+      
+      ImGui::EndPopup();
+    }
+    
+    // ---- EDIT MODAL ----
+    if (g_showEditModal && g_editIndex >= 0 && g_editIndex < holdings.size())
+    {
+      ImGui::OpenPopup("EditHoldingModal");
+      g_showEditModal = false;
+      KanVasX::UI::SetNextWindowAtCenter();
+      KanVasX::UI::SetNextWindowSize({800, 80});
+    }
+    
+    if (ImGui::BeginPopupModal("EditHoldingModal", nullptr,
+                               ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                               ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar))
+    {
+      Holding& h = holdings[g_editIndex];
+      static char symbolBuf[32];
+      static float avgPrice;
+      static int quantity;
+      static int selectedVision;
+      static bool initialized = false;
+      
+      if (!initialized)
       {
+        strcpy(symbolBuf, h.symbol.c_str());
+        avgPrice = h.averagePrice;
+        quantity = h.quantity;
+        selectedVision = static_cast<int>(h.vision);
+        initialized = true;
+      }
+      
+      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 30);
+      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22), "Edit Holding", KanVasX::UI::AlignX::Center);
+      KanVasX::UI::ShiftCursorY(10.0f);
+      
+      const char* visions[] = {"Long Term", "Mid Term", "Short Term"};
+      float availX = ImGui::GetContentRegionAvail().x;
+      
+      ImGui::PushItemWidth(availX * 0.19); ImGui::InputTextWithHint("##symbol", "Symbol", symbolBuf, IM_ARRAYSIZE(symbolBuf)); ImGui::SameLine();
+      ImGui::PushItemWidth(availX * 0.19); ImGui::InputFloat("##avg", &avgPrice, 0, 0, "%.2f"); ImGui::SameLine();
+      ImGui::PushItemWidth(availX * 0.19); ImGui::InputInt("##qty", &quantity); ImGui::SameLine();
+      ImGui::PushItemWidth(availX * 0.19); ImGui::Combo("##vision", &selectedVision, visions, IM_ARRAYSIZE(visions)); ImGui::SameLine();
+
+      if (ImGui::Button("Save", ImVec2(60, 0)) || ImGui::IsKeyPressed(ImGuiKey_Enter))
+      {
+        h.symbol = symbolBuf;
+        h.averagePrice = avgPrice;
+        h.quantity = quantity;
+        h.vision = static_cast<Holding::Vision>(selectedVision);
+        UserManager::GetCurrentUser().SavePortfolio();
+        initialized = false;
         ImGui::CloseCurrentPopup();
       }
       
-      if (ImGui::BeginPopup("InvalidInput"))
+      ImGui::SameLine();
+      if (ImGui::Button("Cancel", ImVec2(80, 0)) || ImGui::IsKeyPressed(ImGuiKey_Escape))
       {
-        ImGui::Text("Please fill all fields correctly!");
-        if (ImGui::Button("OK") || ImGui::IsKeyPressed(ImGuiKey_Enter))
-          ImGui::CloseCurrentPopup();
-        ImGui::EndPopup();
+        initialized = false;
+        ImGui::CloseCurrentPopup();
       }
-
-//      ImGui::InputText("Symbol", symbolBuf, sizeof(symbolBuf));
-//      ImGui::InputDouble("Average Price", &avgPrice, 0, 0, "%.2f");
-//      ImGui::InputInt("Quantity", &qty);
-//      ImGui::Combo("Vision", &visionIdx, visionNames, IM_ARRAYSIZE(visionNames));
-//      
-//      ImGui::Separator();
-//      if (ImGui::Button("Add", ImVec2(120, 0)))
-//      {
-//        if (strlen(symbolBuf) > 0 && qty > 0 && avgPrice > 0.0)
-//        {
-//          Holding h;
-//          h.symbol = symbolBuf;
-//          h.averagePrice = avgPrice;
-//          h.quantity = qty;
-//          h.vision = static_cast<Holding::Vision>(visionIdx);
-//          portfolio->AddHolding(h);
-//          
-//          symbolBuf[0] = '\0';
-//          avgPrice = 0;
-//          qty = 0;
-//          
-//          ImGui::CloseCurrentPopup();
-//        }
-//      }
-//      
-//      ImGui::SameLine();
-//      if (ImGui::Button("Cancel", ImVec2(120, 0)))
-//        ImGui::CloseCurrentPopup();
       
       ImGui::EndPopup();
     }
   }
-  
+
 } // namespace KanVest
