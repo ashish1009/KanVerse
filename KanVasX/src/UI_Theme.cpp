@@ -69,7 +69,7 @@ namespace KanVasX
     Border                = Alpha(Separator, 0.3f);
     PopupBackground       = Alpha(Background, 0.6f);
     BackgroundShadow      = Alpha(Highlight, 0.07f);
-    ChildBackground       = Alpha(Background, 0.6f);
+    ChildBackground       = Alpha(BackgroundDark, 0.6f);
     BackgroundHighlight   = Value(Background, 1.6);
     
     // Model

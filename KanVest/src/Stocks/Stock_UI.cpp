@@ -250,7 +250,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   {
     KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, FirstColumnSize);
     const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
-    if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.92f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
+    if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.9f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
     {
       Utils::ConvertUpper(s_searchedString);
     }
@@ -571,45 +571,52 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       ImGui::TableSetupColumn("Chart", ImGuiTableColumnFlags_WidthFixed, secondColWidth);
       ImGui::TableSetupColumn("Portfolio", ImGuiTableColumnFlags_WidthFixed, thirdColWidth);
 
-      ImGui::TableNextRow();
-      
+      ImGui::TableNextRow(ImGuiTableRowFlags_None, topYArea); // <-- fixed row height
+
       const StockData& stockData = StockController::GetActiveStockData();
       // Column 1 Stock Details
       {
         ImGui::TableSetColumnIndex(0);
-        KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.2985);
-      
-        SearchBar();
-        ShowStcokBasicData(stockData);
-        
-        ShowStockDetails();
+        if (ImGui::BeginChild("StockDetailsCell", ImVec2(firstColWidth, topYArea))) // fixed height
+        {
+          SearchBar();
+          ShowStcokBasicData(stockData);
+          
+          ShowStockDetails();
+        }
+        ImGui::EndChild();
       }
       
       // Column 2 Chart
       {
         ImGui::TableSetColumnIndex(1);
-        KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.46);
-        
+        if (ImGui::BeginChild("Portfolio", ImVec2(secondColWidth, topYArea))) // fixed height
+        {
 //        DrawCandleChart(stockData);
 //        DrawChartController(stockData);
 //        ImGui::NewLine();
 //        KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, secondColWidth);
 //        KanVasX::UI::ShiftCursorY(5.0f);
-        
-        KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.46);
-        KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Portfolio", KanVasX::UI::AlignX::Center, {0.0f, 10.0f});
-        
-        ShowPortfolio();
+
+          KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40, 0.46);
+          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Portfolio", KanVasX::UI::AlignX::Center, {0.0f, 10.0f});
+          
+          ShowPortfolio();
+        }
+        ImGui::EndChild();
       }
       
       // Column 3 Chart
       {
         ImGui::TableSetColumnIndex(2);
-        KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundDark, topYArea, 0.688);
-      }
+        if (ImGui::BeginChild("Oth", ImVec2(thirdColWidth, topYArea))) // fixed height
+        {
 
+        }
+        ImGui::EndChild();
+      }
+      ImGui::EndTable();
     }
-    ImGui::EndTable();
   }
   
   void StockUI::ShowPortfolio()
@@ -812,8 +819,6 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   {
     if (ImGui::BeginTabBar("Stock Details"))
     {
-      KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::TextBright);
-            
       if (ImGui::BeginTabItem("Insights"))
       {
         ShowStockInsights();
@@ -824,7 +829,6 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         ShowStockTechnicals();
         ImGui::EndTabItem();
       }
-      
       ImGui::EndTabBar();
     }
   }
