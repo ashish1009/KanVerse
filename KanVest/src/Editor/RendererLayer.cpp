@@ -7,6 +7,8 @@
 
 #include "RendererLayer.hpp"
 
+#include "Stocks/StockUI.hpp"
+
 #include "User/UserManager.hpp"
 
 namespace KanVest
@@ -161,6 +163,7 @@ namespace KanVest
     if (UserManager::GetCurrentUser().Valid())
     {
       UI_StartMainWindowDocking();
+      StockUI::StockPanel();
       UI_EndMainWindowDocking();
     }
   }
