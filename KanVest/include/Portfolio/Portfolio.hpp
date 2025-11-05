@@ -19,6 +19,8 @@ namespace KanVest
     Vision vision;
 
     // Compute dynamic not serisalize
+    double stockValue;
+    double investment;
     double value;
     double profitLoss;
     double profitLossPercent;

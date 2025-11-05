@@ -7,7 +7,6 @@
 
 #pragma once
 
-
 namespace KanVest
 {
   /// This class responsible for Stock UI Panel
@@ -21,6 +20,13 @@ namespace KanVest
     static void StockPanel();
     
   private:
+    static void ShowStockDetails();
+    static void ShowPortfolio();
+    static void ShowWatchlist();
+
+    static void SearchBar();
+
     inline static ImTextureID s_reloadIconID = 0;
+    inline static char s_searchedString[128] = "Nifty";
   };
 } // namespace KanVest
