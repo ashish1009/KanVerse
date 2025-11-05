@@ -137,8 +137,11 @@ namespace KanVest
         case 0: return cmp(a.symbol, b.symbol);
         case 1: return cmp(a.averagePrice, b.averagePrice);
         case 2: return cmp(a.quantity, b.quantity);
-        case 3: return cmp(a.value, b.value);
-        case 4: return cmp(a.profitLossPercent, b.profitLossPercent);
+        case 3: return cmp(a.stockValue, b.stockValue);
+        case 4: return cmp(a.investment, b.investment);
+        case 5: return cmp(a.value, b.value);
+        case 6: return cmp(a.profitLoss, b.profitLoss);
+        case 7: return cmp(a.profitLossPercent, b.profitLossPercent);
         default: return false;
       }
     });
@@ -213,11 +216,13 @@ namespace KanVest
         ImGui::TableSetColumnIndex(1); ImGui::Text("%.2f", h.averagePrice);
         ImGui::TableSetColumnIndex(2); ImGui::Text("%d", h.quantity);
         ImGui::TableSetColumnIndex(3); ImGui::Text("%.2f", h.value);
-        ImGui::TableSetColumnIndex(4);
-        ImGui::TextColored(h.profitLoss >= 0 ? ImVec4(0.2f, 1.0f, 0.3f, 1.0f)
-                           : ImVec4(1.0f, 0.2f, 0.3f, 1.0f),
-                           "%.2f%%", h.profitLossPercent);
-        ImGui::TableSetColumnIndex(5);
+        ImGui::TableSetColumnIndex(4); ImGui::Text("%.2f", h.value * h.quantity);
+        ImGui::TableSetColumnIndex(5); ImGui::Text("%.2f", h.stockValue * h.quantity);
+        ImGui::TableSetColumnIndex(6);
+        ImGui::TextColored(h.profitLoss >= 0 ? ImVec4(0.2f, 0.7f, 0.8f, 1.0f) : ImVec4(1.0f, 0.2f, 0.3f, 1.0f), "%.2f%%", h.profitLoss);
+        ImGui::TableSetColumnIndex(7);
+        ImGui::TextColored(h.profitLoss >= 0 ? ImVec4(0.2f, 0.7f, 0.8f, 1.0f) : ImVec4(1.0f, 0.2f, 0.3f, 1.0f), "%.2f%%", h.profitLossPercent);
+        ImGui::TableSetColumnIndex(8);
         ImGui::Text("%s", PortfolioUtils::VisionToString(h.vision).c_str());
         
         ImGui::PopID();
