@@ -58,6 +58,7 @@
 		B289EE322EB37F9400937D0B /* libKanVasX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libKanVasX.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289EE3E2EB3ACF200937D0B /* UI_Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Font.hpp; sourceTree = "<group>"; };
 		B289EE3F2EB3ACF200937D0B /* UI_Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Font.cpp; sourceTree = "<group>"; };
+		B2F3BA712EBC358E00EC0863 /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -228,6 +229,7 @@
 			isa = PBXGroup;
 			children = (
 				B25162072EBB4AF300C7FDC3 /* StockUI.hpp */,
+				B2F3BA712EBC358E00EC0863 /* StockData.hpp */,
 			);
 			path = Stocks;
 			sourceTree = "<group>";

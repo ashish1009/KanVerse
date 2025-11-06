@@ -93,7 +93,7 @@ namespace KanVest
   
   void StockUI::ShowPortfolio()
   {
-    if (ImGui::BeginChild("StockDetailsCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.5))) // fixed height
+    if (ImGui::BeginChild("StockPortfolioCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.5))) // fixed height
     {
       KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
       KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Portfolio", KanVasX::UI::AlignX::Center, {0, 5});
@@ -101,11 +101,22 @@ namespace KanVest
       DrawPortfolioTable(UserManager::GetCurrentUser().portfolio.get());
     }
     ImGui::EndChild();
+
+    if (ImGui::BeginChild("ChartCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.5))) // fixed height
+    {
+
+    }
+    ImGui::EndChild();
   }
   
   void StockUI::ShowWatchlist()
   {
-    
+    if (ImGui::BeginChild("WatchlistCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.5))) // fixed height
+    {
+      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
+      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Watchlist", KanVasX::UI::AlignX::Center, {0, 5});
+    }
+    ImGui::EndChild();
   }
   
   void StockUI::SearchBar()
