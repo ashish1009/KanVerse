@@ -227,28 +227,43 @@ namespace KanVest
           ImGui::EndPopup();
         }
         
+        // Update Holding data
+        {
+          h.investment = h.averagePrice * h.quantity;
+          h.value = h.stockValue * h.quantity;
+          h.profitLoss = h.value = h.investment;
+          h.profitLossPercent = (h.profitLoss * 100) / h.investment;
+        }
+        
         // ---- Row Data ----
         {
           ImGui::SetCursorPos(cursor);
-          ImGui::TableSetColumnIndex(0); KanVasX::UI::ShiftCursorX(5); ImGui::Text("%s", h.symbol.c_str());
-          ImGui::TableSetColumnIndex(1); KanVasX::UI::ShiftCursorX(5); ImGui::Text("%.2f", h.averagePrice);
-          ImGui::TableSetColumnIndex(2); KanVasX::UI::ShiftCursorX(5); ImGui::Text("%d", h.quantity);
-          ImGui::TableSetColumnIndex(3); KanVasX::UI::ShiftCursorX(5); ImGui::Text("%.2f", h.stockValue);
-          
-          h.investment = h.averagePrice * h.quantity;
-          ImGui::TableSetColumnIndex(4); ImGui::Text("%.2f", h.investment);
-          
-          h.value = h.stockValue * h.quantity;
-          ImGui::TableSetColumnIndex(5); KanVasX::UI::ShiftCursorX(5); ImGui::Text("%.2f", h.value);
-          
-          ImGui::TableSetColumnIndex(6);
-          KanVasX::UI::ShiftCursorX(5);
-          ImGui::TextColored(h.profitLoss >= 0 ? ImVec4(0.2f, 0.7f, 0.8f, 1.0f) : ImVec4(1.0f, 0.2f, 0.3f, 1.0f), "%.2f%%", h.profitLoss);
-          ImGui::TableSetColumnIndex(7);
-          KanVasX::UI::ShiftCursorX(5);          ImGui::TextColored(h.profitLoss >= 0 ? ImVec4(0.2f, 0.7f, 0.8f, 1.0f) : ImVec4(1.0f, 0.2f, 0.3f, 1.0f), "%.2f%%", h.profitLossPercent);
-          ImGui::TableSetColumnIndex(8);
-          KanVasX::UI::ShiftCursorX(5);
-          ImGui::Text("%s", PortfolioUtils::VisionToString(h.vision).c_str());
+
+          auto PrintCell = [](int32_t colIdx, const auto& data) {
+            ImGui::TableSetColumnIndex(colIdx);
+            KanVasX::UI::ShiftCursorX(5);
+
+            if constexpr (std::is_same_v<std::decay_t<decltype(data)>, double>)
+              ImGui::Text("%.2f", data);
+            else if constexpr (std::is_same_v<std::decay_t<decltype(data)>, float>)
+              ImGui::Text("%.2f", data);
+            else if constexpr (std::is_same_v<std::decay_t<decltype(data)>, int>)
+              ImGui::Text("%d", data);
+            else if constexpr (std::is_same_v<std::decay_t<decltype(data)>, std::string>)
+              ImGui::Text("%s", data.c_str());
+            else
+              ImGui::Text("%s", std::to_string(data).c_str());
+          };
+
+          PrintCell(0, h.symbol);
+          PrintCell(1, h.averagePrice);
+          PrintCell(2, h.quantity);
+          PrintCell(3, h.stockValue);
+          PrintCell(4, h.investment);
+          PrintCell(5, h.value);
+          PrintCell(6, h.profitLoss);
+          PrintCell(7, h.profitLossPercent);
+          PrintCell(8, PortfolioUtils::VisionToString(h.vision));
         }
         ImGui::PopID();
       }
