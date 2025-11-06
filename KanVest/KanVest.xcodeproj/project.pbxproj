@@ -19,6 +19,7 @@
 		B289EDF62EB3047400937D0B /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EDF52EB3047400937D0B /* libcurl.tbd */; };
 		B289EE332EB37F9400937D0B /* libKanVasX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EE322EB37F9400937D0B /* libKanVasX.a */; };
 		B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE3F2EB3ACF200937D0B /* UI_Font.cpp */; };
+		B2F3BA762EBC361600EC0863 /* APIProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F3BA752EBC361600EC0863 /* APIProvider.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -59,6 +60,8 @@
 		B289EE3E2EB3ACF200937D0B /* UI_Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Font.hpp; sourceTree = "<group>"; };
 		B289EE3F2EB3ACF200937D0B /* UI_Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Font.cpp; sourceTree = "<group>"; };
 		B2F3BA712EBC358E00EC0863 /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
+		B2F3BA742EBC361600EC0863 /* APIProvider.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = APIProvider.hpp; sourceTree = "<group>"; };
+		B2F3BA752EBC361600EC0863 /* APIProvider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = APIProvider.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				B25161FF2EBB474800C7FDC3 /* Portfolio.cpp */,
+				B2F3BA752EBC361600EC0863 /* APIProvider.cpp */,
 			);
 			path = Portfolio;
 			sourceTree = "<group>";
@@ -230,6 +234,7 @@
 			children = (
 				B25162072EBB4AF300C7FDC3 /* StockUI.hpp */,
 				B2F3BA712EBC358E00EC0863 /* StockData.hpp */,
+				B2F3BA742EBC361600EC0863 /* APIProvider.hpp */,
 			);
 			path = Stocks;
 			sourceTree = "<group>";
@@ -309,6 +314,7 @@
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
 				B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */,
 				B25162032EBB487000C7FDC3 /* User.cpp in Sources */,
+				B2F3BA762EBC361600EC0863 /* APIProvider.cpp in Sources */,
 				B25162002EBB474800C7FDC3 /* Portfolio.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
 			);
