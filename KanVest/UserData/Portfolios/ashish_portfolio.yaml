@@ -3,26 +3,6 @@ Holdings:
     AveragePrice: 2800
     Quantity: 1
     Vision: LongTerm
-  - Symbol: COALINDIA
-    AveragePrice: 456
-    Quantity: 3
-    Vision: LongTerm
-  - Symbol: CDSL
-    AveragePrice: 1629
-    Quantity: 2
-    Vision: ShortTerm
-  - Symbol: HAL
-    AveragePrice: 4673.7998046875
-    Quantity: 1
-    Vision: ShortTerm
-  - Symbol: GOLDBEES
-    AveragePrice: 95.599998474121094
-    Quantity: 10
-    Vision: MidTerm
-  - Symbol: ETERNAL
-    AveragePrice: 267
-    Quantity: 2
-    Vision: MidTerm
   - Symbol: BEL
     AveragePrice: 282
     Quantity: 1
@@ -35,3 +15,47 @@ Holdings:
     AveragePrice: 1265.449951171875
     Quantity: 1
     Vision: MidTerm
+  - Symbol: CDSL
+    AveragePrice: 1629
+    Quantity: 2
+    Vision: ShortTerm
+  - Symbol: COALINDIA
+    AveragePrice: 456
+    Quantity: 3
+    Vision: LongTerm
+  - Symbol: ETERNAL
+    AveragePrice: 267
+    Quantity: 2
+    Vision: MidTerm
+  - Symbol: GOLDBEES
+    AveragePrice: 95.599998474121094
+    Quantity: 10
+    Vision: MidTerm
+  - Symbol: HAL
+    AveragePrice: 4673.7998046875
+    Quantity: 1
+    Vision: ShortTerm
+  - Symbol: HINDCOPPER
+    AveragePrice: 432
+    Quantity: 3
+    Vision: ShortTerm
+  - Symbol: HINDZINC
+    AveragePrice: 523
+    Quantity: 2
+    Vision: MidTerm
+  - Symbol: IDEA
+    AveragePrice: 9
+    Quantity: 50
+    Vision: LongTerm
+  - Symbol: INDIGO
+    AveragePrice: 5839
+    Quantity: 1
+    Vision: MidTerm
+  - Symbol: JIOFIN
+    AveragePrice: 267
+    Quantity: 2
+    Vision: LongTerm
+  - Symbol: LGEINDIA
+    AveragePrice: 1657
+    Quantity: 1
+    Vision: LongTerm
