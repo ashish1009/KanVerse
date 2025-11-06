@@ -33,12 +33,4 @@ namespace KanVest
     void LoadPortfolio();
     void SavePortfolio() const;
   };
-  
-  // Helper class to handle YAML serialization/deserialization
-  class UserSerializer
-  {
-  public:
-    static bool SaveToYAML(const User& profile, const std::string& filePath);
-    static bool LoadFromYAML(User& profile, const std::string& filePath);
-  };
 } // namespace KanVest

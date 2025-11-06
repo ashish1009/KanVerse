@@ -1,17 +1,5 @@
 Holdings:
   - Symbol: AngelOne
-    AveragePrice: 2868.280029296875
-    Quantity: 1
-    Vision: MidTerm
-  - Symbol: BEL
-    AveragePrice: 250
-    Quantity: 4
-    Vision: LongTerm
-  - Symbol: BSE
-    AveragePrice: 1278
-    Quantity: 1
-    Vision: ShortTerm
-  - Symbol: BHARTIARTL
-    AveragePrice: 1800
+    AveragePrice: 2800
     Quantity: 1
     Vision: LongTerm

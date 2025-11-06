@@ -8,6 +8,7 @@
 #include "RendererLayer.hpp"
 
 #include "Stocks/StockUI.hpp"
+#include "Stocks/StockManager.hpp"
 
 #include "User/UserManager.hpp"
 
@@ -142,12 +143,16 @@ namespace KanVest
     
     // Login popup
     m_loginPopup.Set("KanVest Logic", true /* open flag */, 600, 410, true /* center */);
+    
+    StockManager::StartLiveUpdates(3);
   }
   
   void RendererLayer::OnDetach() noexcept
   {
     IK_PROFILE();
     IK_LOG_WARN("RendererLayer", "Detaching '{0}' Layer from application", GetName());
+    
+    StockManager::StopLiveUpdates();
   }
   
   void RendererLayer::OnUpdate(const KanViz::TimeStep& ts)

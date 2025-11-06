@@ -26,7 +26,6 @@ namespace KanVest
     {
       UserManager::SaveDatabase();
     }
-
   }
   const std::filesystem::path& UserManager::GetDatabaseFilePath()
   {
@@ -129,6 +128,12 @@ namespace KanVest
       profile.passwordHash = n["passwordHash"].as<std::string>();
       profile.portfolioPath = n["portfolioPath"] ? n["portfolioPath"].as<std::string>() : "";
       profile.lastLoginTime = n["lastLoginTime"] ? n["lastLoginTime"].as<std::string>() : "";
+      
+      auto portfolioDirectory = profile.portfolioPath.parent_path();
+      if (!exists(portfolioDirectory))
+      {
+        std::filesystem::create_directory(portfolioDirectory);
+      }
       
       map[profile.username] = profile;
     }

@@ -106,19 +106,19 @@ namespace KanVest
     }
     ImGui::EndChild();
 
-    if (ImGui::BeginChild("ChartCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.5))) // fixed height
+    if (ImGui::BeginChild("ChartCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
     {
-      for (auto& [s, d] : StockManager::GetStokCache())
-      {
-        ImGui::Text("Symbol, %s %s", s.c_str(), d.symbol.c_str());
-      }
+//      for (auto& [s, d] : StockManager::GetStokCache())
+//      {
+//        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
+//      }
     }
     ImGui::EndChild();
   }
   
   void StockUI::ShowWatchlist()
   {
-    if (ImGui::BeginChild("WatchlistCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.5))) // fixed height
+    if (ImGui::BeginChild("WatchlistCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
     {
       KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
       KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Watchlist", KanVasX::UI::AlignX::Center, {0, 5});
@@ -247,15 +247,14 @@ namespace KanVest
         
         // Update Holding data
         {
-          h.investment = h.averagePrice * h.quantity;
-          h.value = h.stockValue * h.quantity;
-          h.profitLoss = h.value = h.investment;
-          h.profitLossPercent = (h.profitLoss * 100) / h.investment;
-          
           StockData stockData("");
           if (StockManager::GetStock(h.symbol, stockData))
           {
-            
+            h.stockValue = stockData.livePrice;
+            h.investment = h.averagePrice * h.quantity;
+            h.value = h.stockValue * h.quantity;
+            h.profitLoss = h.value = h.investment;
+            h.profitLossPercent = (h.profitLoss * 100) / h.investment;
           }
         }
         

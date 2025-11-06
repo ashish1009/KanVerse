@@ -67,9 +67,11 @@ namespace KanVest
     std::cout << "[StockManager] Removed stock: " << symbol << std::endl;
   }
   
-  bool StockManager::GetStock(const std::string& symbol, StockData& outData)
+  bool StockManager::GetStock(const std::string& symbolName, StockData& outData)
   {
     std::scoped_lock lock(s_mutex);
+    std::string symbol = NormalizeSymbol(symbolName);
+    
     auto it = s_stockCache.find(symbol);
     if (it != s_stockCache.end())
     {
@@ -129,6 +131,7 @@ namespace KanVest
   
   const std::unordered_map<std::string, StockData>& StockManager::GetStokCache()
   {
+    std::scoped_lock lock(s_mutex);
     return s_stockCache;
   }
   
@@ -224,7 +227,6 @@ namespace KanVest
         
         data.history.push_back(p);
       }
-
       
       {
         std::scoped_lock lock(s_mutex);
