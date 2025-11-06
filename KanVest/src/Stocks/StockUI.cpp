@@ -16,11 +16,13 @@
 namespace KanVest
 {
   static int g_sortColumn = 0;
-  static bool g_sortAscending = true;
   static int g_selectedRow = -1;
+  static int g_editIndex = -1;
+
+  static bool g_sortAscending = true;
   static bool g_showAddModal = false;
   static bool g_showEditModal = false;
-  static int g_editIndex = -1;
+  static bool g_focusSymbolNextFrame = false;
 
   namespace Utils
   {
@@ -253,7 +255,7 @@ namespace KanVest
             h.stockValue = stockData.livePrice;
             h.investment = h.averagePrice * h.quantity;
             h.value = h.stockValue * h.quantity;
-            h.profitLoss = h.value = h.investment;
+            h.profitLoss = h.value - h.investment;
             h.profitLossPercent = (h.profitLoss * 100) / h.investment;
           }
         }
@@ -262,9 +264,10 @@ namespace KanVest
         {
           ImGui::SetCursorPos(cursor);
 
-          auto PrintCell = [](int32_t colIdx, const auto& data) {
+          auto PrintCell = [](int32_t colIdx, const auto& data, ImU32 textColor = KanVasX::Color::TextBright) {
             ImGui::TableSetColumnIndex(colIdx);
             KanVasX::UI::ShiftCursorX(5);
+            KanVasX::ScopedColor scopedTextColor(ImGuiCol_Text, textColor);
 
             if constexpr (std::is_same_v<std::decay_t<decltype(data)>, double>)
               ImGui::Text("%.2f", data);
@@ -284,8 +287,8 @@ namespace KanVest
           PrintCell(3, h.stockValue);
           PrintCell(4, h.investment);
           PrintCell(5, h.value);
-          PrintCell(6, h.profitLoss);
-          PrintCell(7, h.profitLossPercent);
+          PrintCell(6, h.profitLoss, h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red);
+          PrintCell(7, h.profitLossPercent, h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red);
           PrintCell(8, PortfolioUtils::VisionToString(h.vision));
         }
         ImGui::PopID();
@@ -310,8 +313,10 @@ namespace KanVest
                    ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings |
                    ImGuiWindowFlags_AlwaysAutoResize);
       
-      if (ImGui::Button("+ Add", buttonSize))
+      if (ImGui::Button("+ Add", buttonSize) or (ImGui::IsKeyDown(ImGuiKey_LeftSuper) and ImGui::IsKeyPressed(ImGuiKey_N)))
+      {
         g_showAddModal = true;
+      }
       
       ImGui::End();
       ImGui::PopStyleVar();
@@ -341,13 +346,12 @@ namespace KanVest
       KanVasX::UI::ShiftCursorY(10.0f);
       
       float availX = ImGui::GetContentRegionAvail().x;
-      ImGui::PushItemWidth(availX * 0.19); ImGui::InputTextWithHint("##symbol", "Symbol", symbolBuf, IM_ARRAYSIZE(symbolBuf)); ImGui::SameLine();
-      ImGui::PushItemWidth(availX * 0.19); ImGui::InputFloat("##avg", &avgPrice, 0, 0, "%.2f"); ImGui::SameLine();
-      ImGui::PushItemWidth(availX * 0.19); ImGui::InputInt("##qty", &quantity); ImGui::SameLine();
-      ImGui::PushItemWidth(availX * 0.19); ImGui::Combo("##vision", &selectedVision, visions, IM_ARRAYSIZE(visions)); ImGui::SameLine();
+      ImGui::PushItemWidth(availX * 0.165); ImGui::InputTextWithHint("##symbol", "Symbol", symbolBuf, IM_ARRAYSIZE(symbolBuf)); ImGui::SameLine();
+      ImGui::PushItemWidth(availX * 0.165); ImGui::InputFloat("##avg", &avgPrice, 0, 0, "%.2f"); ImGui::SameLine();
+      ImGui::PushItemWidth(availX * 0.165); ImGui::InputInt("##qty", &quantity); ImGui::SameLine();
+      ImGui::PushItemWidth(availX * 0.165); ImGui::Combo("##vision", &selectedVision, visions, IM_ARRAYSIZE(visions)); ImGui::SameLine();
       
-      if (ImGui::Button("Add", ImVec2(60, 0)) || ImGui::IsKeyPressed(ImGuiKey_Enter))
-      {
+      auto AddHolding = [portfolio](bool closePopup) {
         std::string symbol = symbolBuf;
         if (!symbol.empty() && avgPrice > 0 && quantity > 0)
         {
@@ -359,20 +363,35 @@ namespace KanVest
           
           PortfolioController portfolioController(*portfolio);
           portfolioController.AddHolding(h);
-
+          
           UserManager::GetCurrentUser().SavePortfolio();
           
           symbolBuf[0] = '\0';
           avgPrice = 0.0f;
           quantity = 0;
           selectedVision = 0;
-          ImGui::CloseCurrentPopup();
+          
+          if (closePopup)
+          {
+            ImGui::CloseCurrentPopup();
+          }
         }
-      }
+      };
       
+      if (ImGui::Button("Add", ImVec2(60, 0)) or (!ImGui::IsKeyDown(ImGuiKey_LeftSuper) and ImGui::IsKeyPressed(ImGuiKey_Enter)))
+      {
+        AddHolding(true);
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("Add More", ImVec2(70, 0)) or (ImGui::IsKeyDown(ImGuiKey_LeftSuper) and ImGui::IsKeyPressed(ImGuiKey_Enter)))
+      {
+        AddHolding(false);
+      }
       ImGui::SameLine();
       if (ImGui::Button("Cancel", ImVec2(80, 0)) || ImGui::IsKeyPressed(ImGuiKey_Escape))
+      {
         ImGui::CloseCurrentPopup();
+      }
       
       ImGui::EndPopup();
     }

@@ -50,9 +50,10 @@ namespace KanVest
   }
 
 
-  void StockManager::AddStock(const std::string& symbol)
+  void StockManager::AddStock(const std::string& symbolName)
   {
     std::scoped_lock lock(s_mutex);
+    std::string symbol = NormalizeSymbol(symbolName);
     if (s_stockCache.find(symbol) == s_stockCache.end())
     {
       s_stockCache.emplace(symbol, StockData(symbol));

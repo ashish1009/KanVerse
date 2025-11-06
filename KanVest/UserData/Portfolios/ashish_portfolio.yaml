@@ -1,5 +1,37 @@
 Holdings:
-  - Symbol: AngelOne
+  - Symbol: ANGELNE
     AveragePrice: 2800
     Quantity: 1
     Vision: LongTerm
+  - Symbol: COALINDIA
+    AveragePrice: 456
+    Quantity: 3
+    Vision: LongTerm
+  - Symbol: CDSL
+    AveragePrice: 1629
+    Quantity: 2
+    Vision: ShortTerm
+  - Symbol: HAL
+    AveragePrice: 4673.7998046875
+    Quantity: 1
+    Vision: ShortTerm
+  - Symbol: GOLDBEES
+    AveragePrice: 95.599998474121094
+    Quantity: 10
+    Vision: MidTerm
+  - Symbol: ETERNAL
+    AveragePrice: 267
+    Quantity: 2
+    Vision: MidTerm
+  - Symbol: BEL
+    AveragePrice: 282
+    Quantity: 1
+    Vision: LongTerm
+  - Symbol: BHARTIARTL
+    AveragePrice: 1729.22998046875
+    Quantity: 1
+    Vision: LongTerm
+  - Symbol: BSE
+    AveragePrice: 1265.449951171875
+    Quantity: 1
+    Vision: MidTerm
