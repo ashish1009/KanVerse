@@ -53,7 +53,7 @@ namespace KanVest
     // --- Historical Candles ---
     std::vector<StockPoint> history;
     
-    StockData(const std::string& name) : symbol(name) {}
+    StockData(const std::string& name = "") : symbol(name) {}
     bool IsValid() const { return !symbol.empty() && !history.empty(); }
   };
 } // namespace KanVest

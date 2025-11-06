@@ -251,6 +251,12 @@ namespace KanVest
           h.value = h.stockValue * h.quantity;
           h.profitLoss = h.value = h.investment;
           h.profitLossPercent = (h.profitLoss * 100) / h.investment;
+          
+          StockData stockData("");
+          if (StockManager::GetStock(h.symbol, stockData))
+          {
+            
+          }
         }
         
         // ---- Row Data ----

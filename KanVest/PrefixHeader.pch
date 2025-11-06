@@ -17,6 +17,7 @@
 #include <numeric>
 #include <curl/curl.h>
 #include <regex>
+#include <future>
 
 // Engine Files
 #include <KanVizHeader.h>
