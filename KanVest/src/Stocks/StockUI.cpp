@@ -146,24 +146,42 @@ namespace KanVest
       }
     });
     
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8, 4));
-    
     if (ImGui::BeginTable("HoldingsTable", 9,
                           ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
                           ImGuiTableFlags_ScrollY | ImGuiTableFlags_Sortable))
     {
       ImGui::TableSetupColumn("Symbol", ImGuiTableColumnFlags_DefaultSort);
-      ImGui::TableSetupColumn("Avg Price");
+      ImGui::TableSetupColumn("ATP");
       ImGui::TableSetupColumn("Qty");
-      ImGui::TableSetupColumn("Curr Price");
-      ImGui::TableSetupColumn("Investment");
+      ImGui::TableSetupColumn("LTP");
+      ImGui::TableSetupColumn("Inv");
       ImGui::TableSetupColumn("Value");
       ImGui::TableSetupColumn("P/L");
       ImGui::TableSetupColumn("P/L %");
       ImGui::TableSetupColumn("Vision");
-      ImGui::TableHeadersRow();
-      
+
+      // Headers
+      {
+        KanVasX::ScopedFont headerfont(UI::Font::Get(UI::FontType::FixedWidthHeader_12));
+        static const float EdgeOffset = 4.0f;
+        
+        // Freez column
+        ImGui::TableSetupScrollFreeze(ImGui::TableGetColumnCount(), 1);
+        ImGui::TableNextRow(ImGuiTableRowFlags_Headers, 22.0f);
+        
+        for (int32_t column = 0; column < ImGui::TableGetColumnCount(); column++)
+        {
+          ImGui::TableSetColumnIndex(column);
+          const char* columnName = ImGui::TableGetColumnName(column);
+          KanVasX::ScopedID columnID(column);
+          
+          KanVasX::UI::ShiftCursor({EdgeOffset * 3.0f, EdgeOffset * 2.0f});
+          ImGui::TableHeader(columnName);
+          KanVasX::UI::ShiftCursor({-0 * 3.0f, -0 * 2.0f});
+        }
+        ImGui::SetCursorPosX(ImGui::GetCurrentTable()->OuterRect.Min.x);
+      }
+
       // ---- Sort header ----
       if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs())
       {
@@ -209,29 +227,34 @@ namespace KanVest
           ImGui::EndPopup();
         }
         
-        ImGui::SetCursorPos(cursor);
-        
         // ---- Row Data ----
-        ImGui::TableSetColumnIndex(0); ImGui::Text("%s", h.symbol.c_str());
-        ImGui::TableSetColumnIndex(1); ImGui::Text("%.2f", h.averagePrice);
-        ImGui::TableSetColumnIndex(2); ImGui::Text("%d", h.quantity);
-        ImGui::TableSetColumnIndex(3); ImGui::Text("%.2f", h.value);
-        ImGui::TableSetColumnIndex(4); ImGui::Text("%.2f", h.value * h.quantity);
-        ImGui::TableSetColumnIndex(5); ImGui::Text("%.2f", h.stockValue * h.quantity);
-        ImGui::TableSetColumnIndex(6);
-        ImGui::TextColored(h.profitLoss >= 0 ? ImVec4(0.2f, 0.7f, 0.8f, 1.0f) : ImVec4(1.0f, 0.2f, 0.3f, 1.0f), "%.2f%%", h.profitLoss);
-        ImGui::TableSetColumnIndex(7);
-        ImGui::TextColored(h.profitLoss >= 0 ? ImVec4(0.2f, 0.7f, 0.8f, 1.0f) : ImVec4(1.0f, 0.2f, 0.3f, 1.0f), "%.2f%%", h.profitLossPercent);
-        ImGui::TableSetColumnIndex(8);
-        ImGui::Text("%s", PortfolioUtils::VisionToString(h.vision).c_str());
-        
+        {
+          ImGui::SetCursorPos(cursor);
+          ImGui::TableSetColumnIndex(0); KanVasX::UI::ShiftCursorX(5); ImGui::Text("%s", h.symbol.c_str());
+          ImGui::TableSetColumnIndex(1); KanVasX::UI::ShiftCursorX(5); ImGui::Text("%.2f", h.averagePrice);
+          ImGui::TableSetColumnIndex(2); KanVasX::UI::ShiftCursorX(5); ImGui::Text("%d", h.quantity);
+          ImGui::TableSetColumnIndex(3); KanVasX::UI::ShiftCursorX(5); ImGui::Text("%.2f", h.stockValue);
+          
+          h.investment = h.averagePrice * h.quantity;
+          ImGui::TableSetColumnIndex(4); ImGui::Text("%.2f", h.investment);
+          
+          h.value = h.stockValue * h.quantity;
+          ImGui::TableSetColumnIndex(5); KanVasX::UI::ShiftCursorX(5); ImGui::Text("%.2f", h.value);
+          
+          ImGui::TableSetColumnIndex(6);
+          KanVasX::UI::ShiftCursorX(5);
+          ImGui::TextColored(h.profitLoss >= 0 ? ImVec4(0.2f, 0.7f, 0.8f, 1.0f) : ImVec4(1.0f, 0.2f, 0.3f, 1.0f), "%.2f%%", h.profitLoss);
+          ImGui::TableSetColumnIndex(7);
+          KanVasX::UI::ShiftCursorX(5);          ImGui::TextColored(h.profitLoss >= 0 ? ImVec4(0.2f, 0.7f, 0.8f, 1.0f) : ImVec4(1.0f, 0.2f, 0.3f, 1.0f), "%.2f%%", h.profitLossPercent);
+          ImGui::TableSetColumnIndex(8);
+          KanVasX::UI::ShiftCursorX(5);
+          ImGui::Text("%s", PortfolioUtils::VisionToString(h.vision).c_str());
+        }
         ImGui::PopID();
       }
       
       ImGui::EndTable();
     }
-    
-    ImGui::PopStyleVar(2);
     
     // ---- Floating Add Holding Button ----
     {
