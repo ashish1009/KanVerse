@@ -340,16 +340,37 @@ namespace KanVest
       static int quantity = 0;
       static int selectedVision = 0;
       static const char* visions[] = {"Long Term", "Mid Term", "Short Term"};
+      static bool initializedFocus = false;
+      
+      // Reset focus flag when popup first opens
+      if (!initializedFocus)
+      {
+        ImGui::SetKeyboardFocusHere(0); // Focus on the first input field (Symbol)
+        initializedFocus = true;
+      }
       
       KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 30);
       KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22), "Add Holding", KanVasX::UI::AlignX::Center);
       KanVasX::UI::ShiftCursorY(10.0f);
       
       float availX = ImGui::GetContentRegionAvail().x;
-      ImGui::PushItemWidth(availX * 0.165); ImGui::InputTextWithHint("##symbol", "Symbol", symbolBuf, IM_ARRAYSIZE(symbolBuf)); ImGui::SameLine();
-      ImGui::PushItemWidth(availX * 0.165); ImGui::InputFloat("##avg", &avgPrice, 0, 0, "%.2f"); ImGui::SameLine();
-      ImGui::PushItemWidth(availX * 0.165); ImGui::InputInt("##qty", &quantity); ImGui::SameLine();
-      ImGui::PushItemWidth(availX * 0.165); ImGui::Combo("##vision", &selectedVision, visions, IM_ARRAYSIZE(visions)); ImGui::SameLine();
+      
+      // ⬇️ This will receive focus automatically when the popup opens
+      ImGui::PushItemWidth(availX * 0.165);
+      ImGui::InputTextWithHint("##symbol", "Symbol", symbolBuf, IM_ARRAYSIZE(symbolBuf));
+      ImGui::SameLine();
+      
+      ImGui::PushItemWidth(availX * 0.165);
+      ImGui::InputFloat("##avg", &avgPrice, 0, 0, "%.2f");
+      ImGui::SameLine();
+      
+      ImGui::PushItemWidth(availX * 0.165);
+      ImGui::InputInt("##qty", &quantity);
+      ImGui::SameLine();
+      
+      ImGui::PushItemWidth(availX * 0.165);
+      ImGui::Combo("##vision", &selectedVision, visions, IM_ARRAYSIZE(visions));
+      ImGui::SameLine();
       
       auto AddHolding = [portfolio](bool closePopup) {
         std::string symbol = symbolBuf;
@@ -378,23 +399,31 @@ namespace KanVest
         }
       };
       
-      if (ImGui::Button("Add", ImVec2(60, 0)) or (!ImGui::IsKeyDown(ImGuiKey_LeftSuper) and ImGui::IsKeyPressed(ImGuiKey_Enter)))
+      if (ImGui::Button("Add", ImVec2(60, 0)) ||
+          (!ImGui::IsKeyDown(ImGuiKey_LeftSuper) && ImGui::IsKeyPressed(ImGuiKey_Enter)))
       {
         AddHolding(true);
+        initializedFocus = false; // reset for next open
       }
+      
       ImGui::SameLine();
-      if (ImGui::Button("Add More", ImVec2(70, 0)) or (ImGui::IsKeyDown(ImGuiKey_LeftSuper) and ImGui::IsKeyPressed(ImGuiKey_Enter)))
+      if (ImGui::Button("Add More", ImVec2(70, 0)) ||
+          (ImGui::IsKeyDown(ImGuiKey_LeftSuper) && ImGui::IsKeyPressed(ImGuiKey_Enter)))
       {
         AddHolding(false);
+        ImGui::SetKeyboardFocusHere(0); // keep focus on symbol for adding next one
       }
+      
       ImGui::SameLine();
       if (ImGui::Button("Cancel", ImVec2(80, 0)) || ImGui::IsKeyPressed(ImGuiKey_Escape))
       {
         ImGui::CloseCurrentPopup();
+        initializedFocus = false; // reset for next open
       }
       
       ImGui::EndPopup();
     }
+
     
     // ---- EDIT MODAL ----
     if (g_showEditModal && g_editIndex >= 0 && g_editIndex < holdings.size())
