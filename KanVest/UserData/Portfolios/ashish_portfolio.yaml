@@ -11,3 +11,7 @@ Holdings:
     AveragePrice: 1278
     Quantity: 1
     Vision: ShortTerm
+  - Symbol: BHARTIARTL
+    AveragePrice: 1800
+    Quantity: 1
+    Vision: LongTerm

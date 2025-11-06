@@ -35,4 +35,10 @@ namespace KanVest
     }
     return false;
   }
+  
+  const std::unordered_map<std::string, StockData>& StockManager::GetStokCache()
+  {
+    return m_stockCache;
+  }
+
 } // namespace KanVest

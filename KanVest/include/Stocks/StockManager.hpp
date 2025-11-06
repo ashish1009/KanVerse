@@ -23,6 +23,9 @@ namespace KanVest
     
     /// Get stock data (thread-safe)
     static bool GetStock(const std::string& symbol, StockData& outData);
+    
+    /// This returns stock cache
+    static const std::unordered_map<std::string, StockData>& GetStokCache();
 
   private:
     inline static std::unordered_map<std::string, StockData> m_stockCache;

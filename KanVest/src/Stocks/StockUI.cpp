@@ -7,6 +7,8 @@
 
 #include "StockUI.hpp"
 
+#include "Stocks/StockManager.hpp"
+
 #include "User/UserManager.hpp"
 
 #include "Portfolio/PortfolioController.hpp"
@@ -106,7 +108,10 @@ namespace KanVest
 
     if (ImGui::BeginChild("ChartCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.5))) // fixed height
     {
-
+      for (auto& [s, d] : StockManager::GetStokCache())
+      {
+        ImGui::Text("Symbol, %s %s", s.c_str(), d.symbol.c_str());
+      }
     }
     ImGui::EndChild();
   }
