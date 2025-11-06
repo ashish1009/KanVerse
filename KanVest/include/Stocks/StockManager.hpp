@@ -16,18 +16,18 @@ namespace KanVest
   {
   public:
     /// Add a new stock symbol for live tracking
-    void AddStock(const std::string& symbol);
+    static void AddStock(const std::string& symbol);
     
     /// Remove a stock symbol
-    void RemoveStock(const std::string& symbol);
+    static void RemoveStock(const std::string& symbol);
     
     /// Get stock data (thread-safe)
-    bool GetStock(const std::string& symbol, StockData& outData);
+    static bool GetStock(const std::string& symbol, StockData& outData);
 
   private:
-    std::unordered_map<std::string, StockData> m_stockCache;
-    std::mutex m_mutex;
-    std::atomic<bool> m_running = false;
-    std::thread m_updateThread;
+    inline static std::unordered_map<std::string, StockData> m_stockCache;
+    inline static std::mutex m_mutex;
+    inline static std::atomic<bool> m_running = false;
+    inline static std::thread m_updateThread;
   };
 } // namespace KanVest

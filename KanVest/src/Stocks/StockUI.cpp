@@ -9,6 +9,8 @@
 
 #include "User/UserManager.hpp"
 
+#include "Portfolio/PortfolioController.hpp"
+
 namespace KanVest
 {
   static int g_sortColumn = 0;
@@ -344,7 +346,10 @@ namespace KanVest
           h.averagePrice = avgPrice;
           h.quantity = quantity;
           h.vision = static_cast<Holding::Vision>(selectedVision);
-          portfolio->AddHolding(h);
+          
+          PortfolioController portfolioController(*portfolio);
+          portfolioController.AddHolding(h);
+
           UserManager::GetCurrentUser().SavePortfolio();
           
           symbolBuf[0] = '\0';

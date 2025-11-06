@@ -29,32 +29,38 @@ namespace KanVest
   class Portfolio
   {
   public:
-    /// This function adds the holding in data base
-    /// - Parameter holding: holding instnace
-    void AddHolding(const Holding& holding);
-    
     /// This function returns the holding
     std::vector<Holding>& GetHoldings();
     /// This function returns the holding
     const std::vector<Holding>& GetHoldings() const;
     
   private:
+    /// This function adds the holding in data base
+    /// - Parameter holding: holding instnace
+    void AddHolding(const Holding& holding);
+
     std::vector<Holding> m_holdings;
+    
+    friend class PortfolioSerializer;
+    friend class PortfolioController;
   };
   
   class PortfolioSerializer
   {
-  public:
+  private:
     /// This function saves portfolio data in file
     /// - Parameters:
     ///   - path: file path
     ///   - portfolio: portfolio data
     static bool SaveToYAML(const std::filesystem::path& path, const Portfolio& portfolio);
+    
     /// This function loads the portfolio from file
     /// - Parameters:
     ///   - path: file path
     ///   - portfolio: portfolio reference
     static bool LoadFromYAML(const std::filesystem::path& path, Portfolio& portfolio);
+    
+    friend class PortfolioController;
   };
   
   namespace PortfolioUtils

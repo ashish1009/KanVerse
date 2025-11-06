@@ -23,6 +23,7 @@
 		B2F3BA7B2EBC372500EC0863 /* StockParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F3BA7A2EBC372500EC0863 /* StockParser.cpp */; };
 		B2F3BA7E2EBC37AB00EC0863 /* StockAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F3BA7D2EBC37AB00EC0863 /* StockAPI.cpp */; };
 		B2F3BA812EBC384600EC0863 /* StockManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F3BA802EBC384600EC0863 /* StockManager.cpp */; };
+		B2F3BA842EBCBA7E00EC0863 /* PortfolioController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F3BA832EBCBA7E00EC0863 /* PortfolioController.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -71,6 +72,8 @@
 		B2F3BA7D2EBC37AB00EC0863 /* StockAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockAPI.cpp; sourceTree = "<group>"; };
 		B2F3BA7F2EBC384600EC0863 /* StockManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockManager.hpp; sourceTree = "<group>"; };
 		B2F3BA802EBC384600EC0863 /* StockManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockManager.cpp; sourceTree = "<group>"; };
+		B2F3BA822EBCBA7E00EC0863 /* PortfolioController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PortfolioController.hpp; sourceTree = "<group>"; };
+		B2F3BA832EBCBA7E00EC0863 /* PortfolioController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PortfolioController.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				B25161FE2EBB474800C7FDC3 /* Portfolio.hpp */,
+				B2F3BA822EBCBA7E00EC0863 /* PortfolioController.hpp */,
 			);
 			path = Portfolio;
 			sourceTree = "<group>";
@@ -108,6 +112,7 @@
 			isa = PBXGroup;
 			children = (
 				B25161FF2EBB474800C7FDC3 /* Portfolio.cpp */,
+				B2F3BA832EBCBA7E00EC0863 /* PortfolioController.cpp */,
 			);
 			path = Portfolio;
 			sourceTree = "<group>";
@@ -348,6 +353,7 @@
 				B2F3BA812EBC384600EC0863 /* StockManager.cpp in Sources */,
 				B25162032EBB487000C7FDC3 /* User.cpp in Sources */,
 				B2F3BA762EBC361600EC0863 /* APIProvider.cpp in Sources */,
+				B2F3BA842EBCBA7E00EC0863 /* PortfolioController.cpp in Sources */,
 				B25162002EBB474800C7FDC3 /* Portfolio.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
 				B2F3BA7E2EBC37AB00EC0863 /* StockAPI.cpp in Sources */,

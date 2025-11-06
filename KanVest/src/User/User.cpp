@@ -7,6 +7,8 @@
 
 #include "User.hpp"
 
+#include "Portfolio/PortfolioController.hpp"
+
 namespace KanVest
 {
   // Simple password hasher using std::hash (replace with real hash later)
@@ -28,13 +30,15 @@ namespace KanVest
   {
     portfolio = std::make_shared<Portfolio>();
     // If file doesn’t exist, create a new empty one
+    
+    PortfolioController portfolioController(*portfolio);
     if (!std::filesystem::exists(portfolioPath))
     {
-      PortfolioSerializer::SaveToYAML(portfolioPath, *portfolio);
+      portfolioController.SavePortfolio(portfolioPath);
     }
     else
     {
-      PortfolioSerializer::LoadFromYAML(portfolioPath, *portfolio);
+      portfolioController.LoadPortfolio(portfolioPath);
     }
   }
   
@@ -42,7 +46,8 @@ namespace KanVest
   {
     if (portfolio)
     {
-      PortfolioSerializer::SaveToYAML(portfolioPath, *portfolio);
+      PortfolioController portfolioController(*portfolio);
+      portfolioController.SavePortfolio(portfolioPath);
     }
   }
   

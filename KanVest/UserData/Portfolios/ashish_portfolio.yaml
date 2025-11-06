@@ -1,12 +1,12 @@
 Holdings:
-  - Symbol: BEL
-    AveragePrice: 398
-    Quantity: 1
-    Vision: LongTerm
   - Symbol: AngelOne
     AveragePrice: 2868.280029296875
     Quantity: 1
     Vision: MidTerm
+  - Symbol: BEL
+    AveragePrice: 250
+    Quantity: 4
+    Vision: LongTerm
   - Symbol: BSE
     AveragePrice: 1278
     Quantity: 1
