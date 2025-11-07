@@ -11,16 +11,27 @@ namespace KanVest::Analysis::Utils
 {
   template<typename T> T mean(const std::vector<T>& v)
   {
-    if (v.empty()) return T(0);
+    if (v.empty())
+    {
+      return T(0);
+    }
+    
     T s = std::accumulate(v.begin(), v.end(), T(0));
     return s / static_cast<T>(v.size());
   }
 
   template<typename T> std::optional<double> rolling_mean_last(const std::vector<T>& v, size_t n)
   {
-    if (v.size() < n || n == 0) return std::nullopt;
+    if (v.size() < n || n == 0)
+    {
+      return std::nullopt;
+    }
+    
     double s = 0.0;
-    for (size_t i = v.size()-n; i < v.size(); ++i) s += static_cast<double>(v[i]);
+    for (size_t i = v.size()-n; i < v.size(); ++i)
+    {
+      s += static_cast<double>(v[i]);
+    }
     return s / static_cast<double>(n);
   }
 

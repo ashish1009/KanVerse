@@ -20,6 +20,7 @@
 		B289EE332EB37F9400937D0B /* libKanVasX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289EE322EB37F9400937D0B /* libKanVasX.a */; };
 		B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE3F2EB3ACF200937D0B /* UI_Font.cpp */; };
 		B2F24F122EBE0E4500810B5B /* AnalyzerUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F24F112EBE0E4500810B5B /* AnalyzerUtils.cpp */; };
+		B2F24F152EBE0F0F00810B5B /* Indicators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F24F142EBE0F0F00810B5B /* Indicators.cpp */; };
 		B2F3BA762EBC361600EC0863 /* APIProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F3BA752EBC361600EC0863 /* APIProvider.cpp */; };
 		B2F3BA7B2EBC372500EC0863 /* StockParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F3BA7A2EBC372500EC0863 /* StockParser.cpp */; };
 		B2F3BA7E2EBC37AB00EC0863 /* StockAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F3BA7D2EBC37AB00EC0863 /* StockAPI.cpp */; };
@@ -67,6 +68,8 @@
 		B2F24F0B2EBDF8AE00810B5B /* AnalyzerStrucutre.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AnalyzerStrucutre.hpp; sourceTree = "<group>"; };
 		B2F24F102EBE0E4500810B5B /* AnalyzerUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AnalyzerUtils.hpp; sourceTree = "<group>"; };
 		B2F24F112EBE0E4500810B5B /* AnalyzerUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AnalyzerUtils.cpp; sourceTree = "<group>"; };
+		B2F24F132EBE0F0F00810B5B /* Indicators.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Indicators.hpp; sourceTree = "<group>"; };
+		B2F24F142EBE0F0F00810B5B /* Indicators.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Indicators.cpp; sourceTree = "<group>"; };
 		B2F3BA712EBC358E00EC0863 /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
 		B2F3BA742EBC361600EC0863 /* APIProvider.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = APIProvider.hpp; sourceTree = "<group>"; };
 		B2F3BA752EBC361600EC0863 /* APIProvider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = APIProvider.cpp; sourceTree = "<group>"; };
@@ -278,6 +281,7 @@
 			children = (
 				B2F24F0B2EBDF8AE00810B5B /* AnalyzerStrucutre.hpp */,
 				B2F24F102EBE0E4500810B5B /* AnalyzerUtils.hpp */,
+				B2F24F132EBE0F0F00810B5B /* Indicators.hpp */,
 			);
 			path = Analyzer;
 			sourceTree = "<group>";
@@ -286,6 +290,7 @@
 			isa = PBXGroup;
 			children = (
 				B2F24F112EBE0E4500810B5B /* AnalyzerUtils.cpp */,
+				B2F24F142EBE0F0F00810B5B /* Indicators.cpp */,
 			);
 			path = Analyzer;
 			sourceTree = "<group>";
@@ -381,6 +386,7 @@
 				B25162002EBB474800C7FDC3 /* Portfolio.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
 				B2F3BA7E2EBC37AB00EC0863 /* StockAPI.cpp in Sources */,
+				B2F24F152EBE0F0F00810B5B /* Indicators.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
