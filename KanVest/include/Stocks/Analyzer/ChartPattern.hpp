@@ -12,15 +12,28 @@
 
 namespace KanVest::Analysis::ChartPatterns
 {
-  // Detect double top/bottom (returns hits with neckline level and measured move)
+  // 1️⃣ Reversal
   std::vector<PatternHit> DetectDoubleTopBottom(const std::vector<StockPoint>& history);
-  
-  // Detect Head & Shoulders and Inverse H&S
+  std::vector<PatternHit> DetectTripleTopBottom(const std::vector<StockPoint>& history);
   std::vector<PatternHit> DetectHeadAndShoulders(const std::vector<StockPoint>& history);
+  std::vector<PatternHit> DetectRoundingBottom(const std::vector<StockPoint>& history);
+  std::vector<PatternHit> DetectCupAndHandle(const std::vector<StockPoint>& history);
+  std::vector<PatternHit> DetectWedges(const std::vector<StockPoint>& history);
+  std::vector<PatternHit> DetectBroadeningFormation(const std::vector<StockPoint>& history);
+  std::vector<PatternHit> DetectDiamondPatterns(const std::vector<StockPoint>& history);
   
-  // Detect triangles, flags, pennants (continuation)
+  // 2️⃣ Continuation
   std::vector<PatternHit> DetectTrianglesFlags(const std::vector<StockPoint>& history);
+  std::vector<PatternHit> DetectRectangleChannel(const std::vector<StockPoint>& history);
+  std::vector<PatternHit> DetectMeasuredMove(const std::vector<StockPoint>& history);
   
-  // Generic trend detection (HH/HL / LH/LL)
+  // 3️⃣ Trend and levels
   PatternHit DetectTrendStructure(const std::vector<StockPoint>& history);
-} // namespace KanVest::Analysis::ChartPatterns
+  std::vector<PatternHit> DetectSupportResistance(const std::vector<StockPoint>& history);
+  std::vector<PatternHit> DetectBreakoutEvents(const std::vector<StockPoint>& history);
+  
+  // 4️⃣ Advanced harmonic / geometry
+  std::vector<PatternHit> DetectHarmonicPatterns(const std::vector<StockPoint>& history);
+  std::vector<PatternHit> DetectParabolicMove(const std::vector<StockPoint>& history);
+  std::vector<PatternHit> DetectAdamEvePatterns(const std::vector<StockPoint>& history);
+}
