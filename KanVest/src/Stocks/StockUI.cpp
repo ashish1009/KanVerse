@@ -555,6 +555,13 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
           g_selectedRow = idx;
         }
         
+        // --- Double-click to Edit ---
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+        {
+          g_editIndex = idx;
+          g_showEditModal = true;
+        }
+        
         // Context Menu
         if (ImGui::BeginPopupContextItem())
         {
