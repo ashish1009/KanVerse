@@ -145,7 +145,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowPortfolio()
   {
-    if (ImGui::BeginChild("StockPortfolioCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.6))) // fixed height
+    if (ImGui::BeginChild("StockPortfolioCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.59))) // fixed height
     {
       KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
       KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Portfolio", KanVasX::UI::AlignX::Center, {0, 5});
@@ -382,27 +382,27 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowWatchlist()
   {
-    if (ImGui::BeginChild("WatchlistCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
-    {
-      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
-      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Watchlist", KanVasX::UI::AlignX::Center, {0, 5});
-      
-      ImGui::Text("Total, %d", (int)(StockManager::GetStokCache().size()));
-      for (auto& [s, d] : StockManager::GetStokCache())
-      {
-        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
-      }
-
-      ImGui::Separator();
-      ImGui::Text("Total, %d", (int)(StockManager::GetLongTermStokCache().size()));
-      for (auto& [s, d] : StockManager::GetLongTermStokCache())
-      {
-        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
-      }
-
-    }
-    ImGui::EndChild();
-    
+//    if (ImGui::BeginChild("WatchlistCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
+//    {
+//      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
+//      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Watchlist", KanVasX::UI::AlignX::Center, {0, 5});
+//      
+//      ImGui::Text("Total, %d", (int)(StockManager::GetStokCache().size()));
+//      for (auto& [s, d] : StockManager::GetStokCache())
+//      {
+//        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
+//      }
+//
+//      ImGui::Separator();
+//      ImGui::Text("Total, %d", (int)(StockManager::GetLongTermStokCache().size()));
+//      for (auto& [s, d] : StockManager::GetLongTermStokCache())
+//      {
+//        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
+//      }
+//
+//    }
+//    ImGui::EndChild();
+//    
     {
       KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::TextMuted);
       KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 90.0f, ImGui::GetContentRegionAvail().y - 20.0f});
@@ -454,7 +454,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
     KanVest_Text(Header_30, change, glm::vec2(30.0f, 10.0f), changeColor);
     
-    static const float UnderLineSize = 0.28;
+    static const float UnderLineSize = 0.90;
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
     KanVasX::UI::ShiftCursorY(20);
     
@@ -475,7 +475,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, Utils::FormatLargeNumber(stockData.volume), glm::vec2(20.0f, 0.0f), textColor);
     
-    KanVasX::UI::ShiftCursorY(10);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
   }
   
   void StockUI::DrawPortfolioTable(Portfolio* portfolio)
