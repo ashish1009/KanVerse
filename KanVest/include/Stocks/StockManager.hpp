@@ -47,8 +47,10 @@ namespace KanVest
     static void RemoveStock(const std::string& symbol);
     
     /// Get stock data (thread-safe)
-    static bool GetStock(const std::string& symbol, StockData& outData);
-    
+    static bool GetShortTermStockData(const std::string& symbol, StockData& outData);
+    /// Get stock data (thread-safe)
+    static bool GetLongTermStockData(const std::string& symbol, StockData& outData);
+
     /// Force immediate refresh of all symbols
     static void RefreshAll();
     
@@ -69,7 +71,9 @@ namespace KanVest
 
     /// This returns stock cache
     static const std::unordered_map<std::string, StockData>& GetStokCache();
-    
+    /// This returns stock cache
+    static const std::unordered_map<std::string, StockData>& GetLongTermStokCache();
+
     /// This function update url time itnerval
     /// - Parameter interval:  url range
     static void SetCurrentInterval(const std::string& interval);
@@ -87,6 +91,7 @@ namespace KanVest
     static bool UpdateStock(const std::string& symbol);
 
     inline static std::unordered_map<std::string, StockData> s_stockCache;
+    inline static std::unordered_map<std::string, StockData> s_longTermStockCache;
     inline static std::string s_selectedStockSymbol = {"Nifty"};
     
     inline static std::string s_currentInterval = "1d";

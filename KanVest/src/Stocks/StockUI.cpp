@@ -382,19 +382,32 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowWatchlist()
   {
-//    if (ImGui::BeginChild("WatchlistCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
-//    {
-//      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
-//      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Watchlist", KanVasX::UI::AlignX::Center, {0, 5});
-//      
-//      ImGui::Text("Total, %d", (int)(StockManager::GetStokCache().size()));
-//      for (auto& [s, d] : StockManager::GetStokCache())
-//      {
-//        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
-//      }
-//
-//    }
-//    ImGui::EndChild();
+    if (ImGui::BeginChild("WatchlistCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
+    {
+      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
+      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Watchlist", KanVasX::UI::AlignX::Center, {0, 5});
+      
+      ImGui::Text("Total, %d", (int)(StockManager::GetStokCache().size()));
+      for (auto& [s, d] : StockManager::GetStokCache())
+      {
+        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
+      }
+
+      ImGui::Separator();
+      ImGui::Text("Total, %d", (int)(StockManager::GetLongTermStokCache().size()));
+      for (auto& [s, d] : StockManager::GetLongTermStokCache())
+      {
+        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
+      }
+
+    }
+    ImGui::EndChild();
+    
+    {
+      KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::TextMuted);
+      KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 90.0f, ImGui::GetContentRegionAvail().y - 20.0f});
+      ImGui::Text("FPS : %.1f", ImGui::GetIO().Framerate);
+    }
   }
   
   void StockUI::AddStockInManager(const std::string& symbol)
@@ -563,7 +576,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         // Update data
         {
           StockData stockData("");
-          if (StockManager::GetStock(h.symbol, stockData))
+          if (StockManager::GetShortTermStockData(h.symbol, stockData))
           {
             h.stockValue = stockData.livePrice;
             h.investment = h.averagePrice * h.quantity;
