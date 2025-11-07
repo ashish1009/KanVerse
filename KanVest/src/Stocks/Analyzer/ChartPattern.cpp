@@ -90,7 +90,7 @@ namespace KanVest::Analysis::ChartPatterns
   }
   
   // average slope magnitude
-  static double AvgSlopeAbs(const std::vector<double>& y, size_t start, size_t end) {
+  [[maybe_unused]] static double AvgSlopeAbs(const std::vector<double>& y, size_t start, size_t end) {
     double s = LinearSlope(y, start, end);
     if (std::isnan(s)) return 0.0;
     return std::abs(s);

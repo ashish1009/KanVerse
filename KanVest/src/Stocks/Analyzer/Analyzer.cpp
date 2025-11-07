@@ -215,6 +215,60 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
     }
   }
   
+  if (r.hasHolding)
+  {
+    // Normalize recommendation score between -1 and 1
+    [[maybe_unused]] double normalizedScore = r.score;
+    double riskFactor = std::clamp(r.atr / std::max(1.0, r.lastClose), 0.005, 0.05);
+    
+    // Suggest partial sells or buys based on both unrealized gain/loss and technicals
+    if (r.recommendation == Recommendation::StrongSell || r.recommendation == Recommendation::Sell)
+    {
+      if (r.unrealizedPct > 15.0) // large gain
+      {
+        r.suggestedActionQty = -holding->qty * 0.5; // take profit on half
+        r.actionReason = "Large unrealized gain (" + std::to_string(r.unrealizedPct) +
+        "%). Suggest selling 50% to lock profits.";
+      }
+      else if (r.unrealizedPct < -10.0) // loss threshold
+      {
+        r.suggestedActionQty = -holding->qty * 0.75; // exit most of position
+        r.actionReason = "Loss exceeding -10%. Suggest cutting 75% of position to limit drawdown.";
+      }
+      else
+      {
+        r.suggestedActionQty = -holding->qty * 0.25; // mild technical weakness
+        r.actionReason = "Bearish technicals, suggest trimming 25% of position.";
+      }
+    }
+    else if (r.recommendation == Recommendation::Buy || r.recommendation == Recommendation::StrongBuy)
+    {
+      // Add to position cautiously depending on volatility and strength
+      double addRatio = (r.score > 0.8 ? 0.5 : 0.25) * (1.0 - riskFactor / 0.05);
+      r.suggestedActionQty = holding->qty * addRatio;
+      r.actionReason = "Bullish signal (score " + std::to_string(r.score) +
+      "). Suggest adding " + std::to_string((int)(addRatio * 100)) +
+      "% to position.";
+    }
+    else
+    {
+      // Hold zone
+      r.suggestedActionQty = 0.0;
+      r.actionReason = "Neutral conditions — hold existing position.";
+    }
+  }
+  else
+  {
+    // No current holding, pure entry suggestion
+    if (r.recommendation == Recommendation::Buy || r.recommendation == Recommendation::StrongBuy)
+    {
+      double baseLot = 100; // or from config
+      double scale = (r.score > 0.8 ? 1.0 : 0.5);
+      r.suggestedActionQty = baseLot * scale;
+      r.actionReason = "No existing holding. Entry opportunity detected.";
+    }
+  }
+
   // build explanation string
   r.explanation = "Score " + std::to_string(r.score) + "; ";
   r.explanation += "SMA" + std::to_string(m_cfg.sma_short) + "=" + std::to_string(r.smaShort) + ", ";

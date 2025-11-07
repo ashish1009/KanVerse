@@ -37,9 +37,12 @@ namespace KanVest::Analysis
     Recommendation recommendation = Recommendation::Unknown;
     double score = 0.0;
     std::string explanation;
+    
     bool hasHolding = false;
     double unrealizedPL = 0.0;
     double unrealizedPct = 0.0;
+    double suggestedActionQty = 0.0;
+    std::string actionReason;          
   };
   
   class StockAnalyzer

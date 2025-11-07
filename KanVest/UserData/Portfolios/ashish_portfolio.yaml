@@ -1,7 +1,7 @@
 Holdings:
   - Symbol: ANGELONE
-    AveragePrice: 2800
-    Quantity: 1
+    AveragePrice: 2343
+    Quantity: 3
     Vision: LongTerm
   - Symbol: BEL
     AveragePrice: 282
@@ -19,9 +19,17 @@ Holdings:
     AveragePrice: 1629
     Quantity: 2
     Vision: ShortTerm
+  - Symbol: CHALET
+    AveragePrice: 234
+    Quantity: 23
+    Vision: LongTerm
   - Symbol: COALINDIA
     AveragePrice: 456
     Quantity: 3
+    Vision: LongTerm
+  - Symbol: DLF
+    AveragePrice: 654
+    Quantity: 2
     Vision: LongTerm
   - Symbol: ETERNAL
     AveragePrice: 267
@@ -31,6 +39,10 @@ Holdings:
     AveragePrice: 95.599998474121094
     Quantity: 10
     Vision: MidTerm
+  - Symbol: GRAVITA
+    AveragePrice: 453
+    Quantity: 1
+    Vision: LongTerm
   - Symbol: HAL
     AveragePrice: 4673.7998046875
     Quantity: 1
@@ -53,6 +65,10 @@ Holdings:
     Vision: MidTerm
   - Symbol: JIOFIN
     AveragePrice: 267
+    Quantity: 2
+    Vision: LongTerm
+  - Symbol: KFINTECH
+    AveragePrice: 23
     Quantity: 2
     Vision: LongTerm
   - Symbol: LGEINDIA
@@ -78,6 +94,10 @@ Holdings:
   - Symbol: PAYTM
     AveragePrice: 1478
     Quantity: 1
+    Vision: LongTerm
+  - Symbol: QUESS
+    AveragePrice: 333
+    Quantity: 3
     Vision: LongTerm
   - Symbol: RELIANCE
     AveragePrice: 2354
@@ -114,8 +134,4 @@ Holdings:
   - Symbol: TMPV
     AveragePrice: 881
     Quantity: 2
-    Vision: LongTerm
-  - Symbol: GRAVITA
-    AveragePrice: 453
-    Quantity: 1
     Vision: LongTerm
