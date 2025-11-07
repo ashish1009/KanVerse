@@ -33,6 +33,7 @@ namespace KanVest::Analysis
     double macd = 0.0, macdSignal = 0.0;
     double smaShort=0.0, smaLong=0.0;
     double atr=0.0;
+    double vwap=0.0;
     Recommendation recommendation = Recommendation::Unknown;
     double score = 0.0;
     std::string explanation;

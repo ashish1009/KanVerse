@@ -55,5 +55,5 @@ namespace KanVest::Analysis::Indicators
                     size_t period = 14);
   
   // --- VWAP (intraday weighted average price) ---
-  inline double VWAP(const std::vector<double>& closes, const std::vector<uint64_t>& volumes);
+  inline double VWAP(const std::vector<StockPoint>& h);
 } // namespace KanVest::Analysis::Indicators

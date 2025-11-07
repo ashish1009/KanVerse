@@ -79,7 +79,8 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
   auto macd_pair = MACD(closes);
   r.macd = macd_pair.first; r.macdSignal = macd_pair.second;
   r.atr = ATR(highs, lows, closes, m_cfg.atr_period);
-  
+  r.vwap = VWAP(s.history);
+
   r.candlePatterns = DetectSingleBarPatterns(s.history);
   auto multi = DetectMultiBarPatterns(s.history);
   r.candlePatterns.insert(r.candlePatterns.end(), multi.begin(), multi.end());
@@ -116,6 +117,18 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
       score -= 0.15;
     }
   }
+  if (!std::isnan(r.vwap))
+  {
+    if (r.lastClose > r.vwap)
+    {
+      score += 0.1; // bullish bias
+    }
+    else if (r.lastClose < r.vwap)
+    {
+      score -= 0.1; // bearish bias
+    }
+  }
+
   // patterns adjust score
   for (auto &p : r.candlePatterns)
   {

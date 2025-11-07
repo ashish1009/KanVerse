@@ -318,13 +318,15 @@ namespace KanVest::Analysis::Indicators
     return 100.0 - (100.0 / (1.0 + mfr));
   }
   
-  // --- VWAP (intraday weighted average price) ---
-  inline double VWAP(const std::vector<double>& closes, const std::vector<uint64_t>& volumes) {
-    if (closes.empty() || volumes.empty() || closes.size() != volumes.size()) return nan();
-    double pv = 0.0; double v = 0.0;
-    for (size_t i = 0; i < closes.size(); ++i) { pv += closes[i] * static_cast<double>(volumes[i]); v += static_cast<double>(volumes[i]); }
-    if (v == 0.0) return nan();
-    return pv / v;
+  inline double VWAP(const std::vector<StockPoint>& h) {
+    if (h.empty()) return nan();
+    double pv = 0.0, v = 0.0;
+    for (const auto& p : h) {
+      double typical = (p.high + p.low + p.close) / 3.0;
+      pv += typical * static_cast<double>(p.volume);
+      v += static_cast<double>(p.volume);
+    }
+    return (v == 0.0) ? nan() : (pv / v);
   }
 } //  namespace KanVest::Analysis::Indicators
 
