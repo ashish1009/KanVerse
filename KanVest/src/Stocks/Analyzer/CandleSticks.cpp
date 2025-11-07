@@ -25,7 +25,7 @@ static double lower_wick(const StockPoint& p)
   return std::min(p.open, p.close) - p.low;
 }
 
-std::vector<PatternHit> DetectSingleBarPatterns(const std::vector<StockPoint>& history)
+std::vector<PatternHit> Candles::DetectSingleBarPatterns(const std::vector<StockPoint>& history)
 {
   std::vector<PatternHit> out;
   if (history.empty())
@@ -78,7 +78,7 @@ std::vector<PatternHit> DetectSingleBarPatterns(const std::vector<StockPoint>& h
   return out;
 }
 
-std::vector<PatternHit> DetectMultiBarPatterns(const std::vector<StockPoint>& history)
+std::vector<PatternHit> Candles::DetectMultiBarPatterns(const std::vector<StockPoint>& history)
 {
   std::vector<PatternHit> out;
   if (history.size() < 3)

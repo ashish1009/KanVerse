@@ -40,7 +40,7 @@ static std::vector<double> closesFrom(const std::vector<StockPoint>& h)
   return out;
 }
 
-std::vector<PatternHit> DetectDoubleTopBottom(const std::vector<StockPoint>& history)
+std::vector<PatternHit> ChartPatterns::DetectDoubleTopBottom(const std::vector<StockPoint>& history)
 {
   std::vector<PatternHit> out;
   if (history.size() < 8)
@@ -88,7 +88,7 @@ std::vector<PatternHit> DetectDoubleTopBottom(const std::vector<StockPoint>& his
   return out;
 }
 
-std::vector<PatternHit> DetectHeadAndShoulders(const std::vector<StockPoint>& history)
+std::vector<PatternHit> ChartPatterns::DetectHeadAndShoulders(const std::vector<StockPoint>& history)
 {
   std::vector<PatternHit> out;
   if (history.size() < 9)
@@ -128,7 +128,7 @@ std::vector<PatternHit> DetectHeadAndShoulders(const std::vector<StockPoint>& hi
   return out;
 }
 
-PatternHit DetectTrendStructure(const std::vector<StockPoint>& history)
+PatternHit ChartPatterns::DetectTrendStructure(const std::vector<StockPoint>& history)
 {
   PatternHit ph;
   ph.name = "Trend";

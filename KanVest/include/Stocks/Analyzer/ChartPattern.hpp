@@ -24,4 +24,3 @@ namespace KanVest::Analysis::ChartPatterns
   // Generic trend detection (HH/HL / LH/LL)
   PatternHit DetectTrendStructure(const std::vector<StockPoint>& history);
 } // namespace KanVest::Analysis::ChartPatterns
-
