@@ -22,7 +22,7 @@ namespace KanVest
     static void StockPanel();
     
   private:
-    static void UpdateStockData(const std::string& symbol);
+    static void AddStockInManager(const std::string& symbol);
 
     static void ShowStockDetails();
     static void ShowStcokBasicData();
@@ -30,9 +30,13 @@ namespace KanVest
     static void ShowPortfolio();
     static void ShowWatchlist();
 
+    static void DrawCandleChart();
+    static void DrawChartController();
+
     static void DrawPortfolioTable(Portfolio* portfolio);
     static void SearchBar();
 
+    inline static bool s_showCandle = true;
     inline static ImTextureID s_reloadIconID = 0;
     inline static char s_searchedString[128] = "Nifty";
   };

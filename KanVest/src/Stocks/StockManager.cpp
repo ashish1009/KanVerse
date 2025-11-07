@@ -125,7 +125,7 @@ namespace KanVest
       f.wait();
   }
   
-  void StockManager::StartLiveUpdates(int intervalSeconds)
+  void StockManager::StartLiveUpdates(int intervalMilliseconds)
   {
     if (s_running)
     {
@@ -133,7 +133,7 @@ namespace KanVest
     }
     
     s_running = true;
-    s_updateThread = std::thread(UpdateLoop, intervalSeconds);
+    s_updateThread = std::thread(UpdateLoop, intervalMilliseconds);
   }
   
   void StockManager::StopLiveUpdates()
@@ -173,7 +173,25 @@ namespace KanVest
     return s_stockCache;
   }
   
-  void StockManager::UpdateLoop(int intervalSeconds)
+  void StockManager::SetCurrentInterval(const std::string& interval)
+  {
+    s_currentInterval = interval;
+  }
+  void StockManager::SetCurrentRange(const std::string& range)
+  {
+    s_currentRange = range;
+  }
+  
+  const std::string& StockManager::GetCurrentInterval()
+  {
+    return s_currentInterval;
+  }
+  const std::string& StockManager::GetCurrentRange()
+  {
+    return s_currentRange;
+  }
+
+  void StockManager::UpdateLoop(int intervalMilliseconds)
   {
     using namespace std::chrono_literals;
     
@@ -192,9 +210,9 @@ namespace KanVest
       
       // Sleep until next interval
       auto elapsed = std::chrono::steady_clock::now() - start;
-      auto sleepFor = std::chrono::seconds(intervalSeconds) - elapsed;
-      
-      if (sleepFor > 0s)
+      auto sleepFor = std::chrono::milliseconds(intervalMilliseconds) - elapsed;
+
+      if (sleepFor > 0ms)
         std::this_thread::sleep_for(sleepFor);
     }
   }

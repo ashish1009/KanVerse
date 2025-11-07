@@ -57,6 +57,25 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       
       return oss.str();
     }
+    
+    static std::vector<StockPoint> FilterTradingDays(const std::vector<StockPoint>& history)
+    {
+      std::vector<StockPoint> filtered;
+      filtered.reserve(history.size());
+      
+      for (const auto& h : history)
+      {
+        time_t t = static_cast<time_t>(h.timestamp);
+        struct tm* tm_info = localtime(&t);
+        int wday = tm_info->tm_wday; // 0 = Sunday, 6 = Saturday
+        if (wday != 0 && wday != 6)
+        {
+          filtered.push_back(h);
+        }
+      }
+      
+      return filtered;
+    }
   } // namespace Utils
   
   void StockUI::Initialize(ImTextureID reloadIconID)
@@ -126,7 +145,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowPortfolio()
   {
-    if (ImGui::BeginChild("StockPortfolioCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.5))) // fixed height
+    if (ImGui::BeginChild("StockPortfolioCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.6))) // fixed height
     {
       KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
       KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Portfolio", KanVasX::UI::AlignX::Center, {0, 5});
@@ -135,31 +154,250 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     }
     ImGui::EndChild();
 
+    KanVasX::UI::ShiftCursorY(10.0f);
     if (ImGui::BeginChild("ChartCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
     {
-
+      DrawCandleChart();
+      DrawChartController();
     }
     ImGui::EndChild();
+  }
+  
+  void StockUI::DrawCandleChart()
+  {
+    StockData stockData = StockManager::GetSelectedStockData();
+    const auto& history = stockData.history;
+    
+    if (history.empty())
+    {
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_22), "No Chart Available", KanVasX::UI::AlignX::Left);
+      return;
+    }
+    
+    // Keep only trading days (you already had this).
+    std::vector<StockPoint> filtered = Utils::FilterTradingDays(history);
+    if (filtered.empty())
+    {
+      ImGui::Text("No trading days in this range");
+      return;
+    }
+    
+    // We'll use sequential x indices so weekends/holidays are skipped visually.
+    std::vector<double> xs, opens, highs, lows, closes;
+    xs.reserve(filtered.size());
+    opens.reserve(filtered.size());
+    highs.reserve(filtered.size());
+    lows.reserve(filtered.size());
+    closes.reserve(filtered.size());
+    
+    double ymin = DBL_MAX;
+    double ymax = -DBL_MAX;
+    
+    for (size_t i = 0; i < filtered.size(); ++i)
+    {
+      const auto& h = filtered[i];
+      xs.push_back(static_cast<double>(i)); // sequential index
+      opens.push_back(h.open);
+      highs.push_back(h.high);
+      lows.push_back(h.low);
+      closes.push_back(h.close);
+      ymin = std::min(ymin, h.low);
+      ymax = std::max(ymax, h.high);
+    }
+    
+    // Build human-readable labels locally (e.g., "2025-11-03").
+    // To avoid too many labels, we'll place a label every few points.
+    std::vector<std::string> labelStrings;
+    std::vector<const char*> labelPtrs;
+    std::vector<double> labelPositions;
+    
+    // Decide label step based on number of points: aim for ~8-12 labels max.
+    int targetLabels = 10;
+    size_t n = filtered.size();
+    size_t labelStep = 1;
+    if (n > 0)
+    {
+      labelStep = std::max<size_t>(1, (n + targetLabels - 1) / targetLabels);
+    }
+    
+    labelStrings.reserve((n + labelStep - 1) / labelStep);
+    labelPositions.reserve(labelStrings.capacity());
+    labelPtrs.reserve(labelStrings.capacity());
+    
+    for (size_t i = 0; i < n; i += labelStep)
+    {
+      // Convert timestamp to UTC date string
+      time_t t = static_cast<time_t>(filtered[i].timestamp);
+      struct tm tm{};
+#if defined(_WIN32)
+      gmtime_s(&tm, &t);
+#else
+      gmtime_r(&t, &tm);
+#endif
+      char buf[64];
+      // Format: YYYY-MM-DD (change format if you want time too)
+      std::strftime(buf, sizeof(buf), "%Y-%m-%d", &tm);
+      labelStrings.emplace_back(buf);
+      labelPositions.push_back(static_cast<double>(i));
+    }
+    
+    // Convert label strings to char* for ImPlot
+    for (auto &s : labelStrings)
+      labelPtrs.push_back(s.c_str());
+    
+    // Start plotting
+    if (ImPlot::BeginPlot("##", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.9)))
+    {
+      // We use AutoFit for X and set Y limits explicitly
+      ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
+      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin - 1.0, ymax + 1.0, ImGuiCond_Always);
+      
+      // Setup X axis ticks with our custom positions and labels (compressed timeline)
+      if (!labelPositions.empty())
+      {
+        // ImPlot::SetupAxisTicks accepts arrays of positions and labels.
+        // Provide positions (double*) and labels (const char*[])
+        ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), static_cast<int>(labelPositions.size()), labelPtrs.data());
+      }
+      
+      // Plot close line (optional)
+      ImPlot::PlotLine("", xs.data(), closes.data(), static_cast<int>(xs.size()));
+      
+      ImDrawList* drawList = ImPlot::GetPlotDrawList();
+      
+      if (s_showCandle)
+      {
+        for (size_t i = 0; i < xs.size(); ++i)
+        {
+          ImU32 color = (closes[i] >= opens[i]) ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+          
+          ImVec2 pHigh  = ImPlot::PlotToPixels(ImPlotPoint(xs[i], highs[i]));
+          ImVec2 pLow   = ImPlot::PlotToPixels(ImPlotPoint(xs[i], lows[i]));
+          ImVec2 pOpen  = ImPlot::PlotToPixels(ImPlotPoint(xs[i], opens[i]));
+          ImVec2 pClose = ImPlot::PlotToPixels(ImPlotPoint(xs[i], closes[i]));
+          
+          // Wick
+          drawList->AddLine(pLow, pHigh, IM_COL32(200, 200, 200, 255));
+          
+          float top = std::min(pOpen.y, pClose.y);
+          float bottom = std::max(pOpen.y, pClose.y);
+          float cx = pOpen.x;
+          float width = 4.0f;
+          
+          // Filled body and border
+          drawList->AddRectFilled(ImVec2(cx - width, top), ImVec2(cx + width, bottom), color);
+          drawList->AddRect(ImVec2(cx - width, top), ImVec2(cx + width, bottom), IM_COL32(40, 40, 40, 255));
+        }
+      }
+      
+      // --- Tooltip (hover info with date + time) ---
+      if (ImPlot::IsPlotHovered() && !filtered.empty())
+      {
+        ImPlotPoint mouse = ImPlot::GetPlotMousePos();
+        
+        // Find nearest candle index
+        int idx = (int)std::round(mouse.x);
+        idx = std::clamp(idx, 0, (int)filtered.size() - 1);
+        
+        const StockPoint& p = filtered[idx];
+        
+        // Convert timestamp → readable date + time
+        time_t t = static_cast<time_t>(p.timestamp);
+        struct tm tm {};
+#if defined(_WIN32)
+        localtime_s(&tm, &t); // Use local time for readability
+#else
+        localtime_r(&t, &tm);
+#endif
+        char dateTimeBuf[64];
+        std::strftime(dateTimeBuf, sizeof(dateTimeBuf), "%Y-%m-%d %H:%M", &tm);
+        
+        // Draw tooltip near the cursor
+        ImGui::BeginTooltip();
+        ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "%s", dateTimeBuf);
+        ImGui::Separator();
+        ImGui::Text("Open : %.2f", p.open);
+        ImGui::Text("High : %.2f", p.high);
+        ImGui::Text("Low  : %.2f", p.low);
+        ImGui::Text("Close: %.2f", p.close);
+        ImGui::EndTooltip();
+      }
+      
+      ImPlot::EndPlot();
+    }
+  }
+  
+  void StockUI::DrawChartController()
+  {
+    StockData stockData = StockManager::GetSelectedStockData();
+    if (!stockData.IsValid())
+    {
+      return;
+    }
+    bool modify = false;
+    for (int i = 0; i < IM_ARRAYSIZE(StockManager::ValidRange); ++i)
+    {
+      auto buttonColor = StockManager::ValidRange[i] == StockManager::GetCurrentRange() ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+      
+      std::string displayText = StockManager::ValidRange[i];
+      std::string uniqueLabel = displayText + "##Range" + std::to_string(i);
+      if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
+      {
+        StockManager::SetCurrentRange(StockManager::ValidRange[i]);
+        StockManager::SetCurrentInterval(StockManager::RangeIntervalMap[StockManager::GetCurrentRange()][0].c_str());
+        
+        modify = true;
+      }
+      if (i < IM_ARRAYSIZE(StockManager::ValidRange) - 1)
+      {
+        ImGui::SameLine();
+      }
+    }
+    
+    ImGui::SameLine();
+    KanVasX::UI::ShiftCursorX(20);
+    ImGui::Checkbox(" Show Candle", &s_showCandle);
+        
+    ImGui::SameLine();
+    std::vector<std::string> intervalValues = StockManager::RangeIntervalMap[StockManager::GetCurrentRange()];
+    KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x - (intervalValues.size() * 40));
+    for (int i = 0; i < intervalValues.size(); ++i)
+    {
+      auto buttonColor = intervalValues[i] == StockManager::GetCurrentInterval() ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+      
+      std::string displayText = intervalValues[i];
+      std::string uniqueLabel = displayText + "##Interval" + std::to_string(i);
+      
+      if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
+      {
+        StockManager::SetCurrentInterval(intervalValues[i].c_str());
+        modify = true;
+      }
+      if (i < intervalValues.size())
+      {
+        ImGui::SameLine();
+      }
+    }
   }
   
   void StockUI::ShowWatchlist()
   {
-    if (ImGui::BeginChild("WatchlistCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
-    {
-      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
-      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Watchlist", KanVasX::UI::AlignX::Center, {0, 5});
-      
-      ImGui::Text("Total, %d", (int)(StockManager::GetStokCache().size()));
-      for (auto& [s, d] : StockManager::GetStokCache())
-      {
-        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
-      }
-
-    }
-    ImGui::EndChild();
+//    if (ImGui::BeginChild("WatchlistCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
+//    {
+//      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
+//      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Watchlist", KanVasX::UI::AlignX::Center, {0, 5});
+//      
+//      ImGui::Text("Total, %d", (int)(StockManager::GetStokCache().size()));
+//      for (auto& [s, d] : StockManager::GetStokCache())
+//      {
+//        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
+//      }
+//
+//    }
+//    ImGui::EndChild();
   }
   
-  void StockUI::UpdateStockData(const std::string& symbol)
+  void StockUI::AddStockInManager(const std::string& symbol)
   {
     StockManager::AddStock(symbol);
     StockManager::SetSelectedStockSymbol(symbol);
@@ -177,7 +415,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     float iconSize = ImGui::GetItemRectSize().y - 12;
     if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {0.0, 6.0}) || ImGui::IsKeyDown(ImGuiKey_Enter))
     {
-      UpdateStockData(s_searchedString);
+      AddStockInManager(s_searchedString);
     }
   }
   

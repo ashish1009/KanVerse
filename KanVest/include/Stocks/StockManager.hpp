@@ -15,6 +15,28 @@ namespace KanVest
   class StockManager
   {
   public:
+    inline static const char* ValidIntervals[] =
+    {
+      "1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"
+    };
+    
+    inline static const char* ValidRange[] =
+    {
+      "1d", "5d", "1mo", "6mo", "ytd", "1y", "5y", "max"
+    };
+    
+    inline static std::unordered_map<std::string, std::vector<std::string>> RangeIntervalMap =
+    {
+      {"1d",  {"60m", "30m", "15m", "5m", "2m", "1m"}},
+      {"5d",  {"60m", "30m", "15m", "5m", "2m", "1m"}},
+      {"1mo", {"1d", "60m", "30m", "15m", "5m"}},
+      {"6mo", {"1wk", "1d", "1h"}},
+      {"ytd", {"1mo", "1wk", "1h"}},
+      {"1y",  {"1mo", "1wk", "1d"}},
+      {"5y",  {"1mo", "1wk", "1d"}},
+      {"max", {"1mo", "1wk", "1d"}},
+    };
+
     /// Add a new stock symbol for live tracking
     static bool AddStock(const std::string& symbol);
 
@@ -31,7 +53,7 @@ namespace KanVest
     static void RefreshAll();
     
     /// Start background updating thread
-    static void StartLiveUpdates(int intervalSeconds = 30);
+    static void StartLiveUpdates(int intervalMilliseconds = 100);
     
     /// Stop background updating thread
     static void StopLiveUpdates();
@@ -47,9 +69,21 @@ namespace KanVest
 
     /// This returns stock cache
     static const std::unordered_map<std::string, StockData>& GetStokCache();
+    
+    /// This function update url time itnerval
+    /// - Parameter interval:  url range
+    static void SetCurrentInterval(const std::string& interval);
+    /// This function returns the update refresh time
+    static const std::string& GetCurrentInterval();
+    
+    /// This function update url range
+    /// - Parameter range: new range
+    static void SetCurrentRange(const std::string& range);
+    /// This function returns the url range
+    static const std::string& GetCurrentRange();
 
   private:
-    static void UpdateLoop(int intervalSeconds);
+    static void UpdateLoop(int intervalMilliseconds);
     static bool UpdateStock(const std::string& symbol);
 
     inline static std::unordered_map<std::string, StockData> s_stockCache;
