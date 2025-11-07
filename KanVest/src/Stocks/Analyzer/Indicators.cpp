@@ -14,6 +14,14 @@ namespace KanVest::Analysis::Indicators
     return std::numeric_limits<double>::quiet_NaN();
   }
   
+  // -------------------------------------------------------------
+  // 📊 Simple Moving Average (SMA)
+  // -------------------------------------------------------------
+  // SMA means “average closing price over the last N days”.
+  // It shows the general direction of the market:
+  //  - If current price > SMA → price trending up
+  //  - If current price < SMA → price trending down
+  // -------------------------------------------------------------
   double SMA(const std::vector<double>& series, size_t n)
   {
     if (series.size() < n || n == 0)
@@ -29,6 +37,12 @@ namespace KanVest::Analysis::Indicators
     return sum / static_cast<double>(n);
   }
   
+  // -------------------------------------------------------------
+  // 📈 Exponential Moving Average (EMA)
+  // -------------------------------------------------------------
+  // EMA is similar to SMA, but gives more weight to recent prices.
+  // So it reacts faster when price starts rising or falling.
+  // -------------------------------------------------------------
   double EMA(const std::vector<double>& series, size_t n)
   {
     if (series.empty() || n == 0)
@@ -62,6 +76,15 @@ namespace KanVest::Analysis::Indicators
     return ema;
   }
   
+  // -------------------------------------------------------------
+  // 💪 Relative Strength Index (RSI)
+  // -------------------------------------------------------------
+  // RSI shows how strong or weak recent price movements are.
+  //
+  // - RSI > 70 → price has gone up too fast (overbought)
+  // - RSI < 30 → price has dropped too fast (oversold)
+  // - RSI ≈ 50 → balanced movement, no strong direction
+  // -------------------------------------------------------------
   double RSI(const std::vector<double>& closes, size_t period)
   {
     if (closes.size() < period + 1)
@@ -94,6 +117,16 @@ namespace KanVest::Analysis::Indicators
     return 100.0 - (100.0 / (1.0 + rs));
   }
   
+  // -------------------------------------------------------------
+  // 🌊 Average True Range (ATR)
+  // -------------------------------------------------------------
+  // ATR tells us how much prices move (on average) each day.
+  // It doesn’t care whether the price went up or down,
+  // just how *big* the daily changes were.
+  //
+  // Higher ATR → more volatility (price jumping around)
+  // Lower ATR → calmer price movement
+  // -------------------------------------------------------------
   double ATR(const std::vector<double>& highs, const std::vector<double>& lows, const std::vector<double>& closes, size_t period)
   {
     if (highs.size() < period + 1 || lows.size() < period + 1 || closes.size() < period + 1)
@@ -115,6 +148,18 @@ namespace KanVest::Analysis::Indicators
     return sum / static_cast<double>(trs.size());
   }
   
+  // -------------------------------------------------------------
+  // 📉 MACD (Moving Average Convergence Divergence)
+  // -------------------------------------------------------------
+  // MACD compares a short-term EMA vs a long-term EMA.
+  // It shows how momentum (speed of price changes) is shifting.
+  //
+  // If short-term average rises above long-term → uptrend starting.
+  // If short-term falls below long-term → downtrend starting.
+  //
+  // MACD also calculates a "signal line" (a smoothed version)
+  // and a histogram that shows how strong the shift is.
+  // -------------------------------------------------------------
   std::pair<double,double> MACD(const std::vector<double>& closes, size_t fast, size_t slow, size_t signal)
   {
     if (closes.size() < slow)

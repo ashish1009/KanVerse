@@ -14,7 +14,8 @@ using namespace KanVest;
 // Helper to extract highs/lows
 static std::vector<double> highsFrom(const std::vector<StockPoint>& h)
 {
-  std::vector<double> out; out.reserve(h.size());
+  std::vector<double> out;
+  out.reserve(h.size());
   for (auto &p : h)
   {
     out.push_back(p.high);
@@ -23,7 +24,8 @@ static std::vector<double> highsFrom(const std::vector<StockPoint>& h)
 }
 static std::vector<double> lowsFrom(const std::vector<StockPoint>& h)
 {
-  std::vector<double> out; out.reserve(h.size());
+  std::vector<double> out;
+  out.reserve(h.size());
   for (auto &p : h)
   {
     out.push_back(p.low);
@@ -32,7 +34,8 @@ static std::vector<double> lowsFrom(const std::vector<StockPoint>& h)
 }
 static std::vector<double> closesFrom(const std::vector<StockPoint>& h)
 {
-  std::vector<double> out; out.reserve(h.size());
+  std::vector<double> out;
+  out.reserve(h.size());
   for (auto &p : h)
   {
     out.push_back(p.close);
