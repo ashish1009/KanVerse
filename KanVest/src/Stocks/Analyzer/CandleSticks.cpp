@@ -29,7 +29,7 @@ static PatternHit MakeRange(const std::string& name, size_t s, size_t e, double 
 }
 
 // Utility: safe subtraction for size_t
-static size_t SafeSub(size_t a, size_t b) { return (a > b) ? (a - b) : 0; }
+[[maybe_unused]] static size_t SafeSub(size_t a, size_t b) { return (a > b) ? (a - b) : 0; }
 
 // single-bar comprehensive detection
 std::vector<PatternHit> Candles::DetectSingleBarPatterns(const std::vector<StockPoint>& history)

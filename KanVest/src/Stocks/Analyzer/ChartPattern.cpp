@@ -15,7 +15,7 @@ namespace KanVest::Analysis::ChartPatterns
   // --------------------------- Configuration / helpers ---------------------------
   static constexpr double DEFAULT_PEAK_TOL = 0.03; // 3% tolerance for "similar" peaks/lows
   static constexpr size_t DEFAULT_MIN_PATTERN_SPAN = 6; // minimum bars covering a pattern
-  static constexpr size_t DEFAULT_MIN_PIVOTS = 3; // minimal pivots to search
+  [[maybe_unused]] static constexpr size_t DEFAULT_MIN_PIVOTS = 3; // minimal pivots to search
   
   inline double nan() { return std::numeric_limits<double>::quiet_NaN(); }
   
@@ -28,10 +28,10 @@ namespace KanVest::Analysis::ChartPatterns
   static std::vector<double> closesFrom(const std::vector<StockPoint>& h) {
     std::vector<double> out; out.reserve(h.size()); for (auto &p : h) out.push_back(p.close); return out;
   }
-  static std::vector<double> opensFrom(const std::vector<StockPoint>& h) {
+  [[maybe_unused]] static std::vector<double> opensFrom(const std::vector<StockPoint>& h) {
     std::vector<double> out; out.reserve(h.size()); for (auto &p : h) out.push_back(p.open); return out;
   }
-  static std::vector<uint64_t> volsFrom(const std::vector<StockPoint>& h) {
+  [[maybe_unused]] static std::vector<uint64_t> volsFrom(const std::vector<StockPoint>& h) {
     std::vector<uint64_t> out; out.reserve(h.size()); for (auto &p : h) out.push_back(p.volume); return out;
   }
   
@@ -311,9 +311,9 @@ namespace KanVest::Analysis::ChartPatterns
     // scan windows up to size 60
     for (size_t window = 20; window <= std::min(n, static_cast<size_t>(80)); window += 5) {
       for (size_t start = 0; start + window < n; start += window/4) {
-        size_t end = start + window;
+        [[maybe_unused]] size_t end = start + window;
         // candidate cup
-        double maxLeft = *std::max_element(closes.begin()+start, closes.begin()+end);
+        [[maybe_unused]] double maxLeft = *std::max_element(closes.begin()+start, closes.begin()+end);
         size_t minIdx = std::distance(closes.begin(), std::min_element(closes.begin()+start, closes.begin()+end));
         double minVal = closes[minIdx];
         // need left rim and right rim near same level (within 10%)
@@ -531,7 +531,7 @@ namespace KanVest::Analysis::ChartPatterns
       auto highs = highsFrom(history); auto lows = lowsFrom(history);
       double head = -1.0, neckline = 0.0;
       for (size_t i = left; i <= right; ++i) head = std::max(head, highs[i]);
-      double minA = 1e12, minB = 1e12;
+      [[maybe_unused]] double minA = 1e12, minB = 1e12;
       for (size_t i = left; i <= right; ++i) minA = std::min(minA, lows[i]);
       neckline = minA;
       double target = head - neckline;

@@ -318,7 +318,7 @@ namespace KanVest::Analysis::Indicators
     return 100.0 - (100.0 / (1.0 + mfr));
   }
   
-  inline double VWAP(const std::vector<StockPoint>& h) {
+  double VWAP(const std::vector<KanVest::StockPoint>& h) {
     if (h.empty()) return nan();
     double pv = 0.0, v = 0.0;
     for (const auto& p : h) {

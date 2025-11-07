@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "Stocks/StockData.hpp"
+
 namespace KanVest::Analysis::Indicators
 {  
   // Simple SMA for last n bars; returns NAN if insufficient
@@ -55,5 +57,5 @@ namespace KanVest::Analysis::Indicators
                     size_t period = 14);
   
   // --- VWAP (intraday weighted average price) ---
-  inline double VWAP(const std::vector<StockPoint>& h);
+  double VWAP(const std::vector<KanVest::StockPoint>& h);
 } // namespace KanVest::Analysis::Indicators

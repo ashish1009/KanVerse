@@ -13,6 +13,8 @@
 
 #include "Portfolio/PortfolioController.hpp"
 
+#include "Stocks/Analyzer/Analyzer.hpp"
+
 namespace KanVest
 {
 #define KanVest_Text(font, string, offset, textColor) \
@@ -85,6 +87,20 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 
   void StockUI::StockPanel()
   {
+    KanVest::StockData shortTerm;
+    KanVest::StockData longTerm;
+    std::string symbol = StockManager::GetSelectedStockSymbol();
+    KanVest::StockManager::GetShortTermStockData(symbol, shortTerm);
+    KanVest::StockManager::GetLongTermStockData(symbol, longTerm);
+    
+    KanVest::Analysis::AnalyzerConfig cfg;
+    cfg.sma_short = 9; cfg.sma_long = 21; cfg.rsi_period = 14;
+    
+    KanVest::Analysis::StockAnalyzer analyzer(cfg);
+    KanVest::Analysis::HoldingInfo holding{120.5, 10.0, symbol};
+    
+    auto report = analyzer.Analyze(shortTerm, &longTerm, &holding);
+
     KanVasX::Panel::Begin("Stock Analyzer");
     
     if (ImGui::BeginTable("StockAnalyzerTable", 3, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
