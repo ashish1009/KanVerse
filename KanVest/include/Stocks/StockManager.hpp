@@ -9,6 +9,8 @@
 
 #include "Stocks/StockData.hpp"
 
+#include "Stocks/Analyzer/Analyzer.hpp"
+
 namespace KanVest
 {
   /// This class manages all stocks
@@ -36,6 +38,9 @@ namespace KanVest
       {"5y",  {"1mo", "1wk", "1d"}},
       {"max", {"1mo", "1wk", "1d"}},
     };
+    
+    /// This function analyzes the selected stock
+    static void AnalyzeSelectedStock();
 
     /// Add a new stock symbol for live tracking
     static bool AddStock(const std::string& symbol);
@@ -62,7 +67,9 @@ namespace KanVest
 
     /// This function updates the active stock data
     static void SetSelectedStockSymbol(const std::string& stockSymbol);
-
+    /// This function updates the active stock holding data
+    static void SetSelectedStockHoldingData(double atp, int qty, const std::string& stockSymbol);
+    
     /// This function returns the active stock data
     static const std::string& GetSelectedStockSymbol();
     
@@ -93,7 +100,8 @@ namespace KanVest
     inline static std::unordered_map<std::string, StockData> s_stockCache;
     inline static std::unordered_map<std::string, StockData> s_longTermStockCache;
     inline static std::string s_selectedStockSymbol = {"Nifty"};
-    
+    inline static KanVest::Analysis::HoldingInfo s_selectedHoldingData;
+
     inline static std::string s_currentInterval = "1d";
     inline static std::string s_currentRange = "1mo";
 

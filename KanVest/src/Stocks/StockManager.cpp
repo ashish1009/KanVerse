@@ -85,6 +85,27 @@ namespace KanVest
     return data;
   }
 
+  void StockManager::AnalyzeSelectedStock()
+  {
+    // Get long term and short term data
+    KanVest::StockData shortTerm;
+    KanVest::StockData longTerm;
+    KanVest::StockManager::GetShortTermStockData(s_selectedStockSymbol, shortTerm);
+    KanVest::StockManager::GetLongTermStockData(s_selectedStockSymbol, longTerm);
+    
+    if (shortTerm.IsValid() or longTerm.IsValid())
+    {
+      // Constant config for now
+      KanVest::Analysis::AnalyzerConfig cfg;
+      cfg.sma_short = 9;
+      cfg.sma_long = 21;
+      cfg.rsi_period = 14;
+      
+      KanVest::Analysis::StockAnalyzer analyzer(cfg);
+      
+      auto report = analyzer.Analyze(shortTerm, &longTerm, &s_selectedHoldingData);
+    }
+  }
 
   bool StockManager::AddStock(const std::string& symbolName)
   {
@@ -192,6 +213,11 @@ namespace KanVest
   void StockManager::SetSelectedStockSymbol(const std::string& stockSymbol)
   {
     s_selectedStockSymbol = stockSymbol;
+  }
+  
+  void StockManager::SetSelectedStockHoldingData(double atp, int qty, const std::string& stockSymbol)
+  {
+    s_selectedHoldingData = KanVest::Analysis::HoldingInfo();
   }
   
   const std::string& StockManager::GetSelectedStockSymbol()

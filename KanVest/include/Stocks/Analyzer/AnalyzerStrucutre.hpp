@@ -24,7 +24,7 @@ namespace KanVest
     struct HoldingInfo
     {
       double avgPrice = 0.0;
-      double qty = 0.0;
+      int qty = 0;
       std::string symbol;
     };
     
