@@ -23,7 +23,11 @@ namespace KanVest
     /// This function Adds holding in portfolio
     /// - Parameter holding: holding data
     void AddHolding(const Holding& holding);
-    
+
+    /// This function Edits holding in portfolio
+    /// - Parameter holding: holding data
+    void EditHolding(const Holding& holding);
+
     /// This function loads portfolio from file
     /// - Parameter path: file path
     bool LoadPortfolio(const std::filesystem::path& path);

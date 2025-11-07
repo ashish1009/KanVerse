@@ -22,6 +22,8 @@ namespace KanVest
     static void StockPanel();
     
   private:
+    static void UpdateStockData(const std::string& symbol);
+
     static void ShowStockDetails();
     static void ShowPortfolio();
     static void ShowWatchlist();

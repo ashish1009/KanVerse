@@ -20,6 +20,11 @@ namespace KanVest
     StockManager::AddStock(holding.symbol);
   }
   
+  void PortfolioController::EditHolding(const Holding& holding)
+  {
+    StockManager::EditStock(holding.symbol);
+  }
+  
   bool PortfolioController::LoadPortfolio(const std::filesystem::path& path)
   {
     if (!PortfolioSerializer::LoadFromYAML(path, m_portfolio))

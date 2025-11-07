@@ -20,10 +20,8 @@ namespace KanVest
   static int g_editIndex = -1;
 
   static bool g_sortAscending = true;
-  static bool g_showAddModal = false;
   static bool g_showEditModal = false;
-  static bool g_focusSymbolNextFrame = false;
-
+ 
   namespace Utils
   {
     void ConvertUpper(char* string)
@@ -110,10 +108,7 @@ namespace KanVest
 
     if (ImGui::BeginChild("ChartCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
     {
-//      for (auto& [s, d] : StockManager::GetStokCache())
-//      {
-//        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
-//      }
+
     }
     ImGui::EndChild();
   }
@@ -124,8 +119,20 @@ namespace KanVest
     {
       KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
       KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Watchlist", KanVasX::UI::AlignX::Center, {0, 5});
+      
+      ImGui::Text("Total, %d", (int)(StockManager::GetStokCache().size()));
+      for (auto& [s, d] : StockManager::GetStokCache())
+      {
+        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
+      }
+
     }
     ImGui::EndChild();
+  }
+  
+  void StockUI::UpdateStockData(const std::string& symbol)
+  {
+    StockManager::AddStock(symbol);
   }
   
   void StockUI::SearchBar()
@@ -140,7 +147,7 @@ namespace KanVest
     float iconSize = ImGui::GetItemRectSize().y - 12;
     if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {0.0, 6.0}) || ImGui::IsKeyDown(ImGuiKey_Enter))
     {
-
+      UpdateStockData(s_searchedString);
     }
   }
   
@@ -421,6 +428,10 @@ namespace KanVest
         h.averagePrice = avgPrice;
         h.quantity = quantity;
         h.vision = static_cast<Holding::Vision>(selectedVision);
+        
+        PortfolioController portfolioController(*portfolio);
+        portfolioController.EditHolding(h);
+
         UserManager::GetCurrentUser().SavePortfolio();
         initialized = false;
         ImGui::CloseCurrentPopup();

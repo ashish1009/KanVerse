@@ -1,9 +1,9 @@
 Holdings:
-  - Symbol: ANGELNE
+  - Symbol: ANGELONE
     AveragePrice: 2800
     Quantity: 1
     Vision: LongTerm
-  - Symbol: BEL
+  - Symbol: BDL
     AveragePrice: 282
     Quantity: 1
     Vision: LongTerm
@@ -58,4 +58,60 @@ Holdings:
   - Symbol: LGEINDIA
     AveragePrice: 1657
     Quantity: 1
+    Vision: LongTerm
+  - Symbol: M&M
+    AveragePrice: 3212
+    Quantity: 1
+    Vision: LongTerm
+  - Symbol: MCX
+    AveragePrice: 9876
+    Quantity: 1
+    Vision: LongTerm
+  - Symbol: NSDL
+    AveragePrice: 1127
+    Quantity: 2
+    Vision: LongTerm
+  - Symbol: OLAELEC
+    AveragePrice: 48
+    Quantity: 60
+    Vision: LongTerm
+  - Symbol: PAYTM
+    AveragePrice: 1478
+    Quantity: 1
+    Vision: LongTerm
+  - Symbol: RELIANCE
+    AveragePrice: 2354
+    Quantity: 1
+    Vision: LongTerm
+  - Symbol: SAIL
+    AveragePrice: 142
+    Quantity: 5
+    Vision: LongTerm
+  - Symbol: SBIN
+    AveragePrice: 786
+    Quantity: 1
+    Vision: LongTerm
+  - Symbol: SILVERBEES
+    AveragePrice: 121
+    Quantity: 4
+    Vision: LongTerm
+  - Symbol: SUZLON
+    AveragePrice: 78
+    Quantity: 10
+    Vision: LongTerm
+  - Symbol: TATAPOWER
+    AveragePrice: 376
+    Quantity: 2
+    Vision: LongTerm
+  - Symbol: TATASTEEL
+    AveragePrice: 187
+    Quantity: 20
+    Vision: LongTerm
+  - Symbol: TI
+    AveragePrice: 512
+    Quantity: 2
+    Vision: LongTerm
+  - Symbol: TMPV
+    AveragePrice: 881
+    Quantity: 2
     Vision: LongTerm

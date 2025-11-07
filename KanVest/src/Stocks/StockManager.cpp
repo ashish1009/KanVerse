@@ -20,11 +20,23 @@ namespace KanVest
     std::transform(symbol.begin(), symbol.end(), symbol.begin(),
                    [](unsigned char c) { return std::toupper(c); });
     
-    if (symbol == "NIFTY") return "%5ENSEI";
+    // If Nifty symbol return same
+    if (symbol == "%5ENSEI")
+    {
+      return symbol;
+    }
     
+    // Convert nifty to symbol
+    if (symbol == "NIFTY")
+    {
+      return "%5ENSEI";
+    }
+    
+    // Add NS for NSE
     if (symbol.find('.') == std::string::npos)
+    {
       symbol += ".NS";  // Default to NSE
-    
+    }
     return symbol;
   }
   
@@ -50,17 +62,24 @@ namespace KanVest
   }
 
 
-  void StockManager::AddStock(const std::string& symbolName)
+  bool StockManager::AddStock(const std::string& symbolName)
   {
     std::scoped_lock lock(s_mutex);
     std::string symbol = NormalizeSymbol(symbolName);
     if (s_stockCache.find(symbol) == s_stockCache.end())
     {
       s_stockCache.emplace(symbol, StockData(symbol));
-      std::cout << "[StockManager] Added stock: " << symbol << std::endl;
+      return true;
     }
+    return false;
   }
-  
+
+  bool StockManager::EditStock(const std::string& symbolName)
+  {
+    AddStock(symbolName);
+    return true;
+  }
+
   void StockManager::RemoveStock(const std::string& symbol)
   {
     std::scoped_lock lock(s_mutex);
@@ -79,6 +98,7 @@ namespace KanVest
       outData = it->second;
       return true;
     }
+    
     return false;
   }
   
@@ -166,17 +186,17 @@ namespace KanVest
     }
   }
   
-  void StockManager::UpdateStock(const std::string& symbolName)
+  bool StockManager::UpdateStock(const std::string& symbolName)
   {
     try
     {
       auto apiKeys = API_Provider::GetAPIKeys();
       std::string symbol = NormalizeSymbol(symbolName);
-      std::string response = FetchStockFallbackData(symbol, "1d", "1mo", apiKeys);
+      std::string response = FetchStockFallbackData(symbol, s_currentInterval, s_currentRange, apiKeys);
       
       if (response.empty())
       {
-        return;
+        return false;
       }
       
       StockData data(symbol);
@@ -233,10 +253,12 @@ namespace KanVest
         std::scoped_lock lock(s_mutex);
         s_stockCache[symbol] = std::move(data);
       }
+      return true;
     }
     catch (const std::exception& e)
     {
       std::cerr << "[StockManager] Failed to update stock '" << symbolName << "': " << e.what() << "\n";
     }
+    return false;
   }
 } // namespace KanVest
