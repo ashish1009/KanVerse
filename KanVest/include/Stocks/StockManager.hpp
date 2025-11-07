@@ -36,6 +36,15 @@ namespace KanVest
     /// Stop background updating thread
     static void StopLiveUpdates();
 
+    /// This function updates the active stock data
+    static void SetSelectedStockSymbol(const std::string& stockSymbol);
+
+    /// This function returns the active stock data
+    static const std::string& GetSelectedStockSymbol();
+    
+    /// This function returns the active stock data
+    static StockData GetSelectedStockData();
+
     /// This returns stock cache
     static const std::unordered_map<std::string, StockData>& GetStokCache();
 
@@ -44,7 +53,7 @@ namespace KanVest
     static bool UpdateStock(const std::string& symbol);
 
     inline static std::unordered_map<std::string, StockData> s_stockCache;
-    inline static StockData s_selectedStock = {"Nifty"};
+    inline static std::string s_selectedStockSymbol = {"Nifty"};
     
     inline static std::string s_currentInterval = "1d";
     inline static std::string s_currentRange = "1mo";

@@ -149,16 +149,29 @@ namespace KanVest
       s_updateThread.join();
     }
   }
+
+  void StockManager::SetSelectedStockSymbol(const std::string& stockSymbol)
+  {
+    s_selectedStockSymbol = stockSymbol;
+  }
   
+  const std::string& StockManager::GetSelectedStockSymbol()
+  {
+    return s_selectedStockSymbol;
+  }
+  
+  StockData StockManager::GetSelectedStockData()
+  {
+    StockData selectedStockData;
+    GetStock(s_selectedStockSymbol, selectedStockData);
+    return selectedStockData;
+  }
+
   const std::unordered_map<std::string, StockData>& StockManager::GetStokCache()
   {
     std::scoped_lock lock(s_mutex);
     return s_stockCache;
   }
-  
-  // ----------------------------
-  // Private Implementation
-  // ----------------------------
   
   void StockManager::UpdateLoop(int intervalSeconds)
   {

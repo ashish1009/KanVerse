@@ -15,6 +15,9 @@
 
 namespace KanVest
 {
+#define KanVest_Text(font, string, offset, textColor) \
+KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, KanVasX::UI::AlignX::Left, offset, textColor);
+
   static int g_sortColumn = 0;
   static int g_selectedRow = -1;
   static int g_editIndex = -1;
@@ -28,6 +31,31 @@ namespace KanVest
     {
       for (char* p = string; *p; ++p)
         *p = static_cast<char>(toupper(*p));
+    }
+    
+    std::string FormatDoubleToString(double value)
+    {
+      char buf[32];
+      std::snprintf(buf, sizeof(buf), "%.2f", value);
+      return std::string(buf);
+    }
+
+    std::string FormatLargeNumber(double value)
+    {
+      const double billion = 1e9, million = 1e6, thousand = 1e3;
+      std::ostringstream oss;
+      oss << std::fixed << std::setprecision(2);
+      
+      if (value >= billion)
+        oss << (value / billion) << "B";
+      else if (value >= million)
+        oss << (value / million) << "M";
+      else if (value >= thousand)
+        oss << (value / thousand) << "K";
+      else
+        oss << value;
+      
+      return oss.str();
     }
   } // namespace Utils
   
@@ -93,6 +121,7 @@ namespace KanVest
   void StockUI::ShowStockDetails()
   {
     SearchBar();
+    ShowStcokBasicData();
   }
   
   void StockUI::ShowPortfolio()
@@ -133,6 +162,7 @@ namespace KanVest
   void StockUI::UpdateStockData(const std::string& symbol)
   {
     StockManager::AddStock(symbol);
+    StockManager::SetSelectedStockSymbol(symbol);
   }
   
   void StockUI::SearchBar()
@@ -149,6 +179,52 @@ namespace KanVest
     {
       UpdateStockData(s_searchedString);
     }
+  }
+  
+  void StockUI::ShowStcokBasicData()
+  {
+    StockData stockData = StockManager::GetSelectedStockData();
+
+    const ImU32 textColor = KanVasX::Color::TextBright;
+
+    // Name & price
+    std::string name = stockData.shortName + " (" + stockData.currency + ")";
+    
+    KanVest_Text(Header_36, name.c_str(), glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(Header_24, stockData.longName.c_str(), glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(Header_48, Utils::FormatDoubleToString(stockData.livePrice), glm::vec2(30.0f, 10.0f), textColor);
+    
+    // Change
+    std::string change = (stockData.change > 0 ? "+" : "") +
+    Utils::FormatDoubleToString(stockData.change) +
+    (stockData.change > 0 ? " ( +" : " ( ") +
+    Utils::FormatDoubleToString(stockData.changePercent) + "%)";
+    
+    ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+    KanVest_Text(Header_30, change, glm::vec2(30.0f, 10.0f), changeColor);
+    
+    static const float UnderLineSize = 0.28;
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
+    KanVasX::UI::ShiftCursorY(20);
+    
+    // 52-Week Range
+    std::string fiftyTwoWeek = Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " + Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
+    KanVest_Text(FixedWidthHeader_18, "52-Week Range ", glm::vec2(20.0f, 5.0f), textColor);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_18, fiftyTwoWeek, glm::vec2(20.0f, 0.0f), textColor);
+    
+    // Day Range
+    std::string dayRange = Utils::FormatDoubleToString(stockData.dayLow) + " - " + Utils::FormatDoubleToString(stockData.dayHigh);
+    KanVest_Text(FixedWidthHeader_18, "Day Range     ", glm::vec2(20.0f, 5.0f), textColor);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_18, dayRange, glm::vec2(20.0f, 0.0f), textColor);
+    
+    // Volume
+    KanVest_Text(FixedWidthHeader_18, "Volume        ", glm::vec2(20.0f, 5.0f), textColor);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_18, Utils::FormatLargeNumber(stockData.volume), glm::vec2(20.0f, 0.0f), textColor);
+    
+    KanVasX::UI::ShiftCursorY(10);
   }
   
   void StockUI::DrawPortfolioTable(Portfolio* portfolio)
