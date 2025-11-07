@@ -268,5 +268,63 @@ namespace KanVest::Analysis::Indicators
     // D is SMA of last dperiod of k values — approximate with k itself for single value
     return {k, k};
   }
+  
+  // --- CCI (Commodity Channel Index) ---
+  inline double CCI(const std::vector<double>& highs,
+                    const std::vector<double>& lows,
+                    const std::vector<double>& closes,
+                    size_t period ) {
+    if (closes.size() < period) return nan();
+    size_t start = closes.size() - period;
+    std::vector<double> tp;
+    tp.reserve(period);
+    for (size_t i = start; i < closes.size(); ++i) tp.push_back((highs[i] + lows[i] + closes[i]) / 3.0);
+    double ma = std::accumulate(tp.begin(), tp.end(), 0.0) / static_cast<double>(period);
+    double meanDev = 0.0;
+    for (auto v : tp) meanDev += std::abs(v - ma);
+    meanDev /= static_cast<double>(period);
+    if (meanDev < 1e-12) return nan();
+    return (tp.back() - ma) / (0.015 * meanDev);
+  }
+  
+  // --- ROC (Rate of Change) ---
+  inline double ROC(const std::vector<double>& closes, size_t period) {
+    if (closes.size() < period + 1) return nan();
+    double prev = closes[closes.size() - period - 1];
+    if (std::abs(prev) < 1e-12) return nan();
+    return (closes.back() - prev) / prev * 100.0;
+  }
+  
+  // --- MFI (Money Flow Index) ---
+  inline double MFI(const std::vector<double>& highs,
+                    const std::vector<double>& lows,
+                    const std::vector<double>& closes,
+                    const std::vector<uint64_t>& volumes,
+                    size_t period ) {
+    if (closes.size() < period + 1 || volumes.size() != closes.size()) return nan();
+    size_t start = closes.size() - period - 1;
+    std::vector<double> posFlow, negFlow;
+    for (size_t i = start; i + 1 < closes.size(); ++i) {
+      double typicalPrev = (highs[i] + lows[i] + closes[i]) / 3.0;
+      double typical = (highs[i+1] + lows[i+1] + closes[i+1]) / 3.0;
+      double rawFlow = typical * static_cast<double>(volumes[i+1]);
+      if (typical > typicalPrev) posFlow.push_back(rawFlow);
+      else negFlow.push_back(rawFlow);
+    }
+    double pos = std::accumulate(posFlow.begin(), posFlow.end(), 0.0);
+    double neg = std::accumulate(negFlow.begin(), negFlow.end(), 0.0);
+    if (neg + pos <= 1e-12) return 50.0;
+    double mfr = pos / std::max(1e-12, neg);
+    return 100.0 - (100.0 / (1.0 + mfr));
+  }
+  
+  // --- VWAP (intraday weighted average price) ---
+  inline double VWAP(const std::vector<double>& closes, const std::vector<uint64_t>& volumes) {
+    if (closes.empty() || volumes.empty() || closes.size() != volumes.size()) return nan();
+    double pv = 0.0; double v = 0.0;
+    for (size_t i = 0; i < closes.size(); ++i) { pv += closes[i] * static_cast<double>(volumes[i]); v += static_cast<double>(volumes[i]); }
+    if (v == 0.0) return nan();
+    return pv / v;
+  }
 } //  namespace KanVest::Analysis::Indicators
 

@@ -37,4 +37,23 @@ namespace KanVest::Analysis::Indicators
   // Stochastic %K/%D last values
   std::pair<double,double> Stochastic(const std::vector<double>& highs, const std::vector<double>& lows, const std::vector<double>& closes, size_t kperiod=14, size_t dperiod=3);
   
+  
+  // --- CCI (Commodity Channel Index) ---
+  inline double CCI(const std::vector<double>& highs,
+                    const std::vector<double>& lows,
+                    const std::vector<double>& closes,
+                    size_t period = 20);
+  
+  // --- ROC (Rate of Change) ---
+  inline double ROC(const std::vector<double>& closes, size_t period);
+  
+  // --- MFI (Money Flow Index) ---
+  inline double MFI(const std::vector<double>& highs,
+                    const std::vector<double>& lows,
+                    const std::vector<double>& closes,
+                    const std::vector<uint64_t>& volumes,
+                    size_t period = 14);
+  
+  // --- VWAP (intraday weighted average price) ---
+  inline double VWAP(const std::vector<double>& closes, const std::vector<uint64_t>& volumes);
 } // namespace KanVest::Analysis::Indicators
