@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Stocks/Analyzer/AnalyzerStrucutre.hpp"
+#include "Stocks/Analyzer/Indicators.hpp"
 #include "Stocks/StockManager.hpp"
 
 namespace KanVest::Analysis
@@ -34,6 +35,17 @@ namespace KanVest::Analysis
     double smaShort=0.0, smaLong=0.0;
     double atr=0.0;
     double vwap=0.0;
+    
+    // NEW: additional indicators
+    double obv = 0.0;
+    double obvSlope = 0.0;           // short-term slope / delta
+    double adx = 0.0;
+    double stochasticK = 0.0, stochasticD = 0.0;
+    Indicators::BB bollinger{};                  // {upper,middle,lower}
+    double cci = 0.0;
+    double roc = 0.0;
+    double mfi = 0.0;
+    
     Recommendation recommendation = Recommendation::Unknown;
     double score = 0.0;
     std::string explanation;
@@ -42,9 +54,9 @@ namespace KanVest::Analysis
     double unrealizedPL = 0.0;
     double unrealizedPct = 0.0;
     double suggestedActionQty = 0.0;
-    std::string actionReason;          
+    std::string actionReason;
   };
-  
+
   class StockAnalyzer
   {
   public:

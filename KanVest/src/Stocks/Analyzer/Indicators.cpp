@@ -270,7 +270,7 @@ namespace KanVest::Analysis::Indicators
   }
   
   // --- CCI (Commodity Channel Index) ---
-  inline double CCI(const std::vector<double>& highs,
+  double CCI(const std::vector<double>& highs,
                     const std::vector<double>& lows,
                     const std::vector<double>& closes,
                     size_t period ) {
@@ -288,7 +288,7 @@ namespace KanVest::Analysis::Indicators
   }
   
   // --- ROC (Rate of Change) ---
-  inline double ROC(const std::vector<double>& closes, size_t period) {
+  double ROC(const std::vector<double>& closes, size_t period) {
     if (closes.size() < period + 1) return nan();
     double prev = closes[closes.size() - period - 1];
     if (std::abs(prev) < 1e-12) return nan();
@@ -296,7 +296,7 @@ namespace KanVest::Analysis::Indicators
   }
   
   // --- MFI (Money Flow Index) ---
-  inline double MFI(const std::vector<double>& highs,
+  double MFI(const std::vector<double>& highs,
                     const std::vector<double>& lows,
                     const std::vector<double>& closes,
                     const std::vector<uint64_t>& volumes,
