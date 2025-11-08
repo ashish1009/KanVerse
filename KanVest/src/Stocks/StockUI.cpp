@@ -440,12 +440,30 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     if (ImGui::CollapsingHeader("Detected Patterns", ImGuiTreeNodeFlags_DefaultOpen))
     {
       ImGui::Text("Candlestick Patterns:");
-      for (auto& p : r.candlePatterns)
-        ImGui::BulletText("%s (%.2f)", p.name.c_str(), p.strength);
-      
+      if (r.candlePatterns.empty())
+        ImGui::TextDisabled("No candlestick patterns detected.");
+      else
+      {
+        for (auto& p : r.candlePatterns)
+        {
+          ImGui::BulletText("%s (%.2f)", p.name.c_str(), p.strength);
+          if (ImGui::IsItemHovered() && !p.rationale.empty())
+            ImGui::SetTooltip("%s", p.rationale.c_str());
+        }
+      }
+
       ImGui::Text("Chart Patterns:");
-      for (auto& p : r.chartPatterns)
-        ImGui::BulletText("%s (%.2f)", p.name.c_str(), p.strength);
+      if (r.chartPatterns.empty())
+        ImGui::TextDisabled("No chart patterns detected.");
+      else
+      {
+        for (auto& p : r.chartPatterns)
+        {
+          ImGui::BulletText("%s (%.2f)", p.name.c_str(), p.strength);
+          if (ImGui::IsItemHovered() && !p.rationale.empty())
+            ImGui::SetTooltip("%s", p.rationale.c_str());
+        }
+      }
     }
     
     // --- Action Section ---

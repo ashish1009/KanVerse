@@ -258,33 +258,45 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
     if (r.unrealizedPct < -25.0 && r.score < 0.0) r.recommendation = Recommendation::Sell;
     if (r.unrealizedPct > 40.0 && r.score > 0.0) r.recommendation = Recommendation::Hold;
     
-    // Suggest qty adjustments (same logic as before but include OBV/ADX confirmation)
     double riskFactor = std::clamp(r.atr / std::max(1.0, r.lastClose), 0.005, 0.05);
+    double suggested = 0.0;
+    
     if (r.recommendation == Recommendation::Sell || r.recommendation == Recommendation::StrongSell)
     {
       if (r.unrealizedPct > 15.0)
       {
-        r.suggestedActionQty = -holding->qty * 0.5;
+        suggested = -holding->qty * 0.5;
         r.actionReason = "Large unrealized gain (" + std::to_string(r.unrealizedPct) +
         "%). Suggest selling 50% to lock profits.";
       }
       else if (r.unrealizedPct < -10.0 || (r.obvSlope < 0 && r.adx > 20))
       {
-        r.suggestedActionQty = -holding->qty * 0.75;
+        suggested = -holding->qty * 0.75;
         r.actionReason = "Loss exceeding -10% or volume+trend weakening. Suggest cutting 75% of position.";
       }
       else
       {
-        r.suggestedActionQty = -holding->qty * 0.25;
+        suggested = -holding->qty * 0.25;
         r.actionReason = "Bearish technicals, suggest trimming 25% of position.";
       }
+      
+      // --- ✅ Ensure no negative or invalid suggestion ---
+      double qtyToSell = std::floor(std::abs(suggested)); // round down
+      if (qtyToSell < 1.0 && holding->qty > 1.0) qtyToSell = 1.0;   // at least 1 share if qty > 1
+      qtyToSell = std::min(qtyToSell, (double)holding->qty);                // don’t oversell
+      
+      r.suggestedActionQty = qtyToSell;
     }
     else if (r.recommendation == Recommendation::Buy || r.recommendation == Recommendation::StrongBuy)
     {
       double addRatio = (r.score > 0.8 ? 0.5 : 0.25) * (1.0 - riskFactor / 0.05);
-      // require OBV confirmation for bigger add
       if (r.obvSlope > 0 && r.adx > 15) addRatio *= 1.2;
-      r.suggestedActionQty = holding->qty * addRatio;
+      
+      double qtyToAdd = holding->qty * addRatio;
+      qtyToAdd = std::round(qtyToAdd);
+      if (qtyToAdd < 1.0) qtyToAdd = 1.0;  // ensure at least 1 share suggestion for small lots
+      
+      r.suggestedActionQty = qtyToAdd;
       r.actionReason = "Bullish signal (score " + std::to_string(r.score) +
       "). Suggest adding " + std::to_string((int)(addRatio * 100)) + "% to position.";
     }
@@ -296,16 +308,27 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
   }
   else
   {
-    // No holding — entry suggestion uses new indicators
+    // --- No holding — entry suggestion ---
     if (r.recommendation == Recommendation::Buy || r.recommendation == Recommendation::StrongBuy)
     {
       double baseLot = 100.0;
       double scale = (r.score > 0.8 ? 1.0 : 0.5);
-      if (r.obvSlope > 0 && r.adx > 15) scale *= 1.2; // extra conviction
-      r.suggestedActionQty = baseLot * scale;
+      if (r.obvSlope > 0 && r.adx > 15) scale *= 1.2;
+      
+      double suggested = baseLot * scale;
+      if (suggested < 100.0) suggested = 100.0;
+      
+      // ✅ Round to nearest 10 for cleaner UI
+      r.suggestedActionQty = std::round(suggested / 10.0) * 10.0;
       r.actionReason = "No existing holding. Entry opportunity detected (volume/trend confirmed).";
     }
+    else
+    {
+      r.suggestedActionQty = 0.0;
+      r.actionReason = "No action suggested under current conditions.";
+    }
   }
+
   
   // === Build explanation string (human readable) ===
   {
