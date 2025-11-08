@@ -89,7 +89,7 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
   
   // Additional indicators
   r.bollinger = Bollinger(closes); // returns BB {upper,middle,lower}
-  r.obv = OBV(closes, vols);
+  r.obv =    OBV(closes, vols);
   
   // OBV slope (delta over recent window)
   {
@@ -342,5 +342,119 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
     r.explanation = ss.str();
   }
   
+  {
+    std::ostringstream d;
+    d.setf(std::ios::fixed);
+    d.precision(2);
+    
+    d << "The analysis considers multiple indicators to form a holistic view.\n";
+    
+    // Trend direction
+    if (r.smaShort > r.smaLong)
+      d << "The short-term SMA (" << r.smaShort << ") is above the long-term SMA (" << r.smaLong
+      << "), indicating upward momentum.\n";
+    else
+      d << "The short-term SMA (" << r.smaShort << ") is below the long-term SMA (" << r.smaLong
+      << "), showing bearish trend.\n";
+    
+    // Momentum indicators
+    if (r.rsi < 30)
+      d << "RSI (" << r.rsi << ") suggests the stock is oversold — possible rebound zone.\n";
+    else if (r.rsi > 70)
+      d << "RSI (" << r.rsi << ") indicates overbought conditions — potential short-term cooling.\n";
+    
+    if (r.macd > r.macdSignal)
+      d << "MACD line is above signal line — bullish momentum confirmed.\n";
+    else
+      d << "MACD line is below signal line — bearish momentum in play.\n";
+    
+    // Volume and trend confirmation
+    if (r.obvSlope > 0)
+      d << "OBV rising — buyers are supporting this move with strong volume.\n";
+    else if (r.obvSlope < 0)
+      d << "OBV falling — volume flow suggests distribution (selling pressure).\n";
+    
+    // Volatility and bands
+    if (r.lastClose > r.bollinger.upper)
+      d << "Price has broken above Bollinger upper band, suggesting a possible bullish breakout.\n";
+    else if (r.lastClose < r.bollinger.lower)
+      d << "Price dropped below lower Bollinger band — possible oversold or continuation down.\n";
+    
+    // ADX
+    if (r.adx > 25)
+      d << "ADX (" << r.adx << ") shows a strong trend; signals are more reliable.\n";
+    else
+      d << "ADX (" << r.adx << ") indicates weak or sideways market; momentum signals may fail.\n";
+    
+    // Final opinion
+    d << "\nOverall recommendation: ";
+    switch (r.recommendation)
+    {
+      case Recommendation::StrongBuy: d << "Strong Buy — multiple bullish confirmations align."; break;
+      case Recommendation::Buy: d << "Buy — moderate bullish trend with positive momentum."; break;
+      case Recommendation::Hold: d << "Hold — mixed signals, maintain position."; break;
+      case Recommendation::Sell: d << "Sell — weakness visible in trend and volume."; break;
+      case Recommendation::StrongSell: d << "Strong Sell — technical breakdown confirmed."; break;
+      default: d << "No clear direction — insufficient data."; break;
+    }
+    d << "\n";
+    
+    if (!r.actionReason.empty())
+      d << "Action rationale: " << r.actionReason << "\n";
+    
+    r.detailedExplanation = d.str();
+  }
+  
+  // --- Technical indicator tooltips ---
+  r.tooltips["SMA"] =
+  "Simple Moving Average: average of closing prices over N periods. "
+  "A rising SMA indicates upward momentum.";
+  
+  r.tooltips["RSI"] =
+  "Relative Strength Index: measures overbought (>70) or oversold (<30) conditions. "
+  "Values below 30 may indicate potential rebounds.";
+  
+  r.tooltips["MACD"] =
+  "Moving Average Convergence Divergence: compares two EMAs to show trend direction. "
+  "When MACD crosses above its signal line → bullish, below → bearish.";
+  
+  r.tooltips["ATR"] =
+  "Average True Range: measures volatility. Higher ATR means stronger price swings.";
+  
+  r.tooltips["VWAP"] =
+  "Volume Weighted Average Price: shows average price weighted by volume. "
+  "If price > VWAP, intraday momentum is bullish.";
+  
+  r.tooltips["Bollinger"] =
+  "Bollinger Bands: envelope around SMA showing volatility. "
+  "Price near upper band → overbought; near lower band → oversold.";
+  
+  r.tooltips["OBV"] =
+  "On-Balance Volume: tracks cumulative volume flow. "
+  "Rising OBV supports bullish price trends; falling OBV suggests weakness.";
+  
+  r.tooltips["ADX"] =
+  "Average Directional Index: measures trend strength (0–100). "
+  "Above 25 → strong trend; below 20 → weak or sideways.";
+  
+  r.tooltips["Stochastic"] =
+  "Stochastic Oscillator: compares close to recent range. "
+  "Values <20 → oversold; >80 → overbought.";
+  
+  r.tooltips["CCI"] =
+  "Commodity Channel Index: measures deviation from average. "
+  "Below -100 = oversold; above 100 = overbought.";
+  
+  r.tooltips["ROC"] =
+  "Rate of Change: measures speed of price movement. "
+  "Positive ROC = upward momentum.";
+  
+  r.tooltips["MFI"] =
+  "Money Flow Index: volume-weighted RSI. "
+  "High (>80) = overbought; Low (<30) = oversold.";
+  
+  r.tooltips["Pattern"] =
+  "Detected chart/candlestick formations that may indicate reversals or continuations.";
+
   return r;
 }

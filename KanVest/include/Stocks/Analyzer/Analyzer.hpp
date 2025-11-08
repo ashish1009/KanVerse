@@ -32,29 +32,28 @@ namespace KanVest::Analysis
     double lastClose = 0.0;
     double rsi = 0.0;
     double macd = 0.0, macdSignal = 0.0;
-    double smaShort=0.0, smaLong=0.0;
-    double atr=0.0;
-    double vwap=0.0;
-    
-    // NEW: additional indicators
-    double obv = 0.0;
-    double obvSlope = 0.0;           // short-term slope / delta
+    double smaShort = 0.0, smaLong = 0.0;
+    double atr = 0.0;
+    double vwap = 0.0;
+    double obv = 0.0, obvSlope = 0.0;
     double adx = 0.0;
     double stochasticK = 0.0, stochasticD = 0.0;
-    Indicators::BB bollinger{};                  // {upper,middle,lower}
-    double cci = 0.0;
-    double roc = 0.0;
-    double mfi = 0.0;
+    double cci = 0.0, roc = 0.0, mfi = 0.0;
+    Indicators::BB bollinger{};
     
     Recommendation recommendation = Recommendation::Unknown;
     double score = 0.0;
-    std::string explanation;
+    std::string explanation;          // short summary (already exists)
+    std::string detailedExplanation;  // NEW: human-friendly analysis summary
     
     bool hasHolding = false;
     double unrealizedPL = 0.0;
     double unrealizedPct = 0.0;
     double suggestedActionQty = 0.0;
     std::string actionReason;
+    
+    // Tooltip descriptions (for UI hover info)
+    std::unordered_map<std::string, std::string> tooltips;
   };
 
   class StockAnalyzer
