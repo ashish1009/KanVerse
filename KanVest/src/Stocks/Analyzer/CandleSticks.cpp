@@ -20,12 +20,14 @@ static double midpoint(const StockPoint& p) { return (p.open + p.close) * 0.5; }
 
 // Build PatternHit quickly for single bar
 static PatternHit MakeSingle(const std::string& name, size_t idx, double strength, const std::string& rationale) {
-  PatternHit ph; ph.name = name; ph.startIndex = idx; ph.endIndex = idx; ph.strength = std::max(0.0, std::min(1.0, strength)); ph.rationale = rationale; return ph;
+  PatternHit ph; ph.name = name; ph.startIndex = idx; ph.endIndex = idx; ph.strength = std::max(0.0, std::min(1.0, strength)); ph.rationale = rationale; ph.rationale = PatternRationale::Describe(ph.name);
+ return ph;
 }
 
 // Build PatternHit for ranges
 static PatternHit MakeRange(const std::string& name, size_t s, size_t e, double strength, const std::string& rationale) {
-  PatternHit ph; ph.name = name; ph.startIndex = s; ph.endIndex = e; ph.strength = std::max(0.0, std::min(1.0, strength)); ph.rationale = rationale; return ph;
+  PatternHit ph; ph.name = name; ph.startIndex = s; ph.endIndex = e; ph.strength = std::max(0.0, std::min(1.0, strength)); ph.rationale = rationale; ph.rationale = PatternRationale::Describe(ph.name);
+  return ph;
 }
 
 // Utility: safe subtraction for size_t

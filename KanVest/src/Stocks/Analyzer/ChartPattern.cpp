@@ -113,7 +113,7 @@ namespace KanVest::Analysis::ChartPatterns
   
   // Helper to create PatternHit with explanation
   static PatternHit MakeHit(const std::string& name, size_t start, size_t end, double strength, const std::string& rationale) {
-    PatternHit ph; ph.name = name; ph.startIndex = start; ph.endIndex = end; ph.strength = std::max(0.0, std::min(1.0, strength)); ph.rationale = rationale; return ph;
+    PatternHit ph; ph.name = name; ph.startIndex = start; ph.endIndex = end; ph.strength = std::max(0.0, std::min(1.0, strength)); ph.rationale = PatternRationale::Describe(ph.name); return ph;
   }
   
   // ---------------- Double Top / Bottom ----------------
@@ -544,6 +544,7 @@ namespace KanVest::Analysis::ChartPatterns
   // ---------------- Trend Structure (HH/HL / LH/LL) ----------------
   PatternHit DetectTrendStructure(const std::vector<StockPoint>& history) {
     PatternHit ph; ph.name = "TrendStructure"; ph.startIndex = 0; ph.endIndex = history.size() ? history.size()-1 : 0; ph.strength = 0.0;
+    ph.rationale = PatternRationale::Describe(ph.name);
     if (history.size() < 5) { ph.rationale = "insufficient data"; return ph; }
     auto highs = highsFrom(history); auto lows = lowsFrom(history);
     // count simple pivots
