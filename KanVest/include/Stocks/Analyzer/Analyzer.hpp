@@ -9,7 +9,6 @@
 
 #include "Stocks/Analyzer/AnalyzerStrucutre.hpp"
 #include "Stocks/Analyzer/Indicators.hpp"
-#include "Stocks/StockManager.hpp"
 
 namespace KanVest::Analysis
 {

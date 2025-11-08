@@ -85,7 +85,7 @@ namespace KanVest
     return data;
   }
 
-  void StockManager::AnalyzeSelectedStock()
+  Analysis::AnalysisReport StockManager::AnalyzeSelectedStock()
   {
     // Get long term and short term data
     KanVest::StockData shortTerm;
@@ -103,8 +103,9 @@ namespace KanVest
       
       KanVest::Analysis::StockAnalyzer analyzer(cfg);
       
-      auto report = analyzer.Analyze(shortTerm, &longTerm, &s_selectedHoldingData);
+      return analyzer.Analyze(shortTerm, &longTerm, &s_selectedHoldingData);
     }
+    return Analysis::AnalysisReport();
   }
 
   bool StockManager::AddStock(const std::string& symbolName)
@@ -217,7 +218,7 @@ namespace KanVest
   
   void StockManager::SetSelectedStockHoldingData(double atp, int qty, const std::string& stockSymbol)
   {
-    s_selectedHoldingData = KanVest::Analysis::HoldingInfo();
+    s_selectedHoldingData = KanVest::Analysis::HoldingInfo(atp, qty, stockSymbol);
   }
   
   const std::string& StockManager::GetSelectedStockSymbol()

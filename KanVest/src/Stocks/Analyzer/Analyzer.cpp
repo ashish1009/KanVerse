@@ -7,6 +7,7 @@
 
 #include "Analyzer.hpp"
 
+#include "Stocks/StockManager.hpp"
 #include "Stocks/Analyzer/Indicators.hpp"
 #include "Stocks/Analyzer/CandleSticks.hpp"
 #include "Stocks/Analyzer/ChartPattern.hpp"

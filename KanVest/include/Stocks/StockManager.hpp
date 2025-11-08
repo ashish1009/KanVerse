@@ -40,7 +40,7 @@ namespace KanVest
     };
     
     /// This function analyzes the selected stock
-    static void AnalyzeSelectedStock();
+    static Analysis::AnalysisReport AnalyzeSelectedStock();
 
     /// Add a new stock symbol for live tracking
     static bool AddStock(const std::string& symbol);

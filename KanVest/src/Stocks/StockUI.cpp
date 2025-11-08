@@ -129,7 +129,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         ImGui::TableSetColumnIndex(2);
         if (ImGui::BeginChild("WatchlistCell", ImVec2(thirdColWidth, topYArea))) // fixed height
         {
-          ShowWatchlist();
+          DrawAnalysisPanel();
         }
         ImGui::EndChild();
       }
@@ -382,29 +382,88 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     }
   }
   
-  void StockUI::ShowWatchlist()
+  void StockUI::DrawAnalysisPanel()
   {
-//    if (ImGui::BeginChild("WatchlistCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
-//    {
-//      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
-//      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Watchlist", KanVasX::UI::AlignX::Center, {0, 5});
-//      
-//      ImGui::Text("Total, %d", (int)(StockManager::GetStokCache().size()));
-//      for (auto& [s, d] : StockManager::GetStokCache())
-//      {
-//        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
-//      }
-//
-//      ImGui::Separator();
-//      ImGui::Text("Total, %d", (int)(StockManager::GetLongTermStokCache().size()));
-//      for (auto& [s, d] : StockManager::GetLongTermStokCache())
-//      {
-//        ImGui::Text("Symbol, %s : %f", d.symbol.c_str(), d.livePrice);
-//      }
-//
-//    }
-//    ImGui::EndChild();
-//    
+    Analysis::AnalysisReport r = StockManager::AnalyzeSelectedStock();
+
+    // --- Header Section ---
+    ImGui::TextColored(ImVec4(0.6f, 0.8f, 1.0f, 1.0f), "Technical Analysis Summary");
+    ImGui::Separator();
+    
+    // --- Recommendation ---
+    const char* recText = "";
+    ImVec4 recColor;
+    switch (r.recommendation)
+    {
+      case Analysis::Recommendation::StrongBuy: recText = "Strong Buy"; recColor = {0.0f, 1.0f, 0.0f, 1.0f}; break;
+      case Analysis::Recommendation::Buy:       recText = "Buy";       recColor = {0.3f, 1.0f, 0.3f, 1.0f}; break;
+      case Analysis::Recommendation::Hold:      recText = "Hold";      recColor = {1.0f, 1.0f, 0.4f, 1.0f}; break;
+      case Analysis::Recommendation::Sell:      recText = "Sell";      recColor = {1.0f, 0.6f, 0.3f, 1.0f}; break;
+      case Analysis::Recommendation::StrongSell:recText = "Strong Sell";recColor = {1.0f, 0.2f, 0.2f, 1.0f}; break;
+      default:                        recText = "Unknown";   recColor = {0.7f, 0.7f, 0.7f, 1.0f}; break;
+    }
+    
+    ImGui::Text("Recommendation: "); ImGui::SameLine();
+    ImGui::TextColored(recColor, "%s", recText);
+    
+    // --- Score Bar ---
+    float score = static_cast<float>(r.score);
+    ImGui::ProgressBar((score + 1.0f) / 2.0f, ImVec2(-1, 0), ("Score: " + std::to_string(score)).c_str());
+    
+    // --- Indicator Section ---
+    if (ImGui::CollapsingHeader("Key Indicators", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+      auto Indicator = [&](const char* label, double value)
+      {
+        ImGui::Text("%s: %.2f", label, value);
+        if (ImGui::IsItemHovered())
+          ImGui::SetTooltip("%s", r.tooltips.count(label) ? r.tooltips.at(label).c_str() : "No tooltip");
+      };
+      
+      Indicator("SMA Short", r.smaShort);
+      Indicator("SMA Long", r.smaLong);
+      Indicator("RSI", r.rsi);
+      Indicator("MACD", r.macd);
+      Indicator("MACD Signal", r.macdSignal);
+      Indicator("ATR", r.atr);
+      Indicator("VWAP", r.vwap);
+      Indicator("OBV", r.obv);
+      Indicator("ADX", r.adx);
+      Indicator("MFI", r.mfi);
+      Indicator("ROC", r.roc);
+      Indicator("CCI", r.cci);
+      Indicator("StochasticK", r.stochasticK);
+      Indicator("StochasticD", r.stochasticD);
+    }
+    
+    // --- Patterns Section ---
+    if (ImGui::CollapsingHeader("Detected Patterns", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+      ImGui::Text("Candlestick Patterns:");
+      for (auto& p : r.candlePatterns)
+        ImGui::BulletText("%s (%.2f)", p.name.c_str(), p.strength);
+      
+      ImGui::Text("Chart Patterns:");
+      for (auto& p : r.chartPatterns)
+        ImGui::BulletText("%s (%.2f)", p.name.c_str(), p.strength);
+    }
+    
+    // --- Action Section ---
+    if (ImGui::CollapsingHeader("Suggested Action", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+      ImGui::TextWrapped("%s", r.actionReason.c_str());
+      if (r.suggestedActionQty != 0.0)
+        ImGui::Text("Suggested Quantity: %.2f", r.suggestedActionQty);
+    }
+    
+    // --- Explanation ---
+    if (ImGui::CollapsingHeader("Detailed Explanation", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+      ImGui::BeginChild("ExplanationScroll", ImVec2(0, 150), true);
+      ImGui::TextWrapped("%s", r.detailedExplanation.c_str());
+      ImGui::EndChild();
+    }
+    
     {
       KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::TextMuted);
       KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 90.0f, ImGui::GetContentRegionAvail().y - 20.0f});
@@ -555,7 +614,6 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         {
           StockManager::SetSelectedStockSymbol(h.symbol);
           StockManager::SetSelectedStockHoldingData(h.averagePrice, h.quantity, h.symbol);
-          StockManager::AnalyzeSelectedStock();
           g_selectedRow = idx;
         }
         
