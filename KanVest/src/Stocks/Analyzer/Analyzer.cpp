@@ -430,10 +430,14 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
   }
   
   // --- Technical indicator tooltips ---
-  r.tooltips["SMA"] =
+  r.tooltips["SMA Short"] =
   "Simple Moving Average: average of closing prices over N periods. "
   "A rising SMA indicates upward momentum.";
-  
+
+  r.tooltips["SMA Long"] =
+  "Simple Moving Average: average of closing prices over N periods. "
+  "A rising SMA indicates upward momentum.";
+
   r.tooltips["RSI"] =
   "Relative Strength Index: measures overbought (>70) or oversold (<30) conditions. "
   "Values below 30 may indicate potential rebounds.";
@@ -441,7 +445,11 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
   r.tooltips["MACD"] =
   "Moving Average Convergence Divergence: compares two EMAs to show trend direction. "
   "When MACD crosses above its signal line → bullish, below → bearish.";
-  
+
+  r.tooltips["MACD Signal"] =
+  "Moving Average Convergence Divergence: compares two EMAs to show trend direction. "
+  "When MACD crosses above its signal line → bullish, below → bearish.";
+
   r.tooltips["ATR"] =
   "Average True Range: measures volatility. Higher ATR means stronger price swings.";
   
@@ -464,7 +472,15 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
   r.tooltips["Stochastic"] =
   "Stochastic Oscillator: compares close to recent range. "
   "Values <20 → oversold; >80 → overbought.";
-  
+
+  r.tooltips["StochasticK"] =
+  "Stochastic Oscillator: compares close to recent range. "
+  "Values <20 → oversold; >80 → overbought.";
+
+  r.tooltips["StochasticD"] =
+  "Stochastic Oscillator: compares close to recent range. "
+  "Values <20 → oversold; >80 → overbought.";
+
   r.tooltips["CCI"] =
   "Commodity Channel Index: measures deviation from average. "
   "Below -100 = oversold; above 100 = overbought.";

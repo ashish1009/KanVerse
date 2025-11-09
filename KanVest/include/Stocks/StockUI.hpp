@@ -29,6 +29,7 @@ namespace KanVest
 
     static void ShowPortfolio();
     static void DrawAnalysisPanel();
+    static void ShowAnalyzerData();
 
     static void DrawCandleChart();
     static void DrawChartController();

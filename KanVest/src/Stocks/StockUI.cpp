@@ -8,12 +8,11 @@
 #include "StockUI.hpp"
 
 #include "Stocks/StockManager.hpp"
+#include "Stocks/Analyzer/Analyzer.hpp"
 
 #include "User/UserManager.hpp"
 
 #include "Portfolio/PortfolioController.hpp"
-
-#include "Stocks/Analyzer/Analyzer.hpp"
 
 namespace KanVest
 {
@@ -143,6 +142,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   {
     SearchBar();
     ShowStcokBasicData();
+    ShowAnalyzerData();
   }
   
   void StockUI::ShowPortfolio()
@@ -382,97 +382,129 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     }
   }
   
-  void StockUI::DrawAnalysisPanel()
+  void StockUI::ShowAnalyzerData()
   {
+    KanVasX::UI::ShiftCursorY(0.0f);
+    
     Analysis::AnalysisReport r = StockManager::AnalyzeSelectedStock();
-
-    // --- Header Section ---
-    ImGui::TextColored(ImVec4(0.6f, 0.8f, 1.0f, 1.0f), "Technical Analysis Summary");
-    ImGui::Separator();
     
     // --- Recommendation ---
-    const char* recText = "";
-    ImVec4 recColor;
+    const char* recommendationText = "";
+    ImU32 recColor;
     switch (r.recommendation)
     {
-      case Analysis::Recommendation::StrongBuy: recText = "Strong Buy"; recColor = {0.0f, 1.0f, 0.0f, 1.0f}; break;
-      case Analysis::Recommendation::Buy:       recText = "Buy";       recColor = {0.3f, 1.0f, 0.3f, 1.0f}; break;
-      case Analysis::Recommendation::Hold:      recText = "Hold";      recColor = {1.0f, 1.0f, 0.4f, 1.0f}; break;
-      case Analysis::Recommendation::Sell:      recText = "Sell";      recColor = {1.0f, 0.6f, 0.3f, 1.0f}; break;
-      case Analysis::Recommendation::StrongSell:recText = "Strong Sell";recColor = {1.0f, 0.2f, 0.2f, 1.0f}; break;
-      default:                        recText = "Unknown";   recColor = {0.7f, 0.7f, 0.7f, 1.0f}; break;
+      case Analysis::Recommendation::StrongBuy: recommendationText = "Strong Buy"; recColor = KanVasX::Color::Green; break;
+      case Analysis::Recommendation::Buy:       recommendationText = "Buy";        recColor = KanVasX::Color::Blue; break;
+      case Analysis::Recommendation::Hold:      recommendationText = "Hold";       recColor = KanVasX::Color::Yellow; break;
+      case Analysis::Recommendation::Sell:      recommendationText = "Sell";       recColor = KanVasX::Color::Orange; break;
+      case Analysis::Recommendation::StrongSell:recommendationText = "Strong Sell";recColor = KanVasX::Color::Red; break;
+      default: recommendationText = "Unknown";   recColor = KanVasX::Color::White; break;
     }
-    
-    ImGui::Text("Recommendation: "); ImGui::SameLine();
-    ImGui::TextColored(recColor, "%s", recText);
-    
+
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), "Recommendation", KanVasX::UI::AlignX::Left, {30.0f, 0}, KanVasX::Color::White);
+    ImGui::SameLine();
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), recommendationText, KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
+
     // --- Score Bar ---
     float score = static_cast<float>(r.score);
+    
+    KanVasX::UI::ShiftCursorX(20.0f);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.9);
     ImGui::ProgressBar((score + 1.0f) / 2.0f, ImVec2(-1, 0), ("Score: " + std::to_string(score)).c_str());
-    
-    // --- Indicator Section ---
-    if (ImGui::CollapsingHeader("Key Indicators", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-      auto Indicator = [&](const char* label, double value)
-      {
-        ImGui::Text("%s: %.2f", label, value);
-        if (ImGui::IsItemHovered())
-          ImGui::SetTooltip("%s", r.tooltips.count(label) ? r.tooltips.at(label).c_str() : "No tooltip");
-      };
-      
-      Indicator("SMA Short", r.smaShort);
-      Indicator("SMA Long", r.smaLong);
-      Indicator("RSI", r.rsi);
-      Indicator("MACD", r.macd);
-      Indicator("MACD Signal", r.macdSignal);
-      Indicator("ATR", r.atr);
-      Indicator("VWAP", r.vwap);
-      Indicator("OBV", r.obv);
-      Indicator("ADX", r.adx);
-      Indicator("MFI", r.mfi);
-      Indicator("ROC", r.roc);
-      Indicator("CCI", r.cci);
-      Indicator("StochasticK", r.stochasticK);
-      Indicator("StochasticD", r.stochasticD);
-    }
-    
-    // --- Patterns Section ---
-    if (ImGui::CollapsingHeader("Detected Patterns", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-      ImGui::Text("Candlestick Patterns:");
-      if (r.candlePatterns.empty())
-        ImGui::TextDisabled("No candlestick patterns detected.");
-      else
-      {
-        for (auto& p : r.candlePatterns)
-        {
-          ImGui::BulletText("%s (%.2f)", p.name.c_str(), p.strength);
-          if (ImGui::IsItemHovered() && !p.rationale.empty())
-            ImGui::SetTooltip("%s", p.rationale.c_str());
-        }
-      }
 
-      ImGui::Text("Chart Patterns:");
-      if (r.chartPatterns.empty())
-        ImGui::TextDisabled("No chart patterns detected.");
-      else
-      {
-        for (auto& p : r.chartPatterns)
-        {
-          ImGui::BulletText("%s (%.2f)", p.name.c_str(), p.strength);
-          if (ImGui::IsItemHovered() && !p.rationale.empty())
-            ImGui::SetTooltip("%s", p.rationale.c_str());
-        }
-      }
-    }
-    
-    // --- Action Section ---
-    if (ImGui::CollapsingHeader("Suggested Action", ImGuiTreeNodeFlags_DefaultOpen))
+    // --- Suggested Quantity ---
+    KanVasX::UI::ShiftCursorX(20.0f);
+    ImGui::TextWrapped("%s", r.actionReason.c_str());
+    if (r.suggestedActionQty != 0.0)
     {
-      ImGui::TextWrapped("%s", r.actionReason.c_str());
-      if (r.suggestedActionQty != 0.0)
-        ImGui::Text("Suggested Quantity: %.2f", r.suggestedActionQty);
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), "Suggested Quantity", KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
+      ImGui::SameLine();
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), std::to_string(int(r.suggestedActionQty)), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
     }
+
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 5.0f});
+
+    KanVasX::UI::ShiftCursorY(15.0f);
+    {
+      if (ImGui::BeginTabBar("Technicals"))
+      {
+        if (ImGui::BeginTabItem("Key Indicators"))
+        {
+          auto Indicator = [&](const char* label, double value)
+          {
+            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), label, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
+            ImGui::SameLine();
+            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), std::to_string(value), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
+            if (ImGui::IsItemHovered())
+            {
+              ImGui::SetTooltip("%s", r.tooltips.count(label) ? r.tooltips.at(label).c_str() : "No tooltip");
+            }
+          };
+          
+          Indicator("SMA Short", r.smaShort);
+          Indicator("SMA Long", r.smaLong);
+          Indicator("RSI", r.rsi);
+          Indicator("MACD", r.macd);
+          Indicator("MACD Signal", r.macdSignal);
+          Indicator("ATR", r.atr);
+          Indicator("VWAP", r.vwap);
+          Indicator("OBV", r.obv);
+          Indicator("ADX", r.adx);
+          Indicator("MFI", r.mfi);
+          Indicator("ROC", r.roc);
+          Indicator("CCI", r.cci);
+          Indicator("StochasticK", r.stochasticK);
+          Indicator("StochasticD", r.stochasticD);
+
+          ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Candlestick Patterns"))
+        {
+          if (r.candlePatterns.empty())
+          {
+            ImGui::TextDisabled("No candlestick patterns detected.");
+          }
+          else
+          {
+            for (auto& p : r.candlePatterns)
+            {
+              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), p.name, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
+              ImGui::SameLine();
+              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), Utils::FormatDoubleToString(p.strength), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
+              
+              if (ImGui::IsItemHovered() && !p.rationale.empty())
+              {
+                ImGui::SetTooltip("%s", p.rationale.c_str());
+              }
+            }
+          }
+          ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Chart Patterns"))
+        {
+          if (r.chartPatterns.empty())
+          {
+            ImGui::TextDisabled("No chart patterns detected.");
+          }
+          else
+          {
+            for (auto& p : r.chartPatterns)
+            {
+              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), p.name, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
+              ImGui::SameLine();
+              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), Utils::FormatDoubleToString(p.strength), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
+              if (ImGui::IsItemHovered() && !p.rationale.empty())
+              {
+                ImGui::SetTooltip("%s", p.rationale.c_str());
+              }
+            }
+          }
+          ImGui::EndTabItem();
+        }
+        
+        ImGui::EndTabBar();
+      }
+    } // Tabs
     
     // --- Explanation ---
     if (ImGui::CollapsingHeader("Detailed Explanation", ImGuiTreeNodeFlags_DefaultOpen))
@@ -481,7 +513,10 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       ImGui::TextWrapped("%s", r.detailedExplanation.c_str());
       ImGui::EndChild();
     }
-    
+  }
+  
+  void StockUI::DrawAnalysisPanel()
+  {
     {
       KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::TextMuted);
       KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 90.0f, ImGui::GetContentRegionAvail().y - 20.0f});
@@ -493,6 +528,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   {
     StockManager::AddStock(symbol);
     StockManager::SetSelectedStockSymbol(symbol);
+    StockManager::SetSelectedStockHoldingData(0.0, 0, "");
   }
   
   void StockUI::SearchBar()
@@ -520,9 +556,9 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     // Name & price
     std::string name = stockData.shortName + " (" + stockData.currency + ")";
     
-    KanVest_Text(Header_36, name.c_str(), glm::vec2(30.0f, 10.0f), textColor);
-    KanVest_Text(Header_24, stockData.longName.c_str(), glm::vec2(30.0f, 10.0f), textColor);
-    KanVest_Text(Header_48, Utils::FormatDoubleToString(stockData.livePrice), glm::vec2(30.0f, 10.0f), textColor);
+    KanVest_Text(Header_36, name.c_str(), glm::vec2(30.0f, 0.0f), textColor);
+    KanVest_Text(Header_24, stockData.longName.c_str(), glm::vec2(30.0f, 0.0f), textColor);
+    KanVest_Text(Header_48, Utils::FormatDoubleToString(stockData.livePrice), glm::vec2(30.0f, 0.0f), textColor);
     
     // Change
     std::string change = (stockData.change > 0 ? "+" : "") +
@@ -531,30 +567,30 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     Utils::FormatDoubleToString(stockData.changePercent) + "%)";
     
     ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
-    KanVest_Text(Header_30, change, glm::vec2(30.0f, 10.0f), changeColor);
+    KanVest_Text(Header_30, change, glm::vec2(30.0f, 0.0f), changeColor);
     
     static const float UnderLineSize = 0.90;
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 0.0f});
     KanVasX::UI::ShiftCursorY(20);
     
     // 52-Week Range
     std::string fiftyTwoWeek = Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " + Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
-    KanVest_Text(FixedWidthHeader_18, "52-Week Range ", glm::vec2(20.0f, 5.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "52-Week Range ", glm::vec2(20.0f, 0.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, fiftyTwoWeek, glm::vec2(20.0f, 0.0f), textColor);
     
     // Day Range
     std::string dayRange = Utils::FormatDoubleToString(stockData.dayLow) + " - " + Utils::FormatDoubleToString(stockData.dayHigh);
-    KanVest_Text(FixedWidthHeader_18, "Day Range     ", glm::vec2(20.0f, 5.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Day Range     ", glm::vec2(20.0f, 0.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, dayRange, glm::vec2(20.0f, 0.0f), textColor);
     
     // Volume
-    KanVest_Text(FixedWidthHeader_18, "Volume        ", glm::vec2(20.0f, 5.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Volume        ", glm::vec2(20.0f, 0.0f), textColor);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, Utils::FormatLargeNumber(stockData.volume), glm::vec2(20.0f, 0.0f), textColor);
     
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 5.0f});
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 0.0f});
   }
   
   void StockUI::DrawPortfolioTable(Portfolio* portfolio)
@@ -704,6 +740,16 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         PrintCell(8, PortfolioUtils::VisionToString(h.vision));
         
         ImGui::PopID();
+        
+        if (ImGui::IsKeyPressed(ImGuiKey_Backspace))
+        {
+          if (g_selectedRow >= 0)
+          {
+            holdings.erase(holdings.begin() + g_selectedRow);
+            UserManager::GetCurrentUser().SavePortfolio();
+            g_selectedRow = -1;
+          }
+        }
       }
       
       // ---- Inline Add Row ----
