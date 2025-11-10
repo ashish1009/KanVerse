@@ -35,10 +35,10 @@ namespace KanVest
     }
     
     // ---------- Determine Action ----------
-    bool bullishMomentum = momentumReport.shortTermBehavior == "Very Positive" ||
-    momentumReport.shortTermBehavior == "Positive";
-    bool bearishMomentum = momentumReport.shortTermBehavior == "Very Negative" ||
-    momentumReport.shortTermBehavior == "Negative";
+    bool bullishMomentum = momentumReport.shortTermBehavior == Momentum::VeryPositive ||
+    momentumReport.shortTermBehavior == Momentum::Positive;
+    bool bearishMomentum = momentumReport.shortTermBehavior == Momentum::VeryNegative ||
+    momentumReport.shortTermBehavior == Momentum::Negative;
     
     bool priceAboveSMA50 = techReport.SMA.count(50) && stock.livePrice > techReport.SMA.at(50);
     bool oversold = techReport.RSI < 30;
@@ -89,8 +89,8 @@ namespace KanVest
       << " shares at avg price " << userHolding.avgPrice << "\n";
     
     oss << "- Interval price change: " << intervalChangePercent << "%\n";
-    oss << "- Momentum: Short-term trend is " << momentumReport.shortTermBehavior
-    << ", long-term trend is " << momentumReport.longTermBehavior << ".\n";
+    oss << "- Momentum: Short-term trend is " << Utils::GetMomentumString(momentumReport.shortTermBehavior)
+    << ", long-term trend is " << Utils::GetMomentumString(momentumReport.longTermBehavior) << ".\n";
     oss << "- Technicals: RSI = " << techReport.RSI
     << ", MACD = " << techReport.MACD << " (Signal = " << techReport.MACDSignal << ")"
     << ", SMA50 = " << (techReport.SMA.count(50) ? techReport.SMA.at(50) : 0.0) << ".\n";

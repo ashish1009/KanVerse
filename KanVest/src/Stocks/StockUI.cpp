@@ -407,33 +407,22 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     KanVasX::UI::Text(font, Utils::GetActionString(report.recommendation.action), KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
 
 //    // Voltality
-//    const char* volText = "";
-//    ImU32 volColor;
-//    if (r.volatility > 8.0) {
-//      volText = "Very High";
-//      volColor = KanVasX::Color::Red;
-//    }
-//    else if (r.volatility > 5.0) {
-//      volText = "High";
-//      volColor = KanVasX::Color::Orange;
-//    }
-//    else if (r.volatility > 2.5) {
-//      volText = "Moderate";
-//      volColor = KanVasX::Color::Yellow;
-//    }
-//    else if (r.volatility > 1.0) {
-//      volText = "Low";
-//      volColor = KanVasX::Color::Cyan;
-//    }
-//    else {
-//      volText = "Very Low";
-//      volColor = KanVasX::Color::Green;
-//    }
-//
-//    KanVasX::UI::Text(font, "Voltality", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
-//    ImGui::SameLine();
-//    KanVasX::UI::Text(font, volText, KanVasX::UI::AlignX::Right, {-30, 0}, volColor);
-//
+//    auto ShowVoltalitity = [](const std::string& title, double volatility) {
+//      ImU32 volColor;
+//      if (volatility < 0.5) { volColor = KanVasX::Color::Green; }
+//      else if (volatility < 1.5) { volColor = KanVasX::Color::Cyan; }
+//      else if (volatility < 3.0) { volColor = KanVasX::Color::Yellow; }
+//      else if (volatility < 6.0) { volColor = KanVasX::Color::Orange; }
+//      else { volColor = KanVasX::Color::Red; }
+//      
+//      KanVasX::UI::Text(font, title, KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
+//      ImGui::SameLine();
+//      KanVasX::UI::Text(font, Utils::VolatilityDescription(volatility), KanVasX::UI::AlignX::Right, {-30, 0}, volColor);
+//    };
+//    
+//    ShowVoltalitity("Short Term Volatility", report.volatility.shortTermVolatility);
+//    ShowVoltalitity("Long Term Volatility", report.volatility.longTermVolatility);
+
 //    // Band
 //    KanVasX::UI::Text(font, "Resistance", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
 //    ImGui::SameLine();

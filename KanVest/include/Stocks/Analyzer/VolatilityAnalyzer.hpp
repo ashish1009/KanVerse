@@ -28,4 +28,13 @@ namespace KanVest
     static double ComputeStdDev(const std::vector<StockPoint>& history);
     static std::string GenerateExplanation(double shortVol, double longVol);
   };
+  
+  namespace Utils
+  {
+    // Converts volatility (%) into descriptive string
+    std::string VolatilityDescription(double volatilityPercent);
+    
+    // Example usage for VolatilityReport
+    std::string DescribeVolatility(const VolatilityReport& report);
+  }
 } // namespace KanVest

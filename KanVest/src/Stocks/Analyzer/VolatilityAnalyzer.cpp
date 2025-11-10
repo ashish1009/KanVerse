@@ -69,4 +69,35 @@ namespace KanVest
     
     return desc;
   }
+  
+  namespace Utils
+  {
+    // Converts volatility (%) into descriptive string
+    std::string VolatilityDescription(double volatilityPercent)
+    {
+      if (volatilityPercent < 0.5)
+        return "Very Low";
+      else if (volatilityPercent < 1.5)
+        return "Low";
+      else if (volatilityPercent < 3.0)
+        return "Moderate";
+      else if (volatilityPercent < 6.0)
+        return "High";
+      else
+        return "Very High";
+    }
+    
+    // Example usage for VolatilityReport
+    std::string DescribeVolatility(const VolatilityReport& report)
+    {
+      std::ostringstream oss;
+      oss << "Short-term volatility: "
+      << VolatilityDescription(report.shortTermVolatility)
+      << " (" << report.shortTermVolatility << "%), "
+      << "Long-term volatility: "
+      << VolatilityDescription(report.longTermVolatility)
+      << " (" << report.longTermVolatility << "%)";
+      return oss.str();
+    }
+  }
 } // namespace KanVest

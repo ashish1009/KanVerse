@@ -12,10 +12,11 @@
 
 namespace KanVest
 {
+  enum class Momentum {VeryPositive, Positive, Neutral, Negative, VeryNegative};
   struct MomentumReport
   {
-    std::string shortTermBehavior; // Very Positive, Positive, Neutral, Negative
-    std::string longTermBehavior;
+    Momentum shortTermBehavior; // Very Positive, Positive, Neutral, Negative
+    Momentum longTermBehavior;
     std::string explanation;       // Human-readable summary
   };
   
@@ -25,6 +26,11 @@ namespace KanVest
     /// Analyze momentum using technicals + volatility
     static MomentumReport Analyze(const StockData& stock, const TechnicalReport& techReport, const VolatilityReport& volReport);
   private:
-    static std::string DetermineBehavior(double shortMA, double longMA, double volatility);
+    static Momentum DetermineBehavior(double shortMA, double longMA, double volatility);
   };
+  
+  namespace Utils
+  {
+    std::string GetMomentumString(Momentum momentum);
+  }
 } // namespace KanVest

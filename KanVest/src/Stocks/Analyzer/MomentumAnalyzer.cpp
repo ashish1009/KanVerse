@@ -25,28 +25,47 @@ namespace KanVest
     
     // Human-readable explanation
     std::ostringstream oss;
-    oss << "Short-term behavior is " << report.shortTermBehavior
+    oss << "Short-term behavior is " << Utils::GetMomentumString(report.shortTermBehavior)
     << " based on 5-day SMA vs 50-day SMA and current volatility.\n";
-    oss << "Long-term behavior is " << report.longTermBehavior
+    oss << "Long-term behavior is " << Utils::GetMomentumString(report.longTermBehavior)
     << " based on 50-day SMA vs 100-day SMA and long-term volatility.\n";
     
     report.explanation = oss.str();
     return report;
   }
   
-  std::string MomentumAnalyzer::DetermineBehavior(double shortMA, double longMA, double volatility)
+  Momentum MomentumAnalyzer::DetermineBehavior(double shortMA, double longMA, double volatility)
   {
     double diffPercent = (shortMA - longMA) / longMA * 100.0;
     
     if (diffPercent > 2.0 && volatility < 3.0)
-      return "Very Positive";
+      return Momentum::VeryPositive;
     else if (diffPercent > 0.5)
-      return "Positive";
+      return Momentum::Positive;
     else if (diffPercent < -2.0 && volatility > 5.0)
-      return "Very Negative";
+      return Momentum::VeryNegative;
     else if (diffPercent < -0.5)
-      return "Negative";
+      return Momentum::Negative;
     else
-      return "Neutral";
+      return Momentum::Neutral;
   }
+  
+  namespace Utils
+  {
+    std::string GetMomentumString(Momentum momentum)
+    {
+      switch (momentum)
+      {
+        case Momentum::VeryPositive: return "Very Positive";
+        case Momentum::Positive: return "Positive";
+        case Momentum::Neutral: return "Neutral";
+        case Momentum::Negative: return "Negative";
+        case Momentum::VeryNegative: return "Very Negative";
+        default:
+          break;
+      }
+      return "";
+    }
+  }
+
 } // namespace KanVest
