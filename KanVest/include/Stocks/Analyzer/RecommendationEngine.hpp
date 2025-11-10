@@ -25,7 +25,7 @@ namespace KanVest
 
   struct Recommendation
   {
-    Action action;
+    Action action = Action::Hold;
     double quantity = 0.0;
     double score = 50.0;
     std::string explanation;  // Human-readable reasoning

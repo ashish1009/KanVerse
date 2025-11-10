@@ -15,8 +15,8 @@ namespace KanVest
   enum class Momentum {VeryPositive, Positive, Neutral, Negative, VeryNegative};
   struct MomentumReport
   {
-    Momentum shortTermBehavior; // Very Positive, Positive, Neutral, Negative
-    Momentum longTermBehavior;
+    Momentum shortTermBehavior = Momentum::Neutral;
+    Momentum longTermBehavior = Momentum::Neutral;
     std::string explanation;       // Human-readable summary
   };
   

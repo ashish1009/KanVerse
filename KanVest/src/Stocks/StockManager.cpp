@@ -94,18 +94,18 @@ namespace KanVest
     // ---------- 1. Technical Analysis ----------
     s_report.technicals = TechnicalAnalyzer::Analyze(stockData);
     
-    // ---------- 2. Volatility ----------
-    s_report.volatility = VolatilityAnalyzer::Analyze(stockData);
-    
-    // ---------- 3. Momentum ----------
-    s_report.momentum = MomentumAnalyzer::Analyze(stockData, s_report.technicals, s_report.volatility);
-    
-    // ---------- 4. Performance ----------
-    double sectorChangePercent = 0.5; // example
-    s_report.performance = PerformanceSummary::Analyze(stockData, sectorChangePercent);
-    
-    // ---------- 5. Chart Analysis ----------
-    s_report.chart = ChartAnalyzer::Analyze(stockData);
+//    // ---------- 2. Volatility ----------
+//    s_report.volatility = VolatilityAnalyzer::Analyze(stockData);
+//    
+//    // ---------- 3. Momentum ----------
+//    s_report.momentum = MomentumAnalyzer::Analyze(stockData, s_report.technicals, s_report.volatility);
+//    
+//    // ---------- 4. Performance ----------
+//    double sectorChangePercent = 0.5; // example
+//    s_report.performance = PerformanceSummary::Analyze(stockData, sectorChangePercent);
+//    
+//    // ---------- 5. Chart Analysis ----------
+//    s_report.chart = ChartAnalyzer::Analyze(stockData);
     
     // ---------- 6. Recommendation ----------
     s_report.recommendation = RecommendationEngine::Generate(

@@ -15,20 +15,20 @@ namespace KanVest
   {
     TechnicalReport report;
     
-    ComputeMovingAverages(stock, report);
-    ComputeRSI(stock, report);
-    ComputeMACD(stock, report);
-    ComputeATR(stock, report);
-    ComputeVWAP(stock, report);
+//    ComputeMovingAverages(stock, report);
+//    ComputeRSI(stock, report);
+//    ComputeMACD(stock, report);
+//    ComputeATR(stock, report);
+//    ComputeVWAP(stock, report);
     
-    ComputeAwesomeOscillator(stock, report);
-    ComputeStochasticRSI(stock, report);
-    ComputeCCI(stock, report);
+//    ComputeAwesomeOscillator(stock, report);
+//    ComputeStochasticRSI(stock, report);
+//    ComputeCCI(stock, report);
     
     // NEW
-    ComputeADX(stock, report);   // default period 14
-    ComputeMFI(stock, report);   // default period 14
-    ComputeOBV(stock, report);
+//    ComputeADX(stock, report);   // default period 14
+//    ComputeMFI(stock, report);   // default period 14
+//    ComputeOBV(stock, report);
     
     return report;
   }
