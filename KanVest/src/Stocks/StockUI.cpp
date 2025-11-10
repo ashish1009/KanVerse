@@ -482,7 +482,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 
     // Technical Data
     {
-      ImVec2 technicalAnalyzerSize = {ImGui::GetContentRegionAvail().x, 210.0f};
+      ImVec2 technicalAnalyzerSize = {ImGui::GetContentRegionAvail().x, 250.0f};
       ImGui::BeginChild("Technical Analysis", technicalAnalyzerSize, true);
       
       // Title
@@ -561,8 +561,6 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       // SMA
       if (tab == TechnicalTab::SMA)
       {
-        ImVec2 smaChildSize = {(ImGui::GetContentRegionAvail().x / 4) - 6.0f, 60.0f};
-        
         int bullish = 0;
         int bearish = 0;
         for (const auto& [period, sma] : report.technicals.SMA)
@@ -579,14 +577,25 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         }
         else
         {
-          std::string smaSummary = stockData.shortName + " is trading below " + std::to_string(bearish) + " out of " + std::to_string(total) + "SMAs";
+          std::string smaSummary = stockData.shortName + " is trading below " + std::to_string(bearish) + " out of " + std::to_string(total) + " SMAs";
           KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::Red);
         }
         
+        {
+          KanVasX::ScopedColor frameBg(ImGuiCol_FrameBg, KanVasX::Color::Alpha(KanVasX::Color::DarkRed, 0.7));
+          KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, KanVasX::Color::Alpha(KanVasX::Color::Cyan, 0.7));
+          
+          float fraction = (float)bullish / (float)total;
+          ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
+        }
+
+        std::string smaSummary = "If current price is greater than SMA, trend is bullish";
+        KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Small), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::White);
+
         auto ShowSma = [stockData](int period, double sma) {
           if (sma > 0)
           {
-            std::string datString = std::to_string(period) + " Day";
+            std::string datString = std::to_string(period) + "d";
             KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), datString, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::White);
             ImGui::SameLine();
             auto smaColor = sma > stockData.livePrice ? KanVasX::Color::Red : KanVasX::Color::Cyan;
@@ -595,16 +604,17 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         };
         
         int idx = 0;
+        ImVec2 smaChildSize = {(ImGui::GetContentRegionAvail().x / 2) - 6.0f, 100.0f};
         for (const auto& [period, sma] : report.technicals.SMA)
         {
-          if (idx % 2 == 0)
+          if (idx % 4 == 0)
           {
             ImGui::BeginChild(std::to_string(period).c_str(), smaChildSize, true);
           }
           
           ShowSma(period, sma);
           
-          if (idx % 2 != 0)
+          if (idx % 4 == 3)
           {
             ImGui::EndChild();
             ImGui::SameLine();            
@@ -795,7 +805,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   void StockUI::SearchBar()
   {
     const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
-    if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.93f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
+    if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.9f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
     {
       Utils::ConvertUpper(s_searchedString);
     }

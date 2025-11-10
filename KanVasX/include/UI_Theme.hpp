@@ -18,6 +18,7 @@ namespace KanVasX
     inline static ImU32 Black                 = IM_COL32(0, 0, 0, 255);
     inline static ImU32 White                 = IM_COL32(255, 255, 255, 255);
     
+    inline static ImU32 DarkRed               = IM_COL32(185, 55, 25, 255);
     inline static ImU32 Red                   = IM_COL32(215, 55, 25, 255);
     inline static ImU32 Green                 = IM_COL32(15, 240, 182, 255);
     inline static ImU32 Blue                  = IM_COL32(0, 125, 255, 255);
