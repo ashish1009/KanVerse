@@ -51,6 +51,10 @@ namespace KanVest::Analysis
     double suggestedActionQty = 0.0;
     std::string actionReason;
     
+    double volatility = NAN;      // computed volatility (e.g., %)
+    double supportLevel = NAN;    // recent price support
+    double resistanceLevel = NAN; // recent price resistance
+
     // Tooltip descriptions (for UI hover info)
     std::unordered_map<std::string, std::string> tooltips;
   };

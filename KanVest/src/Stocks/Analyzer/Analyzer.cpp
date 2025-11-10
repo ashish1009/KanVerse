@@ -60,6 +60,32 @@ AnalysisReport StockAnalyzer::Analyze(const StockData& shortTerm, const StockDat
   return BuildReport(shortTerm, longTerm, holding);
 }
 
+inline double Volatility(const std::vector<double>& closes, size_t period = 14)
+{
+  if (closes.size() <= period) return NAN;
+  double mean = std::accumulate(closes.end()-period, closes.end(), 0.0) / period;
+  double sumSq = 0.0;
+  for (size_t i = closes.size() - period; i < closes.size(); ++i)
+  {
+    double diff = closes[i] - mean;
+    sumSq += diff * diff;
+  }
+  double variance = sumSq / period;
+  return std::sqrt(variance) / mean * 100.0; // volatility in %
+}
+
+inline std::pair<double, double> SupportResistance(const std::vector<double>& highs,
+                                                   const std::vector<double>& lows,
+                                                   size_t lookback = 20)
+{
+  if (highs.size() < lookback || lows.size() < lookback)
+    return {NAN, NAN};
+  
+  auto highIter = std::max_element(highs.end() - lookback, highs.end());
+  auto lowIter  = std::min_element(lows.end() - lookback, lows.end());
+  return {*lowIter, *highIter};
+}
+
 AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l, const HoldingInfo* holding) const
 {
   AnalysisReport r;
@@ -239,6 +265,26 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
     if (atrPct > 0.04) score *= 0.85;
   }
   
+  // Volatility and Support/Resistance
+  r.volatility = Volatility(closes, m_cfg.atr_period);
+  auto sr = SupportResistance(highs, lows);
+  r.supportLevel = sr.first;
+  r.resistanceLevel = sr.second;
+
+  if (!std::isnan(r.volatility))
+  {
+    double vol = r.volatility;
+    bool uptrend = (r.smaShort > r.smaLong) && (r.macd > r.macdSignal);
+    
+    if (vol > 3.0)
+    {
+      if (uptrend)
+        score *= 0.95; // small dampening — healthy breakout
+      else
+        score *= 0.75; // strong penalty — chaotic selloff
+    }
+  }
+
   // Bound score & map to recommendation
   r.score = std::max(-1.0, std::min(1.0, score));
   if (r.score >= 0.6) r.recommendation = Recommendation::StrongBuy;
@@ -267,17 +313,17 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
       {
         suggested = -holding->qty * 0.5;
         r.actionReason = "Large unrealized gain (" + std::to_string(r.unrealizedPct) +
-        "%). Suggest selling 50% to lock profits.";
+        "%).\n    Suggest selling 50% to lock profits.";
       }
       else if (r.unrealizedPct < -10.0 || (r.obvSlope < 0 && r.adx > 20))
       {
         suggested = -holding->qty * 0.75;
-        r.actionReason = "Loss exceeding -10% or volume+trend weakening. Suggest cutting 75% of position.";
+        r.actionReason = "Loss exceeding -10% or volume+trend weakening.\n    Suggest cutting 75% of position.";
       }
       else
       {
         suggested = -holding->qty * 0.25;
-        r.actionReason = "Bearish technicals, suggest trimming 25% of position.";
+        r.actionReason = "Bearish technicals.\n    Suggest trimming 25% of position.";
       }
       
       // --- ✅ Ensure no negative or invalid suggestion ---
@@ -298,12 +344,12 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
       
       r.suggestedActionQty = qtyToAdd;
       r.actionReason = "Bullish signal (score " + std::to_string(r.score) +
-      "). Suggest adding " + std::to_string((int)(addRatio * 100)) + "% to position.";
+      "). \n   Suggest adding " + std::to_string((int)(addRatio * 100)) + "% to position.";
     }
     else
     {
       r.suggestedActionQty = 0.0;
-      r.actionReason = "Neutral conditions — hold existing position.";
+      r.actionReason = "Neutral conditions : Hold existing position.";
     }
   }
   else
@@ -320,7 +366,7 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
       
       // ✅ Round to nearest 10 for cleaner UI
       r.suggestedActionQty = std::round(suggested / 10.0) * 10.0;
-      r.actionReason = "No existing holding. Entry opportunity detected (volume/trend confirmed).";
+      r.actionReason = "No existing holding. \n   Entry opportunity detected (volume/trend confirmed).";
     }
     else
     {
@@ -363,6 +409,9 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
         ss << "Suggested entry qty: " << r.suggestedActionQty << ". Reason: " << r.actionReason;
     }
     
+    ss << "Volatility=" << r.volatility << "%, Support=" << r.supportLevel
+    << ", Resistance=" << r.resistanceLevel << ". ";
+
     r.explanation = ss.str();
   }
   
@@ -383,14 +432,14 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
     
     // Momentum indicators
     if (r.rsi < 30)
-      d << "RSI (" << r.rsi << ") suggests the stock is oversold — possible rebound zone.\n";
+      d << "RSI (" << r.rsi << ") suggests the stock is oversold : Possible rebound zone.\n";
     else if (r.rsi > 70)
-      d << "RSI (" << r.rsi << ") indicates overbought conditions — potential short-term cooling.\n";
+      d << "RSI (" << r.rsi << ") indicates overbought conditions : Potential short-term cooling.\n";
     
     if (r.macd > r.macdSignal)
-      d << "MACD line is above signal line — bullish momentum confirmed.\n";
+      d << "MACD line is above signal line : Bullish momentum confirmed.\n";
     else
-      d << "MACD line is below signal line — bearish momentum in play.\n";
+      d << "MACD line is below signal line : Bearish momentum in play.\n";
     
     // Volume and trend confirmation
     if (r.obvSlope > 0)
@@ -402,7 +451,7 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
     if (r.lastClose > r.bollinger.upper)
       d << "Price has broken above Bollinger upper band, suggesting a possible bullish breakout.\n";
     else if (r.lastClose < r.bollinger.lower)
-      d << "Price dropped below lower Bollinger band — possible oversold or continuation down.\n";
+      d << "Price dropped below lower Bollinger band : Possible oversold or continuation down.\n";
     
     // ADX
     if (r.adx > 25)
@@ -414,13 +463,20 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
     d << "\nOverall recommendation: ";
     switch (r.recommendation)
     {
-      case Recommendation::StrongBuy: d << "Strong Buy — multiple bullish confirmations align."; break;
-      case Recommendation::Buy: d << "Buy — moderate bullish trend with positive momentum."; break;
-      case Recommendation::Hold: d << "Hold — mixed signals, maintain position."; break;
-      case Recommendation::Sell: d << "Sell — weakness visible in trend and volume."; break;
-      case Recommendation::StrongSell: d << "Strong Sell — technical breakdown confirmed."; break;
+      case Recommendation::StrongBuy: d << "Strong Buy : Multiple bullish confirmations align."; break;
+      case Recommendation::Buy: d << "Buy : Moderate bullish trend with positive momentum."; break;
+      case Recommendation::Hold: d << "Hold : Mixed signals, maintain position."; break;
+      case Recommendation::Sell: d << "Sell : Weakness visible in trend and volume."; break;
+      case Recommendation::StrongSell: d << "Strong Sell : Technical breakdown confirmed."; break;
       default: d << "No clear direction — insufficient data."; break;
     }
+    if (!std::isnan(r.volatility))
+      d << "Volatility is " << r.volatility << "% over recent periods : "
+      << (r.volatility > 3.0 ? "High market fluctuation.\n" : "Stable trading range.\n");
+    
+    if (!std::isnan(r.supportLevel) && !std::isnan(r.resistanceLevel))
+      d << "Support around " << r.supportLevel << " and resistance near " << r.resistanceLevel << ".\n";
+
     d << "\n";
     
     if (!r.actionReason.empty())
@@ -495,6 +551,16 @@ AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l
   
   r.tooltips["Pattern"] =
   "Detected chart/candlestick formations that may indicate reversals or continuations.";
+
+  r.tooltips["Volatility"] =
+  "Statistical measure of price fluctuations (standard deviation of returns). "
+  "Higher volatility means larger and faster price swings.";
+  
+  r.tooltips["Support"] =
+  "Support level: recent low zone where price tends to find buying interest.";
+  
+  r.tooltips["Resistance"] =
+  "Resistance level: recent high zone where price faces selling pressure.";
 
   return r;
 }

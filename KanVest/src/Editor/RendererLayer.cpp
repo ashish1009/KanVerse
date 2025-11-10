@@ -269,7 +269,11 @@ namespace KanVest
         static bool DefaultUser = true;
         if (DefaultUser)
         {
+#if 1
           usernameBuffer.StrCpy("ashish");
+#else
+          usernameBuffer.StrCpy("aashish1009");
+#endif
         }
         usernameBuffer.TextInput(false, 100, " ");
         KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Password", KanVasX::UI::AlignX::Center, {-50.0f, 15.0f});
@@ -282,7 +286,11 @@ namespace KanVest
         KanVasX::UI::ShiftCursorY(-8.0f);
         if (DefaultUser)
         {
+#if 1
           passwordBuffer.StrCpy("ashish");
+#else
+          passwordBuffer.StrCpy("Aashish@1009");
+#endif
         }
         DefaultUser = false;
         passwordBuffer.TextInput(false, 100, " ", showPassword ? 0 : ImGuiInputTextFlags_Password);

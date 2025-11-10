@@ -147,20 +147,20 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowPortfolio()
   {
-    if (ImGui::BeginChild("StockPortfolioCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.59))) // fixed height
+    if (ImGui::BeginChild("ChartCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.4))) // fixed height
     {
-      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
-      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Portfolio", KanVasX::UI::AlignX::Center, {0, 5});
-
-      DrawPortfolioTable(UserManager::GetCurrentUser().portfolio.get());
+      DrawCandleChart();
+      DrawChartController();
     }
     ImGui::EndChild();
 
     KanVasX::UI::ShiftCursorY(10.0f);
-    if (ImGui::BeginChild("ChartCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
+    if (ImGui::BeginChild("StockPortfolioCell", ImVec2(-1, ImGui::GetContentRegionAvail().y))) // fixed height
     {
-      DrawCandleChart();
-      DrawChartController();
+      KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40);
+      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_26), "Portfolio", KanVasX::UI::AlignX::Center, {0, 5});
+      
+      DrawPortfolioTable(UserManager::GetCurrentUser().portfolio.get());
     }
     ImGui::EndChild();
   }
@@ -389,6 +389,8 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     Analysis::AnalysisReport r = StockManager::AnalyzeSelectedStock();
     
     // --- Recommendation ---
+    static auto font = KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26);
+    
     const char* recommendationText = "";
     ImU32 recColor;
     switch (r.recommendation)
@@ -401,9 +403,31 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       default: recommendationText = "Unknown";   recColor = KanVasX::Color::White; break;
     }
 
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), "Recommendation", KanVasX::UI::AlignX::Left, {30.0f, 0}, KanVasX::Color::White);
+    KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {30.0f, 0}, KanVasX::Color::White);
     ImGui::SameLine();
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), recommendationText, KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
+    KanVasX::UI::Text(font, recommendationText, KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
+
+    // Voltality
+    const char* volText = "";
+    ImU32 volColor;
+    if (r.volatility > 0.9) { volText = "Very High"; volColor = KanVasX::Color::Red; }
+    else if (r.volatility > 0.8) { volText = "High"; volColor = KanVasX::Color::Orange; }
+    else if (r.volatility > 0.4) { volText = "Moderate"; volColor = KanVasX::Color::Yellow; }
+    else if (r.volatility > 0.2) { volText = "Low"; volColor = KanVasX::Color::Blue; }
+    else { volText = "Very Low"; volColor = KanVasX::Color::Green; }
+
+    KanVasX::UI::Text(font, "Voltality", KanVasX::UI::AlignX::Left, {30.0f, 0}, KanVasX::Color::White);
+    ImGui::SameLine();
+    
+    KanVasX::UI::Text(font, volText, KanVasX::UI::AlignX::Right, {-30, 0}, volColor);
+
+    // Band
+    KanVasX::UI::Text(font, "Resistance", KanVasX::UI::AlignX::Left, {30.0f, 0}, KanVasX::Color::White);
+    ImGui::SameLine();
+    KanVasX::UI::Text(font, Utils::FormatDoubleToString(r.resistanceLevel), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
+    KanVasX::UI::Text(font, "Support", KanVasX::UI::AlignX::Left, {30.0f, 0}, KanVasX::Color::White);
+    ImGui::SameLine();
+    KanVasX::UI::Text(font, Utils::FormatDoubleToString(r.supportLevel), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
 
     // --- Score Bar ---
     float score = static_cast<float>(r.score);
@@ -432,9 +456,9 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         {
           auto Indicator = [&](const char* label, double value)
           {
-            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), label, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
+            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), label, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
             ImGui::SameLine();
-            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), std::to_string(value), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
+            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), std::to_string(value), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
             if (ImGui::IsItemHovered())
             {
               ImGui::SetTooltip("%s", r.tooltips.count(label) ? r.tooltips.at(label).c_str() : "No tooltip");
@@ -468,9 +492,9 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
           {
             for (auto& p : r.candlePatterns)
             {
-              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), p.name, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
+              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), p.name, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
               ImGui::SameLine();
-              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), Utils::FormatDoubleToString(p.strength), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
+              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(p.strength), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
               
               if (ImGui::IsItemHovered() && !p.rationale.empty())
               {
@@ -490,9 +514,9 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
           {
             for (auto& p : r.chartPatterns)
             {
-              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), p.name, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
+              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), p.name, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
               ImGui::SameLine();
-              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), Utils::FormatDoubleToString(p.strength), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
+              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(p.strength), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
               if (ImGui::IsItemHovered() && !p.rationale.empty())
               {
                 ImGui::SetTooltip("%s", p.rationale.c_str());
