@@ -51,103 +51,241 @@ namespace KanVest
   // --------------------------
   // Exponential Moving Average (EMA)
   // --------------------------
-  double TechnicalUtils::ComputeEMA(const std::vector<StockPoint>& history, int period)
+  double TechnicalUtils::ComputeEMA(const std::vector<StockPoint>& history, int periodInDays)
   {
-    if (history.size() < period) return 0.0;
+    if (history.empty()) return 0.0;
     
-    double ema = ComputeSMA(history, period); // initial EMA = SMA of first period
-    double multiplier = 2.0 / (period + 1);
+    int numDays = GetNumberOfTradingDays(history);
+    if (numDays == 0) return 0.0;
     
-    for (size_t i = history.size() - period; i < history.size(); ++i)
+    int barsPerDay = static_cast<int>(history.size() / numDays);
+    int requiredBars = periodInDays * barsPerDay;
+    
+    if (history.size() < requiredBars)
+      return 0.0; // not enough data
+    
+    // Initial EMA = SMA of the first "requiredBars"
+    double ema = 0.0;
+    for (size_t i = history.size() - requiredBars; i < history.size() - requiredBars + periodInDays; ++i)
+      ema += history[i].close;
+    ema /= periodInDays;
+    
+    double multiplier = 2.0 / (periodInDays + 1.0);
+    
+    for (size_t i = history.size() - requiredBars + periodInDays; i < history.size(); ++i)
     {
       ema = ((history[i].close - ema) * multiplier) + ema;
     }
+    
     return ema;
   }
-  
+
   // --------------------------
   // Relative Strength Index (RSI)
   // --------------------------
-  double TechnicalUtils::ComputeRSI(const std::vector<StockPoint>& history, int period)
+  double TechnicalUtils::ComputeRSI(const std::vector<StockPoint>& history, int periodInDays)
   {
-    if (history.size() <= period) return 50.0; // neutral
+    if (history.size() < 2) return 50.0; // neutral
     
-    double gain = 0.0, loss = 0.0;
-    for (size_t i = history.size() - period; i < history.size(); ++i)
+    // --- Step 1: Determine bars per day ---
+    int numDays = GetNumberOfTradingDays(history);
+    if (numDays == 0) return 50.0;
+    
+    int barsPerDay = static_cast<int>(history.size() / numDays);
+    int periodInBars = std::max(1, periodInDays * barsPerDay);
+    if (history.size() <= static_cast<size_t>(periodInBars)) return 50.0;
+    
+    // --- Step 2: Compute initial average gain/loss over first period ---
+    double avgGain = 0.0, avgLoss = 0.0;
+    for (int i = 1; i <= periodInBars; ++i)
     {
-      double diff = history[i].close - history[i-1].close;
-      if (diff > 0) gain += diff;
-      else loss -= diff; // loss is positive
+      double diff = history[i].close - history[i - 1].close;
+      if (diff > 0) avgGain += diff;
+      else avgLoss -= diff;
+    }
+    avgGain /= periodInBars;
+    avgLoss /= periodInBars;
+    
+    // --- Step 3: Smooth the averages (Wilder's method) ---
+    for (size_t i = periodInBars + 1; i < history.size(); ++i)
+    {
+      double diff = history[i].close - history[i - 1].close;
+      double gain = diff > 0 ? diff : 0.0;
+      double loss = diff < 0 ? -diff : 0.0;
+      
+      avgGain = ((avgGain * (periodInBars - 1)) + gain) / periodInBars;
+      avgLoss = ((avgLoss * (periodInBars - 1)) + loss) / periodInBars;
     }
     
-    if (loss == 0) return 100.0;
-    double rs = gain / loss;
-    double rsi = 100 - (100 / (1 + rs));
+    // --- Step 4: Compute RSI ---
+    if (avgLoss == 0) return 100.0;
+    double rs = avgGain / avgLoss;
+    double rsi = 100.0 - (100.0 / (1.0 + rs));
+    
     return rsi;
   }
-  
+
+  std::vector<double> ComputeEMASeries(const std::vector<double>& data, int period)
+  {
+    std::vector<double> result;
+    if (data.size() < static_cast<size_t>(period)) return result;
+    
+    double multiplier = 2.0 / (period + 1);
+    double ema = std::accumulate(data.begin(), data.begin() + period, 0.0) / period; // initial SMA
+    result.push_back(ema);
+    
+    for (size_t i = period; i < data.size(); ++i)
+    {
+      ema = ((data[i] - ema) * multiplier) + ema;
+      result.push_back(ema);
+    }
+    return result;
+  }
+
   // --------------------------
   // MACD and Signal line
   // --------------------------
-  std::tuple<double,double> TechnicalUtils::ComputeMACD(const std::vector<StockPoint>& history, int fastPeriod, int slowPeriod, int signalPeriod)
+  std::tuple<double, double> TechnicalUtils::ComputeMACD(
+                                                         const std::vector<StockPoint>& history,
+                                                         int fastPeriodInDays,
+                                                         int slowPeriodInDays,
+                                                         int signalPeriodInDays)
   {
-    if (history.size() < slowPeriod) return {0.0, 0.0};
+    if (history.size() < slowPeriodInDays) return {0.0, 0.0};
     
-    double emaFast = ComputeEMA(history, fastPeriod);
-    double emaSlow = ComputeEMA(history, slowPeriod);
-    double macd = emaFast - emaSlow;
+    // --- Step 1: Handle intraday scaling ---
+    int numDays = GetNumberOfTradingDays(history);
+    if (numDays == 0) return {0.0, 0.0};
     
-    // Signal line
-    std::vector<double> macdHistory;
-    for (size_t i = history.size() - signalPeriod; i < history.size(); ++i)
+    int barsPerDay = static_cast<int>(history.size() / numDays);
+    int fastBars = fastPeriodInDays * barsPerDay;
+    int slowBars = slowPeriodInDays * barsPerDay;
+    int signalBars = signalPeriodInDays * barsPerDay;
+    
+    // --- Step 2: Extract closes ---
+    std::vector<double> closes;
+    closes.reserve(history.size());
+    for (auto &h : history)
+      closes.push_back(h.close);
+    
+    // --- Step 3: Compute EMA series (single pass, efficient) ---
+    std::vector<double> emaFast = ComputeEMASeries(closes, fastBars);
+    std::vector<double> emaSlow = ComputeEMASeries(closes, slowBars);
+    
+    // Align sizes
+    size_t start = slowBars - fastBars;
+    if (emaFast.size() <= start) return {0.0, 0.0};
+    
+    std::vector<double> macdLine;
+    macdLine.reserve(emaSlow.size());
+    for (size_t i = 0; i < emaSlow.size(); ++i)
     {
-      double fast = ComputeEMA(std::vector<StockPoint>(history.begin(), history.begin()+i+1), fastPeriod);
-      double slow = ComputeEMA(std::vector<StockPoint>(history.begin(), history.begin()+i+1), slowPeriod);
-      macdHistory.push_back(fast - slow);
+      size_t idxFast = i + start;
+      if (idxFast < emaFast.size())
+        macdLine.push_back(emaFast[idxFast] - emaSlow[i]);
     }
     
-    double signal = std::accumulate(macdHistory.begin(), macdHistory.end(), 0.0) / macdHistory.size();
+    if (macdLine.empty()) return {0.0, 0.0};
+    
+    // --- Step 4: Compute Signal Line (EMA of MACD line) ---
+    std::vector<double> signalLine = ComputeEMASeries(macdLine, signalBars);
+    
+    // --- Step 5: Return latest values ---
+    double macd = macdLine.back();
+    double signal = signalLine.back();
+    
     return {macd, signal};
   }
-  
+
   // --------------------------
   // Average True Range (ATR)
   // --------------------------
-  double TechnicalUtils::ComputeATR(const std::vector<StockPoint>& history, int period)
+  double TechnicalUtils::ComputeATR(const std::vector<StockPoint>& history, int periodInDays)
   {
-    if (history.size() < period + 1) return 0.0;
+    if (history.size() < 2) return 0.0;
     
+    // --- Step 1: Handle intraday scaling ---
+    int numDays = GetNumberOfTradingDays(history);
+    if (numDays == 0) return 0.0;
+    
+    int barsPerDay = static_cast<int>(history.size() / numDays);
+    int period = std::max(1, periodInDays * barsPerDay);
+    
+    if (history.size() <= static_cast<size_t>(period)) return 0.0;
+    
+    // --- Step 2: Compute True Range (TR) for each bar ---
     std::vector<double> trValues;
-    for (size_t i = history.size() - period; i < history.size(); ++i)
+    trValues.reserve(history.size() - 1);
+    for (size_t i = 1; i < history.size(); ++i)
     {
-      double highLow = history[i].high - history[i].low;
-      double highClose = std::abs(history[i].high - history[i-1].close);
-      double lowClose = std::abs(history[i].low - history[i-1].close);
-      
+      double highLow   = history[i].high - history[i].low;
+      double highClose = std::abs(history[i].high - history[i - 1].close);
+      double lowClose  = std::abs(history[i].low - history[i - 1].close);
       double tr = std::max({highLow, highClose, lowClose});
       trValues.push_back(tr);
     }
     
-    double atr = std::accumulate(trValues.begin(), trValues.end(), 0.0) / trValues.size();
+    // --- Step 3: Initial ATR = SMA of first 'period' TRs ---
+    if (trValues.size() < static_cast<size_t>(period)) return 0.0;
+    double atr = std::accumulate(trValues.begin(), trValues.begin() + period, 0.0) / period;
+    
+    // --- Step 4: Wilder’s smoothing for remaining TRs ---
+    double alpha = 1.0 / period;
+    for (size_t i = period; i < trValues.size(); ++i)
+    {
+      atr = atr + alpha * (trValues[i] - atr);
+    }
+
     return atr;
   }
-  
+
   // --------------------------
   // Volume Weighted Average Price (VWAP)
   // --------------------------
   double TechnicalUtils::ComputeVWAP(const std::vector<StockPoint>& history)
   {
+    if (history.empty()) return 0.0;
+    
     double cumulativePriceVolume = 0.0;
     double cumulativeVolume = 0.0;
     
-    for (const auto& point : history)
+    // Detect current day for session VWAP
+    time_t lastDay = 0;
+    if (history.back().timestamp > 0)
     {
+      // Align to midnight (truncate time to day)
+      time_t ts = static_cast<time_t>(history.back().timestamp);
+      tm* t = std::gmtime(&ts);
+      t->tm_hour = 0; t->tm_min = 0; t->tm_sec = 0;
+      lastDay = std::mktime(t);
+    }
+    
+    for (auto it = history.rbegin(); it != history.rend(); ++it)
+    {
+      const auto& point = *it;
+      
+      // Detect if this bar belongs to the current (latest) day
+      if (point.timestamp > 0)
+      {
+        time_t ts = static_cast<time_t>(point.timestamp);
+        tm* p = std::gmtime(&ts);
+        p->tm_hour = 0; p->tm_min = 0; p->tm_sec = 0;
+        time_t currentBarDay = std::mktime(p);
+        
+        if (currentBarDay < lastDay)
+          break; // stop when we reach previous day (VWAP resets daily)
+      }
+      
+      if (point.volume <= 0) continue; // skip zero-volume bars
+      
       double typicalPrice = (point.high + point.low + point.close) / 3.0;
       cumulativePriceVolume += typicalPrice * point.volume;
       cumulativeVolume += point.volume;
     }
     
-    if (cumulativeVolume == 0) return 0.0;
+    if (cumulativeVolume == 0.0)
+      return 0.0;
+    
     return cumulativePriceVolume / cumulativeVolume;
   }
 } // namespace KanVest

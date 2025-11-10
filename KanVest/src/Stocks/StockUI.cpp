@@ -482,7 +482,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 
     // Technical Data
     {
-      ImVec2 technicalAnalyzerSize = {ImGui::GetContentRegionAvail().x, 250.0f};
+      ImVec2 technicalAnalyzerSize = {ImGui::GetContentRegionAvail().x, 260.0f};
       ImGui::BeginChild("Technical Analysis", technicalAnalyzerSize, true);
       
       // Title
