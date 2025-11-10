@@ -328,5 +328,34 @@ namespace KanVest::Analysis::Indicators
     }
     return (v == 0.0) ? nan() : (pv / v);
   }
+  
+  // Compute percent change over the last N candles
+  // Percent change over N bars
+  static double PriceChangePercent(const std::vector<double>& closes, int period)
+  {
+    if (closes.size() <= period) return 0.0;
+    double oldPrice = closes[closes.size() - period - 1];
+    double newPrice = closes.back();
+    if (oldPrice <= 0.0) return 0.0;
+    return ((newPrice - oldPrice) / oldPrice) * 100.0;
+  }
+  
+  // Rolling linear regression slope as normalized momentum strength
+  static double NormalizedSlope(const std::vector<double>& closes, int period)
+  {
+    if (closes.size() <= period) return 0.0;
+    double n = (double)period;
+    double sumX = 0.0, sumY = 0.0, sumXY = 0.0, sumXX = 0.0;
+    for (int i = 0; i < period; ++i)
+    {
+      double x = (double)i;
+      double y = closes[closes.size() - period + i];
+      sumX += x; sumY += y; sumXY += x * y; sumXX += x * x;
+    }
+    double slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    double mean = sumY / n;
+    return clamp(slope / std::max(1e-6, mean) * 100.0, -1.0, 1.0);
+  }
+
 } //  namespace KanVest::Analysis::Indicators
 

@@ -58,4 +58,7 @@ namespace KanVest::Analysis::Indicators
   
   // --- VWAP (intraday weighted average price) ---
   double VWAP(const std::vector<KanVest::StockPoint>& h);
+  
+  double PriceChangePercent(const std::vector<double>& closes, int period);
+  double NormalizedSlope(const std::vector<double>& closes, int period);
 } // namespace KanVest::Analysis::Indicators
