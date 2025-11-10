@@ -20,10 +20,12 @@ namespace KanVest
     double quantity = 0.0;       // Number of shares
     double avgPrice = 0.0;       // Average buy price
   };
+  
+  enum class Action {StrongBuy, Buy, Hold, Sell, StrongSell};
 
   struct Recommendation
   {
-    std::string action;   // Buy, Sell, Hold
+    Action action;
     double quantity = 0.0;
     std::string explanation;  // Human-readable reasoning
   };
@@ -43,6 +45,11 @@ namespace KanVest
                                    );
     
   private:
-    static double DetermineQuantity(double stockPrice, const UserHoldingForAnalyzer& userHolding, const std::string& action);
+    static double DetermineQuantity(double stockPrice, const UserHoldingForAnalyzer& userHolding, Action action);
   };
+  
+  namespace Utils
+  {
+    std::string GetActionString(Action action);
+  }
 } // namespace KanVest

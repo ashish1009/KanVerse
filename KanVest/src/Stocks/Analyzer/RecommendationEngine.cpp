@@ -35,44 +35,45 @@ namespace KanVest
     bool priceAboveSMA50 = stock.livePrice > (techReport.SMA.count(50) ? techReport.SMA.at(50) : stock.prevClose);
     bool oversold = techReport.RSI < 30;
     bool overbought = techReport.RSI > 70;
-    
+        
     // ---------- Decision Logic ----------
+    Action actionLevel;
+    
     if (userHolding.quantity > 0)
     {
       // Already holding shares
-      if (bearishMomentum || overbought)
-      {
-        if (unrealizedPLPercent > 10.0)
-          rec.action = "Sell";  // Lock in profit
-        else if (unrealizedPLPercent < -5.0)
-          rec.action = "Hold";  // Avoid panic selling
-        else
-          rec.action = "Sell";  // Normal sell on bearish signal
-      }
-      else if (bullishMomentum && (oversold || !overbought))
-      {
-        rec.action = "Buy"; // Add to position
-      }
+      if ((bearishMomentum && overbought) || unrealizedPLPercent > 15.0)
+        actionLevel = Action::StrongSell;
+      else if (bearishMomentum || overbought || !priceAboveSMA50)  // <- use priceAboveSMA50 here
+        actionLevel = Action::Sell;
+      else if (bullishMomentum && (oversold || !priceAboveSMA50) && unrealizedPLPercent < -5.0)
+        actionLevel = Action::StrongBuy;
+      else if (bullishMomentum || priceAboveSMA50)  // <- use priceAboveSMA50 here
+        actionLevel = Action::Buy;
       else
-      {
-        rec.action = "Hold";
-      }
+        actionLevel = Action::Hold;
     }
     else
     {
       // No holdings
-      if (bullishMomentum && (oversold || priceAboveSMA50) && !overbought)
-        rec.action = "Buy";
+      if (bullishMomentum && (oversold || !priceAboveSMA50))
+        actionLevel = Action::StrongBuy;
+      else if (bullishMomentum || priceAboveSMA50)
+        actionLevel = Action::Buy;
+      else if (bearishMomentum || !priceAboveSMA50)
+        actionLevel = Action::StrongSell;
       else
-        rec.action = "Hold";
+        actionLevel = Action::Hold;
     }
-    
+
+    rec.action = actionLevel;
+
     // ---------- Determine Quantity ----------
     rec.quantity = DetermineQuantity(stock.livePrice, userHolding, rec.action);
     
     // ---------- Human-readable Explanation ----------
     std::ostringstream oss;
-    oss << "Recommendation: " << rec.action << "\n";
+    oss << "Recommendation: " << Utils::GetActionString(rec.action) << "\n";
     oss << "Quantity suggested: " << rec.quantity << "\n";
     oss << "Reasoning:\n";
     
@@ -124,9 +125,9 @@ namespace KanVest
   // --------------------------
   // Determine quantity to trade
   // --------------------------
-  double RecommendationEngine::DetermineQuantity(double stockPrice, const UserHoldingForAnalyzer& userHolding, const std::string& action)
+  double RecommendationEngine::DetermineQuantity(double stockPrice, const UserHoldingForAnalyzer& userHolding, Action action)
   {
-    if (action == "Buy")
+    if (action == Action::Buy or action == Action::StrongBuy)
     {
       // Buy fixed 100 shares or 50% more than current if already holding
       if (userHolding.quantity > 0)
@@ -134,7 +135,7 @@ namespace KanVest
       else
         return 100.0;
     }
-    else if (action == "Sell")
+    else if (action == Action::Sell or action == Action::StrongSell)
     {
       // Sell 50% of holding
       return userHolding.quantity * 0.5;
@@ -142,4 +143,19 @@ namespace KanVest
     return 0.0; // Hold
   }
 
+  namespace Utils
+  {
+    std::string GetActionString(Action action)
+    {
+      switch (action) {
+        case Action::StrongBuy:   return "Strong Buy";
+        case Action::Buy:         return "Buy";
+        case Action::Hold:        return "Hold";
+        case Action::Sell:        return "Sell";
+        case Action::StrongSell:  return "Strong Sell";
+        default:
+          break;
+      }
+    }
+  }
 } // namespace KanVest

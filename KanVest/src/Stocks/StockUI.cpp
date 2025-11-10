@@ -8,7 +8,6 @@
 #include "StockUI.hpp"
 
 #include "Stocks/StockManager.hpp"
-//#include "Stocks/Analyzer/Analyzer.hpp"
 
 #include "User/UserManager.hpp"
 
@@ -384,30 +383,30 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowAnalyzerData()
   {
-//    Analysis::AnalysisReport r = StockManager::AnalyzeSelectedStock();
-//    
-//    static float xOffset = 20.0f;
-//    
-//    // --- Recommendation ---
-//    static auto font = KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26);
-//    
-//    const char* recommendationText = "";
-//    ImU32 recColor;
-//    switch (r.recommendation)
-//    {
-//      case Analysis::Recommendation::StrongBuy: recommendationText = "Strong Buy"; recColor = KanVasX::Color::Green; break;
-//      case Analysis::Recommendation::Buy:       recommendationText = "Buy";        recColor = KanVasX::Color::Cyan; break;
-//      case Analysis::Recommendation::Hold:      recommendationText = "Hold";       recColor = KanVasX::Color::Yellow; break;
-//      case Analysis::Recommendation::Sell:      recommendationText = "Sell";       recColor = KanVasX::Color::Orange; break;
-//      case Analysis::Recommendation::StrongSell:recommendationText = "Strong Sell";recColor = KanVasX::Color::Red; break;
-//      default: recommendationText = "Unknown";   recColor = KanVasX::Color::White; break;
-//    }
-//
-//    KanVasX::UI::ShiftCursorY(10.0f);
-//    KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
-//    ImGui::SameLine();
-//    KanVasX::UI::Text(font, recommendationText, KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
-//
+    StockAnalysisReport report = StockManager::AnalyzeSelectedStock();
+    
+    static float xOffset = 20.0f;
+    
+    // --- Recommendation ---
+    static auto font = KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26);
+    
+    const char* recText = "";
+    ImU32 recColor;
+    switch (report.recommendation.action)
+    {
+      case Action::StrongBuy: recText = "Strong Buy"; recColor = KanVasX::Color::Green; break;
+      case Action::Buy:       recText = "Buy";        recColor = KanVasX::Color::Cyan; break;
+      case Action::Hold:      recText = "Hold";       recColor = KanVasX::Color::Yellow; break;
+      case Action::Sell:      recText = "Sell";       recColor = KanVasX::Color::Orange; break;
+      case Action::StrongSell:recText = "Strong Sell";recColor = KanVasX::Color::Red; break;
+      default:                recText = "Unknown";    recColor = KanVasX::Color::White; break;
+    }
+
+    KanVasX::UI::ShiftCursorY(10.0f);
+    KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
+    ImGui::SameLine();
+    KanVasX::UI::Text(font, recText, KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
+
 //    // Voltality
 //    const char* volText = "";
 //    ImU32 volColor;
