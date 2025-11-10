@@ -384,8 +384,9 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   void StockUI::ShowAnalyzerData()
   {
     StockAnalysisReport report = StockManager::AnalyzeSelectedStock();
-    
-    static float xOffset = 20.0f;
+    KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundLight);
+
+    static float xOffset = 0.0f;
     
     // --- Recommendation ---
     static auto font = KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26);
@@ -405,13 +406,11 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
     ImGui::SameLine();
     KanVasX::UI::Text(font, Utils::GetActionString(report.recommendation.action), KanVasX::UI::AlignX::Right, {-50, 0}, recColor);
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 10.0f});
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 1.0f, {xOffset, 0.0f});
 
     KanVasX::UI::ShiftCursorY(20.0f);
     // ------- Stock Insight
     {
-      KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundLight);
-      
       // Voltality
       auto ShowVoltalitity = [](double volatility, const std::string& tooltip) {
         ImU32 color;
@@ -425,7 +424,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         KanVasX::UI::Tooltip(tooltip);
       };
 
-      // Voltality
+      // Momentum
       auto ShowMomentum = [](Momentum momentum, const std::string& tooltip) {
         ImU32 color;
         switch (momentum)
@@ -443,12 +442,12 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         KanVasX::UI::Tooltip(tooltip);
       };
 
-      ImVec2 size = {ImGui::GetContentRegionAvail().x * 0.445f, 110.0f};
-      KanVasX::UI::ShiftCursorX(20.0f);
+      ImVec2 shortLongAnalyzerCildSize = {ImGui::GetContentRegionAvail().x * 0.5f, 110.0f};
+      KanVasX::UI::ShiftCursorX(xOffset);
       
       // Long Term
       {
-        ImGui::BeginChild("Long Term Insigth", size, true);
+        ImGui::BeginChild("Long Term Insigth", shortLongAnalyzerCildSize, true);
         
         // Title
         KanVasX::UI::Text(font, "Long Term", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
@@ -463,7 +462,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       ImGui::SameLine();
       // Short Term
       {
-        ImGui::BeginChild("Short Term Insigth", size, true);
+        ImGui::BeginChild("Short Term Insigth", shortLongAnalyzerCildSize, true);
         
         // Title
         KanVasX::UI::Text(font, "Short Term", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
@@ -475,8 +474,21 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         ImGui::EndChild();
       }
     }
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 10.0f});
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
 
+    KanVasX::UI::ShiftCursor({xOffset, 10.0f});
+
+    {
+      ImVec2 technicalAnalyzerSize = {ImGui::GetContentRegionAvail().x, 210.0f};
+      ImGui::BeginChild("Technical Analysis", technicalAnalyzerSize, true);
+      
+      // Title
+      KanVasX::UI::Text(font, "Technical Analysis", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
+      ImGui::Separator();
+            
+      ImGui::EndChild();
+
+    }
 //    // Band
 //    KanVasX::UI::Text(font, "Resistance", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
 //    ImGui::SameLine();
@@ -655,13 +667,14 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowStcokBasicData()
   {
+    KanVasX::ScopedStyle framePadding(ImGuiStyleVar_FramePadding, ImVec2(100.0f, 10.0f));
     StockData stockData = StockManager::GetSelectedStockData();
 
     // Name & price
     std::string name = stockData.shortName + " (" + stockData.currency + ")";
     std::string longNameName = stockData.longName != "" ? stockData.longName : stockData.shortName;
 
-    static float xOffset = 20.0f;
+    static float xOffset = 0.0f;
     KanVest_Text(Header_36, name, glm::vec2(xOffset, 0.0f), KanVasX::Color::TextBright);
     KanVest_Text(Header_24, longNameName, glm::vec2(xOffset, 0.0f), KanVasX::Color::TextBright);
     KanVest_Text(Header_48, Utils::FormatDoubleToString(stockData.livePrice), glm::vec2(xOffset, 0.0f), KanVasX::Color::TextBright);
@@ -676,8 +689,8 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     ImGui::SameLine();
     KanVest_Text(Header_30, change, glm::vec2(xOffset, 10.0f), changeColor);
     
-    static const float UnderLineSize = 0.90;
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 0.0f});
+    static const float UnderLineSize = 1.0f;
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {xOffset, 0.0f});
     KanVasX::UI::ShiftCursorY(10);
 
     // 52-Week Range
@@ -697,7 +710,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, Utils::FormatLargeNumber(stockData.volume), glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
     
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 10.0f});
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {xOffset, 10.0f});
   }
   
   void StockUI::DrawPortfolioTable(Portfolio* portfolio)
