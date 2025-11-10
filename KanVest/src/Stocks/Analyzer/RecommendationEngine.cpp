@@ -74,6 +74,10 @@ namespace KanVest
     if (techReport.SMA.count(50) && stock.livePrice > techReport.SMA.at(50)) rec.score += 5;
     else rec.score -= 5;
     
+    if (techReport.AwesomeOscillator > 0) rec.score += 3; else rec.score -= 3;
+    if (techReport.StochasticRSI < 20) rec.score += 5; else if (techReport.StochasticRSI > 80) rec.score -= 5;
+    if (techReport.CCI > 100) rec.score += 3; else if (techReport.CCI < -100) rec.score -= 3;
+
     // Cap score based on interval change
     if (intervalChangePercent <= -10.0)       // huge drop
       rec.score = std::min(rec.score, 40.0);          // max 40%, cannot Strong Buy

@@ -20,5 +20,8 @@ namespace KanVest
     static std::tuple<double,double> ComputeMACD(const std::vector<StockPoint>& history, int fastPeriod, int slowPeriod, int signalPeriod);
     static double ComputeATR(const std::vector<StockPoint>& history, int period);
     static double ComputeVWAP(const std::vector<StockPoint>& history);
+    static double ComputeAwesomeOscillator(const std::vector<StockPoint>& history, int fastPeriodInDays, int slowPeriodInDays);
+    static double ComputeStochasticRSI(const std::vector<StockPoint>& history, int periodInDays);
+    static double ComputeCCI(const std::vector<StockPoint>& history, int periodInDays);
   };
 } // namespace KanVest

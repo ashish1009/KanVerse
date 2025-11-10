@@ -21,6 +21,10 @@ namespace KanVest
     ComputeATR(stock, report);
     ComputeVWAP(stock, report);
     
+    ComputeAwesomeOscillator(stock, report);
+    ComputeStochasticRSI(stock, report);
+    ComputeCCI(stock, report);
+
     return report;
   }
   
@@ -81,7 +85,34 @@ namespace KanVest
     report.Explanations["VWAP"] = "VWAP is " + std::to_string(vwap) +
     ". VWAP represents the average price weighted by volume; used by traders to determine market trend intraday.";
   }
-  
+
+  void TechnicalAnalyzer::ComputeAwesomeOscillator(const StockData& stock, TechnicalReport& report, int fastPeriodInDays, int slowPeriodInDays)
+  {
+    double asmOsc = TechnicalUtils::ComputeAwesomeOscillator(stock.history, fastPeriodInDays, slowPeriodInDays);
+    report.AwesomeOscillator = asmOsc;
+    
+    report.Explanations["AwesomeOscillator"] = "VWAP is " + std::to_string(asmOsc) +
+    ". AwesomeOscillator ...";
+  }
+
+  void TechnicalAnalyzer::ComputeStochasticRSI(const StockData& stock, TechnicalReport& report, int period)
+  {
+    double stochasticRSI = TechnicalUtils::ComputeStochasticRSI(stock.history,period);
+    report.StochasticRSI = stochasticRSI;
+    
+    report.Explanations["StochasticRSI"] = "VWAP is " + std::to_string(stochasticRSI) +
+    ". StochasticRSI...";
+  }
+
+  void TechnicalAnalyzer::ComputeCCI(const StockData& stock, TechnicalReport& report, int period)
+  {
+    double cci = TechnicalUtils::ComputeCCI(stock.history,period);
+    report.CCI = cci;
+    
+    report.Explanations["CCI"] = "VWAP is " + std::to_string(cci) +
+    ". CCI ... ";
+  }
+
   std::string TechnicalAnalyzer::DescribeTrend(double value, const std::string& indicator)
   {
     if (indicator == "SMA" || indicator == "EMA")

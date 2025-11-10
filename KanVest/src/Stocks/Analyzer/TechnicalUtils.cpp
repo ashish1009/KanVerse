@@ -288,4 +288,105 @@ namespace KanVest
     
     return cumulativePriceVolume / cumulativeVolume;
   }
+  
+  // =============================
+  // Additional Technical Indicators
+  // Awesome Oscillator, Stochastic RSI, CCI
+  // =============================
+  
+  double TechnicalUtils::ComputeAwesomeOscillator(const std::vector<StockPoint>& history, int fastPeriodInDays, int slowPeriodInDays)
+  {
+    if (history.size() < 2) return 0.0;
+    
+    int numDays = GetNumberOfTradingDays(history);
+    if (numDays == 0) return 0.0;
+    
+    int barsPerDay = static_cast<int>(history.size() / numDays);
+    int fastPeriod = std::max(1, fastPeriodInDays * barsPerDay);
+    int slowPeriod = std::max(1, slowPeriodInDays * barsPerDay);
+    
+    if (history.size() < static_cast<size_t>(slowPeriod)) return 0.0;
+    
+    std::vector<double> medianPrices;
+    medianPrices.reserve(history.size());
+    for (const auto& h : history)
+      medianPrices.push_back((h.high + h.low) / 2.0);
+    
+    double smaFast = 0.0, smaSlow = 0.0;
+    for (size_t i = history.size() - fastPeriod; i < history.size(); ++i) smaFast += medianPrices[i];
+    for (size_t i = history.size() - slowPeriod; i < history.size(); ++i) smaSlow += medianPrices[i];
+    
+    smaFast /= fastPeriod;
+    smaSlow /= slowPeriod;
+    
+    return smaFast - smaSlow;
+  }
+  
+  
+  // =============================
+  // Stochastic RSI
+  // =============================
+  double TechnicalUtils::ComputeStochasticRSI(const std::vector<StockPoint>& history, int periodInDays)
+  {
+    if (history.size() < 2) return 0.0;
+    
+    int numDays = GetNumberOfTradingDays(history);
+    if (numDays == 0) return 0.0;
+    
+    int barsPerDay = static_cast<int>(history.size() / numDays);
+    int period = std::max(1, periodInDays * barsPerDay);
+    if (history.size() < static_cast<size_t>(period)) return 0.0;
+    
+    // Compute RSI series
+    std::vector<double> rsiSeries;
+    for (size_t i = period; i < history.size(); ++i)
+    {
+      std::vector<StockPoint> sub(history.begin() + i - period, history.begin() + i);
+      rsiSeries.push_back(ComputeRSI(sub, period));
+    }
+    
+    if (rsiSeries.size() < static_cast<size_t>(period)) return 50.0; // neutral
+    
+    double recentRSI = rsiSeries.back();
+    auto [minRSI, maxRSI] = std::minmax_element(rsiSeries.end() - period, rsiSeries.end());
+    if (*maxRSI - *minRSI == 0) return 50.0;
+    
+    double stochasticRSI = (recentRSI - *minRSI) / (*maxRSI - *minRSI) * 100.0;
+    return std::clamp(stochasticRSI, 0.0, 100.0);
+  }
+  
+  
+  // =============================
+  // Commodity Channel Index (CCI)
+  // =============================
+  double TechnicalUtils::ComputeCCI(const std::vector<StockPoint>& history, int periodInDays)
+  {
+    if (history.size() < 2) return 0.0;
+    
+    int numDays = GetNumberOfTradingDays(history);
+    if (numDays == 0) return 0.0;
+    
+    int barsPerDay = static_cast<int>(history.size() / numDays);
+    int period = std::max(1, periodInDays * barsPerDay);
+    
+    if (history.size() < static_cast<size_t>(period)) return 0.0;
+    
+    std::vector<double> typicalPrices;
+    typicalPrices.reserve(history.size());
+    for (const auto& h : history)
+      typicalPrices.push_back((h.high + h.low + h.close) / 3.0);
+    
+    double sma = std::accumulate(typicalPrices.end() - period, typicalPrices.end(), 0.0) / period;
+    
+    double meanDeviation = 0.0;
+    for (size_t i = history.size() - period; i < history.size(); ++i)
+      meanDeviation += std::abs(typicalPrices[i] - sma);
+    
+    meanDeviation /= period;
+    if (meanDeviation == 0.0) return 0.0;
+    
+    double cci = (typicalPrices.back() - sma) / (0.015 * meanDeviation);
+    return cci;
+  }
+
 } // namespace KanVest
