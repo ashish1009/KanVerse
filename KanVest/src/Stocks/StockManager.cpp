@@ -12,6 +12,8 @@
 
 #include "URL_API/APIProvider.hpp"
 
+#include "Stocks/Analyzer/RecommendationEngine.hpp"
+
 namespace KanVest
 {
   namespace Utils
@@ -85,28 +87,39 @@ namespace KanVest
     return data;
   }
 
-//  Analysis::AnalysisReport StockManager::AnalyzeSelectedStock()
-//  {
-//    // Get long term and short term data
-//    KanVest::StockData shortTerm;
-//    KanVest::StockData longTerm;
-//    KanVest::StockManager::GetShortTermStockData(s_selectedStockSymbol, shortTerm);
-//    KanVest::StockManager::GetLongTermStockData(s_selectedStockSymbol, longTerm);
-//    
-//    if (shortTerm.IsValid() or longTerm.IsValid())
-//    {
-//      // Constant config for now
-//      KanVest::Analysis::AnalyzerConfig cfg;
-//      cfg.sma_short = 9;
-//      cfg.sma_long = 21;
-//      cfg.rsi_period = 14;
-//      
-//      KanVest::Analysis::StockAnalyzer analyzer(cfg);
-//      
-//      return analyzer.Analyze(shortTerm, &longTerm, &s_selectedHoldingData);
-//    }
-//    return Analysis::AnalysisReport();
-//  }
+  const StockAnalysisReport& StockManager::AnalyzeSelectedStock()
+  {
+    const auto& stockData = GetSelectedStockData();
+    
+    // ---------- 1. Technical Analysis ----------
+    s_report.technicals = TechnicalAnalyzer::Analyze(stockData);
+    
+    // ---------- 2. Volatility ----------
+    s_report.volatility = VolatilityAnalyzer::Analyze(stockData);
+    
+    // ---------- 3. Momentum ----------
+    s_report.momentum = MomentumAnalyzer::Analyze(stockData, s_report.technicals, s_report.volatility);
+    
+    // ---------- 4. Performance ----------
+    double sectorChangePercent = 0.5; // example
+    s_report.performance = PerformanceSummary::Analyze(stockData, sectorChangePercent);
+    
+    // ---------- 5. Chart Analysis ----------
+    s_report.chart = ChartAnalyzer::Analyze(stockData);
+    
+    // ---------- 6. Recommendation ----------
+    s_report.recommendation = RecommendationEngine::Generate(
+                                                             stockData,
+                                                             s_report.technicals,
+                                                             s_report.momentum,
+                                                             s_report.volatility,
+                                                             s_report.chart,
+                                                             s_report.performance,
+                                                             s_selectedHoldingData
+                                                             );
+    
+    return s_report;
+  }
 
   bool StockManager::AddStock(const std::string& symbolName)
   {
@@ -115,7 +128,6 @@ namespace KanVest
     if (s_stockCache.find(symbol) == s_stockCache.end())
     {
       s_stockCache.emplace(symbol, StockData(symbol));
-//      s_longTermStockCache.emplace(symbol, StockData(symbol));
       return true;
     }
     return false;
@@ -131,7 +143,6 @@ namespace KanVest
   {
     std::scoped_lock lock(s_mutex);
     s_stockCache.erase(symbol);
-//    s_longTermStockCache.erase(symbol);
   }
   
   bool StockManager::GetShortTermStockData(const std::string& symbolName, StockData& outData)
@@ -148,21 +159,6 @@ namespace KanVest
     
     return false;
   }
-
-//  bool StockManager::GetLongTermStockData(const std::string& symbolName, StockData& outData)
-//  {
-//    std::scoped_lock lock(s_mutex);
-//    std::string symbol = NormalizeSymbol(symbolName);
-//    
-//    auto it = s_longTermStockCache.find(symbol);
-//    if (it != s_longTermStockCache.end())
-//    {
-//      outData = it->second;
-//      return true;
-//    }
-//    
-//    return false;
-//  }
 
   void StockManager::RefreshAll()
   {
@@ -183,7 +179,6 @@ namespace KanVest
     };
     
     refresh(s_stockCache);
-//    refresh(s_longTermStockCache);
   }
   
   void StockManager::StartLiveUpdates(int intervalMilliseconds)
@@ -216,9 +211,9 @@ namespace KanVest
     s_selectedStockSymbol = stockSymbol;
   }
   
-  void StockManager::SetSelectedStockHoldingData(double atp, int qty, const std::string& stockSymbol)
+  void StockManager::SetSelectedStockHoldingData(double atp, int qty)
   {
-//    s_selectedHoldingData = KanVest::Analysis::HoldingInfo(atp, qty, stockSymbol);
+    s_selectedHoldingData = KanVest::UserHoldingForAnalyzer(qty, atp);
   }
   
   const std::string& StockManager::GetSelectedStockSymbol()
@@ -238,11 +233,6 @@ namespace KanVest
     std::scoped_lock lock(s_mutex);
     return s_stockCache;
   }
-//  const std::unordered_map<std::string, StockData>& StockManager::GetLongTermStokCache()
-//  {
-//    std::scoped_lock lock(s_mutex);
-//    return s_longTermStockCache;
-//  }
 
   void StockManager::SetCurrentInterval(const std::string& interval)
   {
@@ -371,7 +361,6 @@ namespace KanVest
           if (hierData.IsValid())
           {
             std::scoped_lock lock(s_mutex);
-//            s_longTermStockCache[symbol] = std::move(hierData);
           }
         }
       }

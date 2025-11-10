@@ -593,7 +593,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   {
     StockManager::AddStock(symbol);
     StockManager::SetSelectedStockSymbol(symbol);
-    StockManager::SetSelectedStockHoldingData(0.0, 0, "");
+    StockManager::SetSelectedStockHoldingData(0.0, 0);
   }
   
   void StockUI::SearchBar()
@@ -736,7 +736,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
                               ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap))
         {
           StockManager::SetSelectedStockSymbol(h.symbol);
-          StockManager::SetSelectedStockHoldingData(h.averagePrice, h.quantity, h.symbol);
+          StockManager::SetSelectedStockHoldingData(h.averagePrice, h.quantity);
           g_selectedRow = idx;
         }
         

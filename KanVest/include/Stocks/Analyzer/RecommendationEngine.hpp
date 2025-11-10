@@ -15,6 +15,12 @@
 
 namespace KanVest
 {
+  struct UserHoldingForAnalyzer
+  {
+    double quantity = 0.0;       // Number of shares
+    double avgPrice = 0.0;       // Average buy price
+  };
+
   struct Recommendation
   {
     std::string action;   // Buy, Sell, Hold
@@ -33,10 +39,10 @@ namespace KanVest
                                    const VolatilityReport& volReport,
                                    const ChartReport& chartReport,
                                    const PerformanceReport& perfReport,
-                                   double userHolding = 0.0
+                                   const UserHoldingForAnalyzer& userHolding
                                    );
     
   private:
-    static double DetermineQuantity(double stockPrice, double userHolding, const std::string& action);
+    static double DetermineQuantity(double stockPrice, const UserHoldingForAnalyzer& userHolding, const std::string& action);
   };
 } // namespace KanVest

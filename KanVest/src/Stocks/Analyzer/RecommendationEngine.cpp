@@ -16,10 +16,15 @@ namespace KanVest
                                                 const VolatilityReport& volReport,
                                                 const ChartReport& chartReport,
                                                 const PerformanceReport& perfReport,
-                                                double userHolding
+                                                const UserHoldingForAnalyzer& userHolding
                                                 )
   {
     Recommendation rec;
+    
+    // ---------- Compute Unrealized P/L ----------
+    double unrealizedPLPercent = 0.0;
+    if (userHolding.quantity > 0)
+      unrealizedPLPercent = (stock.livePrice - userHolding.avgPrice) / userHolding.avgPrice * 100.0;
     
     // ---------- Determine Action ----------
     bool bullishMomentum = momentumReport.shortTermBehavior == "Very Positive" ||
@@ -31,15 +36,36 @@ namespace KanVest
     bool oversold = techReport.RSI < 30;
     bool overbought = techReport.RSI > 70;
     
-    // ---------- Decision rules ----------
-    if (bullishMomentum && priceAboveSMA50 && !overbought)
-      rec.action = "Buy";
-    else if (bullishMomentum && oversold) // use oversold to trigger buying opportunity
-      rec.action = "Buy";
-    else if (bearishMomentum || overbought)
-      rec.action = (userHolding > 0) ? "Sell" : "Hold";
+    // ---------- Decision Logic ----------
+    if (userHolding.quantity > 0)
+    {
+      // Already holding shares
+      if (bearishMomentum || overbought)
+      {
+        if (unrealizedPLPercent > 10.0)
+          rec.action = "Sell";  // Lock in profit
+        else if (unrealizedPLPercent < -5.0)
+          rec.action = "Hold";  // Avoid panic selling
+        else
+          rec.action = "Sell";  // Normal sell on bearish signal
+      }
+      else if (bullishMomentum && (oversold || !overbought))
+      {
+        rec.action = "Buy"; // Add to position
+      }
+      else
+      {
+        rec.action = "Hold";
+      }
+    }
     else
-      rec.action = "Hold";
+    {
+      // No holdings
+      if (bullishMomentum && (oversold || priceAboveSMA50) && !overbought)
+        rec.action = "Buy";
+      else
+        rec.action = "Hold";
+    }
     
     // ---------- Determine Quantity ----------
     rec.quantity = DetermineQuantity(stock.livePrice, userHolding, rec.action);
@@ -49,6 +75,11 @@ namespace KanVest
     oss << "Recommendation: " << rec.action << "\n";
     oss << "Quantity suggested: " << rec.quantity << "\n";
     oss << "Reasoning:\n";
+    
+    // Unrealized P/L
+    if (userHolding.quantity > 0)
+      oss << "- Unrealized P/L: " << unrealizedPLPercent << "% on " << userHolding.quantity << " shares at avg price "
+      << userHolding.avgPrice << "\n";
     
     // Momentum explanation
     oss << "- Momentum: Short-term trend is " << momentumReport.shortTermBehavior
@@ -93,18 +124,22 @@ namespace KanVest
   // --------------------------
   // Determine quantity to trade
   // --------------------------
-  double RecommendationEngine::DetermineQuantity(double stockPrice, double userHolding, const std::string& action)
+  double RecommendationEngine::DetermineQuantity(double stockPrice, const UserHoldingForAnalyzer& userHolding, const std::string& action)
   {
     if (action == "Buy")
     {
-      // Example: Buy fixed 100 shares if not already holding
-      return std::max(1.0, 100.0);
+      // Buy fixed 100 shares or 50% more than current if already holding
+      if (userHolding.quantity > 0)
+        return std::max(1.0, userHolding.quantity * 0.5);
+      else
+        return 100.0;
     }
     else if (action == "Sell")
     {
-      // Sell 50% of current holding
-      return userHolding * 0.5;
+      // Sell 50% of holding
+      return userHolding.quantity * 0.5;
     }
     return 0.0; // Hold
   }
+
 } // namespace KanVest
