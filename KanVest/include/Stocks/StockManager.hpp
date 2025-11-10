@@ -9,6 +9,8 @@
 
 #include "Stocks/StockData.hpp"
 
+#include "Stocks/Analyzer/RecommendationEngine.hpp"
+
 namespace KanVest
 {
   /// This class manages all stocks
@@ -51,8 +53,8 @@ namespace KanVest
     
     /// Get stock data (thread-safe)
     static bool GetShortTermStockData(const std::string& symbol, StockData& outData);
-    /// Get stock data (thread-safe)
-    static bool GetLongTermStockData(const std::string& symbol, StockData& outData);
+//    /// Get stock data (thread-safe)
+//    static bool GetLongTermStockData(const std::string& symbol, StockData& outData);
 
     /// Force immediate refresh of all symbols
     static void RefreshAll();
@@ -76,8 +78,8 @@ namespace KanVest
 
     /// This returns stock cache
     static const std::unordered_map<std::string, StockData>& GetStokCache();
-    /// This returns stock cache
-    static const std::unordered_map<std::string, StockData>& GetLongTermStokCache();
+//    /// This returns stock cache
+//    static const std::unordered_map<std::string, StockData>& GetLongTermStokCache();
 
     /// This function update url time itnerval
     /// - Parameter interval:  url range
@@ -96,7 +98,7 @@ namespace KanVest
     static bool UpdateStock(const std::string& symbol);
 
     inline static std::unordered_map<std::string, StockData> s_stockCache;
-    inline static std::unordered_map<std::string, StockData> s_longTermStockCache;
+//    inline static std::unordered_map<std::string, StockData> s_longTermStockCache;
     inline static std::string s_selectedStockSymbol = {"Nifty"};
 //    inline static KanVest::Analysis::HoldingInfo s_selectedHoldingData;
 

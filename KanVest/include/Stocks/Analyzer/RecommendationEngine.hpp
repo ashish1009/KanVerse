@@ -11,7 +11,7 @@
 #include "Stocks/Analyzer/MomentumAnalyzer.hpp"
 #include "Stocks/Analyzer/VolatilityAnalyzer.hpp"
 #include "Stocks/Analyzer/ChartAnalyzer.hpp"
-#include "Stocks/Analyzer/PerformanceSummary.hpp"
+#include "Stocks/Analyzer/PerformanceAnalyzer.hpp"
 
 namespace KanVest
 {

@@ -31,8 +31,10 @@ namespace KanVest
     bool oversold = techReport.RSI < 30;
     bool overbought = techReport.RSI > 70;
     
-    // Decision rules
+    // ---------- Decision rules ----------
     if (bullishMomentum && priceAboveSMA50 && !overbought)
+      rec.action = "Buy";
+    else if (bullishMomentum && oversold) // use oversold to trigger buying opportunity
       rec.action = "Buy";
     else if (bearishMomentum || overbought)
       rec.action = (userHolding > 0) ? "Sell" : "Hold";
@@ -87,7 +89,7 @@ namespace KanVest
     rec.explanation = oss.str();
     return rec;
   }
-  
+
   // --------------------------
   // Determine quantity to trade
   // --------------------------

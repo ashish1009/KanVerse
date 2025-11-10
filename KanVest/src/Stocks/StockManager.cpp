@@ -115,7 +115,7 @@ namespace KanVest
     if (s_stockCache.find(symbol) == s_stockCache.end())
     {
       s_stockCache.emplace(symbol, StockData(symbol));
-      s_longTermStockCache.emplace(symbol, StockData(symbol));
+//      s_longTermStockCache.emplace(symbol, StockData(symbol));
       return true;
     }
     return false;
@@ -131,7 +131,7 @@ namespace KanVest
   {
     std::scoped_lock lock(s_mutex);
     s_stockCache.erase(symbol);
-    s_longTermStockCache.erase(symbol);
+//    s_longTermStockCache.erase(symbol);
   }
   
   bool StockManager::GetShortTermStockData(const std::string& symbolName, StockData& outData)
@@ -149,20 +149,20 @@ namespace KanVest
     return false;
   }
 
-  bool StockManager::GetLongTermStockData(const std::string& symbolName, StockData& outData)
-  {
-    std::scoped_lock lock(s_mutex);
-    std::string symbol = NormalizeSymbol(symbolName);
-    
-    auto it = s_longTermStockCache.find(symbol);
-    if (it != s_longTermStockCache.end())
-    {
-      outData = it->second;
-      return true;
-    }
-    
-    return false;
-  }
+//  bool StockManager::GetLongTermStockData(const std::string& symbolName, StockData& outData)
+//  {
+//    std::scoped_lock lock(s_mutex);
+//    std::string symbol = NormalizeSymbol(symbolName);
+//    
+//    auto it = s_longTermStockCache.find(symbol);
+//    if (it != s_longTermStockCache.end())
+//    {
+//      outData = it->second;
+//      return true;
+//    }
+//    
+//    return false;
+//  }
 
   void StockManager::RefreshAll()
   {
@@ -183,7 +183,7 @@ namespace KanVest
     };
     
     refresh(s_stockCache);
-    refresh(s_longTermStockCache);
+//    refresh(s_longTermStockCache);
   }
   
   void StockManager::StartLiveUpdates(int intervalMilliseconds)
@@ -238,11 +238,11 @@ namespace KanVest
     std::scoped_lock lock(s_mutex);
     return s_stockCache;
   }
-  const std::unordered_map<std::string, StockData>& StockManager::GetLongTermStokCache()
-  {
-    std::scoped_lock lock(s_mutex);
-    return s_longTermStockCache;
-  }
+//  const std::unordered_map<std::string, StockData>& StockManager::GetLongTermStokCache()
+//  {
+//    std::scoped_lock lock(s_mutex);
+//    return s_longTermStockCache;
+//  }
 
   void StockManager::SetCurrentInterval(const std::string& interval)
   {
@@ -371,7 +371,7 @@ namespace KanVest
           if (hierData.IsValid())
           {
             std::scoped_lock lock(s_mutex);
-            s_longTermStockCache[symbol] = std::move(hierData);
+//            s_longTermStockCache[symbol] = std::move(hierData);
           }
         }
       }
