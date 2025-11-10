@@ -26,7 +26,7 @@ namespace KanVest
   
   void TechnicalAnalyzer::ComputeMovingAverages(const StockData& stock, TechnicalReport& report)
   {
-    std::vector<int> periods = {5, 20, 50, 100, 200};
+    std::vector<int> periods = {5, 10, 20, 30, 50, 100, 150, 200};
     
     for (int period : periods)
     {

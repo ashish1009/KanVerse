@@ -101,6 +101,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       ImGui::TableSetupColumn("Portfolio", ImGuiTableColumnFlags_WidthFixed, thirdColWidth);
 
       ImGui::TableNextRow(ImGuiTableRowFlags_None, topYArea); // <-- fixed row height
+      KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::Background);
 
       // Column 1 Stock Details
       {
@@ -384,7 +385,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   void StockUI::ShowAnalyzerData()
   {
     StockAnalysisReport report = StockManager::AnalyzeSelectedStock();
-    KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundLight);
+    KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundDark);
 
     static float xOffset = 0.0f;
     
@@ -487,7 +488,28 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       KanVasX::UI::Text(font, "Technical Analysis", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
       ImGui::Separator();
       
-      // Score
+      enum class TechnicalTab {Summary, SMA, EMA, Pivot};
+      static TechnicalTab tab = TechnicalTab::Summary;
+      float availX = ImGui::GetContentRegionAvail().x - 20.0f;
+      float technicalButtonSize = availX / 4;
+      
+      auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab) {
+        if (KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Medium),
+                                    tab == checkerTtab ? KanVasX::Color::ButtonActive : KanVasX::Color::Background,
+                                    KanVasX::Color::TextBright, false, 0.0f, {technicalButtonSize, 30}))
+        {
+          tab = checkerTtab;
+        }
+        KanVasX::UI::DrawItemActivityOutline();
+      };
+      
+      TechnicalButton("Summary", TechnicalTab::Summary); ImGui::SameLine();
+      TechnicalButton("SMA", TechnicalTab::SMA); ImGui::SameLine();
+      TechnicalButton("EMA", TechnicalTab::EMA); ImGui::SameLine();
+      TechnicalButton("Pivot", TechnicalTab::Pivot);
+
+      // Summary
+      if (tab == TechnicalTab::Summary)
       {
         float score = static_cast<float>(report.recommendation.score); // 0-100
         
@@ -521,6 +543,41 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
           float fraction = score / 100.0f;
           ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
         }
+        
+        float availX = ImGui::GetContentRegionAvail().x - 30.0f;
+        float technicalDataSize = availX / 5;
+        auto TechnicalData = [technicalDataSize](const std::string& title) {
+          KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), KanVasX::Color::BackgroundDark, KanVasX::Color::TextBright, false, 0.0f, {technicalDataSize, 60});
+        };
+        
+        TechnicalData(std::string("RSI \n") + std::to_string(report.technicals.RSI));                  ImGui::SameLine();
+        TechnicalData(std::string("MACD \n") + std::to_string(report.technicals.MACD));                ImGui::SameLine();
+        TechnicalData(std::string("MACD Signal \n") + std::to_string(report.technicals.MACDSignal));   ImGui::SameLine();
+        TechnicalData(std::string("ATR \n") + std::to_string(report.technicals.ATR));                  ImGui::SameLine();
+        TechnicalData(std::string("VWAP \n") + std::to_string(report.technicals.VWAP));
+      }
+      
+      // SMA
+      if (tab == TechnicalTab::SMA)
+      {
+        for (const auto& [period,ema] : report.technicals.SMA)
+        {
+          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), Utils::FormatDoubleToString(period), KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
+          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), Utils::FormatDoubleToString(ema), KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
+          
+        }
+
+      }
+      
+      // EMA
+      if (tab == TechnicalTab::SMA)
+      {
+      }
+      
+      // Pivot
+      if (tab == TechnicalTab::Pivot)
+      {
+        
       }
       ImGui::EndChild();
     }
@@ -688,7 +745,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   void StockUI::SearchBar()
   {
     const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
-    if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.9f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
+    if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.93f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
     {
       Utils::ConvertUpper(s_searchedString);
     }

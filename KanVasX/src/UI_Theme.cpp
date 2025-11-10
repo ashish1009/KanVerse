@@ -36,9 +36,9 @@ namespace KanVasX
     // Colors ----------------------------------------------------------------------------------------------------------------------------------------
     // Values -----------------------------
     // Window
-    Background            = IM_COL32(8, 12, 17, 155);
-    BackgroundLight       = IM_COL32(36, 40, 46, 155);
-    BackgroundDark        = IM_COL32(14, 20, 25, 255);
+    BackgroundDark        = IM_COL32(8, 12, 17, 155);
+    Background            = IM_COL32(18, 26, 35, 255);
+    BackgroundLight       = IM_COL32(36, 42, 56, 155);
 
     // Highlight
     Highlight             = IM_COL32(40, 48, 58, 255);;

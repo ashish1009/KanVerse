@@ -9,21 +9,45 @@
 
 namespace KanVest
 {
+  int GetNumberOfTradingDays(const std::vector<StockPoint>& history)
+  {
+    std::set<std::time_t> uniqueDays;
+    
+    for (const auto& point : history)
+    {
+      std::time_t ts = point.timestamp; // UNIX timestamp
+      std::tm* t = std::localtime(&ts);
+      // Normalize to date only (ignore time)
+      std::tm dateOnly = *t;
+      dateOnly.tm_hour = 0;
+      dateOnly.tm_min = 0;
+      dateOnly.tm_sec = 0;
+      
+      std::time_t dayStart = std::mktime(&dateOnly);
+      uniqueDays.insert(dayStart);
+    }
+    
+    return static_cast<int>(uniqueDays.size());
+  }
+  
   // --------------------------
   // Simple Moving Average (SMA)
   // --------------------------
-  double TechnicalUtils::ComputeSMA(const std::vector<StockPoint>& history, int period)
+  double TechnicalUtils::ComputeSMA(const std::vector<StockPoint>& history, int periodInDays)
   {
-    if (history.size() < period) return 0.0;
+    int barsPerDay = static_cast<int>(history.size() / GetNumberOfTradingDays(history));
+
+    int requiredBars = periodInDays * barsPerDay;
+    if (history.size() < requiredBars) return 0.0; // or partial SMA
     
     double sum = 0.0;
-    for (size_t i = history.size() - period; i < history.size(); ++i)
+    for (size_t i = history.size() - requiredBars; i < history.size(); ++i)
     {
       sum += history[i].close;
     }
-    return sum / period;
+    return sum / requiredBars;
   }
-  
+
   // --------------------------
   // Exponential Moving Average (EMA)
   // --------------------------
