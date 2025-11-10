@@ -559,25 +559,25 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       }
       
       // SMA
-      if (tab == TechnicalTab::SMA)
+      auto ShowMovingAvg = [stockData](const auto& maMap, const std::string& maString)
       {
         int bullish = 0;
         int bearish = 0;
-        for (const auto& [period, sma] : report.technicals.SMA)
+        for (const auto& [period, ma] : maMap)
         {
-          if (sma > stockData.livePrice) bearish ++;
-          else if (sma < stockData.livePrice and sma != 0) bullish++;
+          if (ma > stockData.livePrice) bearish ++;
+          else if (ma < stockData.livePrice and ma != 0) bullish++;
         }
         int total = bullish + bearish;
         
         if (bullish >= bearish)
         {
-          std::string smaSummary = stockData.shortName + " is trading above " + std::to_string(bullish) + " out of " + std::to_string(total) + " SMAs";
+          std::string smaSummary = stockData.shortName + " is trading above " + std::to_string(bullish) + " out of " + std::to_string(total) + maString + "s";
           KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::Cyan);
         }
         else
         {
-          std::string smaSummary = stockData.shortName + " is trading below " + std::to_string(bearish) + " out of " + std::to_string(total) + " SMAs";
+          std::string smaSummary = stockData.shortName + " is trading below " + std::to_string(bearish) + " out of " + std::to_string(total) + maString + "s";
           KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::Red);
         }
         
@@ -588,10 +588,10 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
           float fraction = (float)bullish / (float)total;
           ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
         }
-
+        
         std::string smaSummary = "If current price is greater than SMA, trend is bullish";
         KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Small), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::White);
-
+        
         auto ShowSma = [stockData](int period, double sma) {
           if (sma > 0)
           {
@@ -605,33 +605,33 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         
         int idx = 0;
         ImVec2 smaChildSize = {(ImGui::GetContentRegionAvail().x / 2) - 6.0f, 100.0f};
-        for (const auto& [period, sma] : report.technicals.SMA)
+        for (const auto& [period, ma] : maMap)
         {
           if (idx % 4 == 0)
           {
             ImGui::BeginChild(std::to_string(period).c_str(), smaChildSize, true);
           }
           
-          ShowSma(period, sma);
+          ShowSma(period, ma);
           
           if (idx % 4 == 3)
           {
             ImGui::EndChild();
-            ImGui::SameLine();            
+            ImGui::SameLine();
           }
           idx++;
         }
         ImGui::NewLine();
-
-
-//        {
-//          ShowSma(period, ema);
-//        }
+      };
+      if (tab == TechnicalTab::SMA)
+      {
+        ShowMovingAvg(report.technicals.SMA, " SMA");
       }
       
       // EMA
-      if (tab == TechnicalTab::SMA)
+      if (tab == TechnicalTab::EMA)
       {
+        ShowMovingAvg(report.technicals.EMA, " EMA");
       }
       
       // Pivot
