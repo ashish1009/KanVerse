@@ -24,39 +24,61 @@ namespace KanVest::Analysis
   
   struct AnalysisReport
   {
+    // --- Pattern detections ---
     std::vector<PatternHit> candlePatterns;
     std::vector<PatternHit> chartPatterns;
     
-    // indicator snapshots
-    double lastClose = 0.0;
-    double rsi = 0.0;
-    double macd = 0.0, macdSignal = 0.0;
-    double smaShort = 0.0, smaLong = 0.0;
-    double atr = 0.0;
-    double vwap = 0.0;
-    double obv = 0.0, obvSlope = 0.0;
-    double adx = 0.0;
-    double stochasticK = 0.0, stochasticD = 0.0;
-    double cci = 0.0, roc = 0.0, mfi = 0.0;
+    // --- Indicator snapshots ---
+    double lastClose   = 0.0;
+    double rsi         = 0.0;
+    double macd        = 0.0;
+    double macdSignal  = 0.0;
+    double smaShort    = 0.0;
+    double smaLong     = 0.0;
+    double atr         = 0.0;
+    double vwap        = 0.0;
+    double obv         = 0.0;
+    double obvSlope    = 0.0;
+    double adx         = 0.0;
+    double stochasticK = 0.0;
+    double stochasticD = 0.0;
+    double cci         = 0.0;
+    double roc         = 0.0;
+    double mfi         = 0.0;
     Indicators::BB bollinger{};
     
+    // --- Derived analytical results ---
     Recommendation recommendation = Recommendation::Unknown;
-    double score = 0.0;
-    std::string explanation;          // short summary (already exists)
-    std::string detailedExplanation;  // NEW: human-friendly analysis summary
+    double score = 0.0;          // composite score (-1.0 to +1.0)
+    double confidence = 0.0;     // 0–100% confidence adjusted by volatility
+    double volatility = NAN;     // volatility as % (ATR / Close * 100)
     
-    bool hasHolding = false;
-    double unrealizedPL = 0.0;
-    double unrealizedPct = 0.0;
+    // --- Support & Resistance zones ---
+    std::vector<double> supportLevels;     // clustered support levels
+    std::vector<double> resistanceLevels;  // clustered resistance levels
+    
+    // Legacy compatibility (for UI showing single levels)
+    double supportLevel    = NAN;
+    double resistanceLevel = NAN;
+    
+    // --- Holding / P&L Info ---
+    bool hasHolding        = false;
+    double unrealizedPL    = 0.0;
+    double unrealizedPct   = 0.0;
     double suggestedActionQty = 0.0;
     std::string actionReason;
     
-    double volatility = NAN;      // computed volatility (e.g., %)
-    double supportLevel = NAN;    // recent price support
-    double resistanceLevel = NAN; // recent price resistance
-
-    // Tooltip descriptions (for UI hover info)
+    // --- Output summaries ---
+    std::string explanation;          // short summary (Buy/Hold/Sell with reason)
+    std::string detailedExplanation;  // detailed indicator breakdown and commentary
+    
+    // --- Tooltip info for ImGui UI ---
     std::unordered_map<std::string, std::string> tooltips;
+    
+    // --- Utility helpers ---
+    bool IsBullish() const noexcept { return recommendation == Recommendation::Buy; }
+    bool IsBearish() const noexcept { return recommendation == Recommendation::Sell; }
+    bool IsNeutral() const noexcept { return recommendation == Recommendation::Hold; }
   };
 
   class StockAnalyzer

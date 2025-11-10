@@ -60,507 +60,221 @@ AnalysisReport StockAnalyzer::Analyze(const StockData& shortTerm, const StockDat
   return BuildReport(shortTerm, longTerm, holding);
 }
 
-inline double Volatility(const std::vector<double>& closes, size_t period = 14)
-{
-  if (closes.size() <= period) return NAN;
-  double mean = std::accumulate(closes.end()-period, closes.end(), 0.0) / period;
-  double sumSq = 0.0;
-  for (size_t i = closes.size() - period; i < closes.size(); ++i)
-  {
-    double diff = closes[i] - mean;
-    sumSq += diff * diff;
-  }
-  double variance = sumSq / period;
-  return std::sqrt(variance) / mean * 100.0; // volatility in %
-}
-
-inline std::pair<double, double> SupportResistance(const std::vector<double>& highs,
-                                                   const std::vector<double>& lows,
-                                                   size_t lookback = 20)
-{
-  if (highs.size() < lookback || lows.size() < lookback)
-    return {NAN, NAN};
-  
-  auto highIter = std::max_element(highs.end() - lookback, highs.end());
-  auto lowIter  = std::min_element(lows.end() - lookback, lows.end());
-  return {*lowIter, *highIter};
-}
-
 AnalysisReport StockAnalyzer::BuildReport(const StockData& s, const StockData* l, const HoldingInfo* holding) const
 {
   AnalysisReport r;
-  if (!s.IsValid())
-  {
-    r.explanation = "Short term data invalid";
+  if (!s.IsValid()) {
+    r.explanation = "Invalid or insufficient data.";
     return r;
   }
   
+  // --- Extract arrays ---
   auto closes = closesFrom(s.history);
   auto highs  = highsFrom(s.history);
   auto lows   = lowsFrom(s.history);
   auto vols   = volsFrom(s.history);
-  
-  r.lastClose = closes.empty() ? 0.0 : closes.back();
-  
-  // Primary indicators (config-driven)
-  r.smaShort = SMA(closes, m_cfg.sma_short);
-  r.smaLong  = SMA(closes, m_cfg.sma_long);
-  r.rsi      = RSI(closes, m_cfg.rsi_period);
-  auto macd_pair = MACD(closes);
-  r.macd = macd_pair.first;
-  r.macdSignal = macd_pair.second;
-  r.atr = ATR(highs, lows, closes, m_cfg.atr_period);
-  
-  // VWAP using OHLCV StockPoint overload
-  r.vwap = VWAP(s.history);
-  
-  // Additional indicators
-  r.bollinger = Bollinger(closes); // returns BB {upper,middle,lower}
-  r.obv =    OBV(closes, vols);
-  
-  // OBV slope (delta over recent window)
-  {
-    size_t look = std::min<size_t>(std::max<size_t>(10, m_cfg.sma_short), closes.size()-1);
-    if (closes.size() > look + 1)
-    {
-      std::vector<double> prevCloses(closes.end() - (look+1), closes.end() - 1);
-      std::vector<uint64_t> prevVols(vols.end() - (look+1), vols.end() - 1);
-      double prevObv = OBV(prevCloses, prevVols);
-      if (!std::isnan(prevObv))
-        r.obvSlope = r.obv - prevObv;
-    }
+  if (closes.size() < 50) {
+    r.explanation = "Not enough data for reliable analysis.";
+    return r;
   }
   
+  r.lastClose = closes.back();
+  
+  // --- Core Indicators ---
+  r.smaShort = SMA(closes, 20);
+  r.smaLong  = SMA(closes, 50);
+  r.rsi      = RSI(closes, 14);
+  auto [macd, macdSignal] = MACD(closes);
+  r.macd = macd;
+  r.macdSignal = macdSignal;
+  r.atr = ATR(highs, lows, closes, 14);
+  r.volatility = (r.atr / r.lastClose) * 100.0; // ATR% of price
+  r.obv = OBV(closes, vols);
   r.adx = ADX(highs, lows, closes);
-  auto st = Stochastic(highs, lows, closes);
-  r.stochasticK = st.first;
-  r.stochasticD = st.second;
-  r.cci = CCI(highs, lows, closes);
-  r.roc = ROC(closes, 12); // 12-period ROC as default short-term momentum
-  r.mfi = MFI(highs, lows, closes, vols);
   
-  // Candlestick & chart patterns
-  r.candlePatterns = DetectSingleBarPatterns(s.history);
-  {
-    auto multi = DetectMultiBarPatterns(s.history);
-    r.candlePatterns.insert(r.candlePatterns.end(), multi.begin(), multi.end());
+  // --- Helper ---
+  auto near = [](double a, double b, double tol) {
+    return std::fabs(a - b) <= tol;
+  };
+  
+  // --------------------------------------------------------
+  // STEP 1: Improved Support and Resistance Detection
+  // --------------------------------------------------------
+  struct Level { double price; int touches; };
+  std::vector<Level> highsDetected;
+  std::vector<Level> lowsDetected;
+  
+  // Identify local pivots
+  for (size_t i = 2; i < closes.size() - 2; ++i) {
+    bool isHigh = highs[i] > highs[i-1] && highs[i] > highs[i-2] &&
+    highs[i] > highs[i+1] && highs[i] > highs[i+2];
+    bool isLow  = lows[i]  < lows[i-1]  && lows[i]  < lows[i-2]  &&
+    lows[i]  < lows[i+1]  && lows[i]  < lows[i+2];
+    if (isHigh) highsDetected.push_back({ highs[i], 1 });
+    if (isLow)  lowsDetected.push_back({ lows[i], 1 });
   }
   
-  r.chartPatterns = DetectDoubleTopBottom(s.history);
-  {
-    auto hs = DetectHeadAndShoulders(s.history);
-    r.chartPatterns.insert(r.chartPatterns.end(), hs.begin(), hs.end());
-  }
+  // Merge nearby pivots into zones (improved clustering)
+  auto clusterLevels = [](std::vector<Level>& lvls) {
+    std::vector<Level> result;
+    if (lvls.empty()) return result;
+    std::sort(lvls.begin(), lvls.end(), [](auto& a, auto& b){ return a.price < b.price; });
+    
+    double clusterTol = 0.015; // 1.5% zone width
+    double clusterSum = lvls[0].price;
+    int clusterCount = 1;
+    for (size_t i = 1; i < lvls.size(); ++i) {
+      double diff = std::fabs(lvls[i].price - (clusterSum / clusterCount)) / (clusterSum / clusterCount);
+      if (diff < clusterTol) {
+        clusterSum += lvls[i].price;
+        clusterCount++;
+      } else {
+        result.push_back({ clusterSum / clusterCount, clusterCount });
+        clusterSum = lvls[i].price;
+        clusterCount = 1;
+      }
+    }
+    result.push_back({ clusterSum / clusterCount, clusterCount });
+    return result;
+  };
   
-  // === Compose score (base + confirmations) ===
+  auto resistance = clusterLevels(highsDetected);
+  auto support    = clusterLevels(lowsDetected);
+  
+  for (auto& lv : resistance) r.resistanceLevels.push_back(lv.price);
+  for (auto& lv : support)    r.supportLevels.push_back(lv.price);
+  
+  // --------------------------------------------------------
+  // STEP 2: Volatility & Risk Scoring
+  // --------------------------------------------------------
+  double atrPct = r.volatility;
+  double volatilityPenalty = 1.0;
+  if (atrPct > 6.0)      volatilityPenalty = 0.7;
+  else if (atrPct > 4.0) volatilityPenalty = 0.85;
+  else if (atrPct > 2.5) volatilityPenalty = 0.95;
+  bool highVol = (atrPct > 4.0);
+  
+  // --------------------------------------------------------
+  // STEP 3: Technical Scoring
+  // --------------------------------------------------------
   double score = 0.0;
   
-  // MACD cross
-  if (!std::isnan(r.macd) && !std::isnan(r.macdSignal))
-    score += (r.macd > r.macdSignal) ? 0.20 : -0.20;
+  // Trend bias
+  if (r.smaShort > r.smaLong) score += 0.4; else score -= 0.4;
   
-  // RSI extremes
-  if (!std::isnan(r.rsi))
-  {
-    if (r.rsi < 30) score += 0.12;
-    else if (r.rsi > 70) score -= 0.12;
-  }
+  // Momentum
+  if (r.macd > r.macdSignal) score += 0.3; else score -= 0.3;
   
-  // SMA crossover bias
-  if (!std::isnan(r.smaShort) && !std::isnan(r.smaLong))
-    score += (r.smaShort > r.smaLong) ? 0.12 : -0.12;
+  // RSI zones
+  if (r.rsi < 30) score += 0.3;
+  else if (r.rsi > 70) score -= 0.3;
   
-  // VWAP intraday bias
-  if (!std::isnan(r.vwap) && r.lastClose > 0)
-    score += (r.lastClose > r.vwap) ? 0.08 : -0.08;
+  // Trend strength
+  if (r.adx > 25) score *= 1.1;
   
-  // Bollinger band position
-  if (!std::isnan(r.bollinger.middle) && r.bollinger.upper > r.bollinger.lower)
-  {
-    if (r.lastClose > r.bollinger.upper) score += 0.12;         // breakout above upper band
-    else if (r.lastClose < r.bollinger.lower) score -= 0.12;    // breakdown below lower band
-    else
-    {
-      double bandPos = (r.lastClose - r.bollinger.lower) / (r.bollinger.upper - r.bollinger.lower);
-      if (bandPos > 0.85) score -= 0.04;   // near top → mild caution
-      if (bandPos < 0.15) score += 0.04;   // near bottom → mild support
-    }
-  }
+  // Apply volatility dampening
+  score *= volatilityPenalty;
   
-  // OBV confirmation (volume-based)
-  if (!std::isnan(r.obv))
-  {
-    if (r.obvSlope > 0.0) score += 0.10;    // rising OBV supports bullish moves
-    else if (r.obvSlope < 0.0) score -= 0.10;
-  }
+  // --------------------------------------------------------
+  // STEP 4: Proximity Influence (Support/Resistance)
+  // --------------------------------------------------------
+  double proximityBias = 0.0;
+  double nearestSupportDist = 1e9;
+  double nearestResistanceDist = 1e9;
   
-  // ADX (trend strength). If trend strong, amplify trend signals
-  if (!std::isnan(r.adx))
-  {
-    if (r.adx > 25.0) // strong trend
-    {
-      // if price above SMA and MACD bullish, boost score; else penalize
-      if (r.smaShort > r.smaLong && r.macd > r.macdSignal) score += 0.08;
-      else if (r.smaShort < r.smaLong && r.macd < r.macdSignal) score -= 0.08;
-    }
-  }
+  for (auto& sLvl : support)
+    nearestSupportDist = std::min(nearestSupportDist, std::fabs(r.lastClose - sLvl.price));
+  for (auto& rLvl : resistance)
+    nearestResistanceDist = std::min(nearestResistanceDist, std::fabs(r.lastClose - rLvl.price));
   
-  // Stochastic extremes (fast)
-  if (!std::isnan(r.stochasticK) && !std::isnan(r.stochasticD))
-  {
-    if (r.stochasticK < 20 && r.stochasticD < 20) score += 0.06;
-    else if (r.stochasticK > 80 && r.stochasticD > 80) score -= 0.06;
-  }
+  if (nearestSupportDist < r.atr) proximityBias += 0.2;     // near support → bullish tilt
+  if (nearestResistanceDist < r.atr) proximityBias -= 0.2;  // near resistance → bearish tilt
   
-  // CCI / ROC / MFI minor confirmations
-  if (!std::isnan(r.cci))
-  {
-    if (r.cci < -100) score += 0.03;
-    else if (r.cci > 100) score -= 0.03;
-  }
-  if (!std::isnan(r.roc))
-  {
-    if (r.roc > 5.0) score += 0.03;   // positive momentum
-    else if (r.roc < -5.0) score -= 0.03;
-  }
-  if (!std::isnan(r.mfi))
-  {
-    if (r.mfi < 30) score += 0.03;
-    else if (r.mfi > 80) score -= 0.03;
-  }
+  score += proximityBias;
   
-  // patterns adjust score (candles and chart patterns)
-  for (auto &p : r.candlePatterns)
-  {
-    if (p.name.find("Bull") != std::string::npos || p.name.find("Bullish") != std::string::npos) score += 0.08;
-    if (p.name.find("Bear") != std::string::npos || p.name.find("Bearish") != std::string::npos) score -= 0.08;
-  }
+  // Clamp score
+  score = std::clamp(score, -1.0, 1.0);
+  r.score = score;
   
-  for (auto &p : r.chartPatterns)
-  {
-    if (p.name == "DoubleBottom" || p.name == "InverseHeadAndShoulders") score += 0.18;
-    if (p.name == "DoubleTop" || p.name == "HeadAndShoulders") score -= 0.18;
-    // measured moves / breakouts could further adjust — keep conservative
-  }
-  
-  // long-term confirmation using 'l' (if provided)
-  if (l && l->IsValid())
-  {
-    auto lcloses = closesFrom(l->history);
-    double lSma = SMA(lcloses, 30);
-    double lEma = EMA(lcloses, 30);
-    if (!std::isnan(lSma) && !std::isnan(lEma))
-      score += (lEma > lSma) ? 0.12 : -0.12;
-    
-    // long-term VWAP (if available) — gentle confirmation
-    double lvwap = VWAP(l->history);
-    if (!std::isnan(lvwap))
-      score += (r.lastClose > lvwap) ? 0.04 : -0.04;
-  }
-  
-  // volatility dampening (reduce score when very volatile)
-  if (!std::isnan(r.atr) && r.lastClose > 0)
-  {
-    double atrPct = r.atr / r.lastClose;
-    if (atrPct > 0.04) score *= 0.85;
-  }
-  
-  // Volatility and Support/Resistance
-  r.volatility = Volatility(closes, m_cfg.atr_period);
-  auto sr = SupportResistance(highs, lows);
-  r.supportLevel = sr.first;
-  r.resistanceLevel = sr.second;
-
-  if (!std::isnan(r.volatility))
-  {
-    double vol = r.volatility;
-    bool uptrend = (r.smaShort > r.smaLong) && (r.macd > r.macdSignal);
-    
-    if (vol > 3.0)
-    {
-      if (uptrend)
-        score *= 0.95; // small dampening — healthy breakout
-      else
-        score *= 0.75; // strong penalty — chaotic selloff
-    }
-  }
-
-  // Bound score & map to recommendation
-  r.score = std::max(-1.0, std::min(1.0, score));
-  if (r.score >= 0.6) r.recommendation = Recommendation::StrongBuy;
-  else if (r.score >= 0.2) r.recommendation = Recommendation::Buy;
-  else if (r.score >= -0.2) r.recommendation = Recommendation::Hold;
-  else if (r.score >= -0.6) r.recommendation = Recommendation::Sell;
-  else r.recommendation = Recommendation::StrongSell;
-  
-  // === Position / Holding-aware suggestions ===
-  if (holding && holding->qty > 0.0 && holding->avgPrice > 0.0)
-  {
-    r.hasHolding = true;
-    r.unrealizedPL = (r.lastClose - holding->avgPrice) * holding->qty;
-    r.unrealizedPct = (r.lastClose - holding->avgPrice) / holding->avgPrice * 100.0;
-    
-    // override / adjust recommendation on extreme unrealized P/L
-    if (r.unrealizedPct < -25.0 && r.score < 0.0) r.recommendation = Recommendation::Sell;
-    if (r.unrealizedPct > 40.0 && r.score > 0.0) r.recommendation = Recommendation::Hold;
-    
-    double riskFactor = std::clamp(r.atr / std::max(1.0, r.lastClose), 0.005, 0.05);
-    double suggested = 0.0;
-    
-    if (r.recommendation == Recommendation::Sell || r.recommendation == Recommendation::StrongSell)
-    {
-      if (r.unrealizedPct > 15.0)
-      {
-        suggested = -holding->qty * 0.5;
-        r.actionReason = "Large unrealized gain (" + std::to_string(r.unrealizedPct) +
-        "%).\n    Suggest selling 50% to lock profits.";
-      }
-      else if (r.unrealizedPct < -10.0 || (r.obvSlope < 0 && r.adx > 20))
-      {
-        suggested = -holding->qty * 0.75;
-        r.actionReason = "Loss exceeding -10% or volume+trend weakening.\n    Suggest cutting 75% of position.";
-      }
-      else
-      {
-        suggested = -holding->qty * 0.25;
-        r.actionReason = "Bearish technicals.\n    Suggest trimming 25% of position.";
-      }
-      
-      // --- ✅ Ensure no negative or invalid suggestion ---
-      double qtyToSell = std::floor(std::abs(suggested)); // round down
-      if (qtyToSell < 1.0 && holding->qty > 1.0) qtyToSell = 1.0;   // at least 1 share if qty > 1
-      qtyToSell = std::min(qtyToSell, (double)holding->qty);                // don’t oversell
-      
-      r.suggestedActionQty = qtyToSell;
-    }
-    else if (r.recommendation == Recommendation::Buy || r.recommendation == Recommendation::StrongBuy)
-    {
-      double addRatio = (r.score > 0.8 ? 0.5 : 0.25) * (1.0 - riskFactor / 0.05);
-      if (r.obvSlope > 0 && r.adx > 15) addRatio *= 1.2;
-      
-      double qtyToAdd = holding->qty * addRatio;
-      qtyToAdd = std::round(qtyToAdd);
-      if (qtyToAdd < 1.0) qtyToAdd = 1.0;  // ensure at least 1 share suggestion for small lots
-      
-      r.suggestedActionQty = qtyToAdd;
-      r.actionReason = "Bullish signal (score " + std::to_string(r.score) +
-      "). \n   Suggest adding " + std::to_string((int)(addRatio * 100)) + "% to position.";
-    }
-    else
-    {
-      r.suggestedActionQty = 0.0;
-      r.actionReason = "Neutral conditions : Hold existing position.";
-    }
-  }
+  // --------------------------------------------------------
+  // STEP 5: Final Recommendation (integrated logic)
+  // --------------------------------------------------------
+  if (score > 0.3 && !highVol && nearestResistanceDist > r.atr * 1.2)
+    r.recommendation = Recommendation::Buy;
+  else if (score < -0.3 || (nearestResistanceDist < r.atr && r.smaShort < r.smaLong))
+    r.recommendation = Recommendation::Sell;
   else
-  {
-    // --- No holding — entry suggestion ---
-    if (r.recommendation == Recommendation::Buy || r.recommendation == Recommendation::StrongBuy)
-    {
-      double baseLot = 100.0;
-      double scale = (r.score > 0.8 ? 1.0 : 0.5);
-      if (r.obvSlope > 0 && r.adx > 15) scale *= 1.2;
-      
-      double suggested = baseLot * scale;
-      if (suggested < 100.0) suggested = 100.0;
-      
-      // ✅ Round to nearest 10 for cleaner UI
-      r.suggestedActionQty = std::round(suggested / 10.0) * 10.0;
-      r.actionReason = "No existing holding. \n   Entry opportunity detected (volume/trend confirmed).";
-    }
-    else
-    {
-      r.suggestedActionQty = 0.0;
-      r.actionReason = "No action suggested under current conditions.";
-    }
-  }
-
+    r.recommendation = Recommendation::Hold;
   
-  // === Build explanation string (human readable) ===
-  {
-    std::ostringstream ss;
-    ss.setf(std::ios::fixed); ss.precision(2);
-    ss << "Score " << r.score << "; ";
-    ss << "SMA" << m_cfg.sma_short << "=" << r.smaShort << ", RSI=" << r.rsi << ", ATR=" << r.atr << "; ";
-    ss << "VWAP=" << r.vwap << ", OBV=" << r.obv << " (Δ=" << r.obvSlope << "), ADX=" << r.adx << "; ";
-    ss << "Bollinger(mid=" << r.bollinger.middle << " up=" << r.bollinger.upper << " low=" << r.bollinger.lower << "); ";
-    ss << "Stoch K/D=" << r.stochasticK << "/" << r.stochasticD << "; ";
-    ss << "CCI=" << r.cci << ", ROC=" << r.roc << ", MFI=" << r.mfi << ". ";
-    
-    if (!r.candlePatterns.empty())
-    {
-      ss << "Candles: ";
-      for (auto &p : r.candlePatterns) ss << p.name << "(" << p.strength << "), ";
-    }
-    if (!r.chartPatterns.empty())
-    {
-      ss << "Charts: ";
-      for (auto &p : r.chartPatterns) ss << p.name << "(" << p.strength << "), ";
-    }
-    
-    if (r.hasHolding)
-    {
-      ss << "Holding P/L " << r.unrealizedPL << " (" << r.unrealizedPct << "%). ";
-      ss << "SuggestedActionQty=" << r.suggestedActionQty << ". Reason: " << r.actionReason;
-    }
-    else
-    {
-      if (r.suggestedActionQty != 0.0)
-        ss << "Suggested entry qty: " << r.suggestedActionQty << ". Reason: " << r.actionReason;
-    }
-    
-    ss << "Volatility=" << r.volatility << "%, Support=" << r.supportLevel
-    << ", Resistance=" << r.resistanceLevel << ". ";
-
-    r.explanation = ss.str();
+  // --------------------------------------------------------
+  // STEP 6: Explanations
+  // --------------------------------------------------------
+  std::ostringstream ss;
+  if (r.recommendation == Recommendation::Buy)
+    ss << "Buy signal: bullish trend with technical confirmation.";
+  else if (r.recommendation == Recommendation::Sell)
+    ss << "Sell signal: weakening trend or resistance pressure.";
+  else
+    ss << "Hold: mixed signals or uncertain zone.";
+  
+  if (highVol)
+    ss << " ⚠️ High volatility — signals less reliable.";
+  
+  r.explanation = ss.str();
+  
+  // --- Detailed summary (unchanged) ---
+  std::ostringstream ds;
+  ds << std::fixed << std::setprecision(2);
+  ds << "Close: " << r.lastClose
+  << " | RSI: " << r.rsi
+  << " | MACD: " << r.macd << "/" << r.macdSignal
+  << " | SMA(20): " << r.smaShort
+  << " | SMA(50): " << r.smaLong
+  << " | ATR%: " << atrPct << "%"
+  << " | ADX: " << r.adx
+  << " | Score: " << score << "\n";
+  
+  if (!r.resistanceLevels.empty()) {
+    ds << "Resistance: ";
+    for (auto v : r.resistanceLevels) ds << v << " ";
+    ds << "\n";
+  }
+  if (!r.supportLevels.empty()) {
+    ds << "Support: ";
+    for (auto v : r.supportLevels) ds << v << " ";
+    ds << "\n";
   }
   
-  {
-    std::ostringstream d;
-    d.setf(std::ios::fixed);
-    d.precision(2);
-    
-    d << "The analysis considers multiple indicators to form a holistic view.\n";
-    
-    // Trend direction
-    if (r.smaShort > r.smaLong)
-      d << "The short-term SMA (" << r.smaShort << ") is above the long-term SMA (" << r.smaLong
-      << "), indicating upward momentum.\n";
-    else
-      d << "The short-term SMA (" << r.smaShort << ") is below the long-term SMA (" << r.smaLong
-      << "), showing bearish trend.\n";
-    
-    // Momentum indicators
+  std::string technicalSummary = ds.str();
+  
+  // --- Layman explanation (unchanged) ---
+  std::ostringstream human;
+  if (r.recommendation == Recommendation::Buy) {
     if (r.rsi < 30)
-      d << "RSI (" << r.rsi << ") suggests the stock is oversold : Possible rebound zone.\n";
-    else if (r.rsi > 70)
-      d << "RSI (" << r.rsi << ") indicates overbought conditions : Potential short-term cooling.\n";
-    
-    if (r.macd > r.macdSignal)
-      d << "MACD line is above signal line : Bullish momentum confirmed.\n";
+      human << "The stock looks oversold and could rebound soon. ";
+    else if (r.smaShort > r.smaLong && r.macd > r.macdSignal)
+      human << "The short-term trend is strong and momentum is positive. ";
     else
-      d << "MACD line is below signal line : Bearish momentum in play.\n";
-    
-    // Volume and trend confirmation
-    if (r.obvSlope > 0)
-      d << "OBV rising — buyers are supporting this move with strong volume.\n";
-    else if (r.obvSlope < 0)
-      d << "OBV falling — volume flow suggests distribution (selling pressure).\n";
-    
-    // Volatility and bands
-    if (r.lastClose > r.bollinger.upper)
-      d << "Price has broken above Bollinger upper band, suggesting a possible bullish breakout.\n";
-    else if (r.lastClose < r.bollinger.lower)
-      d << "Price dropped below lower Bollinger band : Possible oversold or continuation down.\n";
-    
-    // ADX
-    if (r.adx > 25)
-      d << "ADX (" << r.adx << ") shows a strong trend; signals are more reliable.\n";
+      human << "Overall buying pressure seems to be building. ";
+  } else if (r.recommendation == Recommendation::Sell) {
+    if (r.rsi > 70)
+      human << "The stock appears overbought — it might correct soon. ";
+    else if (r.smaShort < r.smaLong && r.macd < r.macdSignal)
+      human << "The trend is weakening and momentum has turned bearish. ";
     else
-      d << "ADX (" << r.adx << ") indicates weak or sideways market; momentum signals may fail.\n";
-    
-    // Final opinion
-    d << "\nOverall recommendation: ";
-    switch (r.recommendation)
-    {
-      case Recommendation::StrongBuy: d << "Strong Buy : Multiple bullish confirmations align."; break;
-      case Recommendation::Buy: d << "Buy : Moderate bullish trend with positive momentum."; break;
-      case Recommendation::Hold: d << "Hold : Mixed signals, maintain position."; break;
-      case Recommendation::Sell: d << "Sell : Weakness visible in trend and volume."; break;
-      case Recommendation::StrongSell: d << "Strong Sell : Technical breakdown confirmed."; break;
-      default: d << "No clear direction — insufficient data."; break;
-    }
-    if (!std::isnan(r.volatility))
-      d << "Volatility is " << r.volatility << "% over recent periods : "
-      << (r.volatility > 3.0 ? "High market fluctuation.\n" : "Stable trading range.\n");
-    
-    if (!std::isnan(r.supportLevel) && !std::isnan(r.resistanceLevel))
-      d << "Support around " << r.supportLevel << " and resistance near " << r.resistanceLevel << ".\n";
-
-    d << "\n";
-    
-    if (!r.actionReason.empty())
-      d << "Action rationale: " << r.actionReason << "\n";
-    
-    r.detailedExplanation = d.str();
+      human << "Sellers are gaining control. ";
+  } else {
+    human << "The signals are mixed — the stock may be consolidating. ";
   }
   
-  // --- Technical indicator tooltips ---
-  r.tooltips["SMA Short"] =
-  "Simple Moving Average: average of closing prices over N periods. "
-  "A rising SMA indicates upward momentum.";
-
-  r.tooltips["SMA Long"] =
-  "Simple Moving Average: average of closing prices over N periods. "
-  "A rising SMA indicates upward momentum.";
-
-  r.tooltips["RSI"] =
-  "Relative Strength Index: measures overbought (>70) or oversold (<30) conditions. "
-  "Values below 30 may indicate potential rebounds.";
+  if (!r.supportLevels.empty() && near(r.lastClose, r.supportLevels.front(), r.atr))
+    human << "Price is near a support zone, which might act as a floor. ";
+  if (!r.resistanceLevels.empty() && near(r.lastClose, r.resistanceLevels.front(), r.atr))
+    human << "Price is near a resistance level, which could slow gains. ";
+  if (r.volatility > 5.0)
+    human << "Volatility is high, so expect larger price swings.";
   
-  r.tooltips["MACD"] =
-  "Moving Average Convergence Divergence: compares two EMAs to show trend direction. "
-  "When MACD crosses above its signal line → bullish, below → bearish.";
-
-  r.tooltips["MACD Signal"] =
-  "Moving Average Convergence Divergence: compares two EMAs to show trend direction. "
-  "When MACD crosses above its signal line → bullish, below → bearish.";
-
-  r.tooltips["ATR"] =
-  "Average True Range: measures volatility. Higher ATR means stronger price swings.";
+  r.detailedExplanation = human.str() + "\n\n" + technicalSummary;
   
-  r.tooltips["VWAP"] =
-  "Volume Weighted Average Price: shows average price weighted by volume. "
-  "If price > VWAP, intraday momentum is bullish.";
-  
-  r.tooltips["Bollinger"] =
-  "Bollinger Bands: envelope around SMA showing volatility. "
-  "Price near upper band → overbought; near lower band → oversold.";
-  
-  r.tooltips["OBV"] =
-  "On-Balance Volume: tracks cumulative volume flow. "
-  "Rising OBV supports bullish price trends; falling OBV suggests weakness.";
-  
-  r.tooltips["ADX"] =
-  "Average Directional Index: measures trend strength (0–100). "
-  "Above 25 → strong trend; below 20 → weak or sideways.";
-  
-  r.tooltips["Stochastic"] =
-  "Stochastic Oscillator: compares close to recent range. "
-  "Values <20 → oversold; >80 → overbought.";
-
-  r.tooltips["StochasticK"] =
-  "Stochastic Oscillator: compares close to recent range. "
-  "Values <20 → oversold; >80 → overbought.";
-
-  r.tooltips["StochasticD"] =
-  "Stochastic Oscillator: compares close to recent range. "
-  "Values <20 → oversold; >80 → overbought.";
-
-  r.tooltips["CCI"] =
-  "Commodity Channel Index: measures deviation from average. "
-  "Below -100 = oversold; above 100 = overbought.";
-  
-  r.tooltips["ROC"] =
-  "Rate of Change: measures speed of price movement. "
-  "Positive ROC = upward momentum.";
-  
-  r.tooltips["MFI"] =
-  "Money Flow Index: volume-weighted RSI. "
-  "High (>80) = overbought; Low (<30) = oversold.";
-  
-  r.tooltips["Pattern"] =
-  "Detected chart/candlestick formations that may indicate reversals or continuations.";
-
-  r.tooltips["Volatility"] =
-  "Statistical measure of price fluctuations (standard deviation of returns). "
-  "Higher volatility means larger and faster price swings.";
-  
-  r.tooltips["Support"] =
-  "Support level: recent low zone where price tends to find buying interest.";
-  
-  r.tooltips["Resistance"] =
-  "Resistance level: recent high zone where price faces selling pressure.";
-
   return r;
 }

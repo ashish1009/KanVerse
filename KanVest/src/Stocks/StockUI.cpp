@@ -410,10 +410,10 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     // Voltality
     const char* volText = "";
     ImU32 volColor;
-    if (r.volatility > 0.9) { volText = "Very High"; volColor = KanVasX::Color::Red; }
-    else if (r.volatility > 0.8) { volText = "High"; volColor = KanVasX::Color::Orange; }
-    else if (r.volatility > 0.4) { volText = "Moderate"; volColor = KanVasX::Color::Yellow; }
-    else if (r.volatility > 0.2) { volText = "Low"; volColor = KanVasX::Color::Blue; }
+    if (r.volatility > 90) { volText = "Very High"; volColor = KanVasX::Color::Red; }
+    else if (r.volatility > 80) { volText = "High"; volColor = KanVasX::Color::Orange; }
+    else if (r.volatility > 40) { volText = "Moderate"; volColor = KanVasX::Color::Yellow; }
+    else if (r.volatility > 20) { volText = "Low"; volColor = KanVasX::Color::Blue; }
     else { volText = "Very Low"; volColor = KanVasX::Color::Green; }
 
     KanVasX::UI::Text(font, "Voltality", KanVasX::UI::AlignX::Left, {30.0f, 0}, KanVasX::Color::White);
