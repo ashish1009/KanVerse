@@ -58,9 +58,12 @@ namespace KanVest::Analysis
     std::vector<double> resistanceLevels;  // clustered resistance levels
     
     // Legacy compatibility (for UI showing single levels)
-    double supportLevel    = NAN;
-    double resistanceLevel = NAN;
+    double nearestSupportLevel    = NAN;
+    double nearestResistanceLevel = NAN;
     
+    std::string allSupportLevel    = "";
+    std::string allResistanceLevel = "";
+
     // --- Holding / P&L Info ---
     bool hasHolding        = false;
     double unrealizedPL    = 0.0;

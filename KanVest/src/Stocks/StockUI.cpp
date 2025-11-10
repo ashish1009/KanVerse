@@ -384,9 +384,9 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowAnalyzerData()
   {
-    KanVasX::UI::ShiftCursorY(0.0f);
-    
     Analysis::AnalysisReport r = StockManager::AnalyzeSelectedStock();
+    
+    static float xOffset = 20.0f;
     
     // --- Recommendation ---
     static auto font = KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26);
@@ -396,59 +396,100 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     switch (r.recommendation)
     {
       case Analysis::Recommendation::StrongBuy: recommendationText = "Strong Buy"; recColor = KanVasX::Color::Green; break;
-      case Analysis::Recommendation::Buy:       recommendationText = "Buy";        recColor = KanVasX::Color::Blue; break;
+      case Analysis::Recommendation::Buy:       recommendationText = "Buy";        recColor = KanVasX::Color::Cyan; break;
       case Analysis::Recommendation::Hold:      recommendationText = "Hold";       recColor = KanVasX::Color::Yellow; break;
       case Analysis::Recommendation::Sell:      recommendationText = "Sell";       recColor = KanVasX::Color::Orange; break;
       case Analysis::Recommendation::StrongSell:recommendationText = "Strong Sell";recColor = KanVasX::Color::Red; break;
       default: recommendationText = "Unknown";   recColor = KanVasX::Color::White; break;
     }
 
-    KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {30.0f, 0}, KanVasX::Color::White);
+    KanVasX::UI::ShiftCursorY(10.0f);
+    KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
     ImGui::SameLine();
     KanVasX::UI::Text(font, recommendationText, KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
 
     // Voltality
     const char* volText = "";
     ImU32 volColor;
-    if (r.volatility > 90) { volText = "Very High"; volColor = KanVasX::Color::Red; }
-    else if (r.volatility > 80) { volText = "High"; volColor = KanVasX::Color::Orange; }
-    else if (r.volatility > 40) { volText = "Moderate"; volColor = KanVasX::Color::Yellow; }
-    else if (r.volatility > 20) { volText = "Low"; volColor = KanVasX::Color::Blue; }
-    else { volText = "Very Low"; volColor = KanVasX::Color::Green; }
+    if (r.volatility > 8.0) {
+      volText = "Very High";
+      volColor = KanVasX::Color::Red;
+    }
+    else if (r.volatility > 5.0) {
+      volText = "High";
+      volColor = KanVasX::Color::Orange;
+    }
+    else if (r.volatility > 2.5) {
+      volText = "Moderate";
+      volColor = KanVasX::Color::Yellow;
+    }
+    else if (r.volatility > 1.0) {
+      volText = "Low";
+      volColor = KanVasX::Color::Cyan;
+    }
+    else {
+      volText = "Very Low";
+      volColor = KanVasX::Color::Green;
+    }
 
-    KanVasX::UI::Text(font, "Voltality", KanVasX::UI::AlignX::Left, {30.0f, 0}, KanVasX::Color::White);
+    KanVasX::UI::Text(font, "Voltality", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
     ImGui::SameLine();
-    
     KanVasX::UI::Text(font, volText, KanVasX::UI::AlignX::Right, {-30, 0}, volColor);
 
     // Band
-    KanVasX::UI::Text(font, "Resistance", KanVasX::UI::AlignX::Left, {30.0f, 0}, KanVasX::Color::White);
+    KanVasX::UI::Text(font, "Resistance", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
     ImGui::SameLine();
-    KanVasX::UI::Text(font, Utils::FormatDoubleToString(r.resistanceLevel), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
-    KanVasX::UI::Text(font, "Support", KanVasX::UI::AlignX::Left, {30.0f, 0}, KanVasX::Color::White);
+    KanVasX::UI::Text(font, Utils::FormatDoubleToString(r.nearestResistanceLevel), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
+    KanVasX::UI::Tooltip(r.allResistanceLevel);
+    KanVasX::UI::Text(font, "Support", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
     ImGui::SameLine();
-    KanVasX::UI::Text(font, Utils::FormatDoubleToString(r.supportLevel), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
+    KanVasX::UI::Text(font, Utils::FormatDoubleToString(r.nearestSupportLevel), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
+    KanVasX::UI::Tooltip(r.allSupportLevel);
+    
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 10.0f});
 
     // --- Score Bar ---
-    float score = static_cast<float>(r.score);
-    
-    KanVasX::UI::ShiftCursorX(20.0f);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.9);
-    ImGui::ProgressBar((score + 1.0f) / 2.0f, ImVec2(-1, 0), ("Score: " + std::to_string(score)).c_str());
+    KanVasX::UI::ShiftCursorX(xOffset);
+    {
+      float score = static_cast<float>(r.score);
+      ImU32 scoreColor;
+      if (score <= -0.7) {
+        scoreColor = KanVasX::Color::Red;            // Strong Sell
+      }
+      else if (score <= -0.3) {
+        scoreColor = KanVasX::Color::Orange;         // Weak Sell / Bearish
+      }
+      else if (score < 0.3) {
+        scoreColor = KanVasX::Color::Yellow;         // Neutral / Hold
+      }
+      else if (score < 0.7) {
+        scoreColor = KanVasX::Color::Cyan;           // Moderately Bullish / Buy
+      }
+      else {
+        scoreColor = KanVasX::Color::Green;          // Strong Buy
+      }
+
+      KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
+      ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8);
+      ImGui::ProgressBar((score + 1.0f) / 2.0f, ImVec2(-1, 0), ("Score: " + std::to_string(score)).c_str());
+    }
 
     // --- Suggested Quantity ---
     KanVasX::UI::ShiftCursorX(20.0f);
-    ImGui::TextWrapped("%s", r.actionReason.c_str());
+    {
+      KanVasX::ScopedColor textColor(ImGuiCol_Text, recColor);
+      ImGui::TextWrapped("%s", r.actionReason.c_str());
+    }
     if (r.suggestedActionQty != 0.0)
     {
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), "Suggested Quantity", KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), "Suggested Quantity", KanVasX::UI::AlignX::Left, {20.0f, 0}, recColor);
       ImGui::SameLine();
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), std::to_string(int(r.suggestedActionQty)), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), std::to_string(int(r.suggestedActionQty)), KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
     }
 
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 5.0f});
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 0.0f});
 
-    KanVasX::UI::ShiftCursorY(15.0f);
+    KanVasX::UI::ShiftCursorY(5.0f);
     {
       if (ImGui::BeginTabBar("Technicals"))
       {
@@ -458,7 +499,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
           {
             KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), label, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
             ImGui::SameLine();
-            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), std::to_string(value), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
+            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(value), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
             if (ImGui::IsItemHovered())
             {
               ImGui::SetTooltip("%s", r.tooltips.count(label) ? r.tooltips.at(label).c_str() : "No tooltip");
@@ -529,14 +570,14 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         ImGui::EndTabBar();
       }
     } // Tabs
-    
-    // --- Explanation ---
-    if (ImGui::CollapsingHeader("Detailed Explanation", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-      ImGui::BeginChild("ExplanationScroll", ImVec2(0, 150), true);
-      ImGui::TextWrapped("%s", r.detailedExplanation.c_str());
-      ImGui::EndChild();
-    }
+//    
+//    // --- Explanation ---
+//    if (ImGui::CollapsingHeader("Detailed Explanation", ImGuiTreeNodeFlags_DefaultOpen))
+//    {
+//      ImGui::BeginChild("ExplanationScroll", ImVec2(0, 150), true);
+//      ImGui::TextWrapped("%s", r.detailedExplanation.c_str());
+//      ImGui::EndChild();
+//    }
   }
   
   void StockUI::DrawAnalysisPanel()
@@ -575,14 +616,14 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   {
     StockData stockData = StockManager::GetSelectedStockData();
 
-    const ImU32 textColor = KanVasX::Color::TextBright;
-
     // Name & price
     std::string name = stockData.shortName + " (" + stockData.currency + ")";
-    
-    KanVest_Text(Header_36, name.c_str(), glm::vec2(30.0f, 0.0f), textColor);
-    KanVest_Text(Header_24, stockData.longName.c_str(), glm::vec2(30.0f, 0.0f), textColor);
-    KanVest_Text(Header_48, Utils::FormatDoubleToString(stockData.livePrice), glm::vec2(30.0f, 0.0f), textColor);
+    std::string longNameName = stockData.longName != "" ? stockData.longName : stockData.shortName;
+
+    static float xOffset = 20.0f;
+    KanVest_Text(Header_36, name, glm::vec2(xOffset, 0.0f), KanVasX::Color::TextBright);
+    KanVest_Text(Header_24, longNameName, glm::vec2(xOffset, 0.0f), KanVasX::Color::TextBright);
+    KanVest_Text(Header_48, Utils::FormatDoubleToString(stockData.livePrice), glm::vec2(xOffset, 0.0f), KanVasX::Color::TextBright);
     
     // Change
     std::string change = (stockData.change > 0 ? "+" : "") +
@@ -591,30 +632,31 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     Utils::FormatDoubleToString(stockData.changePercent) + "%)";
     
     ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
-    KanVest_Text(Header_30, change, glm::vec2(30.0f, 0.0f), changeColor);
+    ImGui::SameLine();
+    KanVest_Text(Header_30, change, glm::vec2(xOffset, 10.0f), changeColor);
     
     static const float UnderLineSize = 0.90;
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 0.0f});
-    KanVasX::UI::ShiftCursorY(20);
-    
+    KanVasX::UI::ShiftCursorY(10);
+
     // 52-Week Range
     std::string fiftyTwoWeek = Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " + Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
-    KanVest_Text(FixedWidthHeader_18, "52-Week Range ", glm::vec2(20.0f, 0.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "52-Week Range ", glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_18, fiftyTwoWeek, glm::vec2(20.0f, 0.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, fiftyTwoWeek, glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
     
     // Day Range
     std::string dayRange = Utils::FormatDoubleToString(stockData.dayLow) + " - " + Utils::FormatDoubleToString(stockData.dayHigh);
-    KanVest_Text(FixedWidthHeader_18, "Day Range     ", glm::vec2(20.0f, 0.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Day Range     ", glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_18, dayRange, glm::vec2(20.0f, 0.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, dayRange, glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
     
     // Volume
-    KanVest_Text(FixedWidthHeader_18, "Volume        ", glm::vec2(20.0f, 0.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, "Volume        ", glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
     ImGui::SameLine();
-    KanVest_Text(FixedWidthHeader_18, Utils::FormatLargeNumber(stockData.volume), glm::vec2(20.0f, 0.0f), textColor);
+    KanVest_Text(FixedWidthHeader_18, Utils::FormatLargeNumber(stockData.volume), glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
     
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 0.0f});
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, UnderLineSize, {20.0f, 10.0f});
   }
   
   void StockUI::DrawPortfolioTable(Portfolio* portfolio)
