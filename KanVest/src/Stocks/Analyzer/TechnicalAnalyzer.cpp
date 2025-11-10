@@ -24,10 +24,15 @@ namespace KanVest
     ComputeAwesomeOscillator(stock, report);
     ComputeStochasticRSI(stock, report);
     ComputeCCI(stock, report);
-
+    
+    // NEW
+    ComputeADX(stock, report);   // default period 14
+    ComputeMFI(stock, report);   // default period 14
+    ComputeOBV(stock, report);
+    
     return report;
   }
-  
+
   void TechnicalAnalyzer::ComputeMovingAverages(const StockData& stock, TechnicalReport& report)
   {
     std::vector<int> periods = {5, 10, 20, 30, 50, 100, 150, 200};
@@ -122,5 +127,35 @@ namespace KanVest
       else return "Neutral";
     }
     return "Neutral";
+  }
+  
+  void TechnicalAnalyzer::ComputeADX(const StockData& stock, TechnicalReport& report, int period)
+  {
+    double plusDI = 0.0, minusDI = 0.0;
+    double adx = TechnicalUtils::ComputeADX(stock.history, period, plusDI, minusDI);
+    report.ADX = adx;
+    report.PlusDI = plusDI;
+    report.MinusDI = minusDI;
+    
+    report.Explanations["ADX"] =
+    "ADX (" + std::to_string(period) + ") = " + std::to_string(adx) +
+    ". +DI = " + std::to_string(plusDI) + ", -DI = " + std::to_string(minusDI) +
+    ". ADX measures trend strength (higher = stronger trend).";
+  }
+  
+  void TechnicalAnalyzer::ComputeMFI(const StockData& stock, TechnicalReport& report, int period)
+  {
+    double mfi = TechnicalUtils::ComputeMFI(stock.history, period);
+    report.MFI = mfi;
+    report.Explanations["MFI"] = "MFI (" + std::to_string(period) + ") = " + std::to_string(mfi) +
+    ". Money Flow Index uses price+volume to detect buying/selling pressure (0-100).";
+  }
+  
+  void TechnicalAnalyzer::ComputeOBV(const StockData& stock, TechnicalReport& report)
+  {
+    double obv = TechnicalUtils::ComputeOBV(stock.history);
+    report.OBV = obv;
+    report.Explanations["OBV"] = "On-Balance Volume (OBV) accumulative value = " + std::to_string(obv) +
+    ". OBV confirms price moves using volume flow.";
   }
 } // namespace KanVest

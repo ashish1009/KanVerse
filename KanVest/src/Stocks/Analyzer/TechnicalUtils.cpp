@@ -30,6 +30,19 @@ namespace KanVest
     return static_cast<int>(uniqueDays.size());
   }
   
+  static inline bool ResolvePeriods(const std::vector<StockPoint>& history,
+                                    int periodInDays,
+                                    int &outPeriodBars,
+                                    int &outBarsPerDay)
+  {
+    if (history.empty()) return false;
+    int numDays = GetNumberOfTradingDays(history);
+    if (numDays <= 0) return false;
+    outBarsPerDay = static_cast<int>(history.size() / numDays);
+    outPeriodBars = std::max(1, periodInDays * outBarsPerDay);
+    return true;
+  }
+  
   // --------------------------
   // Simple Moving Average (SMA)
   // --------------------------
@@ -387,6 +400,165 @@ namespace KanVest
     
     double cci = (typicalPrices.back() - sma) / (0.015 * meanDeviation);
     return cci;
+  }
+
+  double TechnicalUtils::ComputeADX(const std::vector<StockPoint>& history, int periodInDays, double &outPlusDI, double &outMinusDI)
+  {
+    outPlusDI = 0.0;
+    outMinusDI = 0.0;
+    if (history.size() < 2) return 0.0;
+    
+    int barsPerDay = 1, period = 0;
+    if (!ResolvePeriods(history, periodInDays, period, barsPerDay)) return 0.0;
+    if (history.size() <= static_cast<size_t>(period)) return 0.0;
+    
+    // step 1: compute TR, +DM, -DM for each bar (starting from i=1)
+    std::vector<double> tr(history.size(), 0.0);
+    std::vector<double> plusDM(history.size(), 0.0);
+    std::vector<double> minusDM(history.size(), 0.0);
+    
+    for (size_t i = 1; i < history.size(); ++i)
+    {
+      double high = history[i].high;
+      double low = history[i].low;
+      double prevHigh = history[i - 1].high;
+      double prevLow = history[i - 1].low;
+      double prevClose = history[i - 1].close;
+      
+      double highLow = high - low;
+      double highClose = std::abs(high - prevClose);
+      double lowClose = std::abs(low - prevClose);
+      tr[i] = std::max({highLow, highClose, lowClose});
+      
+      double upMove = high - prevHigh;
+      double downMove = prevLow - low;
+      
+      plusDM[i] = (upMove > downMove && upMove > 0) ? upMove : 0.0;
+      minusDM[i] = (downMove > upMove && downMove > 0) ? downMove : 0.0;
+    }
+    
+    // step 2: Wilder smoothing of TR, +DM, -DM
+    // initial smoothed values = sum of first 'period' values (from i=1..period)
+    double trSum = 0.0, plusDMSum = 0.0, minusDMSum = 0.0;
+    for (int i = 1; i <= period; ++i)
+    {
+      trSum += tr[i];
+      plusDMSum += plusDM[i];
+      minusDMSum += minusDM[i];
+    }
+    double smTR = trSum;
+    double smPlusDM = plusDMSum;
+    double smMinusDM = minusDMSum;
+    
+    std::vector<double> plusDIhist;
+    std::vector<double> minusDIhist;
+    std::vector<double> dxhist;
+    
+    // compute subsequent smoothed values and DI, DX
+    for (size_t i = period + 1; i < tr.size(); ++i)
+    {
+      // Wilder smoothing: sm = (prevSm * (period - 1) + value) / period
+      smTR = (smTR * (period - 1) + tr[i]) / period;
+      smPlusDM = (smPlusDM * (period - 1) + plusDM[i]) / period;
+      smMinusDM = (smMinusDM * (period - 1) + minusDM[i]) / period;
+      
+      double pDI = (smTR == 0.0) ? 0.0 : 100.0 * (smPlusDM / smTR);
+      double mDI = (smTR == 0.0) ? 0.0 : 100.0 * (smMinusDM / smTR);
+      
+      plusDIhist.push_back(pDI);
+      minusDIhist.push_back(mDI);
+      
+      double denom = pDI + mDI;
+      double dx = (denom == 0.0) ? 0.0 : 100.0 * std::abs(pDI - mDI) / denom;
+      dxhist.push_back(dx);
+    }
+    
+    if (dxhist.empty())
+    {
+      outPlusDI = plusDIhist.empty() ? 0.0 : plusDIhist.back();
+      outMinusDI = minusDIhist.empty() ? 0.0 : minusDIhist.back();
+      return 0.0;
+    }
+    
+    // step 3: ADX = Wilder smoothed average of DX (use period)
+    // initial ADX = average of first 'period' DX values
+    if (dxhist.size() < static_cast<size_t>(period))
+    {
+      // average whatever we have
+      double s = std::accumulate(dxhist.begin(), dxhist.end(), 0.0);
+      outPlusDI = plusDIhist.back();
+      outMinusDI = minusDIhist.back();
+      return s / dxhist.size();
+    }
+    
+    double adx = 0.0;
+    // first ADX seed: average of first 'period' DXs
+    for (size_t i = 0; i < static_cast<size_t>(period); ++i) adx += dxhist[i];
+    adx /= period;
+    
+    // then Wilder smoothing for remaining DXs
+    for (size_t i = period; i < dxhist.size(); ++i)
+      adx = ( (adx * (period - 1)) + dxhist[i] ) / period;
+    
+    outPlusDI = plusDIhist.back();
+    outMinusDI = minusDIhist.back();
+    
+    return adx;
+  }
+  
+  // ---------------- MFI ----------------
+  double TechnicalUtils::ComputeMFI(const std::vector<StockPoint>& history, int periodInDays)
+  {
+    if (history.size() < 2) return 50.0;
+    
+    int barsPerDay = 1, period = 0;
+    if (!ResolvePeriods(history, periodInDays, period, barsPerDay)) return 50.0;
+    if (history.size() <= static_cast<size_t>(period)) return 50.0;
+    
+    // compute typical price and raw money flow
+    std::vector<double> tp(history.size(), 0.0);
+    std::vector<double> moneyFlow(history.size(), 0.0);
+    
+    for (size_t i = 0; i < history.size(); ++i)
+    {
+      tp[i] = (history[i].high + history[i].low + history[i].close) / 3.0;
+      moneyFlow[i] = tp[i] * static_cast<double>(history[i].volume);
+    }
+    
+    // now compute positive and negative money flow over the last 'period' bars
+    double positiveFlow = 0.0, negativeFlow = 0.0;
+    for (size_t i = history.size() - period + 1; i < history.size(); ++i)
+    {
+      // compare typical price to previous bar's typical price
+      size_t prev = i - 1;
+      if (tp[i] > tp[prev]) positiveFlow += moneyFlow[i];
+      else if (tp[i] < tp[prev]) negativeFlow += moneyFlow[i];
+      // if equal, neither side increments
+    }
+    
+    if (negativeFlow == 0.0)
+    {
+      return 100.0;
+    }
+    
+    double moneyRatio = positiveFlow / negativeFlow;
+    double mfi = 100.0 - (100.0 / (1.0 + moneyRatio));
+    return std::clamp(mfi, 0.0, 100.0);
+  }
+  
+  // ---------------- OBV ----------------
+  double TechnicalUtils::ComputeOBV(const std::vector<StockPoint>& history)
+  {
+    if (history.empty()) return 0.0;
+    // Use 64-bit accumulator because volume can be large
+    long long obv = 0;
+    for (size_t i = 1; i < history.size(); ++i)
+    {
+      if (history[i].close > history[i - 1].close) obv += static_cast<long long>(history[i].volume);
+      else if (history[i].close < history[i - 1].close) obv -= static_cast<long long>(history[i].volume);
+      // equal -> no change
+    }
+    return static_cast<double>(obv);
   }
 
 } // namespace KanVest

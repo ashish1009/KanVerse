@@ -20,13 +20,20 @@ namespace KanVest
     double ATR = 0.0;
     double VWAP = 0.0;
     
-    double AwesomeOscillator;
-    double StochasticRSI;
-    double CCI;
+    double AwesomeOscillator = 0.0;
+    double StochasticRSI = 0.0;
+    double CCI = 0.0;
+    
+    // New fields:
+    double ADX = 0.0;
+    double PlusDI = 0.0;
+    double MinusDI = 0.0;
+    double MFI = 0.0;
+    double OBV = 0.0;
     
     std::map<std::string, std::string> Explanations; // Human-readable explanations
   };
-  
+
   class TechnicalAnalyzer
   {
   public:
@@ -42,5 +49,8 @@ namespace KanVest
     static void ComputeAwesomeOscillator(const StockData&stock, TechnicalReport& report, int fastPeriodInDays = 5, int slowPeriodInDays = 14);
     static void ComputeStochasticRSI(const StockData&stock, TechnicalReport& report, int period = 14);
     static void ComputeCCI(const StockData&stock, TechnicalReport& report, int period = 14);
+    static void ComputeADX(const StockData& stock, TechnicalReport& report, int period = 14);
+    static void ComputeMFI(const StockData& stock, TechnicalReport& report, int period = 14);
+    static void ComputeOBV(const StockData& stock, TechnicalReport& report);
   };
 } // namespace KanVest

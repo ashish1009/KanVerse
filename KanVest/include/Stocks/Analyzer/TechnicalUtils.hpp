@@ -23,5 +23,10 @@ namespace KanVest
     static double ComputeAwesomeOscillator(const std::vector<StockPoint>& history, int fastPeriodInDays, int slowPeriodInDays);
     static double ComputeStochasticRSI(const std::vector<StockPoint>& history, int periodInDays);
     static double ComputeCCI(const std::vector<StockPoint>& history, int periodInDays);
+    
+    // NEW:
+    static double ComputeADX(const std::vector<StockPoint>& history, int periodInDays, double &outPlusDI, double &outMinusDI);
+    static double ComputeMFI(const std::vector<StockPoint>& history, int periodInDays);
+    static double ComputeOBV(const std::vector<StockPoint>& history);
   };
 } // namespace KanVest

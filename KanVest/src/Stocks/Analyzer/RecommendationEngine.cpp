@@ -45,6 +45,7 @@ namespace KanVest
                                                 const UserHoldingForAnalyzer& userHolding)
   {
     Recommendation rec;
+    rec.score = 0.0;
     
     // ---------- Compute Unrealized P/L ----------
     double unrealizedPLPercent = 0.0;
@@ -60,101 +61,159 @@ namespace KanVest
       intervalChangePercent = (end.close - start.close) / start.close * 100.0;
     }
     
-    // Momentum (0-10)
+    // ============================================================
+    // MOMENTUM (short-term trend direction)
+    // ============================================================
     if (momentumReport.shortTermBehavior == Momentum::VeryPositive) rec.score += 10;
     else if (momentumReport.shortTermBehavior == Momentum::Positive) rec.score += 5;
     else if (momentumReport.shortTermBehavior == Momentum::Negative) rec.score -= 5;
     else if (momentumReport.shortTermBehavior == Momentum::VeryNegative) rec.score -= 10;
     
-    // RSI (0-10)
-    if (techReport.RSI < 30) rec.score += 7;    // oversold => bullish
-    else if (techReport.RSI > 70) rec.score -= 7; // overbought => bearish
+    // ============================================================
+    // RSI — Overbought / Oversold
+    // ============================================================
+    if (techReport.RSI < 30) { rec.score += 7; rec.explanation += "RSI oversold (<30). "; }
+    else if (techReport.RSI > 70) { rec.score -= 7; rec.explanation += "RSI overbought (>70). "; }
     
-    // SMA50 (0-5)
-    if (techReport.SMA.count(50) && stock.livePrice > techReport.SMA.at(50)) rec.score += 5;
-    else rec.score -= 5;
+    // ============================================================
+    // SMA — 50-day trend check
+    // ============================================================
+    if (techReport.SMA.count(50))
+    {
+      if (stock.livePrice > techReport.SMA.at(50)) { rec.score += 5; rec.explanation += "Price above SMA50 (bullish). "; }
+      else { rec.score -= 5; rec.explanation += "Price below SMA50 (bearish). "; }
+    }
     
-    if (techReport.AwesomeOscillator > 0) rec.score += 3; else rec.score -= 3;
-    if (techReport.StochasticRSI < 20) rec.score += 5; else if (techReport.StochasticRSI > 80) rec.score -= 5;
-    if (techReport.CCI > 100) rec.score += 3; else if (techReport.CCI < -100) rec.score -= 3;
-
-    // Cap score based on interval change
-    if (intervalChangePercent <= -10.0)       // huge drop
-      rec.score = std::min(rec.score, 40.0);          // max 40%, cannot Strong Buy
-    else if (intervalChangePercent <= -5.0)   // moderate drop
-      rec.score = std::min(rec.score, 50.0);          // max 50%, cannot be Strong Buy
-    else if (intervalChangePercent >= 10.0)   // huge rise
-      rec.score = std::max(rec.score, 80.0);          // minimum Strong Buy
-
-    // Volatility adjustment (0-5)
-    // Higher short-term volatility reduces confidence
+    // ============================================================
+    // EMA — trend sensitivity
+    // ============================================================
+    if (techReport.EMA.count(20) && techReport.EMA.count(50))
+    {
+      double ema20 = techReport.EMA.at(20);
+      double ema50 = techReport.EMA.at(50);
+      if (ema20 > ema50) { rec.score += 5; rec.explanation += "EMA20>EMA50 bullish crossover. "; }
+      else { rec.score -= 5; rec.explanation += "EMA20<EMA50 bearish crossover. "; }
+    }
+    
+    // ============================================================
+    // MACD — momentum crossover
+    // ============================================================
+    if (!std::isnan(techReport.MACD) && !std::isnan(techReport.MACDSignal))
+    {
+      if (techReport.MACD > techReport.MACDSignal) { rec.score += 7; rec.explanation += "MACD bullish crossover. "; }
+      else { rec.score -= 7; rec.explanation += "MACD bearish crossover. "; }
+    }
+    
+    // ============================================================
+    // Awesome Oscillator
+    // ============================================================
+    if (techReport.AwesomeOscillator > 0) { rec.score += 4; rec.explanation += "Awesome Oscillator bullish. "; }
+    else { rec.score -= 4; rec.explanation += "Awesome Oscillator bearish. "; }
+    
+    // ============================================================
+    // Stochastic RSI
+    // ============================================================
+    if (techReport.StochasticRSI < 20) { rec.score += 5; rec.explanation += "Stochastic RSI oversold (<20). "; }
+    else if (techReport.StochasticRSI > 80) { rec.score -= 5; rec.explanation += "Stochastic RSI overbought (>80). "; }
+    
+    // ============================================================
+    // Commodity Channel Index (CCI)
+    // ============================================================
+    if (techReport.CCI > 100) { rec.score += 3; rec.explanation += "CCI strong positive trend (>100). "; }
+    else if (techReport.CCI < -100) { rec.score -= 3; rec.explanation += "CCI weak trend (<-100). "; }
+    
+    // ============================================================
+    // ADX (trend strength)
+    // ============================================================
+    if (techReport.ADX != 0.0)
+    {
+      if (techReport.ADX > 25) { rec.score += 3; rec.explanation += "ADX shows strong trend (>25). "; }
+      else { rec.score -= 2; rec.explanation += "ADX weak trend (<20). "; }
+    }
+    
+    // ============================================================
+    // MFI (Money Flow Index)
+    // ============================================================
+    if (techReport.MFI != 0.0)
+    {
+      if (techReport.MFI < 20) { rec.score += 4; rec.explanation += "MFI oversold (<20). "; }
+      else if (techReport.MFI > 80) { rec.score -= 4; rec.explanation += "MFI overbought (>80). "; }
+    }
+    
+    // ============================================================
+    // OBV (On-Balance Volume)
+    // ============================================================
+    if (techReport.OBV > 0) { rec.score += 4; rec.explanation += "OBV rising (buying pressure). "; }
+    else if (techReport.OBV < 0) { rec.score -= 4; rec.explanation += "OBV falling (selling pressure). "; }
+    
+    // ============================================================
+    // ATR (volatility sensitivity)
+    // ============================================================
+    if (techReport.ATR > 0.0)
+      rec.explanation += "ATR=" + std::to_string(techReport.ATR) + " (volatility measure). ";
+    
+    // ============================================================
+    // VWAP (intraday fair price)
+    // ============================================================
+    if (techReport.VWAP > 0.0)
+    {
+      if (stock.livePrice > techReport.VWAP) { rec.score += 3; rec.explanation += "Price above VWAP (bullish). "; }
+      else { rec.score -= 3; rec.explanation += "Price below VWAP (bearish). "; }
+    }
+    
+    // ============================================================
+    // Volatility adjustments (reduces confidence)
+    // ============================================================
     rec.score -= volReport.shortTermVolatility / 10.0;
     
-    // Candlestick patterns (optional, 0-5)
+    // ============================================================
+    // Chart Patterns (candlesticks & formations)
+    // ============================================================
     double patternScore = 0.0;
     for (const auto& pattern : chartReport.candlestickPatterns)
-    {
-      if (candlestickScoreMap.count(pattern))
-        patternScore += candlestickScoreMap[pattern];
-    }
-    
-    // Normalize to maximum ±5 points regardless of number of candles
+      if (candlestickScoreMap.count(pattern)) patternScore += candlestickScoreMap[pattern];
     patternScore /= std::max(1.0, static_cast<double>(chartReport.candlestickPatterns.size()));
     patternScore = std::clamp(patternScore, -5.0, 5.0);
-    
     rec.score += patternScore;
-
+    
     double chartScore = 0.0;
     for (const auto& pattern : chartReport.chartPatterns)
-    {
-      if (chartPatternScoreMap.count(pattern))
-        chartScore += candlestickScoreMap[pattern];
-    }
-    
-    // Normalize to maximum ±5 points regardless of number of candles
-    patternScore /= std::max(1.0, static_cast<double>(chartReport.candlestickPatterns.size()));
-    patternScore = std::clamp(patternScore, -5.0, 5.0);
-    
+      if (chartPatternScoreMap.count(pattern)) chartScore += chartPatternScoreMap[pattern];
+    chartScore = std::clamp(chartScore, -5.0, 5.0);
     rec.score += chartScore;
     
-    // Clip rec.score to 0-100%
+    // ============================================================
+    // Interval & performance scaling
+    // ============================================================
+    if (intervalChangePercent <= -10.0) rec.score = std::min(rec.score, 40.0);
+    else if (intervalChangePercent <= -5.0) rec.score = std::min(rec.score, 50.0);
+    else if (intervalChangePercent >= 10.0) rec.score = std::max(rec.score, 80.0);
+    
+    // ============================================================
+    // Normalize to 0–100 and derive final action
+    // ============================================================
     rec.score = std::clamp(rec.score, 0.0, 100.0);
     
-    // ---------- Map rec.score to Action ----------
-    Action actionLevel;
-    if (rec.score >= 70) actionLevel = Action::StrongBuy;
-    else if (rec.score >= 55) actionLevel = Action::Buy;
-    else if (rec.score <= 30) actionLevel = Action::StrongSell;
-    else if (rec.score <= 45) actionLevel = Action::Sell;
-    else actionLevel = Action::Hold;
+    if (rec.score >= 70) rec.action = Action::StrongBuy;
+    else if (rec.score >= 55) rec.action = Action::Buy;
+    else if (rec.score <= 30) rec.action = Action::StrongSell;
+    else if (rec.score <= 45) rec.action = Action::Sell;
+    else rec.action = Action::Hold;
     
-    rec.action = actionLevel;
-    
-    // ---------- Determine Quantity ----------
+    // ============================================================
+    // Suggested Quantity & Explanation
+    // ============================================================
     rec.quantity = DetermineQuantity(stock.livePrice, userHolding, rec.action);
     
-    // ---------- Human-readable Explanation ----------
     std::ostringstream oss;
     oss << "Recommendation: " << Utils::GetActionString(rec.action) << "\n";
-    oss << "rec.score: " << rec.score << "%\n";
-    oss << "Quantity suggested: " << rec.quantity << "\n";
-    oss << "Reasoning:\n";
-    
+    oss << "Score: " << rec.score << "%\n";
+    oss << "Quantity: " << rec.quantity << "\n";
     if (userHolding.quantity > 0)
-      oss << "- Unrealized P/L: " << unrealizedPLPercent << "% on " << userHolding.quantity
-      << " shares at avg price " << userHolding.avgPrice << "\n";
-    
-    oss << "- Interval price change: " << intervalChangePercent << "%\n";
-    oss << "- Momentum: Short-term trend is " << Utils::GetMomentumString(momentumReport.shortTermBehavior)
-    << ", long-term trend is " << Utils::GetMomentumString(momentumReport.longTermBehavior) << ".\n";
-    oss << "- Technicals: RSI = " << techReport.RSI
-    << ", SMA50 = " << (techReport.SMA.count(50) ? techReport.SMA.at(50) : 0.0) << ".\n";
-    oss << "- Volatility: Short-term = " << volReport.shortTermVolatility
-    << "%, Long-term = " << volReport.longTermVolatility << "%.\n";
-    oss << "- Chart Candlestick patterns: ";
-    for (const auto& p : chartReport.candlestickPatterns) oss << p << " ";
-    if (chartReport.candlestickPatterns.empty()) oss << "None";
-    oss << ".\n";
+      oss << "Unrealized P/L: " << unrealizedPLPercent << "% on "
+      << userHolding.quantity << " shares @ " << userHolding.avgPrice << "\n";
+    oss << "Interval change: " << intervalChangePercent << "%\n";
+    oss << "Technical Summary:\n" << rec.explanation << "\n";
     
     rec.explanation = oss.str();
     return rec;
