@@ -22,6 +22,8 @@ namespace KanVest
     double stockValue;
     double investment;
     double value;
+    double dayChange;
+    double dayChangePercent;
     double profitLoss;
     double profitLossPercent;
   };

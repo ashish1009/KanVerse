@@ -29,14 +29,14 @@ namespace KanVest
     
     inline static std::unordered_map<std::string, std::vector<std::string>> RangeIntervalMap =
     {
-      {"1d",  {"60m", "30m", "15m", "5m", "2m", "1m"}},
-      {"5d",  {"60m", "30m", "15m", "5m", "2m", "1m"}},
-      {"1mo", {"1d", "60m", "30m", "15m", "5m"}},
-      {"6mo", {"1wk", "1d", "1h"}},
-      {"ytd", {"1mo", "1wk", "1h"}},
-      {"1y",  {"1mo", "1wk", "1d"}},
-      {"5y",  {"1mo", "1wk", "1d"}},
-      {"max", {"1mo", "1wk", "1d"}},
+      {"1d",  {"1m", "2m", "5m", "15m", "30m", "60m"}},
+      {"5d",  {"1m", "2m", "5m", "15m", "30m", "60m"}},
+      {"1mo", {"5m", "15m", "30m", "60m", "1d"}},
+      {"6mo", {"1h", "1d", "1wk"}},
+      {"ytd", {"1h", "1wk", "1mo"}},
+      {"1y",  {"1d", "1wk", "1mo"}},
+      {"5y",  {"1d", "1wk", "1mo"}},
+      {"max", {"1d", "1wk", "1mo"}},
     };
     
     /// This function analyzes the selected stock
@@ -102,7 +102,7 @@ namespace KanVest
     inline static std::string s_selectedStockSymbol = {"Nifty"};
     inline static KanVest::Analysis::HoldingInfo s_selectedHoldingData;
 
-    inline static std::string s_currentInterval = "1d";
+    inline static std::string s_currentInterval = "60m";
     inline static std::string s_currentRange = "1mo";
 
     inline static std::mutex s_mutex;

@@ -1,8 +1,12 @@
-- username: jit
-  passwordHash: 17557277576984250214
-  portfolioPath: ../../../KanVest/UserData/Portfolios/jit_portfolio.yaml
-  lastLoginTime: "Fri Nov  7 21:30:51 2025\n"
+- username: aashish1009
+  passwordHash: 17392236153509966524
+  portfolioPath: ../../../KanVest/UserData/Portfolios/aashish1009_portfolio.yaml
+  lastLoginTime: "Mon Nov 10 10:00:03 2025\n"
 - username: ashish
   passwordHash: 2826401479913020041
   portfolioPath: ../../../KanVest/UserData/Portfolios/ashish_portfolio.yaml
   lastLoginTime: "Wed Nov  5 14:34:27 2025\n"
+- username: jit
+  passwordHash: 17557277576984250214
+  portfolioPath: ../../../KanVest/UserData/Portfolios/jit_portfolio.yaml
+  lastLoginTime: "Fri Nov  7 21:30:51 2025\n"

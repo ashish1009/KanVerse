@@ -266,7 +266,11 @@ namespace KanVest
         KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Username", KanVasX::UI::AlignX::Center, {-50.0f, 20.0f});
         ImGui::SameLine();
         KanVasX::UI::ShiftCursorY(-8.0f);
-        usernameBuffer.StrCpy("ashish");
+        static bool DefaultUser = true;
+        if (DefaultUser)
+        {
+          usernameBuffer.StrCpy("ashish");
+        }
         usernameBuffer.TextInput(false, 100, " ");
         KanVasX::UI::Text(UI::Font::Get(UI::FontType::FixedWidthHeader_14), "Password", KanVasX::UI::AlignX::Center, {-50.0f, 15.0f});
 
@@ -276,7 +280,11 @@ namespace KanVest
 
         ImGui::SameLine();
         KanVasX::UI::ShiftCursorY(-8.0f);
-        passwordBuffer.StrCpy("ashish");
+        if (DefaultUser)
+        {
+          passwordBuffer.StrCpy("ashish");
+        }
+        DefaultUser = false;
         passwordBuffer.TextInput(false, 100, " ", showPassword ? 0 : ImGuiInputTextFlags_Password);
         
         ImGui::SameLine();

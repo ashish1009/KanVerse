@@ -611,12 +611,14 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         case 5: return cmp(a.value, b.value);
         case 6: return cmp(a.profitLoss, b.profitLoss);
         case 7: return cmp(a.profitLossPercent, b.profitLossPercent);
+        case 8: return cmp(a.dayChange, b.dayChange);
+        case 9: return cmp(a.dayChangePercent, b.dayChangePercent);
         default: return false;
       }
     });
     
     // ---- Table ----
-    if (ImGui::BeginTable("HoldingsTable", 9,
+    if (ImGui::BeginTable("HoldingsTable", 10,
                           ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
                           ImGuiTableFlags_ScrollY | ImGuiTableFlags_Sortable))
     {
@@ -628,8 +630,9 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       ImGui::TableSetupColumn("Value");
       ImGui::TableSetupColumn("P/L");
       ImGui::TableSetupColumn("P/L %");
-      ImGui::TableSetupColumn("Vision");
-      
+      ImGui::TableSetupColumn("Day Change");
+      ImGui::TableSetupColumn("Day Change %");
+
       // ---- Header Row ----
       {
         KanVasX::ScopedFont headerfont(UI::Font::Get(UI::FontType::FixedWidthHeader_14));
@@ -707,6 +710,8 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
             h.value = h.stockValue * h.quantity;
             h.profitLoss = h.value - h.investment;
             h.profitLossPercent = (h.profitLoss * 100) / h.investment;
+            h.dayChange = stockData.change;
+            h.dayChangePercent = stockData.changePercent;
           }
         }
         
@@ -737,8 +742,9 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         PrintCell(5, h.value);
         PrintCell(6, h.profitLoss, h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red);
         PrintCell(7, h.profitLossPercent, h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red);
-        PrintCell(8, PortfolioUtils::VisionToString(h.vision));
-        
+        PrintCell(8, h.dayChange, h.dayChange > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red);
+        PrintCell(9, h.dayChangePercent, h.dayChangePercent > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red);
+
         ImGui::PopID();
         
         if (ImGui::IsKeyPressed(ImGuiKey_Backspace))
@@ -758,7 +764,6 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       static float avgPrice = 0.0f;
       static int quantity = 0;
       static int selectedVision = 0;
-      static const char* visions[] = {"Long Term", "Mid Term", "Short Term"};
       
       // Toggle add-row when ⌘ + N is pressed
       if (ImGui::IsKeyDown(ImGuiKey_LeftSuper) && ImGui::IsKeyPressed(ImGuiKey_N))
@@ -796,11 +801,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         ImGui::TableSetColumnIndex(2);
         ImGui::PushItemWidth(availX);
         ImGui::InputInt("##qty", &quantity);
-        
-        ImGui::TableSetColumnIndex(8);
-        ImGui::PushItemWidth(availX);
-        ImGui::Combo("##vision", &selectedVision, visions, IM_ARRAYSIZE(visions));
-        
+                
         if (ImGui::IsKeyPressed(ImGuiKey_Enter))
         {
           std::string symbol = symbolBuf;
