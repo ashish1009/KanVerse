@@ -478,6 +478,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 
     KanVasX::UI::ShiftCursor({xOffset, 10.0f});
 
+    // Technical Data
     {
       ImVec2 technicalAnalyzerSize = {ImGui::GetContentRegionAvail().x, 210.0f};
       ImGui::BeginChild("Technical Analysis", technicalAnalyzerSize, true);
@@ -485,10 +486,45 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       // Title
       KanVasX::UI::Text(font, "Technical Analysis", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
       ImGui::Separator();
-            
+      
+      // Score
+      {
+        float score = static_cast<float>(report.recommendation.score); // 0-100
+        
+        // Determine color based on score
+        ImU32 scoreColor;
+        std::string scoreString = "Technically Neutral";
+        
+        if (score < 15)      { scoreString = "Technically Strong Bearish"; scoreColor = KanVasX::Color::Red; }
+        else if (score < 30) { scoreString = "Technically Bearish"; scoreColor = KanVasX::Color::Orange; }
+        else if (score < 60) { scoreString = "Technically Neutral"; scoreColor = KanVasX::Color::Yellow; }
+        else if (score < 80) { scoreString = "Technically Bullish"; scoreColor = KanVasX::Color::Cyan; }
+        else                 { scoreString = "Technically Strong Bullish"; scoreColor = KanVasX::Color::Green; }
+        
+        // Scoped color
+        {
+          KanVasX::ScopedStyle headerPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2{1.0f, 1.0f});
+          KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
+          // Convert score 0-100 to fraction 0.0-1.0
+          
+          // Print Score
+          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), Utils::FormatDoubleToString(score), KanVasX::UI::AlignX::Left, {0, 0}, scoreColor);
+          
+          // Print /100
+          static const std::string totalScoreString = "/100";
+          ImGui::SameLine();
+          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), totalScoreString, KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
+          
+          ImGui::SameLine();
+          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Large), scoreString, KanVasX::UI::AlignX::Right, {0, 5.0f}, scoreColor);
+          
+          float fraction = score / 100.0f;
+          ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
+        }
+      }
       ImGui::EndChild();
-
     }
+
 //    // Band
 //    KanVasX::UI::Text(font, "Resistance", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
 //    ImGui::SameLine();

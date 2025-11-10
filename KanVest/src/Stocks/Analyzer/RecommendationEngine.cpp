@@ -9,6 +9,32 @@
 
 namespace KanVest
 {
+  std::unordered_map<std::string, int> candlestickScoreMap = {
+    {"BullishEngulfing", 2},
+    {"Hammer", 2},
+    {"MorningStar", 3},
+    {"PiercingLine", 2},
+    {"BearishEngulfing", -2},
+    {"ShootingStar", -2},
+    {"EveningStar", -3},
+    {"DarkCloudCover", -2},
+    {"Doji", 0}, // neutral
+    {"SpinningTop", 0} // neutral
+    // Add more as needed
+  };
+  
+  std::unordered_map<std::string, int> chartPatternScoreMap = {
+    {"HeadAndShoulders", -3},
+    {"InverseHeadAndShoulders", 3},
+    {"DoubleTop", -2},
+    {"DoubleBottom", 2},
+    {"TriangleAscending", 2},
+    {"TriangleDescending", -2},
+    {"Flag", 1},
+    {"Pennant", 1}
+    // Add more patterns here
+  };
+  
   Recommendation RecommendationEngine::Generate(
                                                 const StockData& stock,
                                                 const TechnicalReport& techReport,
@@ -34,44 +60,69 @@ namespace KanVest
       intervalChangePercent = (end.close - start.close) / start.close * 100.0;
     }
     
-    // ---------- Determine Action ----------
-    bool bullishMomentum = momentumReport.shortTermBehavior == Momentum::VeryPositive ||
-    momentumReport.shortTermBehavior == Momentum::Positive;
-    bool bearishMomentum = momentumReport.shortTermBehavior == Momentum::VeryNegative ||
-    momentumReport.shortTermBehavior == Momentum::Negative;
+    // Momentum (0-10)
+    if (momentumReport.shortTermBehavior == Momentum::VeryPositive) rec.score += 10;
+    else if (momentumReport.shortTermBehavior == Momentum::Positive) rec.score += 5;
+    else if (momentumReport.shortTermBehavior == Momentum::Negative) rec.score -= 5;
+    else if (momentumReport.shortTermBehavior == Momentum::VeryNegative) rec.score -= 10;
     
-    bool priceAboveSMA50 = techReport.SMA.count(50) && stock.livePrice > techReport.SMA.at(50);
-    bool oversold = techReport.RSI < 30;
-    bool overbought = techReport.RSI > 70;
+    // RSI (0-10)
+    if (techReport.RSI < 30) rec.score += 7;    // oversold => bullish
+    else if (techReport.RSI > 70) rec.score -= 7; // overbought => bearish
     
+    // SMA50 (0-5)
+    if (techReport.SMA.count(50) && stock.livePrice > techReport.SMA.at(50)) rec.score += 5;
+    else rec.score -= 5;
+    
+    // Cap score based on interval change
+    if (intervalChangePercent <= -10.0)       // huge drop
+      rec.score = std::min(rec.score, 40.0);          // max 40%, cannot Strong Buy
+    else if (intervalChangePercent <= -5.0)   // moderate drop
+      rec.score = std::min(rec.score, 50.0);          // max 50%, cannot be Strong Buy
+    else if (intervalChangePercent >= 10.0)   // huge rise
+      rec.score = std::max(rec.score, 80.0);          // minimum Strong Buy
+
+    // Volatility adjustment (0-5)
+    // Higher short-term volatility reduces confidence
+    rec.score -= volReport.shortTermVolatility / 10.0;
+    
+    // Candlestick patterns (optional, 0-5)
+    double patternScore = 0.0;
+    for (const auto& pattern : chartReport.candlestickPatterns)
+    {
+      if (candlestickScoreMap.count(pattern))
+        patternScore += candlestickScoreMap[pattern];
+    }
+    
+    // Normalize to maximum ±5 points regardless of number of candles
+    patternScore /= std::max(1.0, static_cast<double>(chartReport.candlestickPatterns.size()));
+    patternScore = std::clamp(patternScore, -5.0, 5.0);
+    
+    rec.score += patternScore;
+
+    double chartScore = 0.0;
+    for (const auto& pattern : chartReport.chartPatterns)
+    {
+      if (chartPatternScoreMap.count(pattern))
+        chartScore += candlestickScoreMap[pattern];
+    }
+    
+    // Normalize to maximum ±5 points regardless of number of candles
+    patternScore /= std::max(1.0, static_cast<double>(chartReport.candlestickPatterns.size()));
+    patternScore = std::clamp(patternScore, -5.0, 5.0);
+    
+    rec.score += chartScore;
+    
+    // Clip rec.score to 0-100%
+    rec.score = std::clamp(rec.score, 0.0, 100.0);
+    
+    // ---------- Map rec.score to Action ----------
     Action actionLevel;
-    
-    if (userHolding.quantity > 0)
-    {
-      // Already holding shares
-      if ((bearishMomentum && overbought) || unrealizedPLPercent > 15.0 || intervalChangePercent < -3.0)
-        actionLevel = Action::StrongSell;
-      else if (bearishMomentum || overbought || !priceAboveSMA50)
-        actionLevel = Action::Sell;
-      else if (bullishMomentum && (oversold || intervalChangePercent < 0) && unrealizedPLPercent < -5.0)
-        actionLevel = Action::StrongBuy;
-      else if (bullishMomentum || priceAboveSMA50 || intervalChangePercent > 2.0)
-        actionLevel = Action::Buy;
-      else
-        actionLevel = Action::Hold;
-    }
-    else
-    {
-      // No holdings
-      if (bullishMomentum && (oversold || intervalChangePercent < 0))
-        actionLevel = Action::StrongBuy;
-      else if (bullishMomentum || priceAboveSMA50 || intervalChangePercent > 2.0)
-        actionLevel = Action::Buy;
-      else if (bearishMomentum || !priceAboveSMA50 || intervalChangePercent < -2.0)
-        actionLevel = Action::StrongSell;
-      else
-        actionLevel = Action::Hold;
-    }
+    if (rec.score >= 70) actionLevel = Action::StrongBuy;
+    else if (rec.score >= 55) actionLevel = Action::Buy;
+    else if (rec.score <= 30) actionLevel = Action::StrongSell;
+    else if (rec.score <= 45) actionLevel = Action::Sell;
+    else actionLevel = Action::Hold;
     
     rec.action = actionLevel;
     
@@ -81,6 +132,7 @@ namespace KanVest
     // ---------- Human-readable Explanation ----------
     std::ostringstream oss;
     oss << "Recommendation: " << Utils::GetActionString(rec.action) << "\n";
+    oss << "rec.score: " << rec.score << "%\n";
     oss << "Quantity suggested: " << rec.quantity << "\n";
     oss << "Reasoning:\n";
     
@@ -92,35 +144,18 @@ namespace KanVest
     oss << "- Momentum: Short-term trend is " << Utils::GetMomentumString(momentumReport.shortTermBehavior)
     << ", long-term trend is " << Utils::GetMomentumString(momentumReport.longTermBehavior) << ".\n";
     oss << "- Technicals: RSI = " << techReport.RSI
-    << ", MACD = " << techReport.MACD << " (Signal = " << techReport.MACDSignal << ")"
     << ", SMA50 = " << (techReport.SMA.count(50) ? techReport.SMA.at(50) : 0.0) << ".\n";
     oss << "- Volatility: Short-term = " << volReport.shortTermVolatility
     << "%, Long-term = " << volReport.longTermVolatility << "%.\n";
-    oss << "- Daily performance: " << perfReport.dailyChangePercent
-    << "%, relative to sector: " << perfReport.relativeToSector << "%.\n";
-    
-    oss << "- Chart: Support levels ";
-    for (double s : chartReport.supportLevels) oss << s << " ";
-    if (chartReport.supportLevels.empty()) oss << "None";
-    
-    oss << ", Resistance levels ";
-    for (double r : chartReport.resistanceLevels) oss << r << " ";
-    if (chartReport.resistanceLevels.empty()) oss << "None";
-    
-    oss << ", Candlestick patterns: ";
+    oss << "- Chart Candlestick patterns: ";
     for (const auto& p : chartReport.candlestickPatterns) oss << p << " ";
     if (chartReport.candlestickPatterns.empty()) oss << "None";
-    
-    oss << ", Chart patterns: ";
-    for (const auto& p : chartReport.chartPatterns) oss << p << " ";
-    if (chartReport.chartPatterns.empty()) oss << "None";
-    
     oss << ".\n";
     
     rec.explanation = oss.str();
     return rec;
   }
-  
+
   // --------------------------
   // Determine quantity to trade
   // --------------------------
