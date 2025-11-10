@@ -390,22 +390,21 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     // --- Recommendation ---
     static auto font = KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26);
     
-    const char* recText = "";
     ImU32 recColor;
     switch (report.recommendation.action)
     {
-      case Action::StrongBuy: recText = "Strong Buy"; recColor = KanVasX::Color::Green; break;
-      case Action::Buy:       recText = "Buy";        recColor = KanVasX::Color::Cyan; break;
-      case Action::Hold:      recText = "Hold";       recColor = KanVasX::Color::Yellow; break;
-      case Action::Sell:      recText = "Sell";       recColor = KanVasX::Color::Orange; break;
-      case Action::StrongSell:recText = "Strong Sell";recColor = KanVasX::Color::Red; break;
-      default:                recText = "Unknown";    recColor = KanVasX::Color::White; break;
+      case Action::StrongBuy:   recColor = KanVasX::Color::Green; break;
+      case Action::Buy:         recColor = KanVasX::Color::Cyan; break;
+      case Action::Hold:        recColor = KanVasX::Color::Yellow; break;
+      case Action::Sell:        recColor = KanVasX::Color::Orange; break;
+      case Action::StrongSell:  recColor = KanVasX::Color::Red; break;
+      default:                  recColor = KanVasX::Color::White; break;
     }
 
     KanVasX::UI::ShiftCursorY(10.0f);
     KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
     ImGui::SameLine();
-    KanVasX::UI::Text(font, recText, KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
+    KanVasX::UI::Text(font, Utils::GetActionString(report.recommendation.action), KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
 
 //    // Voltality
 //    const char* volText = "";
