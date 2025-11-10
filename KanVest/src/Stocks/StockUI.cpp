@@ -8,7 +8,7 @@
 #include "StockUI.hpp"
 
 #include "Stocks/StockManager.hpp"
-#include "Stocks/Analyzer/Analyzer.hpp"
+//#include "Stocks/Analyzer/Analyzer.hpp"
 
 #include "User/UserManager.hpp"
 
@@ -384,192 +384,192 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowAnalyzerData()
   {
-    Analysis::AnalysisReport r = StockManager::AnalyzeSelectedStock();
-    
-    static float xOffset = 20.0f;
-    
-    // --- Recommendation ---
-    static auto font = KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26);
-    
-    const char* recommendationText = "";
-    ImU32 recColor;
-    switch (r.recommendation)
-    {
-      case Analysis::Recommendation::StrongBuy: recommendationText = "Strong Buy"; recColor = KanVasX::Color::Green; break;
-      case Analysis::Recommendation::Buy:       recommendationText = "Buy";        recColor = KanVasX::Color::Cyan; break;
-      case Analysis::Recommendation::Hold:      recommendationText = "Hold";       recColor = KanVasX::Color::Yellow; break;
-      case Analysis::Recommendation::Sell:      recommendationText = "Sell";       recColor = KanVasX::Color::Orange; break;
-      case Analysis::Recommendation::StrongSell:recommendationText = "Strong Sell";recColor = KanVasX::Color::Red; break;
-      default: recommendationText = "Unknown";   recColor = KanVasX::Color::White; break;
-    }
-
-    KanVasX::UI::ShiftCursorY(10.0f);
-    KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
-    ImGui::SameLine();
-    KanVasX::UI::Text(font, recommendationText, KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
-
-    // Voltality
-    const char* volText = "";
-    ImU32 volColor;
-    if (r.volatility > 8.0) {
-      volText = "Very High";
-      volColor = KanVasX::Color::Red;
-    }
-    else if (r.volatility > 5.0) {
-      volText = "High";
-      volColor = KanVasX::Color::Orange;
-    }
-    else if (r.volatility > 2.5) {
-      volText = "Moderate";
-      volColor = KanVasX::Color::Yellow;
-    }
-    else if (r.volatility > 1.0) {
-      volText = "Low";
-      volColor = KanVasX::Color::Cyan;
-    }
-    else {
-      volText = "Very Low";
-      volColor = KanVasX::Color::Green;
-    }
-
-    KanVasX::UI::Text(font, "Voltality", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
-    ImGui::SameLine();
-    KanVasX::UI::Text(font, volText, KanVasX::UI::AlignX::Right, {-30, 0}, volColor);
-
-    // Band
-    KanVasX::UI::Text(font, "Resistance", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
-    ImGui::SameLine();
-    KanVasX::UI::Text(font, Utils::FormatDoubleToString(r.nearestResistanceLevel), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
-    KanVasX::UI::Tooltip(r.allResistanceLevel);
-    KanVasX::UI::Text(font, "Support", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
-    ImGui::SameLine();
-    KanVasX::UI::Text(font, Utils::FormatDoubleToString(r.nearestSupportLevel), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
-    KanVasX::UI::Tooltip(r.allSupportLevel);
-    
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 10.0f});
-
-    // --- Score Bar ---
-    KanVasX::UI::ShiftCursorX(xOffset);
-    {
-      float score = static_cast<float>(r.score);
-      ImU32 scoreColor;
-      if (score <= -0.7) {
-        scoreColor = KanVasX::Color::Red;            // Strong Sell
-      }
-      else if (score <= -0.3) {
-        scoreColor = KanVasX::Color::Orange;         // Weak Sell / Bearish
-      }
-      else if (score < 0.3) {
-        scoreColor = KanVasX::Color::Yellow;         // Neutral / Hold
-      }
-      else if (score < 0.7) {
-        scoreColor = KanVasX::Color::Cyan;           // Moderately Bullish / Buy
-      }
-      else {
-        scoreColor = KanVasX::Color::Green;          // Strong Buy
-      }
-
-      KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
-      ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8);
-      ImGui::ProgressBar((score + 1.0f) / 2.0f, ImVec2(-1, 0), ("Score: " + std::to_string(score)).c_str());
-    }
-
-    // --- Suggested Quantity ---
-    KanVasX::UI::ShiftCursorX(20.0f);
-    {
-      KanVasX::ScopedColor textColor(ImGuiCol_Text, recColor);
-      ImGui::TextWrapped("%s", r.actionReason.c_str());
-    }
-    if (r.suggestedActionQty != 0.0)
-    {
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), "Suggested Quantity", KanVasX::UI::AlignX::Left, {20.0f, 0}, recColor);
-      ImGui::SameLine();
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), std::to_string(int(r.suggestedActionQty)), KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
-    }
-
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 0.0f});
-
-    KanVasX::UI::ShiftCursorY(5.0f);
-    {
-      if (ImGui::BeginTabBar("Technicals"))
-      {
-        if (ImGui::BeginTabItem("Key Indicators"))
-        {
-          auto Indicator = [&](const char* label, double value)
-          {
-            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), label, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
-            ImGui::SameLine();
-            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(value), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
-            if (ImGui::IsItemHovered())
-            {
-              ImGui::SetTooltip("%s", r.tooltips.count(label) ? r.tooltips.at(label).c_str() : "No tooltip");
-            }
-          };
-          
-          Indicator("SMA Short", r.smaShort);
-          Indicator("SMA Long", r.smaLong);
-          Indicator("RSI", r.rsi);
-          Indicator("MACD", r.macd);
-          Indicator("MACD Signal", r.macdSignal);
-          Indicator("ATR", r.atr);
-          Indicator("VWAP", r.vwap);
-          Indicator("OBV", r.obv);
-          Indicator("ADX", r.adx);
-          Indicator("MFI", r.mfi);
-          Indicator("ROC", r.roc);
-          Indicator("CCI", r.cci);
-          Indicator("StochasticK", r.stochasticK);
-          Indicator("StochasticD", r.stochasticD);
-
-          ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Candlestick Patterns"))
-        {
-          if (r.candlePatterns.empty())
-          {
-            ImGui::TextDisabled("No candlestick patterns detected.");
-          }
-          else
-          {
-            for (auto& p : r.candlePatterns)
-            {
-              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), p.name, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
-              ImGui::SameLine();
-              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(p.strength), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
-              
-              if (ImGui::IsItemHovered() && !p.rationale.empty())
-              {
-                ImGui::SetTooltip("%s", p.rationale.c_str());
-              }
-            }
-          }
-          ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Chart Patterns"))
-        {
-          if (r.chartPatterns.empty())
-          {
-            ImGui::TextDisabled("No chart patterns detected.");
-          }
-          else
-          {
-            for (auto& p : r.chartPatterns)
-            {
-              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), p.name, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
-              ImGui::SameLine();
-              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(p.strength), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
-              if (ImGui::IsItemHovered() && !p.rationale.empty())
-              {
-                ImGui::SetTooltip("%s", p.rationale.c_str());
-              }
-            }
-          }
-          ImGui::EndTabItem();
-        }
-        
-        ImGui::EndTabBar();
-      }
-    } // Tabs
+//    Analysis::AnalysisReport r = StockManager::AnalyzeSelectedStock();
+//    
+//    static float xOffset = 20.0f;
+//    
+//    // --- Recommendation ---
+//    static auto font = KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26);
+//    
+//    const char* recommendationText = "";
+//    ImU32 recColor;
+//    switch (r.recommendation)
+//    {
+//      case Analysis::Recommendation::StrongBuy: recommendationText = "Strong Buy"; recColor = KanVasX::Color::Green; break;
+//      case Analysis::Recommendation::Buy:       recommendationText = "Buy";        recColor = KanVasX::Color::Cyan; break;
+//      case Analysis::Recommendation::Hold:      recommendationText = "Hold";       recColor = KanVasX::Color::Yellow; break;
+//      case Analysis::Recommendation::Sell:      recommendationText = "Sell";       recColor = KanVasX::Color::Orange; break;
+//      case Analysis::Recommendation::StrongSell:recommendationText = "Strong Sell";recColor = KanVasX::Color::Red; break;
+//      default: recommendationText = "Unknown";   recColor = KanVasX::Color::White; break;
+//    }
+//
+//    KanVasX::UI::ShiftCursorY(10.0f);
+//    KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
+//    ImGui::SameLine();
+//    KanVasX::UI::Text(font, recommendationText, KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
+//
+//    // Voltality
+//    const char* volText = "";
+//    ImU32 volColor;
+//    if (r.volatility > 8.0) {
+//      volText = "Very High";
+//      volColor = KanVasX::Color::Red;
+//    }
+//    else if (r.volatility > 5.0) {
+//      volText = "High";
+//      volColor = KanVasX::Color::Orange;
+//    }
+//    else if (r.volatility > 2.5) {
+//      volText = "Moderate";
+//      volColor = KanVasX::Color::Yellow;
+//    }
+//    else if (r.volatility > 1.0) {
+//      volText = "Low";
+//      volColor = KanVasX::Color::Cyan;
+//    }
+//    else {
+//      volText = "Very Low";
+//      volColor = KanVasX::Color::Green;
+//    }
+//
+//    KanVasX::UI::Text(font, "Voltality", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
+//    ImGui::SameLine();
+//    KanVasX::UI::Text(font, volText, KanVasX::UI::AlignX::Right, {-30, 0}, volColor);
+//
+//    // Band
+//    KanVasX::UI::Text(font, "Resistance", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
+//    ImGui::SameLine();
+//    KanVasX::UI::Text(font, Utils::FormatDoubleToString(r.nearestResistanceLevel), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
+//    KanVasX::UI::Tooltip(r.allResistanceLevel);
+//    KanVasX::UI::Text(font, "Support", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
+//    ImGui::SameLine();
+//    KanVasX::UI::Text(font, Utils::FormatDoubleToString(r.nearestSupportLevel), KanVasX::UI::AlignX::Right, {-30, 0}, KanVasX::Color::White);
+//    KanVasX::UI::Tooltip(r.allSupportLevel);
+//    
+//    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 10.0f});
+//
+//    // --- Score Bar ---
+//    KanVasX::UI::ShiftCursorX(xOffset);
+//    {
+//      float score = static_cast<float>(r.score);
+//      ImU32 scoreColor;
+//      if (score <= -0.7) {
+//        scoreColor = KanVasX::Color::Red;            // Strong Sell
+//      }
+//      else if (score <= -0.3) {
+//        scoreColor = KanVasX::Color::Orange;         // Weak Sell / Bearish
+//      }
+//      else if (score < 0.3) {
+//        scoreColor = KanVasX::Color::Yellow;         // Neutral / Hold
+//      }
+//      else if (score < 0.7) {
+//        scoreColor = KanVasX::Color::Cyan;           // Moderately Bullish / Buy
+//      }
+//      else {
+//        scoreColor = KanVasX::Color::Green;          // Strong Buy
+//      }
+//
+//      KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
+//      ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8);
+//      ImGui::ProgressBar((score + 1.0f) / 2.0f, ImVec2(-1, 0), ("Score: " + std::to_string(score)).c_str());
+//    }
+//
+//    // --- Suggested Quantity ---
+//    KanVasX::UI::ShiftCursorX(20.0f);
+//    {
+//      KanVasX::ScopedColor textColor(ImGuiCol_Text, recColor);
+//      ImGui::TextWrapped("%s", r.actionReason.c_str());
+//    }
+//    if (r.suggestedActionQty != 0.0)
+//    {
+//      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), "Suggested Quantity", KanVasX::UI::AlignX::Left, {20.0f, 0}, recColor);
+//      ImGui::SameLine();
+//      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), std::to_string(int(r.suggestedActionQty)), KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
+//    }
+//
+//    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 0.0f});
+//
+//    KanVasX::UI::ShiftCursorY(5.0f);
+//    {
+//      if (ImGui::BeginTabBar("Technicals"))
+//      {
+//        if (ImGui::BeginTabItem("Key Indicators"))
+//        {
+//          auto Indicator = [&](const char* label, double value)
+//          {
+//            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), label, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
+//            ImGui::SameLine();
+//            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(value), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
+//            if (ImGui::IsItemHovered())
+//            {
+//              ImGui::SetTooltip("%s", r.tooltips.count(label) ? r.tooltips.at(label).c_str() : "No tooltip");
+//            }
+//          };
+//          
+//          Indicator("SMA Short", r.smaShort);
+//          Indicator("SMA Long", r.smaLong);
+//          Indicator("RSI", r.rsi);
+//          Indicator("MACD", r.macd);
+//          Indicator("MACD Signal", r.macdSignal);
+//          Indicator("ATR", r.atr);
+//          Indicator("VWAP", r.vwap);
+//          Indicator("OBV", r.obv);
+//          Indicator("ADX", r.adx);
+//          Indicator("MFI", r.mfi);
+//          Indicator("ROC", r.roc);
+//          Indicator("CCI", r.cci);
+//          Indicator("StochasticK", r.stochasticK);
+//          Indicator("StochasticD", r.stochasticD);
+//
+//          ImGui::EndTabItem();
+//        }
+//        if (ImGui::BeginTabItem("Candlestick Patterns"))
+//        {
+//          if (r.candlePatterns.empty())
+//          {
+//            ImGui::TextDisabled("No candlestick patterns detected.");
+//          }
+//          else
+//          {
+//            for (auto& p : r.candlePatterns)
+//            {
+//              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), p.name, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
+//              ImGui::SameLine();
+//              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(p.strength), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
+//              
+//              if (ImGui::IsItemHovered() && !p.rationale.empty())
+//              {
+//                ImGui::SetTooltip("%s", p.rationale.c_str());
+//              }
+//            }
+//          }
+//          ImGui::EndTabItem();
+//        }
+//        if (ImGui::BeginTabItem("Chart Patterns"))
+//        {
+//          if (r.chartPatterns.empty())
+//          {
+//            ImGui::TextDisabled("No chart patterns detected.");
+//          }
+//          else
+//          {
+//            for (auto& p : r.chartPatterns)
+//            {
+//              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), p.name, KanVasX::UI::AlignX::Left, {20.0f, 0}, KanVasX::Color::White);
+//              ImGui::SameLine();
+//              KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(p.strength), KanVasX::UI::AlignX::Right, {-20.0f, 0}, KanVasX::Color::White);
+//              if (ImGui::IsItemHovered() && !p.rationale.empty())
+//              {
+//                ImGui::SetTooltip("%s", p.rationale.c_str());
+//              }
+//            }
+//          }
+//          ImGui::EndTabItem();
+//        }
+//        
+//        ImGui::EndTabBar();
+//      }
+//    } // Tabs
 //    
 //    // --- Explanation ---
 //    if (ImGui::CollapsingHeader("Detailed Explanation", ImGuiTreeNodeFlags_DefaultOpen))
