@@ -49,4 +49,4 @@ namespace KanVest
     else
       return "Neutral";
   }
-}
+} // namespace KanVest

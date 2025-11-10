@@ -92,4 +92,4 @@ namespace KanVest
     }
     return "Neutral";
   }
-}
+} // namespace KanVest

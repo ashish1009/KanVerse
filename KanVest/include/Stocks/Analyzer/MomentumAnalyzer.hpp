@@ -27,4 +27,4 @@ namespace KanVest
   private:
     static std::string DetermineBehavior(double shortMA, double longMA, double volatility);
   };
-}
+} // namespace KanVest

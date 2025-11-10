@@ -69,4 +69,4 @@ namespace KanVest
     
     return desc;
   }
-}
+} // namespace KanVest

@@ -23,6 +23,7 @@
 		B2F24F262EC1DBD800810B5B /* TechnicalUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F24F252EC1DBD800810B5B /* TechnicalUtils.cpp */; };
 		B2F24F292EC1DCEF00810B5B /* VolatilityAnalyzer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F24F282EC1DCEF00810B5B /* VolatilityAnalyzer.cpp */; };
 		B2F24F2C2EC1DD7800810B5B /* MomentumAnalyzer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F24F2B2EC1DD7800810B5B /* MomentumAnalyzer.cpp */; };
+		B2F24F2F2EC1DE0C00810B5B /* PerformanceAnalyzer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F24F2E2EC1DE0C00810B5B /* PerformanceAnalyzer.cpp */; };
 		B2F3BA762EBC361600EC0863 /* APIProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F3BA752EBC361600EC0863 /* APIProvider.cpp */; };
 		B2F3BA7B2EBC372500EC0863 /* StockParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F3BA7A2EBC372500EC0863 /* StockParser.cpp */; };
 		B2F3BA7E2EBC37AB00EC0863 /* StockAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F3BA7D2EBC37AB00EC0863 /* StockAPI.cpp */; };
@@ -75,6 +76,8 @@
 		B2F24F282EC1DCEF00810B5B /* VolatilityAnalyzer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VolatilityAnalyzer.cpp; sourceTree = "<group>"; };
 		B2F24F2A2EC1DD7800810B5B /* MomentumAnalyzer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MomentumAnalyzer.hpp; sourceTree = "<group>"; };
 		B2F24F2B2EC1DD7800810B5B /* MomentumAnalyzer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MomentumAnalyzer.cpp; sourceTree = "<group>"; };
+		B2F24F2D2EC1DE0C00810B5B /* PerformanceAnalyzer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PerformanceAnalyzer.hpp; sourceTree = "<group>"; };
+		B2F24F2E2EC1DE0C00810B5B /* PerformanceAnalyzer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PerformanceAnalyzer.cpp; sourceTree = "<group>"; };
 		B2F3BA712EBC358E00EC0863 /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
 		B2F3BA742EBC361600EC0863 /* APIProvider.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = APIProvider.hpp; sourceTree = "<group>"; };
 		B2F3BA752EBC361600EC0863 /* APIProvider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = APIProvider.cpp; sourceTree = "<group>"; };
@@ -288,6 +291,7 @@
 				B2F24F212EC1DB8900810B5B /* TechnicalAnalyzer.hpp */,
 				B2F24F272EC1DCEF00810B5B /* VolatilityAnalyzer.hpp */,
 				B2F24F2A2EC1DD7800810B5B /* MomentumAnalyzer.hpp */,
+				B2F24F2D2EC1DE0C00810B5B /* PerformanceAnalyzer.hpp */,
 			);
 			path = Analyzer;
 			sourceTree = "<group>";
@@ -299,6 +303,7 @@
 				B2F24F222EC1DB8900810B5B /* TechnicalAnalyzer.cpp */,
 				B2F24F282EC1DCEF00810B5B /* VolatilityAnalyzer.cpp */,
 				B2F24F2B2EC1DD7800810B5B /* MomentumAnalyzer.cpp */,
+				B2F24F2E2EC1DE0C00810B5B /* PerformanceAnalyzer.cpp */,
 			);
 			path = Analyzer;
 			sourceTree = "<group>";
@@ -384,6 +389,7 @@
 				B2F24F232EC1DB8900810B5B /* TechnicalAnalyzer.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B25162092EBB4AF300C7FDC3 /* StockUI.cpp in Sources */,
+				B2F24F2F2EC1DE0C00810B5B /* PerformanceAnalyzer.cpp in Sources */,
 				B25162062EBB48A200C7FDC3 /* UserManager.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
 				B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */,
