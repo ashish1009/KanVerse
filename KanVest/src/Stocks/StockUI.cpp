@@ -385,6 +385,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   void StockUI::ShowAnalyzerData()
   {
     StockAnalysisReport report = StockManager::AnalyzeSelectedStock();
+    const StockData& stockData = StockManager::GetSelectedStockData();
     KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundDark);
 
     static float xOffset = 0.0f;
@@ -560,13 +561,62 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       // SMA
       if (tab == TechnicalTab::SMA)
       {
-        for (const auto& [period,ema] : report.technicals.SMA)
+        ImVec2 smaChildSize = {(ImGui::GetContentRegionAvail().x / 4) - 6.0f, 60.0f};
+        
+        int bullish = 0;
+        int bearish = 0;
+        for (const auto& [period, sma] : report.technicals.SMA)
         {
-          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), Utils::FormatDoubleToString(period), KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
-          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), Utils::FormatDoubleToString(ema), KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
-          
+          if (sma > stockData.livePrice) bearish ++;
+          else if (sma < stockData.livePrice and sma != 0) bullish++;
         }
+        int total = bullish + bearish;
+        
+        if (bullish >= bearish)
+        {
+          std::string smaSummary = stockData.shortName + " is trading above " + std::to_string(bullish) + " out of " + std::to_string(total) + " SMAs";
+          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::Cyan);
+        }
+        else
+        {
+          std::string smaSummary = stockData.shortName + " is trading below " + std::to_string(bearish) + " out of " + std::to_string(total) + "SMAs";
+          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::Red);
+        }
+        
+        auto ShowSma = [stockData](int period, double sma) {
+          if (sma > 0)
+          {
+            std::string datString = std::to_string(period) + " Day";
+            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), datString, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::White);
+            ImGui::SameLine();
+            auto smaColor = sma > stockData.livePrice ? KanVasX::Color::Red : KanVasX::Color::Cyan;
+            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(sma), KanVasX::UI::AlignX::Right, {0, 0.0f}, smaColor);
+          }
+        };
+        
+        int idx = 0;
+        for (const auto& [period, sma] : report.technicals.SMA)
+        {
+          if (idx % 2 == 0)
+          {
+            ImGui::BeginChild(std::to_string(period).c_str(), smaChildSize, true);
+          }
+          
+          ShowSma(period, sma);
+          
+          if (idx % 2 != 0)
+          {
+            ImGui::EndChild();
+            ImGui::SameLine();            
+          }
+          idx++;
+        }
+        ImGui::NewLine();
 
+
+//        {
+//          ShowSma(period, ema);
+//        }
       }
       
       // EMA
