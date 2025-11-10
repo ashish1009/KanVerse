@@ -76,15 +76,15 @@ namespace KanVest
     std::string VolatilityDescription(double volatilityPercent)
     {
       if (volatilityPercent < 0.5)
-        return "Very Low";
+        return "Very Low Volatile";
       else if (volatilityPercent < 1.5)
-        return "Low";
+        return "Low Volatile";
       else if (volatilityPercent < 3.0)
-        return "Moderate";
+        return "Moderate Volatile";
       else if (volatilityPercent < 6.0)
-        return "High";
+        return "High Volatile";
       else
-        return "Very High";
+        return "Very High Volatile";
     }
     
     // Example usage for VolatilityReport

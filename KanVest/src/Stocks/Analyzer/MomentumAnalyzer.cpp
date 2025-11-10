@@ -56,11 +56,11 @@ namespace KanVest
     {
       switch (momentum)
       {
-        case Momentum::VeryPositive: return "Very Positive";
-        case Momentum::Positive: return "Positive";
-        case Momentum::Neutral: return "Neutral";
-        case Momentum::Negative: return "Negative";
-        case Momentum::VeryNegative: return "Very Negative";
+        case Momentum::VeryPositive: return "Very Positive Momentum";
+        case Momentum::Positive: return "Positive Momentum";
+        case Momentum::Neutral: return "Neutral Momentum";
+        case Momentum::Negative: return "Negative Momentum";
+        case Momentum::VeryNegative: return "Very Negative Momentum";
         default:
           break;
       }

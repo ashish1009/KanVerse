@@ -401,27 +401,81 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       default:                  recColor = KanVasX::Color::White; break;
     }
 
-    KanVasX::UI::ShiftCursorY(10.0f);
+    KanVasX::UI::ShiftCursorY(20.0f);
     KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
     ImGui::SameLine();
-    KanVasX::UI::Text(font, Utils::GetActionString(report.recommendation.action), KanVasX::UI::AlignX::Right, {-30, 0}, recColor);
+    KanVasX::UI::Text(font, Utils::GetActionString(report.recommendation.action), KanVasX::UI::AlignX::Right, {-50, 0}, recColor);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 10.0f});
 
-//    // Voltality
-//    auto ShowVoltalitity = [](const std::string& title, double volatility) {
-//      ImU32 volColor;
-//      if (volatility < 0.5) { volColor = KanVasX::Color::Green; }
-//      else if (volatility < 1.5) { volColor = KanVasX::Color::Cyan; }
-//      else if (volatility < 3.0) { volColor = KanVasX::Color::Yellow; }
-//      else if (volatility < 6.0) { volColor = KanVasX::Color::Orange; }
-//      else { volColor = KanVasX::Color::Red; }
-//      
-//      KanVasX::UI::Text(font, title, KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
-//      ImGui::SameLine();
-//      KanVasX::UI::Text(font, Utils::VolatilityDescription(volatility), KanVasX::UI::AlignX::Right, {-30, 0}, volColor);
-//    };
-//    
-//    ShowVoltalitity("Short Term Volatility", report.volatility.shortTermVolatility);
-//    ShowVoltalitity("Long Term Volatility", report.volatility.longTermVolatility);
+    KanVasX::UI::ShiftCursorY(20.0f);
+    // ------- Stock Insight
+    {
+      KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundLight);
+      
+      // Voltality
+      auto ShowVoltalitity = [](double volatility, const std::string& tooltip) {
+        ImU32 color;
+        if (volatility < 0.5) { color = KanVasX::Color::Green; }
+        else if (volatility < 1.5) { color = KanVasX::Color::Cyan; }
+        else if (volatility < 3.0) { color = KanVasX::Color::Yellow; }
+        else if (volatility < 6.0) { color = KanVasX::Color::Orange; }
+        else { color = KanVasX::Color::Red; }
+        
+        KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_22), Utils::VolatilityDescription(volatility), KanVasX::UI::AlignX::Left, {0, 0}, color);
+        KanVasX::UI::Tooltip(tooltip);
+      };
+
+      // Voltality
+      auto ShowMomentum = [](Momentum momentum, const std::string& tooltip) {
+        ImU32 color;
+        switch (momentum)
+        {
+          case Momentum::VeryPositive:  color = KanVasX::Color::Green; break;
+          case Momentum::Positive:      color = KanVasX::Color::Cyan; break;
+          case Momentum::Neutral:       color = KanVasX::Color::Yellow; break;
+          case Momentum::Negative:      color = KanVasX::Color::Orange; break;
+          case Momentum::VeryNegative:  color = KanVasX::Color::Red; break;
+          default:
+            color = KanVasX::Color::White; break;
+        }
+
+        KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_22), Utils::GetMomentumString(momentum), KanVasX::UI::AlignX::Left, {0, 0}, color);
+        KanVasX::UI::Tooltip(tooltip);
+      };
+
+      ImVec2 size = {ImGui::GetContentRegionAvail().x * 0.445f, 110.0f};
+      KanVasX::UI::ShiftCursorX(20.0f);
+      
+      // Long Term
+      {
+        ImGui::BeginChild("Long Term Insigth", size, true);
+        
+        // Title
+        KanVasX::UI::Text(font, "Long Term", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
+        ImGui::Separator();
+        
+        ShowVoltalitity(report.volatility.longTermVolatility, report.volatility.explanation);
+        ShowMomentum(report.momentum.longTermBehavior, report.momentum.explanation);
+        
+        ImGui::EndChild();
+      }
+      
+      ImGui::SameLine();
+      // Short Term
+      {
+        ImGui::BeginChild("Short Term Insigth", size, true);
+        
+        // Title
+        KanVasX::UI::Text(font, "Short Term", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
+        ImGui::Separator();
+        
+        ShowVoltalitity(report.volatility.shortTermVolatility, report.volatility.explanation);
+        ShowMomentum(report.momentum.shortTermBehavior, report.momentum.explanation);
+
+        ImGui::EndChild();
+      }
+    }
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 0.9, {20.0f, 10.0f});
 
 //    // Band
 //    KanVasX::UI::Text(font, "Resistance", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
