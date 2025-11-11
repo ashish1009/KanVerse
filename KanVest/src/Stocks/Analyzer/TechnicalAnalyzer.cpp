@@ -11,12 +11,12 @@
 
 namespace KanVest
 {
-//  TechnicalReport TechnicalAnalyzer::Analyze(const StockData& stock)
-//  {
-//    IK_PERFORMANCE_FUNC("TechnicalAnalyzer::Analyze");
-//    TechnicalReport report;
-//    
-//    ComputeMovingAverages(stock, report);
+  TechnicalReport TechnicalAnalyzer::Analyze(const StockData& stock)
+  {
+    IK_PERFORMANCE_FUNC("TechnicalAnalyzer::Analyze");
+    TechnicalReport report;
+    
+    ComputeMovingAverages(stock, report);
 //    ComputeRSI(stock, report);
 //    ComputeMACD(stock, report);
 //    ComputeATR(stock, report);
@@ -29,75 +29,75 @@ namespace KanVest
 //    ComputeADX(stock, report);   // default period 14
 //    ComputeMFI(stock, report);   // default period 14
 //    ComputeOBV(stock, report);
-//    
-//    return report;
-//  }
-//
-//  void TechnicalAnalyzer::ComputeMovingAverages(const StockData& stock, TechnicalReport& report)
-//  {
-//    IK_PERFORMANCE_FUNC("TechnicalAnalyzer::ComputeMovingAverages");
-//    static std::mutex reportMutex;
-//    const auto& data = stock.history;
-//    if (data.empty())
-//      return;
-//    
-//    // Extract closing prices
-//    std::vector<double> closes;
-//    closes.reserve(data.size());
-//    for (const auto& p : data)
-//      closes.push_back(p.close);
-//    
-//    // Common SMA/EMA periods (in days)
-//    std::vector<int> basePeriods = {5, 10, 20, 30, 50, 100, 150, 200};
-//    std::vector<std::future<void>> tasks;
-//    
-//    // Determine bars per trading day and ensure valid resolution
-//    int barsPerDay = 1;
-//    int dummyPeriodBars = 0;
-//    if (!TechnicalUtils::ResolvePeriods(data, 1, dummyPeriodBars, barsPerDay))
-//      return;
-//    
-//    for (int days : basePeriods)
-//    {
-//      int periodBars = 0;
-//      if (!TechnicalUtils::ResolvePeriods(data, days, periodBars, barsPerDay))
-//        continue;
-//      
-//      if (closes.size() < static_cast<size_t>(periodBars))
-//        continue; // not enough data
-//      
-//      tasks.emplace_back(std::async(std::launch::async, [&, days, periodBars]() {
-//        // --- Simple Moving Average ---
-//        double sma = std::accumulate(closes.end() - periodBars, closes.end(), 0.0) / periodBars;
-//        
-//        // --- Exponential Moving Average ---
-//        double alpha = 2.0 / (periodBars + 1.0);
-//        double ema = closes.front();
-//        for (size_t i = 1; i < closes.size(); ++i)
-//          ema = alpha * closes[i] + (1.0 - alpha) * ema;
-//        
-//        // --- Thread-safe update ---
-//        {
-//          std::lock_guard<std::mutex> lock(reportMutex);
-//          report.SMA[days] = sma;
-//          report.EMA[days] = ema;
-//          
-//          report.Explanations["SMA_" + std::to_string(days)] =
-//          "The " + std::to_string(days) + "-day SMA (" + std::to_string(periodBars) +
-//          " bars) = " + std::to_string(sma) + ", showing average price over the last " +
-//          std::to_string(days) + " trading days.";
-//          
-//          report.Explanations["EMA_" + std::to_string(days)] =
-//          "The " + std::to_string(days) + "-day EMA (" + std::to_string(periodBars) +
-//          " bars) = " + std::to_string(ema) +
-//          ", reacting faster to recent price movements.";
-//        }
-//      }));
-//    }
-//    
-//    for (auto& t : tasks)
-//      t.wait();
-//  }
+    
+    return report;
+  }
+
+  void TechnicalAnalyzer::ComputeMovingAverages(const StockData& stock, TechnicalReport& report)
+  {
+    IK_PERFORMANCE_FUNC("TechnicalAnalyzer::ComputeMovingAverages");
+    static std::mutex reportMutex;
+    const auto& data = stock.history;
+    if (data.empty())
+      return;
+    
+    // Extract closing prices
+    std::vector<double> closes;
+    closes.reserve(data.size());
+    for (const auto& p : data)
+      closes.push_back(p.close);
+    
+    // Common SMA/EMA periods (in days)
+    std::vector<int> basePeriods = {5, 10, 20, 30, 50, 100, 150, 200};
+    std::vector<std::future<void>> tasks;
+    
+    // Determine bars per trading day and ensure valid resolution
+    int barsPerDay = 1;
+    int dummyPeriodBars = 0;
+    if (!TechnicalUtils::ResolvePeriods(data, 1, dummyPeriodBars, barsPerDay))
+      return;
+    
+    for (int days : basePeriods)
+    {
+      int periodBars = 0;
+      if (!TechnicalUtils::ResolvePeriods(data, days, periodBars, barsPerDay))
+        continue;
+      
+      if (closes.size() < static_cast<size_t>(periodBars))
+        continue; // not enough data
+      
+      tasks.emplace_back(std::async(std::launch::async, [&, days, periodBars]() {
+        // --- Simple Moving Average ---
+        double sma = std::accumulate(closes.end() - periodBars, closes.end(), 0.0) / periodBars;
+        
+        // --- Exponential Moving Average ---
+        double alpha = 2.0 / (periodBars + 1.0);
+        double ema = closes.front();
+        for (size_t i = 1; i < closes.size(); ++i)
+          ema = alpha * closes[i] + (1.0 - alpha) * ema;
+        
+        // --- Thread-safe update ---
+        {
+          std::lock_guard<std::mutex> lock(reportMutex);
+          report.SMA[days] = sma;
+          report.EMA[days] = ema;
+          
+          report.Explanations["SMA_" + std::to_string(days)] =
+          "The " + std::to_string(days) + "-day SMA (" + std::to_string(periodBars) +
+          " bars) = " + std::to_string(sma) + ", showing average price over the last " +
+          std::to_string(days) + " trading days.";
+          
+          report.Explanations["EMA_" + std::to_string(days)] =
+          "The " + std::to_string(days) + "-day EMA (" + std::to_string(periodBars) +
+          " bars) = " + std::to_string(ema) +
+          ", reacting faster to recent price movements.";
+        }
+      }));
+    }
+    
+    for (auto& t : tasks)
+      t.wait();
+  }
 //  
 //  void TechnicalAnalyzer::ComputeRSI(const StockData& stock, TechnicalReport& report, int period)
 //  {

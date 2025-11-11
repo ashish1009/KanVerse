@@ -13,16 +13,16 @@
 
 namespace KanVest
 {
-//  struct StockAnalysisReport
-//  {
-//    KanVest::TechnicalReport technicals;
+  struct StockAnalysisReport
+  {
+    KanVest::TechnicalReport technicals;
 //    KanVest::VolatilityReport volatility;
 //    KanVest::MomentumReport momentum;
 //    KanVest::PerformanceReport performance;
 //    KanVest::ChartReport chart;
 //    KanVest::Recommendation recommendation;
-//  };
-//
+  };
+
   /// This class manages all stocks
   class StockManager
   {
@@ -50,7 +50,7 @@ namespace KanVest
     };
     
     /// This function analyzes the selected stock
-//    static const StockAnalysisReport& AnalyzeSelectedStock();
+    static const StockAnalysisReport& AnalyzeSelectedStock();
 
     /// Add a new stock symbol for live tracking
     static bool AddStock(const std::string& symbol);
@@ -63,6 +63,8 @@ namespace KanVest
     
     /// Get stock data (thread-safe)
     static bool GetShortTermStockData(const std::string& symbol, StockData& outData);
+    /// Get stock data (thread-safe)
+    static bool GetLongTermStockData(const std::string& symbol, StockData& outData);
 
     /// Force immediate refresh of all symbols
     static void RefreshAll();
@@ -75,17 +77,21 @@ namespace KanVest
 
     /// This function updates the active stock data
     static void SetSelectedStockSymbol(const std::string& stockSymbol);
-//    /// This function updates the active stock holding data
-//    static void SetSelectedStockHoldingData(double atp, int qty);
+    /// This function updates the active stock holding data
+    static void SetSelectedStockHoldingData(const UserHoldingForAnalyzer& holding);
     
     /// This function returns the active stock data
     static const std::string& GetSelectedStockSymbol();
     
     /// This function returns the active stock data
     static StockData GetSelectedStockData();
+    /// This function returns the active stock data
+    static StockData GetSelectedStockLongData();
 
     /// This returns stock cache
-    static const std::unordered_map<std::string, StockData>& GetStokCache();
+    static const std::unordered_map<std::string, StockData>& GetStockCache();
+    /// This returns stock cache
+    static const std::unordered_map<std::string, StockData>& GetStockCacheLongData();
 
     /// This function update url time itnerval
     /// - Parameter interval:  url range
@@ -104,6 +110,7 @@ namespace KanVest
     static bool UpdateStock(const std::string& symbol);
 
     inline static std::unordered_map<std::string, StockData> s_stockCache;
+    inline static std::unordered_map<std::string, StockData> s_stockCacheLongData;
     inline static std::string s_selectedStockSymbol = {"Nifty"};
 
     inline static std::string s_currentInterval = "60m";
@@ -113,7 +120,7 @@ namespace KanVest
     inline static std::atomic<bool> s_running = false;
     inline static std::thread s_updateThread;
     
-//    inline static UserHoldingForAnalyzer s_selectedHoldingData;
-//    inline static StockAnalysisReport s_report;
+    inline static UserHoldingForAnalyzer s_selectedHoldingData;
+    inline static StockAnalysisReport s_report;
   };
 } // namespace KanVest

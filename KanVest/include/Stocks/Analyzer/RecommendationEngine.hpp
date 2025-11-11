@@ -15,12 +15,12 @@
 
 namespace KanVest
 {
-//  struct UserHoldingForAnalyzer
-//  {
-//    double quantity = 0.0;       // Number of shares
-//    double avgPrice = 0.0;       // Average buy price
-//  };
-//  
+  struct UserHoldingForAnalyzer
+  {
+    double avgPrice = 0.0;       // Average buy price
+    int quantity = 0;       // Number of shares
+  };
+  
 //  enum class Action {StrongBuy, Buy, Hold, Sell, StrongSell};
 //
 //  struct Recommendation

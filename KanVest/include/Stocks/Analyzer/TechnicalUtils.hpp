@@ -11,11 +11,12 @@
 
 namespace KanVest
 {
-//  class TechnicalUtils
-//  {
-//  public:
-//    static int GetNumberOfTradingDays(const std::vector<StockPoint>& history);
-//    static bool ResolvePeriods(const std::vector<StockPoint>& history, int periodInDays, int &outPeriodBars, int &outBarsPerDay);
+  class TechnicalUtils
+  {
+  public:
+    static int GetNumberOfTradingDays(const std::vector<StockPoint>& history);
+    static bool ResolvePeriods(const std::vector<StockPoint>& history, int periodInDays, int &outPeriodBars, int &outBarsPerDay);
+  
 //    static double ComputeSMA(const std::vector<StockPoint>& history, int period);
 //    static double ComputeEMA(const std::vector<StockPoint>& history, int period);
 //    static double ComputeRSI(const std::vector<StockPoint>& history, int period);
@@ -30,5 +31,5 @@ namespace KanVest
 //    static double ComputeADX(const std::vector<StockPoint>& history, int periodInDays, double &outPlusDI, double &outMinusDI);
 //    static double ComputeMFI(const std::vector<StockPoint>& history, int periodInDays);
 //    static double ComputeOBV(const std::vector<StockPoint>& history);
-//  };
+  };
 } // namespace KanVest

@@ -157,7 +157,7 @@ namespace KanVest
   
   void RendererLayer::OnUpdate(const KanViz::TimeStep& ts)
   {
-    IK_PERFORMANCE_FUNC("RendererLayer::OnUpdate");
+
   }
   
   void RendererLayer::OnImGuiRender()
@@ -176,6 +176,7 @@ namespace KanVest
   
   void RendererLayer::OnEvent(KanViz::Event& event)
   {
+    
   }
   
   void RendererLayer::UI_StartMainWindowDocking()
@@ -466,7 +467,7 @@ namespace KanVest
                                       "%s", node->name.c_str()
                                       );
         
-        ImGui::SameLine(600);
+        ImGui::SameLine(550);
         ImGui::TextColored(color, "%6.3f ms", ms);
         
         if (open) {
@@ -577,7 +578,6 @@ namespace KanVest
   
   void RendererLayer::UI_WindowButtons()
   {
-    IK_PERFORMANCE_FUNC("RendererLayer::UI_WindowButtons");
     // Window buttons
     static const ImU32 buttonColN = KanVasX::Color::MultipliedValue(KanVasX::Color::Text, 0.9f);
     static const ImU32 buttonColP = KanVasX::Color::TextDark;

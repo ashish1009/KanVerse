@@ -9,42 +9,39 @@
 
 namespace KanVest
 {
-//  int TechnicalUtils::GetNumberOfTradingDays(const std::vector<StockPoint>& history)
-//  {
-//    IK_PERFORMANCE_FUNC("TechnicalUtils::GetNumberOfTradingDays");
-//    std::set<std::time_t> uniqueDays;
-//    
-//    for (const auto& point : history)
-//    {
-//      std::time_t ts = point.timestamp; // UNIX timestamp
-//      std::tm* t = std::localtime(&ts);
-//      // Normalize to date only (ignore time)
-//      std::tm dateOnly = *t;
-//      dateOnly.tm_hour = 0;
-//      dateOnly.tm_min = 0;
-//      dateOnly.tm_sec = 0;
-//      
-//      std::time_t dayStart = std::mktime(&dateOnly);
-//      uniqueDays.insert(dayStart);
-//    }
-//    
-//    return static_cast<int>(uniqueDays.size());
-//  }
-//  
-//  bool TechnicalUtils::ResolvePeriods(const std::vector<StockPoint>& history,
-//                                    int periodInDays,
-//                                    int &outPeriodBars,
-//                                    int &outBarsPerDay)
-//  {
-//    IK_PERFORMANCE_FUNC("TechnicalUtils::ResolvePeriods");
-//    if (history.empty()) return false;
-//    int numDays = GetNumberOfTradingDays(history);
-//    if (numDays <= 0) return false;
-//    outBarsPerDay = static_cast<int>(history.size() / numDays);
-//    outPeriodBars = std::max(1, periodInDays * outBarsPerDay);
-//    return true;
-//  }
-//  
+  int TechnicalUtils::GetNumberOfTradingDays(const std::vector<StockPoint>& history)
+  {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::GetNumberOfTradingDays");
+    std::set<std::time_t> uniqueDays;
+    
+    for (const auto& point : history)
+    {
+      std::time_t ts = point.timestamp; // UNIX timestamp
+      std::tm* t = std::localtime(&ts);
+      // Normalize to date only (ignore time)
+      std::tm dateOnly = *t;
+      dateOnly.tm_hour = 0;
+      dateOnly.tm_min = 0;
+      dateOnly.tm_sec = 0;
+      
+      std::time_t dayStart = std::mktime(&dateOnly);
+      uniqueDays.insert(dayStart);
+    }
+    
+    return static_cast<int>(uniqueDays.size());
+  }
+  
+  bool TechnicalUtils::ResolvePeriods(const std::vector<StockPoint>& history, int periodInDays, int &outPeriodBars, int &outBarsPerDay)
+  {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ResolvePeriods");
+    if (history.empty()) return false;
+    int numDays = GetNumberOfTradingDays(history);
+    if (numDays <= 0) return false;
+    outBarsPerDay = static_cast<int>(history.size() / numDays);
+    outPeriodBars = std::max(1, periodInDays * outBarsPerDay);
+    return true;
+  }
+  
 //  // --------------------------
 //  // Simple Moving Average (SMA)
 //  // --------------------------

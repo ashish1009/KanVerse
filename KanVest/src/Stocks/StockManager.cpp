@@ -87,13 +87,13 @@ namespace KanVest
     return data;
   }
 
-//  const StockAnalysisReport& StockManager::AnalyzeSelectedStock()
-//  {
-//    const auto& stockData = GetSelectedStockData();
-//    
-//    // ---------- 1. Technical Analysis ----------
-//    s_report.technicals = TechnicalAnalyzer::Analyze(stockData);
-//    
+  const StockAnalysisReport& StockManager::AnalyzeSelectedStock()
+  {
+    const auto& stockData = GetSelectedStockLongData();
+    
+    // ---------- 1. Technical Analysis ----------
+    s_report.technicals = TechnicalAnalyzer::Analyze(stockData);
+    
 //    // ---------- 2. Volatility ----------
 //    s_report.volatility = VolatilityAnalyzer::Analyze(stockData);
 //    
@@ -118,8 +118,8 @@ namespace KanVest
 //                                                             s_selectedHoldingData
 //                                                             );
 //    
-//    return s_report;
-//  }
+    return s_report;
+  }
 
   bool StockManager::AddStock(const std::string& symbolName)
   {
@@ -128,6 +128,7 @@ namespace KanVest
     if (s_stockCache.find(symbol) == s_stockCache.end())
     {
       s_stockCache.emplace(symbol, StockData(symbol));
+      s_stockCacheLongData.emplace(symbol, StockData(symbol));
       return true;
     }
     return false;
@@ -143,6 +144,7 @@ namespace KanVest
   {
     std::scoped_lock lock(s_mutex);
     s_stockCache.erase(symbol);
+    s_stockCacheLongData.erase(symbol);
   }
   
   bool StockManager::GetShortTermStockData(const std::string& symbolName, StockData& outData)
@@ -152,6 +154,21 @@ namespace KanVest
     
     auto it = s_stockCache.find(symbol);
     if (it != s_stockCache.end())
+    {
+      outData = it->second;
+      return true;
+    }
+    
+    return false;
+  }
+
+  bool StockManager::GetLongTermStockData(const std::string& symbolName, StockData& outData)
+  {
+    std::scoped_lock lock(s_mutex);
+    std::string symbol = NormalizeSymbol(symbolName);
+    
+    auto it = s_stockCacheLongData.find(symbol);
+    if (it != s_stockCacheLongData.end())
     {
       outData = it->second;
       return true;
@@ -179,6 +196,7 @@ namespace KanVest
     };
     
     refresh(s_stockCache);
+    refresh(s_stockCacheLongData);
   }
   
   void StockManager::StartLiveUpdates(int intervalMilliseconds)
@@ -211,10 +229,10 @@ namespace KanVest
     s_selectedStockSymbol = stockSymbol;
   }
   
-//  void StockManager::SetSelectedStockHoldingData(double atp, int qty)
-//  {
-//    s_selectedHoldingData = KanVest::UserHoldingForAnalyzer(qty, atp);
-//  }
+  void StockManager::SetSelectedStockHoldingData(const UserHoldingForAnalyzer& holding)
+  {
+    s_selectedHoldingData = holding;
+  }
   
   const std::string& StockManager::GetSelectedStockSymbol()
   {
@@ -227,11 +245,22 @@ namespace KanVest
     GetShortTermStockData(s_selectedStockSymbol, selectedStockData);
     return selectedStockData;
   }
+  StockData StockManager::GetSelectedStockLongData()
+  {
+    StockData selectedStockData;
+    GetLongTermStockData(s_selectedStockSymbol, selectedStockData);
+    return selectedStockData;
+  }
 
-  const std::unordered_map<std::string, StockData>& StockManager::GetStokCache()
+  const std::unordered_map<std::string, StockData>& StockManager::GetStockCache()
   {
     std::scoped_lock lock(s_mutex);
     return s_stockCache;
+  }
+  const std::unordered_map<std::string, StockData>& StockManager::GetStockCacheLongData()
+  {
+    std::scoped_lock lock(s_mutex);
+    return s_stockCacheLongData;
   }
 
   void StockManager::SetCurrentInterval(const std::string& interval)
@@ -345,23 +374,20 @@ namespace KanVest
       
       std::string symbol = NormalizeSymbol(symbolName);
       StockData shortTermData = FetchData(symbol, s_currentInterval, s_currentRange);
-       
       if (shortTermData.IsValid())
       {
         {
           std::scoped_lock lock(s_mutex);
           s_stockCache[symbol] = std::move(shortTermData);
         }
-        
-        auto map = Utils::GetHybridMapping(s_currentInterval);
-        
-        if (!map.higherInterval.empty())
+      }
+
+      StockData longTermData = FetchData(symbol, "1d", "1y");
+      if (longTermData.IsValid())
+      {
         {
-          StockData hierData = FetchData(symbol, map.higherInterval.c_str(), map.higherRange.c_str());
-          if (hierData.IsValid())
-          {
-            std::scoped_lock lock(s_mutex);
-          }
+          std::scoped_lock lock(s_mutex);
+          s_stockCacheLongData[symbol] = std::move(longTermData);
         }
       }
 
