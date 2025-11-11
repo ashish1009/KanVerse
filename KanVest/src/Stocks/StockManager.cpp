@@ -87,13 +87,13 @@ namespace KanVest
     return data;
   }
 
-  const StockAnalysisReport& StockManager::AnalyzeSelectedStock()
-  {
-    const auto& stockData = GetSelectedStockData();
-    
-    // ---------- 1. Technical Analysis ----------
-    s_report.technicals = TechnicalAnalyzer::Analyze(stockData);
-    
+//  const StockAnalysisReport& StockManager::AnalyzeSelectedStock()
+//  {
+//    const auto& stockData = GetSelectedStockData();
+//    
+//    // ---------- 1. Technical Analysis ----------
+//    s_report.technicals = TechnicalAnalyzer::Analyze(stockData);
+//    
 //    // ---------- 2. Volatility ----------
 //    s_report.volatility = VolatilityAnalyzer::Analyze(stockData);
 //    
@@ -108,18 +108,18 @@ namespace KanVest
 //    s_report.chart = ChartAnalyzer::Analyze(stockData);
     
     // ---------- 6. Recommendation ----------
-    s_report.recommendation = RecommendationEngine::Generate(
-                                                             stockData,
-                                                             s_report.technicals,
-                                                             s_report.momentum,
-                                                             s_report.volatility,
-                                                             s_report.chart,
-                                                             s_report.performance,
-                                                             s_selectedHoldingData
-                                                             );
-    
-    return s_report;
-  }
+//    s_report.recommendation = RecommendationEngine::Generate(
+//                                                             stockData,
+//                                                             s_report.technicals,
+//                                                             s_report.momentum,
+//                                                             s_report.volatility,
+//                                                             s_report.chart,
+//                                                             s_report.performance,
+//                                                             s_selectedHoldingData
+//                                                             );
+//    
+//    return s_report;
+//  }
 
   bool StockManager::AddStock(const std::string& symbolName)
   {
@@ -211,10 +211,10 @@ namespace KanVest
     s_selectedStockSymbol = stockSymbol;
   }
   
-  void StockManager::SetSelectedStockHoldingData(double atp, int qty)
-  {
-    s_selectedHoldingData = KanVest::UserHoldingForAnalyzer(qty, atp);
-  }
+//  void StockManager::SetSelectedStockHoldingData(double atp, int qty)
+//  {
+//    s_selectedHoldingData = KanVest::UserHoldingForAnalyzer(qty, atp);
+//  }
   
   const std::string& StockManager::GetSelectedStockSymbol()
   {
