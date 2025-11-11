@@ -169,6 +169,7 @@ namespace KanVest
     {
       UI_StartMainWindowDocking();
       StockUI::StockPanel();
+      UI_PerformancePanel();
       UI_EndMainWindowDocking();
     }
   }
@@ -465,7 +466,7 @@ namespace KanVest
                                       "%s", node->name.c_str()
                                       );
         
-        ImGui::SameLine(300);
+        ImGui::SameLine(600);
         ImGui::TextColored(color, "%6.3f ms", ms);
         
         if (open) {

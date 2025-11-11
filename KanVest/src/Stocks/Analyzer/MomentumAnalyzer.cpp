@@ -11,6 +11,7 @@ namespace KanVest
 {
   MomentumReport MomentumAnalyzer::Analyze(const StockData& stock, const TechnicalReport& techReport, const VolatilityReport& volReport)
   {
+    IK_PERFORMANCE_FUNC("MomentumAnalyzer::Analyze");
     MomentumReport report;
     
     // Use 5-day SMA for short-term, 50-day SMA for long-term
@@ -36,6 +37,7 @@ namespace KanVest
   
   Momentum MomentumAnalyzer::DetermineBehavior(double shortMA, double longMA, double volatility)
   {
+    IK_PERFORMANCE_FUNC("MomentumAnalyzer::DetermineBehavior");
     double diffPercent = (shortMA - longMA) / longMA * 100.0;
     
     if (diffPercent > 2.0 && volatility < 3.0)

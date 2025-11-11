@@ -11,6 +11,7 @@ namespace KanVest
 {
   VolatilityReport VolatilityAnalyzer::Analyze(const StockData& stock, int shortTermPeriod, int longTermPeriod)
   {
+    IK_PERFORMANCE_FUNC("VolatilityAnalyzer::Analyze");
     VolatilityReport report;
     
     if (stock.history.size() < 2)
@@ -37,6 +38,7 @@ namespace KanVest
   
   double VolatilityAnalyzer::ComputeStdDev(const std::vector<StockPoint>& history)
   {
+    IK_PERFORMANCE_FUNC("VolatilityAnalyzer::ComputeStdDev");
     if (history.size() < 2) return 0.0;
     
     // Compute daily returns
@@ -57,6 +59,7 @@ namespace KanVest
   
   std::string VolatilityAnalyzer::GenerateExplanation(double shortVol, double longVol)
   {
+    IK_PERFORMANCE_FUNC("VolatilityAnalyzer::GenerateExplanation");
     std::string desc = "Short-term volatility is " + std::to_string(shortVol) + "%, ";
     desc += "long-term volatility is " + std::to_string(longVol) + "%. ";
     

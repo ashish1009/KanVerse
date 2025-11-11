@@ -1,17 +1,21 @@
 Holdings:
-  - Symbol: OLAELEC
-    AveragePrice: 56.849998474121094
-    Quantity: 400
-    Vision: LongTerm
   - Symbol: BEL
     AveragePrice: 386
     Quantity: 160
+    Vision: LongTerm
+  - Symbol: BSE
+    AveragePrice: 2346
+    Quantity: 23
     Vision: LongTerm
   - Symbol: ETERNAL
     AveragePrice: 298
     Quantity: 370
     Vision: LongTerm
-  - Symbol: BSE
-    AveragePrice: 2346
-    Quantity: 23
+  - Symbol: IDEA
+    AveragePrice: 9.6000003814697266
+    Quantity: 1400
+    Vision: LongTerm
+  - Symbol: OLAELEC
+    AveragePrice: 56.849998474121094
+    Quantity: 400
     Vision: LongTerm

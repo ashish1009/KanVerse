@@ -39,8 +39,8 @@ namespace KanVest
     
     inline static std::unordered_map<std::string, std::vector<std::string>> RangeIntervalMap =
     {
-      {"1d",  {"1m", "2m", "5m", "15m", "30m", "60m"}},
-      {"5d",  {"1m", "2m", "5m", "15m", "30m", "60m"}},
+      {"1d",  {"1m", "5m", "15m", "30m", "60m"}},
+      {"5d",  {"1m", "5m", "15m", "30m", "60m"}},
       {"1mo", {"5m", "15m", "30m", "60m", "1d"}},
       {"6mo", {"1h", "1d", "1wk"}},
       {"ytd", {"1h", "1wk", "1mo"}},

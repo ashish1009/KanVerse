@@ -11,6 +11,7 @@ namespace KanVest
 {
   ChartReport ChartAnalyzer::Analyze(const StockData& stock)
   {
+    IK_PERFORMANCE_FUNC("ChartAnalyzer::Analyze");
     ChartReport report;
     
     DetectSupportResistance(stock, report);
@@ -23,9 +24,10 @@ namespace KanVest
   
   // --------------------------
   // Support and Resistance
-// --------------------------
+  // --------------------------
   void ChartAnalyzer::DetectSupportResistance(const StockData& stock, ChartReport& report)
   {
+    IK_PERFORMANCE_FUNC("ChartAnalyzer::DetectSupportResistance");
     if (stock.history.size() < 3) return;
     
     struct Level {
@@ -106,6 +108,7 @@ namespace KanVest
   // --------------------------
   void ChartAnalyzer::DetectCandlestickPatterns(const StockData& stock, ChartReport& report)
   {
+    IK_PERFORMANCE_FUNC("ChartAnalyzer::DetectCandlestickPatterns");
     for (const auto& point : stock.history)
     {
       double body = std::abs(point.close - point.open);
@@ -122,6 +125,7 @@ namespace KanVest
   // --------------------------
   void ChartAnalyzer::DetectChartPatterns(const StockData& stock, ChartReport& report)
   {
+    IK_PERFORMANCE_FUNC("ChartAnalyzer::DetectChartPatterns");
     // Placeholder: advanced pattern detection (head & shoulders, double top/bottom)
     // For now, detect simple uptrend/downtrend
     if (stock.history.size() < 2) return;
@@ -139,6 +143,7 @@ namespace KanVest
   // --------------------------
   std::string ChartAnalyzer::GenerateExplanation(const ChartReport& report)
   {
+    IK_PERFORMANCE_FUNC("ChartAnalyzer::GenerateExplanation");
     std::ostringstream oss;
     
     oss << "Support levels detected: ";

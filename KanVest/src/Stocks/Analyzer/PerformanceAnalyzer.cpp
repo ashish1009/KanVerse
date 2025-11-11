@@ -11,6 +11,7 @@ namespace KanVest
 {
   PerformanceReport PerformanceSummary::Analyze(const StockData& stock, double sectorChangePercent)
   {
+    IK_PERFORMANCE_FUNC("PerformanceSummary::Analyze");
     PerformanceReport report;
     
     if (stock.prevClose <= 0)

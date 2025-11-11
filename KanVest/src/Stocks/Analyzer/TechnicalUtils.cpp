@@ -9,8 +9,9 @@
 
 namespace KanVest
 {
-  int GetNumberOfTradingDays(const std::vector<StockPoint>& history)
+  int TechnicalUtils::GetNumberOfTradingDays(const std::vector<StockPoint>& history)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::GetNumberOfTradingDays");
     std::set<std::time_t> uniqueDays;
     
     for (const auto& point : history)
@@ -30,11 +31,12 @@ namespace KanVest
     return static_cast<int>(uniqueDays.size());
   }
   
-  static inline bool ResolvePeriods(const std::vector<StockPoint>& history,
+  bool TechnicalUtils::ResolvePeriods(const std::vector<StockPoint>& history,
                                     int periodInDays,
                                     int &outPeriodBars,
                                     int &outBarsPerDay)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ResolvePeriods");
     if (history.empty()) return false;
     int numDays = GetNumberOfTradingDays(history);
     if (numDays <= 0) return false;
@@ -48,6 +50,7 @@ namespace KanVest
   // --------------------------
   double TechnicalUtils::ComputeSMA(const std::vector<StockPoint>& history, int periodInDays)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeSMA");
     int barsPerDay = static_cast<int>(history.size() / GetNumberOfTradingDays(history));
 
     int requiredBars = periodInDays * barsPerDay;
@@ -66,6 +69,7 @@ namespace KanVest
   // --------------------------
   double TechnicalUtils::ComputeEMA(const std::vector<StockPoint>& history, int periodInDays)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeEMA");
     if (history.empty()) return 0.0;
     
     int numDays = GetNumberOfTradingDays(history);
@@ -98,6 +102,7 @@ namespace KanVest
   // --------------------------
   double TechnicalUtils::ComputeRSI(const std::vector<StockPoint>& history, int periodInDays)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeRSI");
     const size_t n = history.size();
     if (n < 2)
       return 50.0;
@@ -209,6 +214,7 @@ namespace KanVest
 
   std::vector<double> ComputeEMASeries(const std::vector<double>& data, int period)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeEMASeries");
     std::vector<double> result;
     if (data.size() < static_cast<size_t>(period)) return result;
     
@@ -233,6 +239,7 @@ namespace KanVest
                                                          int slowPeriodInDays,
                                                          int signalPeriodInDays)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeMACD");
     if (history.size() < slowPeriodInDays) return {0.0, 0.0};
     
     // --- Step 1: Handle intraday scaling ---
@@ -284,6 +291,7 @@ namespace KanVest
   // --------------------------
   double TechnicalUtils::ComputeATR(const std::vector<StockPoint>& history, int periodInDays)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeATR");
     if (history.size() < 2) return 0.0;
     
     // --- Step 1: Handle intraday scaling ---
@@ -326,6 +334,7 @@ namespace KanVest
   // --------------------------
   double TechnicalUtils::ComputeVWAP(const std::vector<StockPoint>& history)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeVWAP");
     if (history.empty()) return 0.0;
     
     double cumulativePriceVolume = 0.0;
@@ -378,6 +387,7 @@ namespace KanVest
   
   double TechnicalUtils::ComputeAwesomeOscillator(const std::vector<StockPoint>& history, int fastPeriodInDays, int slowPeriodInDays)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeAwesomeOscillator");
     if (history.size() < 2) return 0.0;
     
     int numDays = GetNumberOfTradingDays(history);
@@ -410,6 +420,7 @@ namespace KanVest
   // =============================
   double TechnicalUtils::ComputeStochasticRSI(const std::vector<StockPoint>& history, int periodInDays)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeStochasticRSI");
     if (history.size() < 2) return 0.0;
     
     int numDays = GetNumberOfTradingDays(history);
@@ -443,6 +454,7 @@ namespace KanVest
   // =============================
   double TechnicalUtils::ComputeCCI(const std::vector<StockPoint>& history, int periodInDays)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeCCI");
     if (history.size() < 2) return 0.0;
     
     int numDays = GetNumberOfTradingDays(history);
@@ -473,6 +485,7 @@ namespace KanVest
 
   double TechnicalUtils::ComputeADX(const std::vector<StockPoint>& history, int periodInDays, double &outPlusDI, double &outMinusDI)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeADX");
     outPlusDI = 0.0;
     outMinusDI = 0.0;
     if (history.size() < 2) return 0.0;
@@ -578,6 +591,7 @@ namespace KanVest
   // ---------------- MFI ----------------
   double TechnicalUtils::ComputeMFI(const std::vector<StockPoint>& history, int periodInDays)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeMFI");
     if (history.size() < 2) return 50.0;
     
     int barsPerDay = 1, period = 0;
@@ -618,6 +632,7 @@ namespace KanVest
   // ---------------- OBV ----------------
   double TechnicalUtils::ComputeOBV(const std::vector<StockPoint>& history)
   {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeOBV");
     if (history.empty()) return 0.0;
     // Use 64-bit accumulator because volume can be large
     long long obv = 0;

@@ -85,6 +85,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 
   void StockUI::StockPanel()
   {
+    IK_PERFORMANCE_FUNC("StockUI::StockPanel");
     KanVasX::Panel::Begin("Stock Analyzer");
     
     if (ImGui::BeginTable("StockAnalyzerTable", 3, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit))
@@ -140,6 +141,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowStockDetails()
   {
+    IK_PERFORMANCE_FUNC("StockUI::ShowStockDetails");
     SearchBar();
     ShowStcokBasicData();
     ShowAnalyzerData();
@@ -147,6 +149,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowPortfolio()
   {
+    IK_PERFORMANCE_FUNC("StockUI::ShowPortfolio");
     if (ImGui::BeginChild("ChartCell", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.4))) // fixed height
     {
       DrawCandleChart();
@@ -167,6 +170,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::DrawCandleChart()
   {
+    IK_PERFORMANCE_FUNC("StockUI::DrawCandleChart");
     StockData stockData = StockManager::GetSelectedStockData();
     const auto& history = stockData.history;
     
@@ -331,6 +335,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::DrawChartController()
   {
+    IK_PERFORMANCE_FUNC("StockUI::DrawChartController");
     StockData stockData = StockManager::GetSelectedStockData();
     if (!stockData.IsValid())
     {
@@ -346,7 +351,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
       {
         StockManager::SetCurrentRange(StockManager::ValidRange[i]);
-        StockManager::SetCurrentInterval(StockManager::RangeIntervalMap[StockManager::GetCurrentRange()][0].c_str());
+        StockManager::SetCurrentInterval(StockManager::RangeIntervalMap[StockManager::GetCurrentRange()][1].c_str());
         
         modify = true;
       }
@@ -384,6 +389,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowAnalyzerData()
   {
+    IK_PERFORMANCE_FUNC("StockUI::ShowAnalyzerData");
     const StockData& stockData = StockManager::GetSelectedStockData();
     if (!stockData.IsValid())
     {
@@ -562,13 +568,13 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         TechnicalData(std::string("VWAP \n") + Utils::FormatDoubleToString(report.technicals.VWAP), "VWAP"); ImGui::SameLine();
         TechnicalData(std::string("ATR \n") + Utils::FormatDoubleToString(report.technicals.ATR), "ATR");
         
-//        TechnicalData(std::string("AwesomeOscillator \n") + Utils::FormatDoubleToString(report.technicals.AwesomeOscillator), "AwesomeOscillator"); ImGui::SameLine();
-//        TechnicalData(std::string("StochasticRSI \n") + Utils::FormatDoubleToString(report.technicals.StochasticRSI), "StochasticRSI"); ImGui::SameLine();
-//        TechnicalData(std::string("ADX \n") + Utils::FormatDoubleToString(report.technicals.ADX), "ADX"); ImGui::SameLine();
-//        TechnicalData(std::string("CCI \n") + Utils::FormatDoubleToString(report.technicals.CCI), "CCI");
-//        
-//        TechnicalData(std::string("OBV \n") + Utils::FormatDoubleToString(report.technicals.OBV), "OBV"); ImGui::SameLine();
-//        TechnicalData(std::string("MFI \n") + Utils::FormatDoubleToString(report.technicals.MFI), "MFI");
+        TechnicalData(std::string("AwesomeOscillator \n") + Utils::FormatDoubleToString(report.technicals.AwesomeOscillator), "AwesomeOscillator"); ImGui::SameLine();
+        TechnicalData(std::string("StochasticRSI \n") + Utils::FormatDoubleToString(report.technicals.StochasticRSI), "StochasticRSI"); ImGui::SameLine();
+        TechnicalData(std::string("ADX \n") + Utils::FormatDoubleToString(report.technicals.ADX), "ADX"); ImGui::SameLine();
+        TechnicalData(std::string("CCI \n") + Utils::FormatDoubleToString(report.technicals.CCI), "CCI");
+        
+        TechnicalData(std::string("OBV \n") + Utils::FormatDoubleToString(report.technicals.OBV), "OBV"); ImGui::SameLine();
+        TechnicalData(std::string("MFI \n") + Utils::FormatDoubleToString(report.technicals.MFI), "MFI");
       }
       
       // SMA
@@ -826,6 +832,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::SearchBar()
   {
+    IK_PERFORMANCE_FUNC("StockUI::SearchBar");
     const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
     if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX * 0.9f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
     {
@@ -842,6 +849,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowStcokBasicData()
   {
+    IK_PERFORMANCE_FUNC("StockUI::ShowStcokBasicData");
     KanVasX::ScopedStyle framePadding(ImGuiStyleVar_FramePadding, ImVec2(100.0f, 10.0f));
     StockData stockData = StockManager::GetSelectedStockData();
     if (!stockData.IsValid())
@@ -894,6 +902,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::DrawPortfolioTable(Portfolio* portfolio)
   {
+    IK_PERFORMANCE_FUNC("StockUI::DrawPortfolioTable");
     auto& holdings = portfolio->GetHoldings();
     
     // ---- Sorting ----
