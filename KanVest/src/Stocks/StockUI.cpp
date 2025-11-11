@@ -384,8 +384,13 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::ShowAnalyzerData()
   {
-    StockAnalysisReport report = StockManager::AnalyzeSelectedStock();
     const StockData& stockData = StockManager::GetSelectedStockData();
+    if (!stockData.IsValid())
+    {
+      return;
+    }
+
+    StockAnalysisReport report = StockManager::AnalyzeSelectedStock();
     KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundDark);
 
     static float xOffset = 0.0f;
@@ -482,7 +487,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 
     // Technical Data
     {
-      ImVec2 technicalAnalyzerSize = {ImGui::GetContentRegionAvail().x, 260.0f};
+      ImVec2 technicalAnalyzerSize = {ImGui::GetContentRegionAvail().x, 350.0f};
       ImGui::BeginChild("Technical Analysis", technicalAnalyzerSize, true);
       
       // Title
@@ -546,16 +551,24 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         }
         
         float availX = ImGui::GetContentRegionAvail().x - 30.0f;
-        float technicalDataSize = availX / 5;
-        auto TechnicalData = [technicalDataSize](const std::string& title) {
+        float technicalDataSize = availX / 4;
+        auto TechnicalData = [technicalDataSize, report](const std::string& title, const std::string& tooltipTag) {
           KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), KanVasX::Color::BackgroundDark, KanVasX::Color::TextBright, false, 0.0f, {technicalDataSize, 60});
+          KanVasX::UI::Tooltip(report.technicals.Explanations.at(tooltipTag));
         };
         
-        TechnicalData(std::string("RSI \n") + std::to_string(report.technicals.RSI));                  ImGui::SameLine();
-        TechnicalData(std::string("MACD \n") + std::to_string(report.technicals.MACD));                ImGui::SameLine();
-        TechnicalData(std::string("MACD Signal \n") + std::to_string(report.technicals.MACDSignal));   ImGui::SameLine();
-        TechnicalData(std::string("ATR \n") + std::to_string(report.technicals.ATR));                  ImGui::SameLine();
-        TechnicalData(std::string("VWAP \n") + std::to_string(report.technicals.VWAP));
+        TechnicalData(std::string("RSI \n") + Utils::FormatDoubleToString(report.technicals.RSI), "RSI"); ImGui::SameLine();
+        TechnicalData(std::string("MACD \n") + Utils::FormatDoubleToString(report.technicals.MACD), "MACD"); ImGui::SameLine();
+        TechnicalData(std::string("VWAP \n") + Utils::FormatDoubleToString(report.technicals.VWAP), "VWAP"); ImGui::SameLine();
+        TechnicalData(std::string("ATR \n") + Utils::FormatDoubleToString(report.technicals.ATR), "ATR");
+        
+//        TechnicalData(std::string("AwesomeOscillator \n") + Utils::FormatDoubleToString(report.technicals.AwesomeOscillator), "AwesomeOscillator"); ImGui::SameLine();
+//        TechnicalData(std::string("StochasticRSI \n") + Utils::FormatDoubleToString(report.technicals.StochasticRSI), "StochasticRSI"); ImGui::SameLine();
+//        TechnicalData(std::string("ADX \n") + Utils::FormatDoubleToString(report.technicals.ADX), "ADX"); ImGui::SameLine();
+//        TechnicalData(std::string("CCI \n") + Utils::FormatDoubleToString(report.technicals.CCI), "CCI");
+//        
+//        TechnicalData(std::string("OBV \n") + Utils::FormatDoubleToString(report.technicals.OBV), "OBV"); ImGui::SameLine();
+//        TechnicalData(std::string("MFI \n") + Utils::FormatDoubleToString(report.technicals.MFI), "MFI");
       }
       
       // SMA
@@ -604,12 +617,14 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         };
         
         int idx = 0;
+        bool allChildEnded = true;
         ImVec2 smaChildSize = {(ImGui::GetContentRegionAvail().x / 2) - 6.0f, 100.0f};
         for (const auto& [period, ma] : maMap)
         {
           if (idx % 4 == 0)
           {
             ImGui::BeginChild(std::to_string(period).c_str(), smaChildSize, true);
+            allChildEnded = false;
           }
           
           ShowSma(period, ma);
@@ -618,11 +633,18 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
           {
             ImGui::EndChild();
             ImGui::SameLine();
+            allChildEnded = true;
           }
           idx++;
         }
         ImGui::NewLine();
+
+        if (!allChildEnded)
+        {
+          ImGui::EndChild();
+        }
       };
+      
       if (tab == TechnicalTab::SMA)
       {
         ShowMovingAvg(report.technicals.SMA, " SMA");
@@ -822,6 +844,10 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   {
     KanVasX::ScopedStyle framePadding(ImGuiStyleVar_FramePadding, ImVec2(100.0f, 10.0f));
     StockData stockData = StockManager::GetSelectedStockData();
+    if (!stockData.IsValid())
+    {
+      return;
+    }
 
     // Name & price
     std::string name = stockData.shortName + " (" + stockData.currency + ")";

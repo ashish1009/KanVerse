@@ -15,43 +15,75 @@ namespace KanVest
   {
     TechnicalReport report;
     
-//    ComputeMovingAverages(stock, report);
-//    ComputeRSI(stock, report);
-//    ComputeMACD(stock, report);
-//    ComputeATR(stock, report);
-//    ComputeVWAP(stock, report);
+    ComputeMovingAverages(stock, report);
+    ComputeRSI(stock, report);
+    ComputeMACD(stock, report);
+    ComputeATR(stock, report);
+    ComputeVWAP(stock, report);
     
-//    ComputeAwesomeOscillator(stock, report);
-//    ComputeStochasticRSI(stock, report);
-//    ComputeCCI(stock, report);
+    ComputeAwesomeOscillator(stock, report);
+    ComputeStochasticRSI(stock, report);
+    ComputeCCI(stock, report);
     
-    // NEW
-//    ComputeADX(stock, report);   // default period 14
-//    ComputeMFI(stock, report);   // default period 14
-//    ComputeOBV(stock, report);
+    ComputeADX(stock, report);   // default period 14
+    ComputeMFI(stock, report);   // default period 14
+    ComputeOBV(stock, report);
     
     return report;
   }
 
   void TechnicalAnalyzer::ComputeMovingAverages(const StockData& stock, TechnicalReport& report)
   {
+    static std::mutex reportMutex;
     std::vector<int> periods = {5, 10, 20, 30, 50, 100, 150, 200};
+    
+    const auto& data = stock.history;
+    if (data.empty())
+      return;
+    
+    // Extract closing prices once
+    std::vector<double> closes;
+    closes.reserve(data.size());
+    for (const auto& p : data)
+      closes.push_back(p.close);
+    
+    std::vector<std::future<void>> tasks;
+    tasks.reserve(periods.size());
     
     for (int period : periods)
     {
-      double sma = TechnicalUtils::ComputeSMA(stock.history, period);
-      double ema = TechnicalUtils::ComputeEMA(stock.history, period);
-      
-      report.SMA[period] = sma;
-      report.EMA[period] = ema;
-      
-      report.Explanations["SMA_" + std::to_string(period)] =
-      "The " + std::to_string(period) + "-day SMA is " + std::to_string(sma) +
-      ". This indicates the average closing price over last " + std::to_string(period) + " days.";
-      report.Explanations["EMA_" + std::to_string(period)] =
-      "The " + std::to_string(period) + "-day EMA is " + std::to_string(ema) +
-      ". EMA gives more weight to recent prices and reacts faster to changes.";
+      tasks.emplace_back(std::async(std::launch::async, [&, period]() {
+        if (closes.size() < static_cast<size_t>(period))
+          return;
+        
+        // --- Simple Moving Average ---
+        double sma = std::accumulate(closes.end() - period, closes.end(), 0.0) / period;
+        
+        // --- Exponential Moving Average ---
+        double alpha = 2.0 / (period + 1.0);
+        double ema = closes[0];
+        for (size_t i = 1; i < closes.size(); ++i)
+          ema = alpha * closes[i] + (1.0 - alpha) * ema;
+        
+        // --- Thread-safe report update ---
+        {
+          std::lock_guard<std::mutex> lock(reportMutex);
+          report.SMA[period] = sma;
+          report.EMA[period] = ema;
+          
+          report.Explanations["SMA_" + std::to_string(period)] =
+          "The " + std::to_string(period) + "-day SMA is " + std::to_string(sma) +
+          ". This indicates the average closing price over the last " + std::to_string(period) + " days.";
+          
+          report.Explanations["EMA_" + std::to_string(period)] =
+          "The " + std::to_string(period) + "-day EMA is " + std::to_string(ema) +
+          ". EMA gives more weight to recent prices and reacts faster to changes.";
+        }
+      }));
     }
+    
+    for (auto& t : tasks)
+      t.wait();
   }
   
   void TechnicalAnalyzer::ComputeRSI(const StockData& stock, TechnicalReport& report, int period)
@@ -96,8 +128,10 @@ namespace KanVest
     double asmOsc = TechnicalUtils::ComputeAwesomeOscillator(stock.history, fastPeriodInDays, slowPeriodInDays);
     report.AwesomeOscillator = asmOsc;
     
-    report.Explanations["AwesomeOscillator"] = "VWAP is " + std::to_string(asmOsc) +
-    ". AwesomeOscillator ...";
+    report.Explanations["AwesomeOscillator"] =
+    "AO = " + std::to_string(asmOsc) +
+    ". It compares short-term and long-term momentum. "
+    "Positive → bullish, Negative → bearish.";
   }
 
   void TechnicalAnalyzer::ComputeStochasticRSI(const StockData& stock, TechnicalReport& report, int period)
@@ -105,8 +139,10 @@ namespace KanVest
     double stochasticRSI = TechnicalUtils::ComputeStochasticRSI(stock.history,period);
     report.StochasticRSI = stochasticRSI;
     
-    report.Explanations["StochasticRSI"] = "VWAP is " + std::to_string(stochasticRSI) +
-    ". StochasticRSI...";
+    report.Explanations["StochasticRSI"] =
+    "StochRSI = " + std::to_string(stochasticRSI) +
+    ". Shows RSI’s position within its recent range — >0.8 overbought, <0.2 oversold.";
+    
   }
 
   void TechnicalAnalyzer::ComputeCCI(const StockData& stock, TechnicalReport& report, int period)
@@ -114,8 +150,9 @@ namespace KanVest
     double cci = TechnicalUtils::ComputeCCI(stock.history,period);
     report.CCI = cci;
     
-    report.Explanations["CCI"] = "VWAP is " + std::to_string(cci) +
-    ". CCI ... ";
+    report.Explanations["CCI"] =
+    "CCI = " + std::to_string(cci) +
+    ". Measures price deviation from its average — >+100 overbought, <-100 oversold.";
   }
 
   std::string TechnicalAnalyzer::DescribeTrend(double value, const std::string& indicator)

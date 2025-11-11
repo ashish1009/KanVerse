@@ -98,44 +98,113 @@ namespace KanVest
   // --------------------------
   double TechnicalUtils::ComputeRSI(const std::vector<StockPoint>& history, int periodInDays)
   {
-    if (history.size() < 2) return 50.0; // neutral
+    const size_t n = history.size();
+    if (n < 2)
+      return 50.0;
     
-    // --- Step 1: Determine bars per day ---
-    int numDays = GetNumberOfTradingDays(history);
-    if (numDays == 0) return 50.0;
-    
-    int barsPerDay = static_cast<int>(history.size() / numDays);
-    int periodInBars = std::max(1, periodInDays * barsPerDay);
-    if (history.size() <= static_cast<size_t>(periodInBars)) return 50.0;
-    
-    // --- Step 2: Compute initial average gain/loss over first period ---
-    double avgGain = 0.0, avgLoss = 0.0;
-    for (int i = 1; i <= periodInBars; ++i)
+    // --- Step 1: Detect time interval ---
+    uint64_t totalGap = 0;
+    int gapCount = 0;
+    for (size_t i = 1; i < std::min(n, size_t(100)); ++i)
     {
-      double diff = history[i].close - history[i - 1].close;
-      if (diff > 0) avgGain += diff;
-      else avgLoss -= diff;
+      uint64_t gap = history[i].timestamp - history[i - 1].timestamp;
+      if (gap > 0 && gap < 86400 * 7) // ignore missing week gaps
+      {
+        totalGap += gap;
+        ++gapCount;
+      }
     }
-    avgGain /= periodInBars;
-    avgLoss /= periodInBars;
     
-    // --- Step 3: Smooth the averages (Wilder's method) ---
-    for (size_t i = periodInBars + 1; i < history.size(); ++i)
+    double avgGap = (gapCount > 0) ? (double)totalGap / gapCount : 86400.0;
+    bool isIntraday = (avgGap < 12 * 3600); // less than 12 hours = intraday
+    
+    // --- Step 2: If intraday, use bar-based RSI ---
+    if (isIntraday)
     {
-      double diff = history[i].close - history[i - 1].close;
+      int period = periodInDays; // RSI(14) means 14 bars for intraday
+      if (n <= static_cast<size_t>(period))
+        return 50.0;
+      
+      double avgGain = 0.0, avgLoss = 0.0;
+      for (int i = 1; i <= period; ++i)
+      {
+        double diff = history[i].close - history[i - 1].close;
+        if (diff > 0)
+          avgGain += diff;
+        else
+          avgLoss -= diff;
+      }
+      avgGain /= period;
+      avgLoss /= period;
+      
+      for (size_t i = period + 1; i < n; ++i)
+      {
+        double diff = history[i].close - history[i - 1].close;
+        double gain = diff > 0 ? diff : 0.0;
+        double loss = diff < 0 ? -diff : 0.0;
+        
+        avgGain = ((avgGain * (period - 1)) + gain) / period;
+        avgLoss = ((avgLoss * (period - 1)) + loss) / period;
+      }
+      
+      if (avgLoss == 0.0)
+        return 100.0;
+      
+      double rs = avgGain / avgLoss;
+      return 100.0 - (100.0 / (1.0 + rs));
+    }
+    
+    // --- Step 3: If daily/long interval, aggregate by day ---
+    std::vector<std::pair<uint64_t, double>> dailyCloses;
+    uint64_t currentDay = 0;
+    
+    for (const auto& p : history)
+    {
+      uint64_t day = p.timestamp / 86400;
+      if (dailyCloses.empty() || day != currentDay)
+      {
+        dailyCloses.emplace_back(day, p.close);
+        currentDay = day;
+      }
+      else
+      {
+        // update last close for same day
+        dailyCloses.back().second = p.close;
+      }
+    }
+    
+    const size_t dn = dailyCloses.size();
+    int period = periodInDays;
+    if (dn <= static_cast<size_t>(period))
+      return 50.0;
+    
+    double avgGain = 0.0, avgLoss = 0.0;
+    for (int i = 1; i <= period; ++i)
+    {
+      double diff = dailyCloses[i].second - dailyCloses[i - 1].second;
+      if (diff > 0)
+        avgGain += diff;
+      else
+        avgLoss -= diff;
+    }
+    avgGain /= period;
+    avgLoss /= period;
+    
+    for (size_t i = period + 1; i < dn; ++i)
+    {
+      double diff = dailyCloses[i].second - dailyCloses[i - 1].second;
       double gain = diff > 0 ? diff : 0.0;
       double loss = diff < 0 ? -diff : 0.0;
       
-      avgGain = ((avgGain * (periodInBars - 1)) + gain) / periodInBars;
-      avgLoss = ((avgLoss * (periodInBars - 1)) + loss) / periodInBars;
+      avgGain = ((avgGain * (period - 1)) + gain) / period;
+      avgLoss = ((avgLoss * (period - 1)) + loss) / period;
     }
     
-    // --- Step 4: Compute RSI ---
-    if (avgLoss == 0) return 100.0;
-    double rs = avgGain / avgLoss;
-    double rsi = 100.0 - (100.0 / (1.0 + rs));
+    if (avgLoss == 0.0)
+      return 100.0;
     
-    return rsi;
+    double rs = avgGain / avgLoss;
+    return 100.0 - (100.0 / (1.0 + rs));
   }
 
   std::vector<double> ComputeEMASeries(const std::vector<double>& data, int period)
