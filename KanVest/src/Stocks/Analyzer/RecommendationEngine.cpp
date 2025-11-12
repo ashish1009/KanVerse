@@ -34,7 +34,47 @@ namespace KanVest
 //    {"Pennant", 1}
 //    // Add more patterns here
 //  };
-//  
+//
+  
+  static float GetMovingAverageScore(float currentPrice, const std::map<int, double>& SMA, const std::map<int, double>& EMA)
+  {
+    float score = 0.0f;
+    
+    // Technical periods considered
+    std::vector<int> periods = {5, 10, 20, 30, 50, 100, 150, 200};
+    
+    // Weight per period (longer periods have more influence)
+    std::unordered_map<int, double> weights = {
+      {5, 0.5}, {10, 0.75}, {20, 1.0}, {30, 1.25},
+      {50, 1.5}, {100, 2.0}, {150, 2.25}, {200, 2.5}
+    };
+    
+    // --- Analyze SMA/EMA influence ---
+    for (int days : periods)
+    {
+      double sma = (SMA.count(days)) ? SMA.at(days) : 0.0;
+      double ema = (EMA.count(days)) ? EMA.at(days) : 0.0;
+      double w = weights[days];
+      
+      if (sma > 0.0)
+      {
+        if (currentPrice > sma)
+          score += w * 2.0; // bullish
+        else
+          score -= w * 2.0; // bearish
+      }
+      
+      if (ema > 0.0)
+      {
+        if (currentPrice > ema)
+          score += w * 3.0; // stronger bullish bias for EMA
+        else
+          score -= w * 3.0; // stronger bearish bias
+      }
+    }
+    return score;
+  }
+  
   Recommendation RecommendationEngine::Generate(
                                                 const StockData& stock,
                                                 const TechnicalReport& techReport,
@@ -49,20 +89,59 @@ namespace KanVest
     Recommendation rec;
     rec.score = 50.0;
     
-//    // ---------- Compute Unrealized P/L ----------
-//    double unrealizedPLPercent = 0.0;
-//    if (userHolding.quantity > 0)
-//      unrealizedPLPercent = (stock.livePrice - userHolding.avgPrice) / userHolding.avgPrice * 100.0;
-//    
-//    // ---------- Compute interval price change ----------
-//    double intervalChangePercent = 0.0;
-//    if (!stock.history.empty())
-//    {
-//      const auto& start = stock.history.front();
-//      const auto& end = stock.history.back();
-//      intervalChangePercent = (end.close - start.close) / start.close * 100.0;
+    if (!stock.IsValid())
+    {
+      return rec;
+    }
+    
+    // ---------- Compute Unrealized P/L ----------
+    double unrealizedPLPercent = 0.0;
+    if (userHolding.quantity > 0)
+      unrealizedPLPercent = (stock.livePrice - userHolding.avgPrice) / userHolding.avgPrice * 100.0;
+    
+    // ---------- Compute interval price change ----------
+    double intervalChangePercent = 0.0;
+    if (!stock.history.empty())
+    {
+      const auto& start = stock.history.front();
+      const auto& end = stock.history.back();
+      intervalChangePercent = (end.close - start.close) / start.close * 100.0;
+    }
+    
+    // SMA / EMA
+    rec.score += GetMovingAverageScore(stock.history.back().close, techReport.SMA, techReport.EMA);
+
+//    // ============================================================
+//    // Interval Momentum Boost — recent price action (major fix)
+//    // ============================================================
+//    if (intervalChangePercent >= 10.0) {
+//      rec.score += 10;
+//      rec.explanation += "Strong recent rally (+10%). ";
+//    } else if (intervalChangePercent >= 5.0) {
+//      rec.score += 6;
+//      rec.explanation += "Moderate upward trend (+5%). ";
+//    } else if (intervalChangePercent <= -5.0) {
+//      rec.score -= 6;
+//      rec.explanation += "Moderate decline (-5%). ";
+//    } else if (intervalChangePercent <= -10.0) {
+//      rec.score -= 10;
+//      rec.explanation += "Sharp decline (-10%). ";
 //    }
-//    
+
+//    if (techReport.EMA.count(20) && techReport.EMA.count(50))
+//    {
+//      double ema20 = techReport.EMA.at(20);
+//      double ema50 = techReport.EMA.at(50);
+//      if (ema20 > ema50) {
+//        rec.score += 6;
+//        rec.explanation += "EMA20>EMA50 bullish crossover. ";
+//      } else {
+//        rec.score -= 6;
+//        rec.explanation += "EMA20<EMA50 bearish crossover. ";
+//      }
+//    }
+
+
 //    // ============================================================
 //    // MOMENTUM (short-term trend direction)
 //    // ============================================================
@@ -81,33 +160,6 @@ namespace KanVest
 //    else if (techReport.RSI > 70) {
 //      rec.score -= 3; // smaller penalty, not a sell trigger
 //      rec.explanation += "RSI overbought (>70). ";
-//    }
-//    
-//    // ============================================================
-//    // SMA / EMA — medium-term trend alignment
-//    // ============================================================
-//    if (techReport.SMA.count(50))
-//    {
-//      if (stock.livePrice > techReport.SMA.at(50)) {
-//        rec.score += 6;
-//        rec.explanation += "Price above SMA50 (bullish). ";
-//      } else {
-//        rec.score -= 6;
-//        rec.explanation += "Price below SMA50 (bearish). ";
-//      }
-//    }
-//    
-//    if (techReport.EMA.count(20) && techReport.EMA.count(50))
-//    {
-//      double ema20 = techReport.EMA.at(20);
-//      double ema50 = techReport.EMA.at(50);
-//      if (ema20 > ema50) {
-//        rec.score += 6;
-//        rec.explanation += "EMA20>EMA50 bullish crossover. ";
-//      } else {
-//        rec.score -= 6;
-//        rec.explanation += "EMA20<EMA50 bearish crossover. ";
-//      }
 //    }
 //    
 //    // ============================================================
@@ -203,23 +255,7 @@ namespace KanVest
 //      }
 //    }
 //    
-//    // ============================================================
-//    // Interval Momentum Boost — recent price action (major fix)
-//    // ============================================================
-//    if (intervalChangePercent >= 10.0) {
-//      rec.score += 10;
-//      rec.explanation += "Strong recent rally (+10%). ";
-//    } else if (intervalChangePercent >= 5.0) {
-//      rec.score += 6;
-//      rec.explanation += "Moderate upward trend (+5%). ";
-//    } else if (intervalChangePercent <= -5.0) {
-//      rec.score -= 6;
-//      rec.explanation += "Moderate decline (-5%). ";
-//    } else if (intervalChangePercent <= -10.0) {
-//      rec.score -= 10;
-//      rec.explanation += "Sharp decline (-10%). ";
-//    }
-//    
+//
 //    // ============================================================
 //    // Volatility Adjustment (reduces conviction slightly)
 //    // ============================================================
