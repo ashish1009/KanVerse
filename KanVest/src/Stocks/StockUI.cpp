@@ -7,8 +7,6 @@
 
 #include "StockUI.hpp"
 
-#include "Stocks/StockManager.hpp"
-
 #include "User/UserManager.hpp"
 
 #include "Portfolio/PortfolioController.hpp"
@@ -396,7 +394,6 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       return;
     }
 
-    StockAnalysisReport report = StockManager::AnalyzeSelectedStock();
     KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundDark);
 
     static float xOffset = 0.0f;
@@ -652,13 +649,13 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       
       if (tab == TechnicalTab::SMA)
       {
-        ShowMovingAvg(report.technicals.SMA, " SMA");
+        ShowMovingAvg(s_analyzerReport.technicals.SMA, " SMA");
       }
       
       // EMA
       if (tab == TechnicalTab::EMA)
       {
-        ShowMovingAvg(report.technicals.EMA, " EMA");
+        ShowMovingAvg(s_analyzerReport.technicals.EMA, " EMA");
       }
       
 //      // Pivot
@@ -974,6 +971,8 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         {
           StockManager::SetSelectedStockSymbol(h.symbol);
           StockManager::SetSelectedStockHoldingData({h.averagePrice, h.quantity});
+          
+          s_analyzerReport = StockManager::AnalyzeSelectedStock();
           g_selectedRow = idx;
         }
         

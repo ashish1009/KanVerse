@@ -89,7 +89,12 @@ namespace KanVest
 
   const StockAnalysisReport& StockManager::AnalyzeSelectedStock()
   {
+    static StockAnalysisReport EmptyStockAnalysisReport;
     const auto& stockData = GetSelectedStockLongData();
+    if (!stockData.IsValid())
+    {
+      return EmptyStockAnalysisReport;
+    }
     
     // ---------- 1. Technical Analysis ----------
     s_report.technicals = TechnicalAnalyzer::Analyze(stockData);
