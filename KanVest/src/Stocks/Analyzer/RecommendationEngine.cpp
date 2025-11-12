@@ -36,7 +36,17 @@ namespace KanVest
 //  };
 //
   
-  static float GetMovingAverageScore(float currentPrice, const std::map<int, double>& SMA, const std::map<int, double>& EMA)
+  std::unordered_map<int, double> GetWeightsForGranularity(const std::string& granularity)
+  {
+    if (granularity == "1d" || granularity == "5d")
+      return { {5, 2.5}, {10, 2.0}, {20, 1.5}, {30, 1.0}, {50, 0.75}, {100, 0.5}, {150, 0.25}, {200, 0.25} };
+    else if (granularity == "1wk")
+      return { {5, 1.0}, {10, 1.25}, {20, 1.5}, {30, 1.75}, {50, 2.0}, {100, 2.25}, {150, 2.5}, {200, 2.75} };
+    else // "1mo" or higher
+      return { {5, 0.25}, {10, 0.5}, {20, 0.75}, {30, 1.0}, {50, 1.5}, {100, 2.0}, {150, 2.25}, {200, 2.5} };
+  }
+
+  static float GetMovingAverageScore(float currentPrice, const std::map<int, double>& SMA, const std::map<int, double>& EMA, const std::string& granuality)
   {
     float score = 0.0f;
     
@@ -44,10 +54,7 @@ namespace KanVest
     std::vector<int> periods = {5, 10, 20, 30, 50, 100, 150, 200};
     
     // Weight per period (longer periods have more influence)
-    std::unordered_map<int, double> weights = {
-      {5, 0.5}, {10, 0.75}, {20, 1.0}, {30, 1.25},
-      {50, 1.5}, {100, 2.0}, {150, 2.25}, {200, 2.5}
-    };
+    std::unordered_map<int, double> weights = GetWeightsForGranularity(granuality);
     
     // --- Analyze SMA/EMA influence ---
     for (int days : periods)
@@ -109,7 +116,7 @@ namespace KanVest
     }
     
     // SMA / EMA
-    rec.score += GetMovingAverageScore(stock.history.back().close, techReport.SMA, techReport.EMA);
+    rec.score += GetMovingAverageScore(stock.history.back().close, techReport.SMA, techReport.EMA, stock.dataGranularity);
 
 //    // ============================================================
 //    // Interval Momentum Boost — recent price action (major fix)
