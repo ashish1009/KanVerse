@@ -144,7 +144,7 @@ namespace KanVest
     // Login popup
     m_loginPopup.Set("KanVest Logic", true /* open flag */, 600, 410, true /* center */);
     
-    StockManager::StartLiveUpdates(10);
+    StockManager::StartLiveUpdates(1);
   }
   
   void RendererLayer::OnDetach() noexcept

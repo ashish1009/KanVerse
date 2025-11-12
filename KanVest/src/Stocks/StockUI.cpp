@@ -394,13 +394,16 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       return;
     }
 
-    if (s_lastAnalyzedRange != StockManager::GetCurrentRange() or
-        s_lastAnalyzedInterval != StockManager::GetCurrentInterval() or
-        s_lastAnalyzedSymbol != StockManager::GetSelectedStockSymbol())
+    static std::chrono::steady_clock::time_point s_lastAnalysis = std::chrono::steady_clock::now();
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - s_lastAnalysis);
+    
+    if (elapsed.count() >= 10)
     {
       s_analyzerReport = StockManager::AnalyzeSelectedStock();
+      s_lastAnalysis = now;
     }
-
+    
     KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundDark);
 
     static float xOffset = 0.0f;
@@ -819,7 +822,11 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   
   void StockUI::DrawAnalysisPanel()
   {
-
+    {
+      KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::TextMuted);
+      KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 90.0f, ImGui::GetContentRegionAvail().y - 20.0f});
+      ImGui::Text("FPS : %.1f", ImGui::GetIO().Framerate);
+    }
   }
   
   void StockUI::AddStockInManager(const std::string& symbol)

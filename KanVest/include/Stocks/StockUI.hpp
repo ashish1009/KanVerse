@@ -44,6 +44,5 @@ namespace KanVest
     inline static char s_searchedString[128] = "Nifty";
     
     inline static StockAnalysisReport s_analyzerReport;
-    inline static std::string s_lastAnalyzedInterval, s_lastAnalyzedRange, s_lastAnalyzedSymbol;
   };
 } // namespace KanVest
