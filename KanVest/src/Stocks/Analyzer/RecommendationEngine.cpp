@@ -46,9 +46,10 @@ namespace KanVest
       return { {5, 0.25}, {10, 0.5}, {20, 0.75}, {30, 1.0}, {50, 1.5}, {100, 2.0}, {150, 2.25}, {200, 2.5} };
   }
 
-  static float GetMovingAverageScore(float currentPrice, const std::map<int, double>& SMA, const std::map<int, double>& EMA, const std::string& granuality)
+  static std::pair<float, std::string> GetMovingAverageScore(float currentPrice, const std::map<int, double>& SMA, const std::map<int, double>& EMA, const std::string& granuality)
   {
     float score = 0.0f;
+    std::string explanation;
     
     // Technical periods considered
     std::vector<int> periods = {5, 10, 20, 30, 50, 100, 150, 200};
@@ -66,20 +67,44 @@ namespace KanVest
       if (sma > 0.0)
       {
         if (currentPrice > sma)
+        {
           score += w * 2.0; // bullish
+          explanation += "SMA_" + std::to_string(days) +
+          "Price (" + std::to_string(currentPrice) + ") > " + std::to_string(days) +
+          "-day SMA (" + std::to_string(sma) + ") → Bullish +"
+          + std::to_string(w * 2.0) + "\n";
+        }
         else
+        {
           score -= w * 2.0; // bearish
+          explanation += "SMA_" + std::to_string(days) +
+          "Price (" + std::to_string(currentPrice) + ") < " + std::to_string(days) +
+          "-day SMA (" + std::to_string(sma) + ") → Bearish "
+          + std::to_string(-(w * 2.0)) + "\n";
+        }
       }
       
       if (ema > 0.0)
       {
         if (currentPrice > ema)
+        {
           score += w * 3.0; // stronger bullish bias for EMA
+          explanation += "EMA_" + std::to_string(days) +
+          "Price (" + std::to_string(currentPrice) + ") > " + std::to_string(days) +
+          "-day EMA (" + std::to_string(ema) + ") → Strong bullish +"
+          + std::to_string(w * 3.0)  + "\n";
+        }
         else
+        {
           score -= w * 3.0; // stronger bearish bias
+          explanation += "EMA_" + std::to_string(days) +
+          "Price (" + std::to_string(currentPrice) + ") < " + std::to_string(days) +
+          "-day EMA (" + std::to_string(ema) + ") → Strong bearish "
+          + std::to_string(-(w * 3.0)) + "\n";
+        }
       }
     }
-    return score;
+    return {score, explanation};
   }
   
   Recommendation RecommendationEngine::Generate(
@@ -116,24 +141,30 @@ namespace KanVest
     }
     
     // SMA / EMA
-    rec.score += GetMovingAverageScore(stock.history.back().close, techReport.SMA, techReport.EMA, stock.dataGranularity);
-
-//    // ============================================================
-//    // Interval Momentum Boost — recent price action (major fix)
-//    // ============================================================
-//    if (intervalChangePercent >= 10.0) {
-//      rec.score += 10;
-//      rec.explanation += "Strong recent rally (+10%). ";
-//    } else if (intervalChangePercent >= 5.0) {
-//      rec.score += 6;
-//      rec.explanation += "Moderate upward trend (+5%). ";
-//    } else if (intervalChangePercent <= -5.0) {
-//      rec.score -= 6;
-//      rec.explanation += "Moderate decline (-5%). ";
-//    } else if (intervalChangePercent <= -10.0) {
-//      rec.score -= 10;
-//      rec.explanation += "Sharp decline (-10%). ";
-//    }
+    const auto& [movingAvgscore, movingAvgExplaination] = GetMovingAverageScore(stock.history.back().close, techReport.SMA, techReport.EMA, stock.dataGranularity);
+    rec.score += movingAvgscore;
+    rec.explanation += movingAvgExplaination;
+    
+    // Interval Momentum Boost — recent price action (major fix)
+    if (intervalChangePercent >= 10.0) {
+      rec.score += 50;
+      rec.explanation += "Strong recent rally (+10%). ";
+    } else if (intervalChangePercent >= 5.0) {
+      rec.score += 10;
+      rec.explanation += "Moderate upward trend (+5%). ";
+    } else if (intervalChangePercent >= 2.0) {
+      rec.score += 5;
+      rec.explanation += "Moderate upward trend (+2%). ";
+    } else if (intervalChangePercent <= -2.0) {
+      rec.score -= 5;
+      rec.explanation += "Moderate decline (-2%). ";
+    } else if (intervalChangePercent <= -5.0) {
+      rec.score -= 10;
+      rec.explanation += "Moderate decline (-5%). ";
+    } else if (intervalChangePercent <= -10.0) {
+      rec.score -= 50;
+      rec.explanation += "Sharp decline (-10%). ";
+    }
 
 //    if (techReport.EMA.count(20) && techReport.EMA.count(50))
 //    {
