@@ -21,36 +21,36 @@ namespace KanVest
     int quantity = 0;       // Number of shares
   };
   
-//  enum class Action {StrongBuy, Buy, Hold, Sell, StrongSell};
-//
-//  struct Recommendation
-//  {
-//    Action action = Action::Hold;
-//    double quantity = 0.0;
-//    double score = 50.0;
-//    std::string explanation;  // Human-readable reasoning
-//  };
-//  
-//  class RecommendationEngine
-//  {
-//  public:
-//    /// Generate recommendation based on all analysis and current holdings
-//    static Recommendation Generate(
-//                                   const StockData& stock,
-//                                   const TechnicalReport& techReport,
+  enum class Action {StrongBuy, Buy, Hold, Sell, StrongSell};
+
+  struct Recommendation
+  {
+    Action action = Action::Hold;
+    double quantity = 0.0;
+    double score = 50.0;
+    std::string explanation;  // Human-readable reasoning
+  };
+  
+  class RecommendationEngine
+  {
+  public:
+    /// Generate recommendation based on all analysis and current holdings
+    static Recommendation Generate(
+                                   const StockData& stock,
+                                   const TechnicalReport& techReport,
 //                                   const MomentumReport& momentumReport,
 //                                   const VolatilityReport& volReport,
 //                                   const ChartReport& chartReport,
 //                                   const PerformanceReport& perfReport,
-//                                   const UserHoldingForAnalyzer& userHolding
-//                                   );
-//    
+                                   const UserHoldingForAnalyzer& userHolding
+                                   );
+    
 //  private:
 //    static double DetermineQuantity(double stockPrice, const UserHoldingForAnalyzer& userHolding, Action action);
-//  };
-//  
-//  namespace Utils
-//  {
-//    std::string GetActionString(Action action);
-//  }
+  };
+  
+  namespace Utils
+  {
+    std::string GetActionString(Action action);
+  }
 } // namespace KanVest

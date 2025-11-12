@@ -35,19 +35,20 @@ namespace KanVest
 //    // Add more patterns here
 //  };
 //  
-//  Recommendation RecommendationEngine::Generate(
-//                                                const StockData& stock,
-//                                                const TechnicalReport& techReport,
+  Recommendation RecommendationEngine::Generate(
+                                                const StockData& stock,
+                                                const TechnicalReport& techReport,
 //                                                const MomentumReport& momentumReport,
 //                                                const VolatilityReport& volReport,
 //                                                const ChartReport& chartReport,
 //                                                const PerformanceReport& perfReport,
-//                                                const UserHoldingForAnalyzer& userHolding)
-//  {
-//    IK_PERFORMANCE_FUNC("RecommendationEngine::Generate");
-//    Recommendation rec;
-//    rec.score = 50.0;
-//    
+                                                const UserHoldingForAnalyzer& userHolding
+                                                )
+  {
+    IK_PERFORMANCE_FUNC("RecommendationEngine::Generate");
+    Recommendation rec;
+    rec.score = 50.0;
+    
 //    // ---------- Compute Unrealized P/L ----------
 //    double unrealizedPLPercent = 0.0;
 //    if (userHolding.quantity > 0)
@@ -252,8 +253,8 @@ namespace KanVest
 //    oss << "Technical Summary:\n" << rec.explanation << "\n";
 //    
 //    rec.explanation = oss.str();
-//    return rec;
-//  }
+    return rec;
+  }
 //
 //  // --------------------------
 //  // Determine quantity to trade
@@ -273,20 +274,20 @@ namespace KanVest
 //    }
 //    return 0.0;
 //  }
-//  
-//  namespace Utils
-//  {
-//    std::string GetActionString(Action action)
-//    {
-//      switch (action)
-//      {
-//        case Action::StrongBuy: return "Strong Buy";
-//        case Action::Buy:       return "Buy";
-//        case Action::Hold:      return "Hold";
-//        case Action::Sell:      return "Sell";
-//        case Action::StrongSell:return "Strong Sell";
-//        default: return "Unknown";
-//      }
-//    }
-//  }
+  
+  namespace Utils
+  {
+    std::string GetActionString(Action action)
+    {
+      switch (action)
+      {
+        case Action::StrongBuy: return "Strong Buy";
+        case Action::Buy:       return "Buy";
+        case Action::Hold:      return "Hold";
+        case Action::Sell:      return "Sell";
+        case Action::StrongSell:return "Strong Sell";
+        default: return "Unknown";
+      }
+    }
+  }
 } // namespace KanVest

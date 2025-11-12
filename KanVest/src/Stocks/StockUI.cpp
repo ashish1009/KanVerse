@@ -400,25 +400,25 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     
     // --- Recommendation ---
     static auto font = KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26);
-//    
-//    ImU32 recColor;
-//    switch (report.recommendation.action)
-//    {
-//      case Action::StrongBuy:   recColor = KanVasX::Color::Green; break;
-//      case Action::Buy:         recColor = KanVasX::Color::Cyan; break;
-//      case Action::Hold:        recColor = KanVasX::Color::Yellow; break;
-//      case Action::Sell:        recColor = KanVasX::Color::Orange; break;
-//      case Action::StrongSell:  recColor = KanVasX::Color::Red; break;
-//      default:                  recColor = KanVasX::Color::White; break;
-//    }
-//
-//    KanVasX::UI::ShiftCursorY(20.0f);
-//    KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
-//    ImGui::SameLine();
-//    KanVasX::UI::Text(font, Utils::GetActionString(report.recommendation.action), KanVasX::UI::AlignX::Right, {-50, 0}, recColor);
-//    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 1.0f, {xOffset, 0.0f});
-//
-//    KanVasX::UI::ShiftCursorY(20.0f);
+    
+    ImU32 recColor;
+    switch (s_analyzerReport.recommendation.action)
+    {
+      case Action::StrongBuy:   recColor = KanVasX::Color::Green; break;
+      case Action::Buy:         recColor = KanVasX::Color::Cyan; break;
+      case Action::Hold:        recColor = KanVasX::Color::Yellow; break;
+      case Action::Sell:        recColor = KanVasX::Color::Orange; break;
+      case Action::StrongSell:  recColor = KanVasX::Color::Red; break;
+      default:                  recColor = KanVasX::Color::White; break;
+    }
+
+    KanVasX::UI::ShiftCursorY(20.0f);
+    KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
+    ImGui::SameLine();
+    KanVasX::UI::Text(font, Utils::GetActionString(s_analyzerReport.recommendation.action), KanVasX::UI::AlignX::Right, {-50, 0}, recColor);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 1.0f, {xOffset, 0.0f});
+
+    KanVasX::UI::ShiftCursorY(20.0f);
 //    // ------- Stock Insight
 //    {
 //      // Voltality
@@ -1005,7 +1005,8 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         // Update data
         {
           StockData stockData("");
-          if (StockManager::GetShortTermStockData(h.symbol, stockData))
+          StockManager::GetStockData(h.symbol, stockData);
+          if (stockData.IsValid())
           {
             h.stockValue = stockData.livePrice;
             h.investment = h.averagePrice * h.quantity;

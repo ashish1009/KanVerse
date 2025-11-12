@@ -113,16 +113,16 @@ namespace KanVest
 //    s_report.chart = ChartAnalyzer::Analyze(stockData);
     
     // ---------- 6. Recommendation ----------
-//    s_report.recommendation = RecommendationEngine::Generate(
-//                                                             stockData,
-//                                                             s_report.technicals,
+    s_report.recommendation = RecommendationEngine::Generate(
+                                                             stockData,
+                                                             s_report.technicals,
 //                                                             s_report.momentum,
 //                                                             s_report.volatility,
 //                                                             s_report.chart,
 //                                                             s_report.performance,
-//                                                             s_selectedHoldingData
-//                                                             );
-//    
+                                                             s_selectedHoldingData
+                                                             );
+    
     return s_report;
   }
 
@@ -229,7 +229,7 @@ namespace KanVest
   StockData StockManager::GetSelectedStockData()
   {
     StockData selectedStockData;
-    GetShortTermStockData(s_selectedStockSymbol, selectedStockData);
+    GetStockData(s_selectedStockSymbol, selectedStockData);
     return selectedStockData;
   }
 

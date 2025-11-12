@@ -20,7 +20,7 @@ namespace KanVest
 //    KanVest::MomentumReport momentum;
 //    KanVest::PerformanceReport performance;
 //    KanVest::ChartReport chart;
-//    KanVest::Recommendation recommendation;
+    KanVest::Recommendation recommendation;
   };
 
   /// This class manages all stocks
