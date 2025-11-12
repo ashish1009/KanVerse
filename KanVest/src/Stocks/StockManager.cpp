@@ -90,7 +90,7 @@ namespace KanVest
   const StockAnalysisReport& StockManager::AnalyzeSelectedStock()
   {
     static StockAnalysisReport EmptyStockAnalysisReport;
-    const auto& stockData = GetSelectedStockLongData();
+    const auto& stockData = GetSelectedStockData();
     if (!stockData.IsValid())
     {
       return EmptyStockAnalysisReport;
@@ -133,7 +133,6 @@ namespace KanVest
     if (s_stockCache.find(symbol) == s_stockCache.end())
     {
       s_stockCache.emplace(symbol, StockData(symbol));
-      s_stockCacheLongData.emplace(symbol, StockData(symbol));
       return true;
     }
     return false;
@@ -149,31 +148,15 @@ namespace KanVest
   {
     std::scoped_lock lock(s_mutex);
     s_stockCache.erase(symbol);
-    s_stockCacheLongData.erase(symbol);
   }
   
-  bool StockManager::GetShortTermStockData(const std::string& symbolName, StockData& outData)
+  bool StockManager::GetStockData(const std::string& symbolName, StockData& outData)
   {
     std::scoped_lock lock(s_mutex);
     std::string symbol = NormalizeSymbol(symbolName);
     
     auto it = s_stockCache.find(symbol);
     if (it != s_stockCache.end())
-    {
-      outData = it->second;
-      return true;
-    }
-    
-    return false;
-  }
-
-  bool StockManager::GetLongTermStockData(const std::string& symbolName, StockData& outData)
-  {
-    std::scoped_lock lock(s_mutex);
-    std::string symbol = NormalizeSymbol(symbolName);
-    
-    auto it = s_stockCacheLongData.find(symbol);
-    if (it != s_stockCacheLongData.end())
     {
       outData = it->second;
       return true;
@@ -201,7 +184,6 @@ namespace KanVest
     };
     
     refresh(s_stockCache);
-    refresh(s_stockCacheLongData);
   }
   
   void StockManager::StartLiveUpdates(int intervalMilliseconds)
@@ -250,22 +232,11 @@ namespace KanVest
     GetShortTermStockData(s_selectedStockSymbol, selectedStockData);
     return selectedStockData;
   }
-  StockData StockManager::GetSelectedStockLongData()
-  {
-    StockData selectedStockData;
-    GetLongTermStockData(s_selectedStockSymbol, selectedStockData);
-    return selectedStockData;
-  }
 
   const std::unordered_map<std::string, StockData>& StockManager::GetStockCache()
   {
     std::scoped_lock lock(s_mutex);
     return s_stockCache;
-  }
-  const std::unordered_map<std::string, StockData>& StockManager::GetStockCacheLongData()
-  {
-    std::scoped_lock lock(s_mutex);
-    return s_stockCacheLongData;
   }
 
   void StockManager::SetCurrentInterval(const std::string& interval)
@@ -384,15 +355,6 @@ namespace KanVest
         {
           std::scoped_lock lock(s_mutex);
           s_stockCache[symbol] = std::move(shortTermData);
-        }
-      }
-
-      StockData longTermData = FetchData(symbol, "1d", "1y");
-      if (longTermData.IsValid())
-      {
-        {
-          std::scoped_lock lock(s_mutex);
-          s_stockCacheLongData[symbol] = std::move(longTermData);
         }
       }
 
