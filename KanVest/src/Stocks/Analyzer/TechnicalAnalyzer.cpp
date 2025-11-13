@@ -17,7 +17,7 @@ namespace KanVest
     TechnicalReport report;
     
     ComputeMovingAverages(stock, report);
-//    ComputeRSI(stock, report);
+    ComputeRSI(stock, report);
 //    ComputeMACD(stock, report);
 //    ComputeATR(stock, report);
 //    ComputeVWAP(stock, report);
@@ -98,17 +98,17 @@ namespace KanVest
     for (auto& t : tasks)
       t.wait();
   }
-//  
-//  void TechnicalAnalyzer::ComputeRSI(const StockData& stock, TechnicalReport& report, int period)
-//  {
-//    IK_PERFORMANCE_FUNC("TechnicalAnalyzer::ComputeRSI");
-//    double rsi = TechnicalUtils::ComputeRSI(stock.history, period);
-//    report.RSI = rsi;
-//    
-//    report.Explanations["RSI"] = "RSI (" + std::to_string(period) + ") is " + std::to_string(rsi) +
-//    ". RSI above 70 may indicate overbought; below 30 may indicate oversold conditions.";
-//  }
-//  
+  
+  void TechnicalAnalyzer::ComputeRSI(const StockData& stock, TechnicalReport& report, int period)
+  {
+    IK_PERFORMANCE_FUNC("TechnicalAnalyzer::ComputeRSI");
+    double rsi = TechnicalUtils::ComputeRSI(stock.history, period);
+    report.RSI = rsi;
+    
+    report.Explanations["RSI"] = "RSI (" + std::to_string(period) + ") is " + std::to_string(rsi) +
+    ". RSI above 70 may indicate overbought; below 30 may indicate oversold conditions.";
+  }
+  
 //  void TechnicalAnalyzer::ComputeMACD(const StockData& stock, TechnicalReport& report, int fastPeriod, int slowPeriod, int signalPeriod)
 //  {
 //    IK_PERFORMANCE_FUNC("TechnicalAnalyzer::ComputeMACD");

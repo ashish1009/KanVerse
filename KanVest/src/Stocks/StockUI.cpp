@@ -562,14 +562,17 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
           ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
         }
         
-//        float availX = ImGui::GetContentRegionAvail().x - 30.0f;
-//        float technicalDataSize = availX / 4;
-//        auto TechnicalData = [technicalDataSize, report](const std::string& title, const std::string& tooltipTag) {
-//          KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), KanVasX::Color::BackgroundDark, KanVasX::Color::TextBright, false, 0.0f, {technicalDataSize, 60});
-//          KanVasX::UI::Tooltip(report.technicals.Explanations.at(tooltipTag));
-//        };
-//        
-//        TechnicalData(std::string("RSI \n") + Utils::FormatDoubleToString(report.technicals.RSI), "RSI"); ImGui::SameLine();
+        float availX = ImGui::GetContentRegionAvail().x - 30.0f;
+        float technicalDataSize = availX / 4;
+        auto TechnicalData = [technicalDataSize](const std::string& title, const std::string& tooltipTag) {
+          KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), KanVasX::Color::BackgroundDark, KanVasX::Color::TextBright, false, 0.0f, {technicalDataSize, 60});
+          if (const auto& explainIt = s_analyzerReport.technicals.Explanations.find(tooltipTag); explainIt != s_analyzerReport.technicals.Explanations.end())
+          {
+            KanVasX::UI::Tooltip(explainIt->second);
+          }
+        };
+        
+        TechnicalData(std::string("RSI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.RSI), "RSI"); ImGui::SameLine();
 //        TechnicalData(std::string("MACD \n") + Utils::FormatDoubleToString(report.technicals.MACD), "MACD"); ImGui::SameLine();
 //        TechnicalData(std::string("VWAP \n") + Utils::FormatDoubleToString(report.technicals.VWAP), "VWAP"); ImGui::SameLine();
 //        TechnicalData(std::string("ATR \n") + Utils::FormatDoubleToString(report.technicals.ATR), "ATR");

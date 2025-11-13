@@ -42,191 +42,140 @@ namespace KanVest
     return true;
   }
   
-//  // --------------------------
-//  // Simple Moving Average (SMA)
-//  // --------------------------
-//  double TechnicalUtils::ComputeSMA(const std::vector<StockPoint>& history, int periodInDays)
-//  {
-//    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeSMA");
-//    int barsPerDay = static_cast<int>(history.size() / GetNumberOfTradingDays(history));
-//
-//    int requiredBars = periodInDays * barsPerDay;
-//    if (history.size() < requiredBars) return 0.0; // or partial SMA
-//    
-//    double sum = 0.0;
-//    for (size_t i = history.size() - requiredBars; i < history.size(); ++i)
-//    {
-//      sum += history[i].close;
-//    }
-//    return sum / requiredBars;
-//  }
-//
-//  // --------------------------
-//  // Exponential Moving Average (EMA)
-//  // --------------------------
-//  double TechnicalUtils::ComputeEMA(const std::vector<StockPoint>& history, int periodInDays)
-//  {
-//    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeEMA");
-//    if (history.empty()) return 0.0;
-//    
-//    int numDays = GetNumberOfTradingDays(history);
-//    if (numDays == 0) return 0.0;
-//    
-//    int barsPerDay = static_cast<int>(history.size() / numDays);
-//    int requiredBars = periodInDays * barsPerDay;
-//    
-//    if (history.size() < requiredBars)
-//      return 0.0; // not enough data
-//    
-//    // Initial EMA = SMA of the first "requiredBars"
-//    double ema = 0.0;
-//    for (size_t i = history.size() - requiredBars; i < history.size() - requiredBars + periodInDays; ++i)
-//      ema += history[i].close;
-//    ema /= periodInDays;
-//    
-//    double multiplier = 2.0 / (periodInDays + 1.0);
-//    
-//    for (size_t i = history.size() - requiredBars + periodInDays; i < history.size(); ++i)
-//    {
-//      ema = ((history[i].close - ema) * multiplier) + ema;
-//    }
-//    
-//    return ema;
-//  }
-//
-//  // --------------------------
-//  // Relative Strength Index (RSI)
-//  // --------------------------
-//  double TechnicalUtils::ComputeRSI(const std::vector<StockPoint>& history, int periodInDays)
-//  {
-//    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeRSI");
-//    const size_t n = history.size();
-//    if (n < 2)
-//      return 50.0;
-//    
-//    // --- Step 1: Detect time interval ---
-//    uint64_t totalGap = 0;
-//    int gapCount = 0;
-//    for (size_t i = 1; i < std::min(n, size_t(100)); ++i)
-//    {
-//      uint64_t gap = history[i].timestamp - history[i - 1].timestamp;
-//      if (gap > 0 && gap < 86400 * 7) // ignore missing week gaps
-//      {
-//        totalGap += gap;
-//        ++gapCount;
-//      }
-//    }
-//    
-//    double avgGap = (gapCount > 0) ? (double)totalGap / gapCount : 86400.0;
-//    bool isIntraday = (avgGap < 12 * 3600); // less than 12 hours = intraday
-//    
-//    // --- Step 2: If intraday, use bar-based RSI ---
-//    if (isIntraday)
-//    {
-//      int period = periodInDays; // RSI(14) means 14 bars for intraday
-//      if (n <= static_cast<size_t>(period))
-//        return 50.0;
-//      
-//      double avgGain = 0.0, avgLoss = 0.0;
-//      for (int i = 1; i <= period; ++i)
-//      {
-//        double diff = history[i].close - history[i - 1].close;
-//        if (diff > 0)
-//          avgGain += diff;
-//        else
-//          avgLoss -= diff;
-//      }
-//      avgGain /= period;
-//      avgLoss /= period;
-//      
-//      for (size_t i = period + 1; i < n; ++i)
-//      {
-//        double diff = history[i].close - history[i - 1].close;
-//        double gain = diff > 0 ? diff : 0.0;
-//        double loss = diff < 0 ? -diff : 0.0;
-//        
-//        avgGain = ((avgGain * (period - 1)) + gain) / period;
-//        avgLoss = ((avgLoss * (period - 1)) + loss) / period;
-//      }
-//      
-//      if (avgLoss == 0.0)
-//        return 100.0;
-//      
-//      double rs = avgGain / avgLoss;
-//      return 100.0 - (100.0 / (1.0 + rs));
-//    }
-//    
-//    // --- Step 3: If daily/long interval, aggregate by day ---
-//    std::vector<std::pair<uint64_t, double>> dailyCloses;
-//    uint64_t currentDay = 0;
-//    
-//    for (const auto& p : history)
-//    {
-//      uint64_t day = p.timestamp / 86400;
-//      if (dailyCloses.empty() || day != currentDay)
-//      {
-//        dailyCloses.emplace_back(day, p.close);
-//        currentDay = day;
-//      }
-//      else
-//      {
-//        // update last close for same day
-//        dailyCloses.back().second = p.close;
-//      }
-//    }
-//    
-//    const size_t dn = dailyCloses.size();
-//    int period = periodInDays;
-//    if (dn <= static_cast<size_t>(period))
-//      return 50.0;
-//    
-//    double avgGain = 0.0, avgLoss = 0.0;
-//    for (int i = 1; i <= period; ++i)
-//    {
-//      double diff = dailyCloses[i].second - dailyCloses[i - 1].second;
-//      if (diff > 0)
-//        avgGain += diff;
-//      else
-//        avgLoss -= diff;
-//    }
-//    avgGain /= period;
-//    avgLoss /= period;
-//    
-//    for (size_t i = period + 1; i < dn; ++i)
-//    {
-//      double diff = dailyCloses[i].second - dailyCloses[i - 1].second;
-//      double gain = diff > 0 ? diff : 0.0;
-//      double loss = diff < 0 ? -diff : 0.0;
-//      
-//      avgGain = ((avgGain * (period - 1)) + gain) / period;
-//      avgLoss = ((avgLoss * (period - 1)) + loss) / period;
-//    }
-//    
-//    if (avgLoss == 0.0)
-//      return 100.0;
-//    
-//    double rs = avgGain / avgLoss;
-//    return 100.0 - (100.0 / (1.0 + rs));
-//  }
-//
-//  std::vector<double> ComputeEMASeries(const std::vector<double>& data, int period)
-//  {
-//    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeEMASeries");
-//    std::vector<double> result;
-//    if (data.size() < static_cast<size_t>(period)) return result;
-//    
-//    double multiplier = 2.0 / (period + 1);
-//    double ema = std::accumulate(data.begin(), data.begin() + period, 0.0) / period; // initial SMA
-//    result.push_back(ema);
-//    
-//    for (size_t i = period; i < data.size(); ++i)
-//    {
-//      ema = ((data[i] - ema) * multiplier) + ema;
-//      result.push_back(ema);
-//    }
-//    return result;
-//  }
-//
+
+  // --------------------------
+  // Relative Strength Index (RSI)
+  // --------------------------
+  double TechnicalUtils::ComputeRSI(const std::vector<StockPoint>& history, int periodInDays)
+  {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeRSI");
+    const size_t n = history.size();
+    if (n < 2)
+      return 50.0;
+    
+    // --- Step 1: Detect time interval ---
+    uint64_t totalGap = 0;
+    int gapCount = 0;
+    for (size_t i = 1; i < std::min(n, size_t(100)); ++i)
+    {
+      uint64_t gap = history[i].timestamp - history[i - 1].timestamp;
+      if (gap > 0 && gap < 86400 * 7) // ignore missing week gaps
+      {
+        totalGap += gap;
+        ++gapCount;
+      }
+    }
+    
+    double avgGap = (gapCount > 0) ? (double)totalGap / gapCount : 86400.0;
+    bool isIntraday = (avgGap < 12 * 3600); // less than 12 hours = intraday
+    
+    // --- Step 2: If intraday, use bar-based RSI ---
+    if (isIntraday)
+    {
+      int period = periodInDays; // RSI(14) means 14 bars for intraday
+      if (n <= static_cast<size_t>(period))
+        return 50.0;
+      
+      double avgGain = 0.0, avgLoss = 0.0;
+      for (int i = 1; i <= period; ++i)
+      {
+        double diff = history[i].close - history[i - 1].close;
+        if (diff > 0)
+          avgGain += diff;
+        else
+          avgLoss -= diff;
+      }
+      avgGain /= period;
+      avgLoss /= period;
+      
+      for (size_t i = period + 1; i < n; ++i)
+      {
+        double diff = history[i].close - history[i - 1].close;
+        double gain = diff > 0 ? diff : 0.0;
+        double loss = diff < 0 ? -diff : 0.0;
+        
+        avgGain = ((avgGain * (period - 1)) + gain) / period;
+        avgLoss = ((avgLoss * (period - 1)) + loss) / period;
+      }
+      
+      if (avgLoss == 0.0)
+        return 100.0;
+      
+      double rs = avgGain / avgLoss;
+      return 100.0 - (100.0 / (1.0 + rs));
+    }
+    
+    // --- Step 3: If daily/long interval, aggregate by day ---
+    std::vector<std::pair<uint64_t, double>> dailyCloses;
+    uint64_t currentDay = 0;
+    
+    for (const auto& p : history)
+    {
+      uint64_t day = p.timestamp / 86400;
+      if (dailyCloses.empty() || day != currentDay)
+      {
+        dailyCloses.emplace_back(day, p.close);
+        currentDay = day;
+      }
+      else
+      {
+        // update last close for same day
+        dailyCloses.back().second = p.close;
+      }
+    }
+    
+    const size_t dn = dailyCloses.size();
+    int period = periodInDays;
+    if (dn <= static_cast<size_t>(period))
+      return 50.0;
+    
+    double avgGain = 0.0, avgLoss = 0.0;
+    for (int i = 1; i <= period; ++i)
+    {
+      double diff = dailyCloses[i].second - dailyCloses[i - 1].second;
+      if (diff > 0)
+        avgGain += diff;
+      else
+        avgLoss -= diff;
+    }
+    avgGain /= period;
+    avgLoss /= period;
+    
+    for (size_t i = period + 1; i < dn; ++i)
+    {
+      double diff = dailyCloses[i].second - dailyCloses[i - 1].second;
+      double gain = diff > 0 ? diff : 0.0;
+      double loss = diff < 0 ? -diff : 0.0;
+      
+      avgGain = ((avgGain * (period - 1)) + gain) / period;
+      avgLoss = ((avgLoss * (period - 1)) + loss) / period;
+    }
+    
+    if (avgLoss == 0.0)
+      return 100.0;
+    
+    double rs = avgGain / avgLoss;
+    return 100.0 - (100.0 / (1.0 + rs));
+  }
+
+  std::vector<double> ComputeEMASeries(const std::vector<double>& data, int period)
+  {
+    IK_PERFORMANCE_FUNC("TechnicalUtils::ComputeEMASeries");
+    std::vector<double> result;
+    if (data.size() < static_cast<size_t>(period)) return result;
+    
+    double multiplier = 2.0 / (period + 1);
+    double ema = std::accumulate(data.begin(), data.begin() + period, 0.0) / period; // initial SMA
+    result.push_back(ema);
+    
+    for (size_t i = period; i < data.size(); ++i)
+    {
+      ema = ((data[i] - ema) * multiplier) + ema;
+      result.push_back(ema);
+    }
+    return result;
+  }
+
 //  // --------------------------
 //  // MACD and Signal line
 //  // --------------------------

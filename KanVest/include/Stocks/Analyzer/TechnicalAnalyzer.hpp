@@ -22,7 +22,7 @@ namespace KanVest
   {
     std::map<int, double> SMA;      // key = period, value = SMA
     std::map<int, double> EMA;      // key = period, value = EMA
-//    double RSI = 0.0;
+    double RSI = 0.0;
 //    double MACD = 0.0;
 //    double MACDSignal = 0.0;
 //    double ATR = 0.0;
@@ -50,7 +50,7 @@ namespace KanVest
     
   private:
     static void ComputeMovingAverages(const StockData& stock, TechnicalReport& report);
-//    static void ComputeRSI(const StockData& stock, TechnicalReport& report, int period = 14);
+    static void ComputeRSI(const StockData& stock, TechnicalReport& report, int period = 14);
 //    static void ComputeMACD(const StockData& stock, TechnicalReport& report, int fastPeriod = 12, int slowPeriod = 26, int signalPeriod = 9);
 //    static void ComputeATR(const StockData& stock, TechnicalReport& report, int period = 14);
 //    static void ComputeVWAP(const StockData& stock, TechnicalReport& report);

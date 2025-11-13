@@ -17,9 +17,7 @@ namespace KanVest
     static int GetNumberOfTradingDays(const std::vector<StockPoint>& history);
     static bool ResolvePeriods(const std::vector<StockPoint>& history, int periodInDays, int &outPeriodBars, int &outBarsPerDay);
   
-//    static double ComputeSMA(const std::vector<StockPoint>& history, int period);
-//    static double ComputeEMA(const std::vector<StockPoint>& history, int period);
-//    static double ComputeRSI(const std::vector<StockPoint>& history, int period);
+    static double ComputeRSI(const std::vector<StockPoint>& history, int period);
 //    static std::tuple<double,double> ComputeMACD(const std::vector<StockPoint>& history, int fastPeriod, int slowPeriod, int signalPeriod);
 //    static double ComputeATR(const std::vector<StockPoint>& history, int period);
 //    static double ComputeVWAP(const std::vector<StockPoint>& history);

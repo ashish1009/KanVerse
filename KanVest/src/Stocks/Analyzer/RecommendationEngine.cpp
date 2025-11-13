@@ -166,18 +166,24 @@ namespace KanVest
       rec.explanation += "Sharp decline (-10%). ";
     }
 
-//    if (techReport.EMA.count(20) && techReport.EMA.count(50))
-//    {
-//      double ema20 = techReport.EMA.at(20);
-//      double ema50 = techReport.EMA.at(50);
-//      if (ema20 > ema50) {
-//        rec.score += 6;
-//        rec.explanation += "EMA20>EMA50 bullish crossover. ";
-//      } else {
-//        rec.score -= 6;
-//        rec.explanation += "EMA20<EMA50 bearish crossover. ";
-//      }
-//    }
+    // RSI — Overbought / Oversold (caution signal, not reversal)
+    if (techReport.RSI < 40) {
+      float boost = std::clamp((40.0f - (float)techReport.RSI) * 0.25f, 0.0f, 10.0f);
+      rec.score += boost;
+      if (techReport.RSI < 30.0f)
+        rec.explanation += "RSI oversold (" + std::to_string(techReport.RSI) + ") strong bullish bias. ";
+      else
+        rec.explanation += "RSI mildly oversold (" + std::to_string(techReport.RSI) + "). ";
+    }
+    else if (techReport.RSI > 60) {
+      // The higher above 70, the stronger the bearish caution
+      float penalty = std::clamp(((float)techReport.RSI - 60.0f) * 0.2f, 0.0f, 8.0f);
+      rec.score -= penalty;
+      if (techReport.RSI > 70.0f)
+        rec.explanation += "RSI overbought (" + std::to_string(techReport.RSI) + ") bearish caution. ";
+      else
+        rec.explanation += "RSI slightly overbought (" + std::to_string(techReport.RSI) + "). ";
+    }
 
 
 //    // ============================================================
@@ -187,18 +193,6 @@ namespace KanVest
 //    else if (momentumReport.shortTermBehavior == Momentum::Positive) rec.score += 6;
 //    else if (momentumReport.shortTermBehavior == Momentum::Negative) rec.score -= 6;
 //    else if (momentumReport.shortTermBehavior == Momentum::VeryNegative) rec.score -= 10;
-//    
-//    // ============================================================
-//    // RSI — Overbought / Oversold (caution signal, not reversal)
-//    // ============================================================
-//    if (techReport.RSI < 30) {
-//      rec.score += 5;
-//      rec.explanation += "RSI oversold (<30). ";
-//    }
-//    else if (techReport.RSI > 70) {
-//      rec.score -= 3; // smaller penalty, not a sell trigger
-//      rec.explanation += "RSI overbought (>70). ";
-//    }
 //    
 //    // ============================================================
 //    // MACD — momentum confirmation
