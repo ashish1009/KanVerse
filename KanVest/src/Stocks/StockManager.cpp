@@ -12,8 +12,6 @@
 
 #include "URL_API/APIProvider.hpp"
 
-#include "Stocks/Analyzer/RecommendationEngine.hpp"
-
 namespace KanVest
 {
   namespace Utils
@@ -85,45 +83,6 @@ namespace KanVest
     }
     
     return data;
-  }
-
-  const StockAnalysisReport& StockManager::AnalyzeSelectedStock()
-  {
-    static StockAnalysisReport EmptyStockAnalysisReport;
-    const auto& stockData = GetSelectedStockData();
-    if (!stockData.IsValid())
-    {
-      return EmptyStockAnalysisReport;
-    }
-    
-    // ---------- 1. Technical Analysis ----------
-    s_report.technicals = TechnicalAnalyzer::Analyze(stockData);
-    
-    // ---------- 2. Volatility ----------
-    s_report.volatility = VolatilityAnalyzer::Analyze(stockData);
-    
-    // ---------- 3. Momentum ----------
-    s_report.momentum = MomentumAnalyzer::Analyze(stockData, s_report.technicals, s_report.volatility);
-    
-    // ---------- 4. Performance ----------
-    double sectorChangePercent = 0.5; // example
-    s_report.performance = PerformanceSummary::Analyze(stockData, sectorChangePercent);
-    
-    // ---------- 5. Chart Analysis ----------
-    s_report.chart = ChartAnalyzer::Analyze(stockData);
-    
-    // ---------- 6. Recommendation ----------
-    s_report.recommendation = RecommendationEngine::Generate(
-                                                             stockData,
-                                                             s_report.technicals,
-                                                             s_report.momentum,
-                                                             s_report.volatility,
-                                                             s_report.chart,
-                                                             s_report.performance,
-                                                             s_selectedHoldingData
-                                                             );
-    
-    return s_report;
   }
 
   bool StockManager::AddStock(const std::string& symbolName)
@@ -214,11 +173,6 @@ namespace KanVest
   void StockManager::SetSelectedStockSymbol(const std::string& stockSymbol)
   {
     s_selectedStockSymbol = stockSymbol;
-  }
-  
-  void StockManager::SetSelectedStockHoldingData(const UserHoldingForAnalyzer& holding)
-  {
-    s_selectedHoldingData = holding;
   }
   
   const std::string& StockManager::GetSelectedStockSymbol()

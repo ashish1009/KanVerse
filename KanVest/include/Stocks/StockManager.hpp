@@ -9,20 +9,8 @@
 
 #include "Stocks/StockData.hpp"
 
-#include "Stocks/Analyzer/RecommendationEngine.hpp"
-
 namespace KanVest
 {
-  struct StockAnalysisReport
-  {
-    KanVest::TechnicalReport technicals;
-    KanVest::VolatilityReport volatility;
-    KanVest::MomentumReport momentum;
-    KanVest::PerformanceReport performance;
-    KanVest::ChartReport chart;
-    KanVest::Recommendation recommendation;
-  };
-
   /// This class manages all stocks
   class StockManager
   {
@@ -49,9 +37,6 @@ namespace KanVest
       {"max", {"1d", "1wk", "1mo"}},
     };
     
-    /// This function analyzes the selected stock
-    static const StockAnalysisReport& AnalyzeSelectedStock();
-
     /// Add a new stock symbol for live tracking
     static bool AddStock(const std::string& symbol);
 
@@ -75,8 +60,6 @@ namespace KanVest
 
     /// This function updates the active stock data
     static void SetSelectedStockSymbol(const std::string& stockSymbol);
-    /// This function updates the active stock holding data
-    static void SetSelectedStockHoldingData(const UserHoldingForAnalyzer& holding);
     
     /// This function returns the active stock data
     static const std::string& GetSelectedStockSymbol();
@@ -112,8 +95,5 @@ namespace KanVest
     inline static std::mutex s_mutex;
     inline static std::atomic<bool> s_running = false;
     inline static std::thread s_updateThread;
-    
-    inline static UserHoldingForAnalyzer s_selectedHoldingData;
-    inline static StockAnalysisReport s_report;
   };
 } // namespace KanVest

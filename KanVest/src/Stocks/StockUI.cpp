@@ -388,47 +388,47 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   void StockUI::ShowAnalyzerData()
   {
     IK_PERFORMANCE_FUNC("StockUI::ShowAnalyzerData");
-    const StockData& stockData = StockManager::GetSelectedStockData();
-    if (!stockData.IsValid())
-    {
-      return;
-    }
-
-    static std::chrono::steady_clock::time_point s_lastAnalysis = std::chrono::steady_clock::now();
-    auto now = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - s_lastAnalysis);
-    
-    if (elapsed.count() >= 10)
-    {
-      s_analyzerReport = StockManager::AnalyzeSelectedStock();
-      s_lastAnalysis = now;
-    }
-    
-    KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundDark);
-
-    static float xOffset = 0.0f;
-    
-    // --- Recommendation ---
-    static auto font = KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26);
-    
-    ImU32 recColor;
-    switch (s_analyzerReport.recommendation.action)
-    {
-      case Action::StrongBuy:   recColor = KanVasX::Color::Green; break;
-      case Action::Buy:         recColor = KanVasX::Color::Cyan; break;
-      case Action::Hold:        recColor = KanVasX::Color::Yellow; break;
-      case Action::Sell:        recColor = KanVasX::Color::Orange; break;
-      case Action::StrongSell:  recColor = KanVasX::Color::Red; break;
-      default:                  recColor = KanVasX::Color::White; break;
-    }
-
-    KanVasX::UI::ShiftCursorY(20.0f);
-    KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
-    ImGui::SameLine();
-    KanVasX::UI::Text(font, Utils::GetActionString(s_analyzerReport.recommendation.action), KanVasX::UI::AlignX::Right, {-50, 0}, recColor);
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 1.0f, {xOffset, 0.0f});
-
-    KanVasX::UI::ShiftCursorY(20.0f);
+//    const StockData& stockData = StockManager::GetSelectedStockData();
+//    if (!stockData.IsValid())
+//    {
+//      return;
+//    }
+//
+//    static std::chrono::steady_clock::time_point s_lastAnalysis = std::chrono::steady_clock::now();
+//    auto now = std::chrono::steady_clock::now();
+//    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - s_lastAnalysis);
+//    
+//    if (elapsed.count() >= 10)
+//    {
+//      s_analyzerReport = StockManager::AnalyzeSelectedStock();
+//      s_lastAnalysis = now;
+//    }
+//    
+//    KanVasX::ScopedColor childColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundDark);
+//
+//    static float xOffset = 0.0f;
+//    
+//    // --- Recommendation ---
+//    static auto font = KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26);
+//    
+//    ImU32 recColor;
+//    switch (s_analyzerReport.recommendation.action)
+//    {
+//      case Action::StrongBuy:   recColor = KanVasX::Color::Green; break;
+//      case Action::Buy:         recColor = KanVasX::Color::Cyan; break;
+//      case Action::Hold:        recColor = KanVasX::Color::Yellow; break;
+//      case Action::Sell:        recColor = KanVasX::Color::Orange; break;
+//      case Action::StrongSell:  recColor = KanVasX::Color::Red; break;
+//      default:                  recColor = KanVasX::Color::White; break;
+//    }
+//
+//    KanVasX::UI::ShiftCursorY(20.0f);
+//    KanVasX::UI::Text(font, "Recommendation", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
+//    ImGui::SameLine();
+//    KanVasX::UI::Text(font, Utils::GetActionString(s_analyzerReport.recommendation.action), KanVasX::UI::AlignX::Right, {-50, 0}, recColor);
+//    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1, 1.0f, {xOffset, 0.0f});
+//
+//    KanVasX::UI::ShiftCursorY(20.0f);
 //    // ------- Stock Insight
 //    {
 //      // Voltality
@@ -497,187 +497,187 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 //    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
 //    KanVasX::UI::ShiftCursor({xOffset, 10.0f});
 
-    // Technical Data
-    {
-      ImVec2 technicalAnalyzerSize = {ImGui::GetContentRegionAvail().x, 350.0f};
-      ImGui::BeginChild("Technical Analysis", technicalAnalyzerSize, true);
-      
-      // Title
-      KanVasX::UI::Text(font, "Technical Analysis", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
-      ImGui::Separator();
-      
-      enum class TechnicalTab {Summary, SMA, EMA, Pivot};
-      static TechnicalTab tab = TechnicalTab::Summary;
-      float availX = ImGui::GetContentRegionAvail().x - 20.0f;
-      float technicalButtonSize = availX / 4;
-      
-      auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab) {
-        if (KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Medium),
-                                    tab == checkerTtab ? KanVasX::Color::ButtonActive : KanVasX::Color::Background,
-                                    KanVasX::Color::TextBright, false, 0.0f, {technicalButtonSize, 30}))
-        {
-          tab = checkerTtab;
-        }
-        KanVasX::UI::DrawItemActivityOutline();
-      };
-      
-      TechnicalButton("Summary", TechnicalTab::Summary); ImGui::SameLine();
-      TechnicalButton("SMA", TechnicalTab::SMA); ImGui::SameLine();
-      TechnicalButton("EMA", TechnicalTab::EMA); ImGui::SameLine();
-      TechnicalButton("Pivot", TechnicalTab::Pivot);
-
-      // Summary
-      if (tab == TechnicalTab::Summary)
-      {
-        float score = static_cast<float>(s_analyzerReport.recommendation.score); // 0-100
-        
-        // Determine color based on score
-        ImU32 scoreColor;
-        std::string scoreString = "Technically Neutral";
-        
-        if (score < 15)      { scoreString = "Technically Strong Bearish"; scoreColor = KanVasX::Color::Red; }
-        else if (score < 30) { scoreString = "Technically Bearish"; scoreColor = KanVasX::Color::Orange; }
-        else if (score < 60) { scoreString = "Technically Neutral"; scoreColor = KanVasX::Color::Yellow; }
-        else if (score < 80) { scoreString = "Technically Bullish"; scoreColor = KanVasX::Color::Cyan; }
-        else                 { scoreString = "Technically Strong Bullish"; scoreColor = KanVasX::Color::Green; }
-        
-        // Scoped color
-        {
-          KanVasX::ScopedStyle headerPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2{1.0f, 1.0f});
-          KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
-          // Convert score 0-100 to fraction 0.0-1.0
-          
-          // Print Score
-          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), Utils::FormatDoubleToString(score), KanVasX::UI::AlignX::Left, {0, 0}, scoreColor);
-          
-          // Print /100
-          static const std::string totalScoreString = "/100";
-          ImGui::SameLine();
-          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), totalScoreString, KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
-          
-          ImGui::SameLine();
-          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Large), scoreString, KanVasX::UI::AlignX::Right, {0, 5.0f}, scoreColor);
-          
-          float fraction = score / 100.0f;
-          ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
-        }
-        
-        float availX = ImGui::GetContentRegionAvail().x - 30.0f;
-        float technicalDataSize = availX / 4;
-        auto TechnicalData = [technicalDataSize](const std::string& title, const std::string& tooltipTag) {
-          KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), KanVasX::Color::BackgroundDark, KanVasX::Color::TextBright, false, 0.0f, {technicalDataSize, 60});
-          if (const auto& explainIt = s_analyzerReport.technicals.Explanations.find(tooltipTag); explainIt != s_analyzerReport.technicals.Explanations.end())
-          {
-            KanVasX::UI::Tooltip(explainIt->second);
-          }
-        };
-        
-        TechnicalData(std::string("RSI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.RSI), "RSI"); ImGui::SameLine();
-        TechnicalData(std::string("MACD \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.MACD), "MACD"); ImGui::SameLine();
-        TechnicalData(std::string("VWAP \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.VWAP), "VWAP"); ImGui::SameLine();
-        TechnicalData(std::string("ATR \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.ATR), "ATR");
-        
-        TechnicalData(std::string("AwesomeOscillator \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.AwesomeOscillator), "AwesomeOscillator"); ImGui::SameLine();
-        TechnicalData(std::string("StochasticRSI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.StochasticRSI), "StochasticRSI"); ImGui::SameLine();
-        TechnicalData(std::string("ADX \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.ADX), "ADX"); ImGui::SameLine();
-        TechnicalData(std::string("CCI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.CCI), "CCI");
-        
-        TechnicalData(std::string("OBV \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.OBV), "OBV"); ImGui::SameLine();
-        TechnicalData(std::string("MFI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.MFI), "MFI");
-      }
-      
-      // SMA
-      auto ShowMovingAvg = [stockData](const auto& maMap, const std::string& maString)
-      {
-        int bullish = 0;
-        int bearish = 0;
-        for (const auto& [period, ma] : maMap)
-        {
-          if (ma > stockData.livePrice) bearish ++;
-          else if (ma < stockData.livePrice and ma != 0) bullish++;
-        }
-        int total = bullish + bearish;
-        
-        if (bullish >= bearish)
-        {
-          std::string smaSummary = stockData.shortName + " is trading above " + std::to_string(bullish) + " out of " + std::to_string(total) + maString + "s";
-          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::Cyan);
-        }
-        else
-        {
-          std::string smaSummary = stockData.shortName + " is trading below " + std::to_string(bearish) + " out of " + std::to_string(total) + maString + "s";
-          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::Red);
-        }
-        
-        {
-          KanVasX::ScopedColor frameBg(ImGuiCol_FrameBg, KanVasX::Color::Alpha(KanVasX::Color::DarkRed, 0.7));
-          KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, KanVasX::Color::Alpha(KanVasX::Color::Cyan, 0.7));
-          
-          float fraction = (float)bullish / (float)total;
-          ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
-        }
-        
-        std::string smaSummary = "If current price is greater than SMA, trend is bullish";
-        KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Small), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::White);
-        
-        auto ShowSma = [stockData](int period, double sma) {
-          if (sma > 0)
-          {
-            std::string datString = std::to_string(period) + "d";
-            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), datString, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::White);
-            ImGui::SameLine();
-            auto smaColor = sma > stockData.livePrice ? KanVasX::Color::Red : KanVasX::Color::Cyan;
-            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(sma), KanVasX::UI::AlignX::Right, {0, 0.0f}, smaColor);
-          }
-        };
-        
-        int idx = 0;
-        bool allChildEnded = true;
-        ImVec2 smaChildSize = {(ImGui::GetContentRegionAvail().x / 2) - 6.0f, 100.0f};
-        for (const auto& [period, ma] : maMap)
-        {
-          if (idx % 4 == 0)
-          {
-            ImGui::BeginChild(std::to_string(period).c_str(), smaChildSize, true);
-            allChildEnded = false;
-          }
-          
-          ShowSma(period, ma);
-          
-          if (idx % 4 == 3)
-          {
-            ImGui::EndChild();
-            ImGui::SameLine();
-            allChildEnded = true;
-          }
-          idx++;
-        }
-        ImGui::NewLine();
-
-        if (!allChildEnded)
-        {
-          ImGui::EndChild();
-        }
-      };
-      
-      if (tab == TechnicalTab::SMA)
-      {
-        ShowMovingAvg(s_analyzerReport.technicals.SMA, " SMA");
-      }
-      
-      // EMA
-      if (tab == TechnicalTab::EMA)
-      {
-        ShowMovingAvg(s_analyzerReport.technicals.EMA, " EMA");
-      }
-      
-      // Pivot
-      if (tab == TechnicalTab::Pivot)
-      {
-        
-      }
-      ImGui::EndChild();
-    }
+//    // Technical Data
+//    {
+//      ImVec2 technicalAnalyzerSize = {ImGui::GetContentRegionAvail().x, 350.0f};
+//      ImGui::BeginChild("Technical Analysis", technicalAnalyzerSize, true);
+//      
+//      // Title
+//      KanVasX::UI::Text(font, "Technical Analysis", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
+//      ImGui::Separator();
+//      
+//      enum class TechnicalTab {Summary, SMA, EMA, Pivot};
+//      static TechnicalTab tab = TechnicalTab::Summary;
+//      float availX = ImGui::GetContentRegionAvail().x - 20.0f;
+//      float technicalButtonSize = availX / 4;
+//      
+//      auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab) {
+//        if (KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Medium),
+//                                    tab == checkerTtab ? KanVasX::Color::ButtonActive : KanVasX::Color::Background,
+//                                    KanVasX::Color::TextBright, false, 0.0f, {technicalButtonSize, 30}))
+//        {
+//          tab = checkerTtab;
+//        }
+//        KanVasX::UI::DrawItemActivityOutline();
+//      };
+//      
+//      TechnicalButton("Summary", TechnicalTab::Summary); ImGui::SameLine();
+//      TechnicalButton("SMA", TechnicalTab::SMA); ImGui::SameLine();
+//      TechnicalButton("EMA", TechnicalTab::EMA); ImGui::SameLine();
+//      TechnicalButton("Pivot", TechnicalTab::Pivot);
+//
+//      // Summary
+//      if (tab == TechnicalTab::Summary)
+//      {
+//        float score = static_cast<float>(s_analyzerReport.recommendation.score); // 0-100
+//        
+//        // Determine color based on score
+//        ImU32 scoreColor;
+//        std::string scoreString = "Technically Neutral";
+//        
+//        if (score < 15)      { scoreString = "Technically Strong Bearish"; scoreColor = KanVasX::Color::Red; }
+//        else if (score < 30) { scoreString = "Technically Bearish"; scoreColor = KanVasX::Color::Orange; }
+//        else if (score < 60) { scoreString = "Technically Neutral"; scoreColor = KanVasX::Color::Yellow; }
+//        else if (score < 80) { scoreString = "Technically Bullish"; scoreColor = KanVasX::Color::Cyan; }
+//        else                 { scoreString = "Technically Strong Bullish"; scoreColor = KanVasX::Color::Green; }
+//        
+//        // Scoped color
+//        {
+//          KanVasX::ScopedStyle headerPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2{1.0f, 1.0f});
+//          KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
+//          // Convert score 0-100 to fraction 0.0-1.0
+//          
+//          // Print Score
+//          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), Utils::FormatDoubleToString(score), KanVasX::UI::AlignX::Left, {0, 0}, scoreColor);
+//          
+//          // Print /100
+//          static const std::string totalScoreString = "/100";
+//          ImGui::SameLine();
+//          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), totalScoreString, KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
+//          
+//          ImGui::SameLine();
+//          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Large), scoreString, KanVasX::UI::AlignX::Right, {0, 5.0f}, scoreColor);
+//          
+//          float fraction = score / 100.0f;
+//          ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
+//        }
+//        
+//        float availX = ImGui::GetContentRegionAvail().x - 30.0f;
+//        float technicalDataSize = availX / 4;
+//        auto TechnicalData = [technicalDataSize](const std::string& title, const std::string& tooltipTag) {
+//          KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), KanVasX::Color::BackgroundDark, KanVasX::Color::TextBright, false, 0.0f, {technicalDataSize, 60});
+//          if (const auto& explainIt = s_analyzerReport.technicals.Explanations.find(tooltipTag); explainIt != s_analyzerReport.technicals.Explanations.end())
+//          {
+//            KanVasX::UI::Tooltip(explainIt->second);
+//          }
+//        };
+//        
+//        TechnicalData(std::string("RSI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.RSI), "RSI"); ImGui::SameLine();
+//        TechnicalData(std::string("MACD \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.MACD), "MACD"); ImGui::SameLine();
+//        TechnicalData(std::string("VWAP \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.VWAP), "VWAP"); ImGui::SameLine();
+//        TechnicalData(std::string("ATR \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.ATR), "ATR");
+//        
+//        TechnicalData(std::string("AwesomeOscillator \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.AwesomeOscillator), "AwesomeOscillator"); ImGui::SameLine();
+//        TechnicalData(std::string("StochasticRSI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.StochasticRSI), "StochasticRSI"); ImGui::SameLine();
+//        TechnicalData(std::string("ADX \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.ADX), "ADX"); ImGui::SameLine();
+//        TechnicalData(std::string("CCI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.CCI), "CCI");
+//        
+//        TechnicalData(std::string("OBV \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.OBV), "OBV"); ImGui::SameLine();
+//        TechnicalData(std::string("MFI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.MFI), "MFI");
+//      }
+//      
+//      // SMA
+//      auto ShowMovingAvg = [stockData](const auto& maMap, const std::string& maString)
+//      {
+//        int bullish = 0;
+//        int bearish = 0;
+//        for (const auto& [period, ma] : maMap)
+//        {
+//          if (ma > stockData.livePrice) bearish ++;
+//          else if (ma < stockData.livePrice and ma != 0) bullish++;
+//        }
+//        int total = bullish + bearish;
+//        
+//        if (bullish >= bearish)
+//        {
+//          std::string smaSummary = stockData.shortName + " is trading above " + std::to_string(bullish) + " out of " + std::to_string(total) + maString + "s";
+//          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::Cyan);
+//        }
+//        else
+//        {
+//          std::string smaSummary = stockData.shortName + " is trading below " + std::to_string(bearish) + " out of " + std::to_string(total) + maString + "s";
+//          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::Red);
+//        }
+//        
+//        {
+//          KanVasX::ScopedColor frameBg(ImGuiCol_FrameBg, KanVasX::Color::Alpha(KanVasX::Color::DarkRed, 0.7));
+//          KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, KanVasX::Color::Alpha(KanVasX::Color::Cyan, 0.7));
+//          
+//          float fraction = (float)bullish / (float)total;
+//          ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
+//        }
+//        
+//        std::string smaSummary = "If current price is greater than SMA, trend is bullish";
+//        KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Small), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::White);
+//        
+//        auto ShowSma = [stockData](int period, double sma) {
+//          if (sma > 0)
+//          {
+//            std::string datString = std::to_string(period) + "d";
+//            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), datString, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::White);
+//            ImGui::SameLine();
+//            auto smaColor = sma > stockData.livePrice ? KanVasX::Color::Red : KanVasX::Color::Cyan;
+//            KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(sma), KanVasX::UI::AlignX::Right, {0, 0.0f}, smaColor);
+//          }
+//        };
+//        
+//        int idx = 0;
+//        bool allChildEnded = true;
+//        ImVec2 smaChildSize = {(ImGui::GetContentRegionAvail().x / 2) - 6.0f, 100.0f};
+//        for (const auto& [period, ma] : maMap)
+//        {
+//          if (idx % 4 == 0)
+//          {
+//            ImGui::BeginChild(std::to_string(period).c_str(), smaChildSize, true);
+//            allChildEnded = false;
+//          }
+//          
+//          ShowSma(period, ma);
+//          
+//          if (idx % 4 == 3)
+//          {
+//            ImGui::EndChild();
+//            ImGui::SameLine();
+//            allChildEnded = true;
+//          }
+//          idx++;
+//        }
+//        ImGui::NewLine();
+//
+//        if (!allChildEnded)
+//        {
+//          ImGui::EndChild();
+//        }
+//      };
+//      
+//      if (tab == TechnicalTab::SMA)
+//      {
+//        ShowMovingAvg(s_analyzerReport.technicals.SMA, " SMA");
+//      }
+//      
+//      // EMA
+//      if (tab == TechnicalTab::EMA)
+//      {
+//        ShowMovingAvg(s_analyzerReport.technicals.EMA, " EMA");
+//      }
+//      
+//      // Pivot
+//      if (tab == TechnicalTab::Pivot)
+//      {
+//        
+//      }
+//      ImGui::EndChild();
+//    }
 
 //    // Band
 //    KanVasX::UI::Text(font, "Resistance", KanVasX::UI::AlignX::Left, {xOffset, 0}, KanVasX::Color::White);
@@ -836,7 +836,6 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   {
     StockManager::AddStock(symbol);
     StockManager::SetSelectedStockSymbol(symbol);
-    StockManager::SetSelectedStockHoldingData({0.0, 0});
   }
   
   void StockUI::SearchBar()
@@ -987,7 +986,6 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
                               ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap))
         {
           StockManager::SetSelectedStockSymbol(h.symbol);
-          StockManager::SetSelectedStockHoldingData({h.averagePrice, h.quantity});
           
           g_selectedRow = idx;
         }
