@@ -16,10 +16,10 @@ namespace KanVest
   struct StockAnalysisReport
   {
     KanVest::TechnicalReport technicals;
-//    KanVest::VolatilityReport volatility;
-//    KanVest::MomentumReport momentum;
-//    KanVest::PerformanceReport performance;
-//    KanVest::ChartReport chart;
+    KanVest::VolatilityReport volatility;
+    KanVest::MomentumReport momentum;
+    KanVest::PerformanceReport performance;
+    KanVest::ChartReport chart;
     KanVest::Recommendation recommendation;
   };
 

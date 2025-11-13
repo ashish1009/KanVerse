@@ -38,15 +38,15 @@ namespace KanVest
     static Recommendation Generate(
                                    const StockData& stock,
                                    const TechnicalReport& techReport,
-//                                   const MomentumReport& momentumReport,
-//                                   const VolatilityReport& volReport,
-//                                   const ChartReport& chartReport,
-//                                   const PerformanceReport& perfReport,
+                                   const MomentumReport& momentumReport,
+                                   const VolatilityReport& volReport,
+                                   const ChartReport& chartReport,
+                                   const PerformanceReport& perfReport,
                                    const UserHoldingForAnalyzer& userHolding
                                    );
     
-//  private:
-//    static double DetermineQuantity(double stockPrice, const UserHoldingForAnalyzer& userHolding, Action action);
+  private:
+    static double DetermineQuantity(double stockPrice, const UserHoldingForAnalyzer& userHolding, Action action);
   };
   
   namespace Utils

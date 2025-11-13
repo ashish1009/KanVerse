@@ -573,17 +573,17 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         };
         
         TechnicalData(std::string("RSI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.RSI), "RSI"); ImGui::SameLine();
-//        TechnicalData(std::string("MACD \n") + Utils::FormatDoubleToString(report.technicals.MACD), "MACD"); ImGui::SameLine();
-//        TechnicalData(std::string("VWAP \n") + Utils::FormatDoubleToString(report.technicals.VWAP), "VWAP"); ImGui::SameLine();
-//        TechnicalData(std::string("ATR \n") + Utils::FormatDoubleToString(report.technicals.ATR), "ATR");
-//        
-//        TechnicalData(std::string("AwesomeOscillator \n") + Utils::FormatDoubleToString(report.technicals.AwesomeOscillator), "AwesomeOscillator"); ImGui::SameLine();
-//        TechnicalData(std::string("StochasticRSI \n") + Utils::FormatDoubleToString(report.technicals.StochasticRSI), "StochasticRSI"); ImGui::SameLine();
-//        TechnicalData(std::string("ADX \n") + Utils::FormatDoubleToString(report.technicals.ADX), "ADX"); ImGui::SameLine();
-//        TechnicalData(std::string("CCI \n") + Utils::FormatDoubleToString(report.technicals.CCI), "CCI");
-//        
-//        TechnicalData(std::string("OBV \n") + Utils::FormatDoubleToString(report.technicals.OBV), "OBV"); ImGui::SameLine();
-//        TechnicalData(std::string("MFI \n") + Utils::FormatDoubleToString(report.technicals.MFI), "MFI");
+        TechnicalData(std::string("MACD \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.MACD), "MACD"); ImGui::SameLine();
+        TechnicalData(std::string("VWAP \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.VWAP), "VWAP"); ImGui::SameLine();
+        TechnicalData(std::string("ATR \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.ATR), "ATR");
+        
+        TechnicalData(std::string("AwesomeOscillator \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.AwesomeOscillator), "AwesomeOscillator"); ImGui::SameLine();
+        TechnicalData(std::string("StochasticRSI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.StochasticRSI), "StochasticRSI"); ImGui::SameLine();
+        TechnicalData(std::string("ADX \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.ADX), "ADX"); ImGui::SameLine();
+        TechnicalData(std::string("CCI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.CCI), "CCI");
+        
+        TechnicalData(std::string("OBV \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.OBV), "OBV"); ImGui::SameLine();
+        TechnicalData(std::string("MFI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.MFI), "MFI");
       }
       
       // SMA
@@ -671,11 +671,11 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         ShowMovingAvg(s_analyzerReport.technicals.EMA, " EMA");
       }
       
-//      // Pivot
-//      if (tab == TechnicalTab::Pivot)
-//      {
-//        
-//      }
+      // Pivot
+      if (tab == TechnicalTab::Pivot)
+      {
+        
+      }
       ImGui::EndChild();
     }
 
