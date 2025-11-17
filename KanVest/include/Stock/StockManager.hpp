@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include "Stocks/StockData.hpp"
-#include "Stocks/StockParser.hpp"
-#include "Stocks/StockAPI.hpp"
+#include "Stock/StockData.hpp"
+#include "Stock/StockParser.hpp"
+#include "Stock/StockAPI.hpp"
 
 #include "URL_API/APIProvider.hpp"
 
@@ -70,5 +70,29 @@ namespace KanVest
     std::mutex m_mutex;
     std::condition_variable m_cv;
     bool m_done;
+  };
+  
+  // Cache key representing symbol+interval+range
+  struct CacheKey
+  {
+    std::string symbol;
+    std::string interval;
+    std::string range;
+    
+    bool operator==(const CacheKey& o) const noexcept
+    {
+      return symbol == o.symbol && interval == o.interval && range == o.range;
+    }
+  };
+  
+  struct CacheKeyHash
+  {
+    size_t operator()(const CacheKey& k) const noexcept
+    {
+      size_t h1 = std::hash<std::string>{}(k.symbol);
+      size_t h2 = std::hash<std::string>{}(k.interval);
+      size_t h3 = std::hash<std::string>{}(k.range);
+      return h1 ^ (h2 * 16777619u) ^ (h3 << 1);
+    }
   };
 }
