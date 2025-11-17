@@ -7,6 +7,8 @@
 
 #include "PortfolioController.hpp"
 
+#include "Stock/StockManager.hpp"
+
 namespace KanVest
 {
   PortfolioController::PortfolioController(Portfolio& portfolio)
@@ -15,12 +17,12 @@ namespace KanVest
   void PortfolioController::AddHolding(const Holding& holding)
   {
     m_portfolio.AddHolding(holding);
-//    StockManager::AddStock(holding.symbol);
+    StockManager::AddStock(holding.symbol);
   }
   
   void PortfolioController::EditHolding(const Holding& holding)
   {
-//    StockManager::EditStock(holding.symbol);
+    StockManager::EditStock(holding.symbol);
   }
   
   bool PortfolioController::LoadPortfolio(const std::filesystem::path& path)
@@ -31,9 +33,9 @@ namespace KanVest
     }
     
     // Sync all holdings with live manager
-//    for (auto& h : m_portfolio.GetHoldings())
+    for (auto& h : m_portfolio.GetHoldings())
     {
-//      StockManager::AddStock(h.symbol);
+      StockManager::AddStock(h.symbol);
     }
     
     return true;
