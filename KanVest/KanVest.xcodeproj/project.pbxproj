@@ -25,6 +25,7 @@
 		B2B465C42ECB111B00E01770 /* CandleDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2B465C32ECB111B00E01770 /* CandleDetector.cpp */; };
 		B2B465C72ECB11A700E01770 /* CandleEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2B465C62ECB11A700E01770 /* CandleEngine.cpp */; };
 		B2B465CA2ECB12AF00E01770 /* CandlePatternUI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2B465C92ECB12AF00E01770 /* CandlePatternUI.cpp */; };
+		B2B465CF2ECB135100E01770 /* ChartPattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2B465CE2ECB135100E01770 /* ChartPattern.cpp */; };
 		B2D2E7002EC5F06100D7DD04 /* MovingAverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2D2E6FF2EC5F06100D7DD04 /* MovingAverage.cpp */; };
 		B2D2E7032ECAD8BF00D7DD04 /* Momentum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2D2E7022ECAD8BF00D7DD04 /* Momentum.cpp */; };
 		B2D2E7062ECAE66300D7DD04 /* MACDCalculator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2D2E7052ECAE66300D7DD04 /* MACDCalculator.cpp */; };
@@ -87,6 +88,8 @@
 		B2B465C62ECB11A700E01770 /* CandleEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CandleEngine.cpp; sourceTree = "<group>"; };
 		B2B465C82ECB12AF00E01770 /* CandlePatternUI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CandlePatternUI.hpp; sourceTree = "<group>"; };
 		B2B465C92ECB12AF00E01770 /* CandlePatternUI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CandlePatternUI.cpp; sourceTree = "<group>"; };
+		B2B465CD2ECB135100E01770 /* ChartPattern.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ChartPattern.hpp; sourceTree = "<group>"; };
+		B2B465CE2ECB135100E01770 /* ChartPattern.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChartPattern.cpp; sourceTree = "<group>"; };
 		B2D2E6FE2EC5F06100D7DD04 /* MovingAverage.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MovingAverage.hpp; sourceTree = "<group>"; };
 		B2D2E6FF2EC5F06100D7DD04 /* MovingAverage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MovingAverage.cpp; sourceTree = "<group>"; };
 		B2D2E7012ECAD8BF00D7DD04 /* Momentum.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Momentum.hpp; sourceTree = "<group>"; };
@@ -326,6 +329,22 @@
 			path = Candle;
 			sourceTree = "<group>";
 		};
+		B2B465CB2ECB133F00E01770 /* Chart */ = {
+			isa = PBXGroup;
+			children = (
+				B2B465CD2ECB135100E01770 /* ChartPattern.hpp */,
+			);
+			path = Chart;
+			sourceTree = "<group>";
+		};
+		B2B465CC2ECB134700E01770 /* Chart */ = {
+			isa = PBXGroup;
+			children = (
+				B2B465CE2ECB135100E01770 /* ChartPattern.cpp */,
+			);
+			path = Chart;
+			sourceTree = "<group>";
+		};
 		B2D2E6FC2EC5F04B00D7DD04 /* Indicators */ = {
 			isa = PBXGroup;
 			children = (
@@ -357,6 +376,7 @@
 		B2F24F0E2EBE001600810B5B /* Analyzer */ = {
 			isa = PBXGroup;
 			children = (
+				B2B465CB2ECB133F00E01770 /* Chart */,
 				B2B465BA2ECB105E00E01770 /* Candle */,
 				B2D2E6FC2EC5F04B00D7DD04 /* Indicators */,
 			);
@@ -366,6 +386,7 @@
 		B2F24F0F2EBE002100810B5B /* Analyzer */ = {
 			isa = PBXGroup;
 			children = (
+				B2B465CC2ECB134700E01770 /* Chart */,
 				B2B465BB2ECB106F00E01770 /* Candle */,
 				B2D2E6FD2EC5F05200D7DD04 /* Indicators */,
 			);
@@ -467,6 +488,7 @@
 				B2F3BA762EBC361600EC0863 /* APIProvider.cpp in Sources */,
 				B2F3BA842EBCBA7E00EC0863 /* PortfolioController.cpp in Sources */,
 				B25162002EBB474800C7FDC3 /* Portfolio.cpp in Sources */,
+				B2B465CF2ECB135100E01770 /* ChartPattern.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
 				B2D2E7002EC5F06100D7DD04 /* MovingAverage.cpp in Sources */,
 				B2F3BA7E2EBC37AB00EC0863 /* StockAPI.cpp in Sources */,
