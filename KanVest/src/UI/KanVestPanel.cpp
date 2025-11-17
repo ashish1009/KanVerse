@@ -15,6 +15,9 @@
 
 namespace KanVest::UI
 {
+#define KanVest_Text(font, string, offset, textColor) \
+KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, KanVasX::UI::AlignX::Left, offset, textColor);
+
   namespace Utils
   {
     static std::vector<StockPoint> FilterTradingDays(const std::vector<StockPoint>& history)
@@ -42,6 +45,30 @@ namespace KanVest::UI
         *p = static_cast<char>(toupper(*p));
     }
 
+    std::string FormatDoubleToString(double value)
+    {
+      char buf[32];
+      std::snprintf(buf, sizeof(buf), "%.2f", value);
+      return std::string(buf);
+    }
+
+    std::string FormatLargeNumber(double value)
+    {
+      const double billion = 1e9, million = 1e6, thousand = 1e3;
+      std::ostringstream oss;
+      oss << std::fixed << std::setprecision(2);
+      
+      if (value >= billion)
+        oss << (value / billion) << "B";
+      else if (value >= million)
+        oss << (value / million) << "M";
+      else if (value >= thousand)
+        oss << (value / thousand) << "K";
+      else
+        oss << value;
+      
+      return oss.str();
+    }
   } // namespace Utils
   
   void Panel::SetShadowTextureId(ImTextureID shadowTextureID)
@@ -602,7 +629,7 @@ namespace KanVest::UI
       labelPtrs.push_back(s.c_str());
     
     // Start plotting
-    if (ImPlot::BeginPlot("##", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.95)))
+    if (ImPlot::BeginPlot("##", ImVec2(-1, ImGui::GetContentRegionAvail().y * 0.94)))
     {
       // We use AutoFit for X and set Y limits explicitly
       ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
@@ -755,6 +782,53 @@ namespace KanVest::UI
   void Panel::ShowStockBasicData()
   {
     IK_PERFORMANCE_FUNC("Panel::ShowStockBasicData");
+    
+    StockData stockData = StockManager::GetSelectedStockData();
+    if (!stockData.IsValid())
+    {
+      return;
+    }
+
+    // Name & price
+    std::string name = stockData.shortName + " (" + stockData.currency + ")";
+    std::string longNameName = stockData.longName != "" ? stockData.longName : stockData.shortName;
+    
+    static glm::vec2 offset = {20.0f, 10.0f};
+    KanVest_Text(Header_36, name, offset, KanVasX::Color::TextBright);
+    KanVest_Text(Header_24, longNameName, offset, KanVasX::Color::TextBright);
+    KanVest_Text(Header_48, Utils::FormatDoubleToString(stockData.livePrice), offset, KanVasX::Color::TextBright);
+
+    // Change
+    std::string change = (stockData.change > 0 ? "+" : "") +
+    Utils::FormatDoubleToString(stockData.change) +
+    (stockData.change > 0 ? " ( +" : " ( ") +
+    Utils::FormatDoubleToString(stockData.changePercent) + "%)";
+    
+    ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+    ImGui::SameLine();
+    KanVest_Text(Header_30, change, offset, changeColor);
+    
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
+    KanVasX::UI::ShiftCursorY(10);
+    
+    // 52-Week Range
+    std::string fiftyTwoWeek = Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " + Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
+    KanVest_Text(FixedWidthHeader_18, "52-Week Range ", glm::vec2(20.0f, 10.0f), KanVasX::Color::Text);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_18, fiftyTwoWeek, glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
+    
+    // Day Range
+    std::string dayRange = Utils::FormatDoubleToString(stockData.dayLow) + " - " + Utils::FormatDoubleToString(stockData.dayHigh);
+    KanVest_Text(FixedWidthHeader_18, "Day Range     ", glm::vec2(20.0f, 10.0f), KanVasX::Color::Text);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_18, dayRange, glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
+    
+    // Volume
+    KanVest_Text(FixedWidthHeader_18, "Volume        ", glm::vec2(20.0f, 10.0f), KanVasX::Color::Text);
+    ImGui::SameLine();
+    KanVest_Text(FixedWidthHeader_18, Utils::FormatLargeNumber(stockData.volume), glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
+    
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1.0f, 1.0f, {0.0f, 10.0f});
   }
 
   void Panel::AddStockInManager(const std::string& symbol)
