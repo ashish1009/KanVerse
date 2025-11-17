@@ -15,6 +15,7 @@
 #include "Stocks/Analyzer/Indicators/Momentum.hpp"
 #include "Stocks/Analyzer/Indicators/MACDCalculator.hpp"
 #include "Stocks/Analyzer/Indicators/StochasticCalculator.hpp"
+#include "Stocks/Analyzer/Indicators/Bolinger.hpp"
 
 namespace KanVest
 {
@@ -411,7 +412,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       KanVasX::UI::Text(font, "Technical Analysis", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
       ImGui::Separator();
 
-      enum class TechnicalTab {Summary, SMA, EMA, RSI, MACD, Stochastic, Pivot};
+      enum class TechnicalTab {Summary, SMA, EMA, RSI, MACD, Stochastic, BB, Pivot};
       static TechnicalTab tab = TechnicalTab::Summary;
       float availX = ImGui::GetContentRegionAvail().x - 20.0f;
       float technicalButtonSize = availX / 7;
@@ -432,6 +433,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       TechnicalButton("RSI", TechnicalTab::RSI); ImGui::SameLine();
       TechnicalButton("MACD", TechnicalTab::MACD); ImGui::SameLine();
       TechnicalButton("Stochastic", TechnicalTab::Stochastic); ImGui::SameLine();
+      TechnicalButton("BB", TechnicalTab::BB); ImGui::SameLine();
       TechnicalButton("Pivot", TechnicalTab::Pivot);
 
       // Summary
@@ -1031,6 +1033,200 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         
         ImGui::PlotLines("%K", kF.data(), (int)kF.size(), 0, nullptr, 0.f, 100.f, size);
         ImGui::PlotLines("%D", dF.data(), (int)dF.size(), 0, nullptr, 0.f, 100.f, size);
+      }
+      
+      if (tab == TechnicalTab::BB)
+      {
+        struct BB_UI
+        {
+          double middle = 0.0;
+          double upper  = 0.0;
+          double lower  = 0.0;
+          
+          double bandwidth = 0.0;       // Indicates volatility
+          double squeezeFactor = 0.0;   // BB width compression %
+          
+          std::string state;            // "Breakout", "Breakdown", "Inside Bands"
+          std::string trend;            // widening / narrowing
+          std::vector<std::string> signals;
+          std::string interpretation;
+          
+          ImU32 color = KanVasX::Color::Yellow;  // UI color
+          
+          std::vector<double> upperSeries;
+          std::vector<double> middleSeries;
+          std::vector<double> lowerSeries;
+          
+          bool valid = false;
+        };
+
+        const auto& bbData = BollingerBandsCalculator::Compute(StockManager::GetSelectedStockData());
+        auto BuildBB_UI = [bbData, stockData]()
+        {
+          BB_UI ui;
+          
+          if (!bbData.valid || !stockData.IsValid())
+          {
+            ui.state = "Not enough data";
+            ui.interpretation = "Insufficient history for Bollinger Bands.";
+            ui.color = KanVasX::Color::TextMuted;
+            return ui;
+          }
+          
+          ui.valid = true;
+          
+          ui.middle = bbData.lastMiddle;
+          ui.upper  = bbData.lastUpper;
+          ui.lower  = bbData.lastLower;
+          
+          ui.upperSeries  = bbData.upper;
+          ui.middleSeries = bbData.middle;
+          ui.lowerSeries  = bbData.lower;
+          
+          const double lastClose = stockData.history.back().close;
+          
+          // ----------------------------
+          // VOLATILITY - BANDWIDTH
+          // ----------------------------
+          ui.bandwidth = (ui.upper - ui.lower) / ui.middle * 100.0;
+          
+          double prevWidth = bbData.upper[bbData.upper.size() - 2]
+          - bbData.lower[bbData.lower.size() - 2];
+          
+          double currWidth = ui.upper - ui.lower;
+          
+          // ----------------------------
+          // TREND: WIDTH EXPANSION
+          // ----------------------------
+          if (currWidth > prevWidth)
+            ui.trend = "Widening (volatility increasing)";
+          else if (currWidth < prevWidth)
+            ui.trend = "Narrowing (volatility compressing)";
+          else
+            ui.trend = "Stable";
+          
+          // ----------------------------
+          // STATE / SIGNALS
+          // ----------------------------
+          if (lastClose > ui.upper)
+          {
+            ui.state = "Breakout";
+            ui.color = KanVasX::Color::Green;
+            ui.signals.push_back("Price closed ABOVE upper band");
+            ui.signals.push_back("Momentum strong");
+          }
+          else if (lastClose < ui.lower)
+          {
+            ui.state = "Breakdown";
+            ui.color = KanVasX::Color::Red;
+            ui.signals.push_back("Price closed BELOW lower band");
+            ui.signals.push_back("Downward momentum strong");
+          }
+          else
+          {
+            ui.state = "Inside Bands";
+            ui.color = KanVasX::Color::Yellow;
+          }
+          
+          // ----------------------------
+          // SQUEEZE FACTOR FOR SIGNALS
+          // ----------------------------
+          ui.squeezeFactor = (currWidth / prevWidth) * 100.0;
+          
+          if (ui.squeezeFactor < 85.0)      // Bands compressing
+            ui.signals.push_back("Potential Squeeze forming");
+          
+          // ----------------------------
+          // INTERPRETATION
+          // ----------------------------
+          if (ui.state == "Breakout")
+            ui.interpretation = "Price breaking above the bands signals strong bullish momentum.";
+          else if (ui.state == "Breakdown")
+            ui.interpretation = "Price breaking below the bands signals strong bearish pressure.";
+          else
+          {
+            if (ui.squeezeFactor < 85.0)
+              ui.interpretation = "Bands are compressing. A large move may come soon.";
+            else
+              ui.interpretation = "Price trading within the bands. No strong direction.";
+          }
+          
+          return ui;
+        };
+
+        auto BB_UI_Data = BuildBB_UI();
+        
+        if (!BB_UI_Data.valid)
+        {
+          ImGui::Text("BB data unavailable.");
+          return;
+        }
+        
+        {
+          KanVasX::ScopedColor bbColor(ImGuiCol_PlotLines, BB_UI_Data.color);
+          
+          // --- Main Header Text ---
+          std::string header = "BB: ";
+          header += Utils::FormatDoubleToString(BB_UI_Data.middle);
+          header += " | ";
+          header += BB_UI_Data.state + " | ";
+          header += BB_UI_Data.trend;
+          
+          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22),
+                            header,
+                            KanVasX::UI::AlignX::Center,
+                            {0,0},
+                            BB_UI_Data.color);
+          
+          // --------------------------------------
+          // Convert to float for ImGui
+          // --------------------------------------
+          std::vector<float> upper, mid, lower;
+          upper.reserve(BB_UI_Data.upperSeries.size());
+          mid.reserve(BB_UI_Data.middleSeries.size());
+          lower.reserve(BB_UI_Data.lowerSeries.size());
+          
+          for (auto d : BB_UI_Data.upperSeries)  upper.push_back((float)d);
+          for (auto d : BB_UI_Data.middleSeries) mid.push_back((float)d);
+          for (auto d : BB_UI_Data.lowerSeries)  lower.push_back((float)d);
+          
+          // ----------------------------
+          // PLOT: Upper Band
+          // ----------------------------
+          ImGui::PlotLines("##BBUpper",
+                           upper.data(),
+                           (int)upper.size(),
+                           0,
+                           nullptr,
+                           FLT_MAX,
+                           FLT_MAX,
+                           ImVec2(0, 80));
+          
+          // ----------------------------
+          // PLOT: Middle Band
+          // ----------------------------
+          ImGui::PlotLines("##BBMid",
+                           mid.data(),
+                           (int)mid.size(),
+                           0,
+                           nullptr,
+                           FLT_MAX,
+                           FLT_MAX,
+                           ImVec2(0, 80));
+          
+          // ----------------------------
+          // PLOT: Lower Band
+          // ----------------------------
+          ImGui::PlotLines("##BBLower",
+                           lower.data(),
+                           (int)lower.size(),
+                           0,
+                           nullptr,
+                           FLT_MAX,
+                           FLT_MAX,
+                           ImVec2(0, 80));
+        }
+
       }
 
       ImGui::EndChild();
