@@ -35,6 +35,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B26107782ECB4ADD006F954D /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -77,6 +78,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B26107762ECB4A98006F954D /* Stock */ = {
+			isa = PBXGroup;
+			children = (
+				B26107782ECB4ADD006F954D /* StockData.hpp */,
+			);
+			path = Stock;
+			sourceTree = "<group>";
+		};
+		B26107772ECB4AA1006F954D /* Stock */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Stock;
+			sourceTree = "<group>";
+		};
 		B289E6192EB0E01600937D0B = {
 			isa = PBXGroup;
 			children = (
@@ -105,6 +121,7 @@
 				B289EDF02EB2559500937D0B /* Editor */,
 				B2B465DA2ECB1A8C00E01770 /* User */,
 				B2B465E22ECB1AB800E01770 /* Portfolio */,
+				B26107762ECB4A98006F954D /* Stock */,
 				B289EE3C2EB3ACDD00937D0B /* UI */,
 			);
 			path = include;
@@ -117,6 +134,7 @@
 				B289EDEF2EB2558E00937D0B /* Editor */,
 				B2B465D52ECB1A7D00E01770 /* User */,
 				B2B465DD2ECB1AAF00E01770 /* Portfolio */,
+				B26107772ECB4AA1006F954D /* Stock */,
 				B289EE3D2EB3ACE300937D0B /* UI */,
 			);
 			path = src;

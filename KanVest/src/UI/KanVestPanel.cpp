@@ -66,7 +66,7 @@ namespace KanVest::UI
         ImGui::TableSetColumnIndex(0);
         if (ImGui::BeginChild("Stock-Data-Cell", ImVec2(firstColWidth, tableHeight))) // fixed height
         {
-//          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
       }
@@ -76,7 +76,7 @@ namespace KanVest::UI
         ImGui::TableSetColumnIndex(1);
         if (ImGui::BeginChild("Stock-Analyzer-Cell", ImVec2(secondColWidth, tableHeight))) // fixed height
         {
-//          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
       }
@@ -84,9 +84,9 @@ namespace KanVest::UI
       // Column 3 Summary
       {
         ImGui::TableSetColumnIndex(2);
-        if (ImGui::BeginChild("Stock-Summary-Cell", ImVec2(thirtColWidth, tableHeight))) // fixed height
+        if (ImGui::BeginChild("Stock-Summary-Cell", ImVec2(thirtColWidth * 0.978, tableHeight))) // fixed height
         {
-//          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
       }
@@ -116,7 +116,7 @@ namespace KanVest::UI
         ImGui::TableSetColumnIndex(0);
         if (ImGui::BeginChild("Chart-Cell", ImVec2(firstColWidth, tableHeight))) // fixed height
         {
-//          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
       }
@@ -124,9 +124,9 @@ namespace KanVest::UI
       // Column 2 Portfolio
       {
         ImGui::TableSetColumnIndex(1);
-        if (ImGui::BeginChild("Portfolio-Cell", ImVec2(secondColWidth, tableHeight))) // fixed height
+        if (ImGui::BeginChild("Portfolio-Cell", ImVec2(secondColWidth * 0.99, tableHeight))) // fixed height
         {
-//          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
       }
