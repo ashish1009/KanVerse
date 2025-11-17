@@ -14,6 +14,7 @@
 #include "Stocks/Analyzer/Indicators/MovingAverage.hpp"
 #include "Stocks/Analyzer/Indicators/Momentum.hpp"
 #include "Stocks/Analyzer/Indicators/MACDCalculator.hpp"
+#include "Stocks/Analyzer/Indicators/StochasticCalculator.hpp"
 
 namespace KanVest
 {
@@ -410,10 +411,10 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       KanVasX::UI::Text(font, "Technical Analysis", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
       ImGui::Separator();
 
-      enum class TechnicalTab {Summary, SMA, EMA, RSI, MACD, Pivot};
+      enum class TechnicalTab {Summary, SMA, EMA, RSI, MACD, Stochastic, Pivot};
       static TechnicalTab tab = TechnicalTab::Summary;
       float availX = ImGui::GetContentRegionAvail().x - 20.0f;
-      float technicalButtonSize = availX / 6;
+      float technicalButtonSize = availX / 7;
 
       auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab) {
         if (KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Medium),
@@ -430,6 +431,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       TechnicalButton("EMA", TechnicalTab::EMA); ImGui::SameLine();
       TechnicalButton("RSI", TechnicalTab::RSI); ImGui::SameLine();
       TechnicalButton("MACD", TechnicalTab::MACD); ImGui::SameLine();
+      TechnicalButton("Stochastic", TechnicalTab::Stochastic); ImGui::SameLine();
       TechnicalButton("Pivot", TechnicalTab::Pivot);
 
       // Summary
@@ -898,6 +900,137 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
                              +5.0f,
                              plotSize
                              );
+      }
+      
+      if (tab == TechnicalTab::Stochastic)
+      {
+        struct Stoch_UI
+        {
+          double k = 0.0;
+          double d = 0.0;
+          
+          std::string state;
+          std::string trend;
+          
+          std::vector<std::string> signals;
+          std::string interpretation;
+          
+          ImU32 color;
+          
+          std::vector<double> kSeries;
+          std::vector<double> dSeries;
+        };
+        
+        auto IsValid = [](double v)
+        {
+          return !std::isnan(v) && !std::isinf(v);
+        };
+        
+        const auto& st = Stochastic::Compute(StockManager::GetSelectedStockData());
+        auto BuildStoch_UI = [](const StochasticResult& st)
+        {
+          Stoch_UI ui;
+          
+          ui.kSeries = st.kSeries;
+          ui.dSeries = st.dSeries;
+          
+          auto IsValid = [](double v){ return !std::isnan(v) && !std::isinf(v); };
+          
+          if (ui.kSeries.empty() || ui.dSeries.empty())
+          {
+            ui.state = "Not enough data";
+            ui.color = KanVasX::Color::TextMuted;
+            ui.trend = "Flat";
+            ui.interpretation = "Insufficient history for Stochastic Oscillator.";
+            return ui;
+          }
+          
+          ui.k = st.lastK;
+          ui.d = st.lastD;
+          
+          // --- STATE ---
+          if (ui.k < 20)
+          {
+            ui.state = "Oversold";
+            ui.color = KanVasX::Color::Cyan;
+          }
+          else if (ui.k > 80)
+          {
+            ui.state = "Overbought";
+            ui.color = KanVasX::Color::Red;
+          }
+          else
+          {
+            ui.state = "Neutral";
+            ui.color = KanVasX::Color::Yellow;
+          }
+          
+          // --- TREND ---
+          double prev = ui.kSeries[ui.kSeries.size() - 2];
+          
+          if (ui.k > prev)
+            ui.trend = "Rising";
+          else if (ui.k < prev)
+            ui.trend = "Falling";
+          else
+            ui.trend = "Flat";
+          
+          // --- SIGNALS ---
+          if (ui.k > ui.d)
+            ui.signals.push_back("Bullish crossover (%K > %D)");
+          
+          if (ui.k < ui.d)
+            ui.signals.push_back("Bearish crossover (%K < %D)");
+          
+          if (ui.state == "Oversold")
+            ui.signals.push_back("Stock oversold → possible bounce");
+          
+          if (ui.state == "Overbought")
+            ui.signals.push_back("Stock overbought → possible correction");
+          
+          // --- Interpretation ---
+          if (ui.state == "Oversold")
+            ui.interpretation = "Stochastic indicates a possible upward reversal.";
+          else if (ui.state == "Overbought")
+            ui.interpretation = "Stochastic indicates a possible downward correction.";
+          else
+            ui.interpretation = "Stochastic neutral; no reversal pressure.";
+          
+          return ui;
+        };
+        
+        const auto& stoch = Stochastic::Compute(StockManager::GetSelectedStockData());
+        const auto& UI_ST = BuildStoch_UI(stoch);
+        
+        KanVasX::ScopedColor sc(ImGuiCol_PlotLines, UI_ST.color);
+        
+        std::string header =
+        "Stochastic %K: " + Utils::FormatDoubleToString(UI_ST.k) +
+        " | %D: " + Utils::FormatDoubleToString(UI_ST.d) +
+        " | " + UI_ST.state +
+        " | " + UI_ST.trend + " Trend";
+        
+        KanVasX::UI::Text(
+                          UI::Font::Get(UI::FontType::Header_22),
+                          header,
+                          KanVasX::UI::AlignX::Center,
+                          {0, 0},
+                          UI_ST.color);
+        
+        if (UI_ST.kSeries.empty()) return;
+        
+        // Convert to float
+        std::vector<float> kF, dF;
+        kF.reserve(UI_ST.kSeries.size());
+        dF.reserve(UI_ST.dSeries.size());
+        
+        for (double v : UI_ST.kSeries) kF.push_back((float)v);
+        for (double v : UI_ST.dSeries) dF.push_back((float)v);
+        
+        ImVec2 size(ImGui::GetContentRegionAvail().x, 150);
+        
+        ImGui::PlotLines("%K", kF.data(), (int)kF.size(), 0, nullptr, 0.f, 100.f, size);
+        ImGui::PlotLines("%D", dF.data(), (int)dF.size(), 0, nullptr, 0.f, 100.f, size);
       }
 
       ImGui::EndChild();
