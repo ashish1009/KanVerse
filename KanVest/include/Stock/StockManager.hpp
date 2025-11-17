@@ -123,7 +123,6 @@ namespace KanVest
     static bool GetStockData(const std::string& symbol, StockData& outData);
     
     // Refresh operations
-    static void RefreshAll();
     static void RefreshAllBlocking();
     static void RefreshStockAsync(const std::string& symbol);
     static bool RefreshStockBlocking(const std::string& symbol);

@@ -21,6 +21,8 @@ namespace KanVest::UI
     static void ShowStockAnalyzerTable();
     static void ShowPortfolioChartTable();
     
+    static void ShowPortfolio();
+    
     inline static ImTextureID s_shadowTextureID = 0;
   };
 } // namespace KanVest

@@ -95,6 +95,86 @@ namespace KanVest
     }
   } // namespace Utils
   
+  // Stock operations
+  bool StockManager::AddStock(const std::string& symbolName)
+  {
+    std::scoped_lock lock(s_mutex);
+    std::string symbol = Utils::NormalizeSymbol(symbolName);
+    if (std::find(s_symbols.begin(), s_symbols.end(), symbol) == s_symbols.end())
+    {
+      s_symbols.push_back(symbol);
+      // ensure an empty placeholder for active cache to avoid UI checks
+      s_activeCache.emplace(symbol, StockData(symbol));
+      return true;
+    }
+    return false;
+  }
+  
+  bool StockManager::EditStock(const std::string& symbol)
+  {
+    return AddStock(symbol);
+  }
+  
+  void StockManager::RemoveStock(const std::string& symbolName)
+  {
+    std::scoped_lock lock(s_mutex);
+    std::string symbol = Utils::NormalizeSymbol(symbolName);
+    s_symbols.erase(std::remove(s_symbols.begin(), s_symbols.end(), symbol), s_symbols.end());
+    s_activeCache.erase(symbol);
+    
+    // remove all cached variants for this symbol
+    for (auto it = s_cache.begin(); it != s_cache.end(); ) {
+      if (it->first.symbol == symbol) it = s_cache.erase(it); else ++it;
+    }
+  }
+  
+  bool StockManager::GetStockData(const std::string& symbolName, StockData& outData)
+  {
+    std::scoped_lock lock(s_mutex);
+    std::string symbol = Utils::NormalizeSymbol(symbolName);
+    auto it = s_activeCache.find(symbol);
+    if (it != s_activeCache.end())
+    {
+      outData = it->second;
+      return true;
+    }
+    return false;
+  }
+
+  // Refresh operations
+  void StockManager::RefreshAllBlocking()
+  {
+    // For blocking refresh we create a temporary small threadpool and wait via futures
+    std::vector<std::future<void>> futs;
+    std::vector<std::string> symbolsCopy;
+    {
+      std::scoped_lock lock(s_mutex);
+      symbolsCopy = s_symbols;
+    }
+    
+    for (const auto& sym : symbolsCopy)
+    {
+      futs.push_back(std::async(std::launch::async, [sym]() {
+        UpdateStockInternal(sym, false);
+      }));
+    }
+    for (auto& f : futs) f.wait();
+  }
+  void StockManager::RefreshStockAsync(const std::string& symbolName)
+  {
+    std::string symbol = Utils::NormalizeSymbol(symbolName);
+    if (!s_threadPool) s_threadPool = std::make_unique<ThreadPool>(4);
+    s_threadPool->Enqueue([symbol]() { UpdateStockInternal(symbol, false); });
+  }
+  
+  bool StockManager::RefreshStockBlocking(const std::string& symbolName)
+  {
+    std::string symbol = Utils::NormalizeSymbol(symbolName);
+    auto fut = std::async(std::launch::async, [symbol]() { return UpdateStockInternal(symbol, false); });
+    return fut.get();
+  }
+  
+  // Live updates
   void StockManager::StartLiveUpdates(int intervalMilliseconds)
   {
     if (s_running)
@@ -117,6 +197,71 @@ namespace KanVest
       s_updateThread.join();
   }
 
+  // Selection / active stock
+  void StockManager::SetSelectedStockSymbol(const std::string& stockSymbol)
+  {
+    std::scoped_lock lock(s_mutex);
+    s_selectedStockSymbol = Utils::NormalizeSymbol(stockSymbol);
+    // ensure active cache entry exists
+    if (s_activeCache.find(s_selectedStockSymbol) == s_activeCache.end())
+      s_activeCache.emplace(s_selectedStockSymbol, StockData(s_selectedStockSymbol));
+  }
+  
+  const std::string& StockManager::GetSelectedStockSymbol()
+  {
+    return s_selectedStockSymbol;
+  }
+  
+  StockData StockManager::GetSelectedStockData()
+  {
+    StockData d;
+    GetStockData(s_selectedStockSymbol, d);
+    return d;
+  }
+  
+  const std::unordered_map<std::string, StockData>& StockManager::GetStockCache()
+  {
+    std::scoped_lock lock(s_mutex);
+    return s_activeCache;
+  }
+
+  // Interval / range
+  void StockManager::SetCurrentInterval(const std::string& interval)
+  {
+    std::scoped_lock lock(s_mutex);
+    s_currentInterval = interval;
+    // after changing current interval, map activeCache from cached value if exists
+    for (auto& sym : s_symbols)
+    {
+      CacheKey k{sym, s_currentInterval, s_currentRange};
+      auto it = s_cache.find(k);
+      if (it != s_cache.end()) s_activeCache[sym] = it->second;
+    }
+  }
+  
+  const std::string& StockManager::GetCurrentInterval()
+  {
+    return s_currentInterval;
+  }
+  
+  void StockManager::SetCurrentRange(const std::string& range)
+  {
+    std::scoped_lock lock(s_mutex);
+    s_currentRange = range;
+    for (auto& sym : s_symbols)
+    {
+      CacheKey k{sym, s_currentInterval, s_currentRange};
+      auto it = s_cache.find(k);
+      if (it != s_cache.end()) s_activeCache[sym] = it->second;
+    }
+  }
+  
+  const std::string& StockManager::GetCurrentRange()
+  {
+    return s_currentRange;
+  }
+
+  // Private APIs
   void StockManager::UpdateLoop(int intervalMilliseconds)
   {
     using namespace std::chrono_literals;
@@ -133,25 +278,6 @@ namespace KanVest
       if (sleepFor > 0ms)
         std::this_thread::sleep_for(sleepFor);
     }
-  }
-  
-  void StockManager::RefreshAllBlocking()
-  {
-    // For blocking refresh we create a temporary small threadpool and wait via futures
-    std::vector<std::future<void>> futs;
-    std::vector<std::string> symbolsCopy;
-    {
-      std::scoped_lock lock(s_mutex);
-      symbolsCopy = s_symbols;
-    }
-    
-    for (const auto& sym : symbolsCopy)
-    {
-      futs.push_back(std::async(std::launch::async, [sym]() {
-        UpdateStockInternal(sym, false);
-      }));
-    }
-    for (auto& f : futs) f.wait();
   }
   
   bool StockManager::UpdateStockInternal(const std::string& symbolName, bool forceRefresh)
@@ -186,51 +312,6 @@ namespace KanVest
     catch (const std::exception& e)
     {
       std::cerr << "[StockManager] Failed to update stock '" << symbolName << "': " << e.what() << "\n";
-    }
-    return false;
-  }
-  
-  bool StockManager::AddStock(const std::string& symbolName)
-  {
-    std::scoped_lock lock(s_mutex);
-    std::string symbol = Utils::NormalizeSymbol(symbolName);
-    if (std::find(s_symbols.begin(), s_symbols.end(), symbol) == s_symbols.end())
-    {
-      s_symbols.push_back(symbol);
-      // ensure an empty placeholder for active cache to avoid UI checks
-      s_activeCache.emplace(symbol, StockData(symbol));
-      return true;
-    }
-    return false;
-  }
-  
-  bool StockManager::EditStock(const std::string& symbol)
-  {
-    return AddStock(symbol);
-  }
-
-  void StockManager::RemoveStock(const std::string& symbolName)
-  {
-    std::scoped_lock lock(s_mutex);
-    std::string symbol = Utils::NormalizeSymbol(symbolName);
-    s_symbols.erase(std::remove(s_symbols.begin(), s_symbols.end(), symbol), s_symbols.end());
-    s_activeCache.erase(symbol);
-    
-    // remove all cached variants for this symbol
-    for (auto it = s_cache.begin(); it != s_cache.end(); ) {
-      if (it->first.symbol == symbol) it = s_cache.erase(it); else ++it;
-    }
-  }
-  
-  bool StockManager::GetStockData(const std::string& symbolName, StockData& outData)
-  {
-    std::scoped_lock lock(s_mutex);
-    std::string symbol = Utils::NormalizeSymbol(symbolName);
-    auto it = s_activeCache.find(symbol);
-    if (it != s_activeCache.end())
-    {
-      outData = it->second;
-      return true;
     }
     return false;
   }
