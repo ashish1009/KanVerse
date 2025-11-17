@@ -9,6 +9,8 @@
 
 #include "User/UserManager.hpp"
 
+#include "UI/KanVestPanel.hpp"
+
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
@@ -136,6 +138,8 @@ namespace KanVest
     KanVasX::Widget::SetSearchIcon(KanVasX::UI::GetTextureID(m_searchIcon->GetRendererID()));
     KanVasX::Widget::SetSettingIcon(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
     
+    KanVest::UI::Panel::SetShadowTextureId(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
+    
 //    StockUI::Initialize(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
     
     // Login popup
@@ -165,8 +169,7 @@ namespace KanVest
     if (UserManager::GetCurrentUser().Valid())
     {
       UI_StartMainWindowDocking();
-//      StockUI::StockPanel();
-//      UI_PerformancePanel();
+      KanVest::UI::Panel::Show();
       UI_EndMainWindowDocking();
     }
   }
@@ -218,11 +221,12 @@ namespace KanVest
     }
     
     // Render the title if original title bar is hidden
-    if (KanViz::Application::Get().GetSpecification().windowSpec.hideTitleBar)
-    {
-      float titlebarHeight = UI_DrawTitlebar();
-      KanVasX::UI::SetCursorPosY(titlebarHeight + ImGui::GetCurrentWindow()->WindowPadding.y);
-    }
+//    const auto& applicationSpec = KanViz::Application::Get().GetSpecification().windowSpec;
+//    if (applicationSpec.hideTitleBar)
+//    {
+//      float titlebarHeight = UI_DrawTitlebar();
+//      KanVasX::UI::SetCursorPosY(titlebarHeight + ImGui::GetCurrentWindow()->WindowPadding.y);
+//    }
     
     // Dockspace
     float minWinSizeX = style.WindowMinSize.x;
@@ -497,21 +501,22 @@ namespace KanVest
     // Draw KanVest Logo ----------------------------------------------------------------
     ImGui::SetItemAllowOverlap();
     KanVasX::UI::SetCursorPos(windowPadding);
+    
     static const ImVec2 size = {titleBarHeight - 10.0f, titleBarHeight - 10.0f};
     if (KanVasX::UI::DrawButtonImage("MainMenu", KanVasX::UI::GetTextureID(m_applicationIcon->GetRendererID()), false, size, {10.0f, 5.0f}, KanVasX::Color::White))
     {
       ImGui::OpenPopup("MainMenu");
     }
     
-    // KanVest Name -------------------------------------------------------------------------
+    // KanVest Name ---------------------------------------------------------------------
     KanVasX::UI::SetCursorPos({0.0f, 0.0f});
     KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header), "KanVest", KanVasX::UI::AlignX::Center, {0.0f, 10.0f}, KanVasX::Color::TextMuted);
     
-    // Title Rectangles --------------------------------------------------------------------
+    // Title Rectangles -----------------------------------------------------------------
     KanVasX::UI::SetCursorPos({ImGui::GetWindowWidth() / 4, windowPadding.y});
     KanVasX::UI::DrawRect(KanVasX::Color::Alpha(KanVasX::Color::HighlightMuted, 0.4f), titleBarHeight / 1.6, 0.5f, {0.0f, titleBarHeight / 4});
     
-    // Render the Window Buttons -------------------------------------------------------
+    // Render the Window Buttons --------------------------------------------------------
     KanVasX::UI::SetCursorPosX(ImGui::GetWindowWidth() - 78);
     KanVasX::UI::SetCursorPosY(10.0f);
     UI_WindowButtons();

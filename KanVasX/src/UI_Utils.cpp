@@ -447,9 +447,12 @@ namespace KanVasX
   
   void UI::DrawShadowAllDirection(ImTextureID shadowImageID, int32_t radius, float alpha)
   {
-    UI::DrawShadow(shadowImageID, UI::Position::Left, radius, alpha);
-    UI::DrawShadow(shadowImageID, UI::Position::Right, radius, alpha);
-    UI::DrawShadow(shadowImageID, UI::Position::Top, radius, alpha);
-    UI::DrawShadow(shadowImageID, UI::Position::Bottom, radius, alpha);
+    if (shadowImageID != 0)
+    {
+      UI::DrawShadow(shadowImageID, UI::Position::Left, radius, alpha);
+      UI::DrawShadow(shadowImageID, UI::Position::Right, radius, alpha);
+      UI::DrawShadow(shadowImageID, UI::Position::Top, radius, alpha);
+      UI::DrawShadow(shadowImageID, UI::Position::Bottom, radius, alpha);
+    }
   }
 } // namespace KanVasX
