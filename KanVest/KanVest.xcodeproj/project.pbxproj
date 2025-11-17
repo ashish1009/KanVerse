@@ -21,6 +21,10 @@
 		B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289EE3F2EB3ACF200937D0B /* UI_Font.cpp */; };
 		B2B465B62ECB0AEF00E01770 /* ADXCalculator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2B465B52ECAEF4500E01770 /* ADXCalculator.cpp */; };
 		B2B465B92ECB0ED500E01770 /* MFICalculator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2B465B82ECB0CAE00E01770 /* MFICalculator.cpp */; };
+		B2B465C12ECB10D000E01770 /* CandleUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2B465C02ECB10D000E01770 /* CandleUtils.cpp */; };
+		B2B465C42ECB111B00E01770 /* CandleDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2B465C32ECB111B00E01770 /* CandleDetector.cpp */; };
+		B2B465C72ECB11A700E01770 /* CandleEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2B465C62ECB11A700E01770 /* CandleEngine.cpp */; };
+		B2B465CA2ECB12AF00E01770 /* CandlePatternUI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2B465C92ECB12AF00E01770 /* CandlePatternUI.cpp */; };
 		B2D2E7002EC5F06100D7DD04 /* MovingAverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2D2E6FF2EC5F06100D7DD04 /* MovingAverage.cpp */; };
 		B2D2E7032ECAD8BF00D7DD04 /* Momentum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2D2E7022ECAD8BF00D7DD04 /* Momentum.cpp */; };
 		B2D2E7062ECAE66300D7DD04 /* MACDCalculator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2D2E7052ECAE66300D7DD04 /* MACDCalculator.cpp */; };
@@ -74,6 +78,15 @@
 		B2B465B52ECAEF4500E01770 /* ADXCalculator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ADXCalculator.cpp; sourceTree = "<group>"; };
 		B2B465B72ECB0CAE00E01770 /* MFICalculator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MFICalculator.hpp; sourceTree = "<group>"; };
 		B2B465B82ECB0CAE00E01770 /* MFICalculator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MFICalculator.cpp; sourceTree = "<group>"; };
+		B2B465BC2ECB10AC00E01770 /* CandleTypes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CandleTypes.hpp; sourceTree = "<group>"; };
+		B2B465BF2ECB10D000E01770 /* CandleUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CandleUtils.hpp; sourceTree = "<group>"; };
+		B2B465C02ECB10D000E01770 /* CandleUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CandleUtils.cpp; sourceTree = "<group>"; };
+		B2B465C22ECB111B00E01770 /* CandleDetector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CandleDetector.hpp; sourceTree = "<group>"; };
+		B2B465C32ECB111B00E01770 /* CandleDetector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CandleDetector.cpp; sourceTree = "<group>"; };
+		B2B465C52ECB11A700E01770 /* CandleEngine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CandleEngine.hpp; sourceTree = "<group>"; };
+		B2B465C62ECB11A700E01770 /* CandleEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CandleEngine.cpp; sourceTree = "<group>"; };
+		B2B465C82ECB12AF00E01770 /* CandlePatternUI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CandlePatternUI.hpp; sourceTree = "<group>"; };
+		B2B465C92ECB12AF00E01770 /* CandlePatternUI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CandlePatternUI.cpp; sourceTree = "<group>"; };
 		B2D2E6FE2EC5F06100D7DD04 /* MovingAverage.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MovingAverage.hpp; sourceTree = "<group>"; };
 		B2D2E6FF2EC5F06100D7DD04 /* MovingAverage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MovingAverage.cpp; sourceTree = "<group>"; };
 		B2D2E7012ECAD8BF00D7DD04 /* Momentum.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Momentum.hpp; sourceTree = "<group>"; };
@@ -290,6 +303,29 @@
 			path = Stocks;
 			sourceTree = "<group>";
 		};
+		B2B465BA2ECB105E00E01770 /* Candle */ = {
+			isa = PBXGroup;
+			children = (
+				B2B465BC2ECB10AC00E01770 /* CandleTypes.hpp */,
+				B2B465BF2ECB10D000E01770 /* CandleUtils.hpp */,
+				B2B465C22ECB111B00E01770 /* CandleDetector.hpp */,
+				B2B465C52ECB11A700E01770 /* CandleEngine.hpp */,
+				B2B465C82ECB12AF00E01770 /* CandlePatternUI.hpp */,
+			);
+			path = Candle;
+			sourceTree = "<group>";
+		};
+		B2B465BB2ECB106F00E01770 /* Candle */ = {
+			isa = PBXGroup;
+			children = (
+				B2B465C02ECB10D000E01770 /* CandleUtils.cpp */,
+				B2B465C32ECB111B00E01770 /* CandleDetector.cpp */,
+				B2B465C62ECB11A700E01770 /* CandleEngine.cpp */,
+				B2B465C92ECB12AF00E01770 /* CandlePatternUI.cpp */,
+			);
+			path = Candle;
+			sourceTree = "<group>";
+		};
 		B2D2E6FC2EC5F04B00D7DD04 /* Indicators */ = {
 			isa = PBXGroup;
 			children = (
@@ -321,6 +357,7 @@
 		B2F24F0E2EBE001600810B5B /* Analyzer */ = {
 			isa = PBXGroup;
 			children = (
+				B2B465BA2ECB105E00E01770 /* Candle */,
 				B2D2E6FC2EC5F04B00D7DD04 /* Indicators */,
 			);
 			path = Analyzer;
@@ -329,6 +366,7 @@
 		B2F24F0F2EBE002100810B5B /* Analyzer */ = {
 			isa = PBXGroup;
 			children = (
+				B2B465BB2ECB106F00E01770 /* Candle */,
 				B2D2E6FD2EC5F05200D7DD04 /* Indicators */,
 			);
 			path = Analyzer;
@@ -414,12 +452,15 @@
 				B2F3BA7B2EBC372500EC0863 /* StockParser.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B25162092EBB4AF300C7FDC3 /* StockUI.cpp in Sources */,
+				B2B465CA2ECB12AF00E01770 /* CandlePatternUI.cpp in Sources */,
 				B25162062EBB48A200C7FDC3 /* UserManager.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
 				B2D2E7092ECAEA2D00D7DD04 /* StochasticCalculator.cpp in Sources */,
 				B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */,
 				B2D2E70C2ECAED1800D7DD04 /* Bolinger.cpp in Sources */,
 				B2B465B92ECB0ED500E01770 /* MFICalculator.cpp in Sources */,
+				B2B465C42ECB111B00E01770 /* CandleDetector.cpp in Sources */,
+				B2B465C12ECB10D000E01770 /* CandleUtils.cpp in Sources */,
 				B2B465B62ECB0AEF00E01770 /* ADXCalculator.cpp in Sources */,
 				B2F3BA812EBC384600EC0863 /* StockManager.cpp in Sources */,
 				B25162032EBB487000C7FDC3 /* User.cpp in Sources */,
@@ -430,6 +471,7 @@
 				B2D2E7002EC5F06100D7DD04 /* MovingAverage.cpp in Sources */,
 				B2F3BA7E2EBC37AB00EC0863 /* StockAPI.cpp in Sources */,
 				B2D2E7062ECAE66300D7DD04 /* MACDCalculator.cpp in Sources */,
+				B2B465C72ECB11A700E01770 /* CandleEngine.cpp in Sources */,
 				B2D2E7032ECAD8BF00D7DD04 /* Momentum.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
