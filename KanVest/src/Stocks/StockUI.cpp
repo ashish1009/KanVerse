@@ -13,6 +13,7 @@
 
 #include "Stocks/Analyzer/Indicators/MovingAverage.hpp"
 #include "Stocks/Analyzer/Indicators/Momentum.hpp"
+#include "Stocks/Analyzer/Indicators/MACDCalculator.hpp"
 
 namespace KanVest
 {
@@ -409,10 +410,10 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       KanVasX::UI::Text(font, "Technical Analysis", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
       ImGui::Separator();
 
-      enum class TechnicalTab {Summary, SMA, EMA, RSI, Pivot};
+      enum class TechnicalTab {Summary, SMA, EMA, RSI, MACD, Pivot};
       static TechnicalTab tab = TechnicalTab::Summary;
       float availX = ImGui::GetContentRegionAvail().x - 20.0f;
-      float technicalButtonSize = availX / 5;
+      float technicalButtonSize = availX / 6;
 
       auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab) {
         if (KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Medium),
@@ -428,6 +429,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       TechnicalButton("SMA", TechnicalTab::SMA); ImGui::SameLine();
       TechnicalButton("EMA", TechnicalTab::EMA); ImGui::SameLine();
       TechnicalButton("RSI", TechnicalTab::RSI); ImGui::SameLine();
+      TechnicalButton("MACD", TechnicalTab::MACD); ImGui::SameLine();
       TechnicalButton("Pivot", TechnicalTab::Pivot);
 
       // Summary
@@ -567,17 +569,17 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 
       if (tab == TechnicalTab::SMA)
       {
-        const auto& maData = Indicators::MovingAverages::Compute(StockManager::GetSelectedStockData(), StockManager::GetCurrentRange());
+        const auto& maData = MovingAverages::Compute(StockManager::GetSelectedStockData(), StockManager::GetCurrentRange());
         ShowMovingAvg(maData.smaValues, " SMA");
       }
       if (tab == TechnicalTab::EMA)
       {
-        const auto& maData = Indicators::MovingAverages::Compute(StockManager::GetSelectedStockData(), StockManager::GetCurrentRange());
+        const auto& maData = MovingAverages::Compute(StockManager::GetSelectedStockData(), StockManager::GetCurrentRange());
         ShowMovingAvg(maData.emaValues, " EMA");
       }
       if (tab == TechnicalTab::RSI)
       {
-        const auto& rsiData = Indicators::ComputeRSI(StockManager::GetSelectedStockData());
+        const auto& rsiData = RSI::Compute(StockManager::GetSelectedStockData());
         
         struct RSI_UI
         {
@@ -719,9 +721,183 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         }
         
       }
-      if (tab == TechnicalTab::Pivot)
+      if (tab == TechnicalTab::MACD)
       {
-
+        struct MACD_UI
+        {
+          double macd = 0.0;
+          double signal = 0.0;
+          double hist = 0.0;
+          
+          std::string state;               // Bullish, Bearish, Neutral
+          std::string trend;               // Rising / Falling / Flat
+          std::vector<std::string> signals;
+          std::string interpretation;
+          
+          ImU32 color;                     // Main UI color (green/red/yellow)
+          
+          std::vector<double> macdSeries;
+          std::vector<double> signalSeries;
+          std::vector<double> histSeries;
+        };
+        
+        auto IsValid = [](double v)
+        {
+          return !std::isnan(v) && !std::isinf(v);
+        };
+        
+        const auto& macdData = MACDCalculator::Compute(StockManager::GetSelectedStockData());
+        auto BuildMACD_UI = [IsValid](const MACDResult& macdData)
+        {
+          MACD_UI ui;
+          
+          if (macdData.macdLine.empty() || macdData.signalLine.empty() || macdData.histogram.empty())
+          {
+            ui.state = "Not enough data";
+            ui.color = KanVasX::Color::TextMuted;
+            ui.trend = "Flat";
+            ui.interpretation = "Insufficient history to compute MACD.";
+            return ui;
+          }
+          
+          // Copy series for chart
+          ui.macdSeries   = macdData.macdLine;
+          ui.signalSeries = macdData.signalLine;
+          ui.histSeries   = macdData.histogram;
+          
+          // Latest values
+          ui.macd   = macdData.macdLine.back();
+          ui.signal = macdData.signalLine.back();
+          ui.hist   = macdData.histogram.back();
+          
+          // --- Determine MACD trend (Bullish if MACD > Signal) ---
+          if (ui.macd > ui.signal)
+          {
+            ui.state = "Bullish Crossover";
+            ui.color = KanVasX::Color::Cyan;   // same as oversold in RSI style
+          }
+          else if (ui.macd < ui.signal)
+          {
+            ui.state = "Bearish Crossover";
+            ui.color = KanVasX::Color::Red;
+          }
+          else
+          {
+            ui.state = "Neutral";
+            ui.color = KanVasX::Color::Yellow;
+          }
+          
+          // --- Trend direction (same logic as RSI rising/falling) ---
+          if (ui.macdSeries.size() > 1)
+          {
+            double last  = ui.macdSeries.back();
+            double prev  = ui.macdSeries[ui.macdSeries.size() - 2];
+            
+            if (last > prev)
+              ui.trend = "Rising";
+            else if (last < prev)
+              ui.trend = "Falling";
+            else
+              ui.trend = "Flat";
+          }
+          
+          // --- Signals ---
+          if (ui.macd > ui.signal)
+            ui.signals.push_back("MACD above Signal → Bullish momentum");
+          else
+            ui.signals.push_back("MACD below Signal → Bearish momentum");
+          
+          if (ui.hist > 0)
+            ui.signals.push_back("Histogram positive → Upward strength");
+          else
+            ui.signals.push_back("Histogram negative → Downward pressure");
+          
+          if (ui.trend == "Rising")
+            ui.signals.push_back("Momentum is rising");
+          else if (ui.trend == "Falling")
+            ui.signals.push_back("Momentum weakening");
+          
+          // --- Interpretation (angel/zerodha style) ---
+          if (ui.state == "Bullish Crossover")
+            ui.interpretation = "MACD is in bullish crossover. Trend may continue upward.";
+          else if (ui.state == "Bearish Crossover")
+            ui.interpretation = "MACD is in bearish crossover. Selling pressure increasing.";
+          else
+            ui.interpretation = "MACD neutral. No strong momentum shift.";
+          
+          return ui;
+        };
+        
+        MACD_UI ui = BuildMACD_UI(macdData);
+        
+        // Title like RSI (centered)
+        std::string title =
+        "MACD: "
+        + Utils::FormatDoubleToString(ui.macd)
+        + " : " + ui.state
+        + " : " + ui.trend + " Trend";
+        
+        KanVasX::UI::Text(
+                          UI::Font::Get(UI::FontType::Header_22),
+                          title,
+                          KanVasX::UI::AlignX::Center,
+                          {0, 0},
+                          ui.color);
+        
+        // If no data
+        if (ui.macdSeries.empty())
+        {
+          ImGui::Text("MACD data unavailable.");
+          return;
+        }
+        
+        // Convert to floats for chart
+        std::vector<float> macdF, sigF, histF;
+        macdF.reserve(ui.macdSeries.size());
+        sigF.reserve(ui.signalSeries.size());
+        histF.reserve(ui.histSeries.size());
+        
+        for (double v : ui.macdSeries)   macdF.push_back((float)v);
+        for (double v : ui.signalSeries) sigF.push_back((float)v);
+        for (double v : ui.histSeries)   histF.push_back((float)v);
+        
+        ImVec2 plotSize(0, ImGui::GetContentRegionAvail().y * 0.5f);
+        
+        // --- MACD Line ---
+        ImGui::PlotLines(
+                         "##MACDLine",
+                         macdF.data(),
+                         (int)macdF.size(),
+                         0,
+                         "MACD Line",
+                         -5.0f,
+                         +5.0f,
+                         plotSize
+                         );
+        
+        // --- Signal Line ---
+        ImGui::PlotLines(
+                         "##MACDSignal",
+                         sigF.data(),
+                         (int)sigF.size(),
+                         0,
+                         "Signal Line",
+                         -5.0f,
+                         +5.0f,
+                         plotSize
+                         );
+        
+        // --- Histogram ---
+        ImGui::PlotHistogram(
+                             "##MACDHistogram",
+                             histF.data(),
+                             (int)histF.size(),
+                             0,
+                             "Histogram",
+                             -5.0f,
+                             +5.0f,
+                             plotSize
+                             );
       }
 
       ImGui::EndChild();

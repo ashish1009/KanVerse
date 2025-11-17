@@ -7,12 +7,12 @@
 
 #include "Momentum.hpp"
 
-namespace KanVest::Indicators
+namespace KanVest
 {
   // Helper: safe NaN
   static inline double NaN() { return std::numeric_limits<double>::quiet_NaN(); }
   
-  RSISeries ComputeRSI(const StockData& data, size_t period)
+  RSISeries RSI::Compute(const StockData& data, size_t period)
   {
     RSISeries out;
     
@@ -83,7 +83,7 @@ namespace KanVest::Indicators
     return out;
   }
   
-  std::string TooltipRSI()
+  std::string RSI::TooltipRSI()
   {
     return "Relative Strength Index (RSI):\n"
     "- Wilder's smoothing method (period default 14) is used (same as brokers).\n"
@@ -91,4 +91,4 @@ namespace KanVest::Indicators
     "- Common interpretation: RSI > 70 = overbought (sell bias), RSI < 30 = oversold (buy bias).\n"
     "- Divergences between price and RSI suggest potential reversals.";
   }
-}
+} // namespace KanVest

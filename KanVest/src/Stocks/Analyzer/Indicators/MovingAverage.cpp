@@ -7,7 +7,7 @@
 
 #include "MovingAverage.hpp"
 
-namespace KanVest::Indicators
+namespace KanVest
 {
   // --- Utility: get applicable MA periods based on chart range ---
   static std::vector<int> GetActivePeriods(const std::string& chartRange)
@@ -82,4 +82,4 @@ namespace KanVest::Indicators
     
     return result;
   }
-} // namespace KanVest::Indicators
+} // namespace KanVest
