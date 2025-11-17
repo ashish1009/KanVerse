@@ -9,7 +9,7 @@
 
 #include "Stocks/StockData.hpp"
 
-namespace KanVest
+namespace KanVest::Indicators
 {
   struct MAResult
   {
@@ -31,4 +31,4 @@ namespace KanVest
     static std::string TooltipSMA();
     static std::string TooltipEMA();
   };
-} // namespace KanVest
+} // namespace KanVest::Indicators

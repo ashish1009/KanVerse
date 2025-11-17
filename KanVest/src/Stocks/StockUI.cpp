@@ -12,6 +12,7 @@
 #include "Portfolio/PortfolioController.hpp"
 
 #include "Stocks/Analyzer/Indicators/MovingAverage.hpp"
+#include "Stocks/Analyzer/Indicators/Momentum.hpp"
 
 namespace KanVest
 {
@@ -408,10 +409,10 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       KanVasX::UI::Text(font, "Technical Analysis", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
       ImGui::Separator();
 
-      enum class TechnicalTab {Summary, SMA, EMA, Pivot};
-      static TechnicalTab tab = TechnicalTab::SMA;
+      enum class TechnicalTab {Summary, SMA, EMA, RSI, Pivot};
+      static TechnicalTab tab = TechnicalTab::Summary;
       float availX = ImGui::GetContentRegionAvail().x - 20.0f;
-      float technicalButtonSize = availX / 4;
+      float technicalButtonSize = availX / 5;
 
       auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab) {
         if (KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Medium),
@@ -426,8 +427,70 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       TechnicalButton("Summary", TechnicalTab::Summary); ImGui::SameLine();
       TechnicalButton("SMA", TechnicalTab::SMA); ImGui::SameLine();
       TechnicalButton("EMA", TechnicalTab::EMA); ImGui::SameLine();
+      TechnicalButton("RSI", TechnicalTab::RSI); ImGui::SameLine();
       TechnicalButton("Pivot", TechnicalTab::Pivot);
 
+      // Summary
+      if (tab == TechnicalTab::Summary)
+      {
+//        float score = static_cast<float>(s_analyzerReport.recommendation.score); // 0-100
+
+//        // Determine color based on score
+//        ImU32 scoreColor;
+//        std::string scoreString = "Technically Neutral";
+//
+//        if (score < 15)      { scoreString = "Technically Strong Bearish"; scoreColor = KanVasX::Color::Red; }
+//        else if (score < 30) { scoreString = "Technically Bearish"; scoreColor = KanVasX::Color::Orange; }
+//        else if (score < 60) { scoreString = "Technically Neutral"; scoreColor = KanVasX::Color::Yellow; }
+//        else if (score < 80) { scoreString = "Technically Bullish"; scoreColor = KanVasX::Color::Cyan; }
+//        else                 { scoreString = "Technically Strong Bullish"; scoreColor = KanVasX::Color::Green; }
+
+//        // Scoped color
+//        {
+//          KanVasX::ScopedStyle headerPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2{1.0f, 1.0f});
+//          KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
+//          // Convert score 0-100 to fraction 0.0-1.0
+//
+//          // Print Score
+//          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), Utils::FormatDoubleToString(score), KanVasX::UI::AlignX::Left, {0, 0}, scoreColor);
+//
+//          // Print /100
+//          static const std::string totalScoreString = "/100";
+//          ImGui::SameLine();
+//          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), totalScoreString, KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
+//
+//          ImGui::SameLine();
+//          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Large), scoreString, KanVasX::UI::AlignX::Right, {0, 5.0f}, scoreColor);
+//
+//          float fraction = score / 100.0f;
+//          ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
+//        }
+
+//        float availX = ImGui::GetContentRegionAvail().x - 30.0f;
+//        float technicalDataSize = availX / 4;
+//        auto TechnicalData = [technicalDataSize](const std::string& title, const std::string& tooltipTag) {
+//          KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), KanVasX::Color::BackgroundDark, KanVasX::Color::TextBright, false, 0.0f, {technicalDataSize, 60});
+//          if (const auto& explainIt = s_analyzerReport.technicals.Explanations.find(tooltipTag); explainIt != s_analyzerReport.technicals.Explanations.end())
+//          {
+//            KanVasX::UI::Tooltip(explainIt->second);
+//          }
+//        };
+
+//        const auto& rsiData = Indicators::ComputeRSI(StockManager::GetSelectedStockData());
+//        TechnicalData(std::string("RSI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.RSI), "RSI"); ImGui::SameLine();
+//        TechnicalData(std::string("MACD \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.MACD), "MACD"); ImGui::SameLine();
+//        TechnicalData(std::string("VWAP \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.VWAP), "VWAP"); ImGui::SameLine();
+//        TechnicalData(std::string("ATR \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.ATR), "ATR");
+//
+//        TechnicalData(std::string("AwesomeOscillator \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.AwesomeOscillator), "AwesomeOscillator"); ImGui::SameLine();
+//        TechnicalData(std::string("StochasticRSI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.StochasticRSI), "StochasticRSI"); ImGui::SameLine();
+//        TechnicalData(std::string("ADX \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.ADX), "ADX"); ImGui::SameLine();
+//        TechnicalData(std::string("CCI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.CCI), "CCI");
+//
+//        TechnicalData(std::string("OBV \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.OBV), "OBV"); ImGui::SameLine();
+//        TechnicalData(std::string("MFI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.MFI), "MFI");
+      }
+      
       // SMA
       auto ShowMovingAvg = [stockData](const auto& maMap, const std::string& maString)
       {
@@ -502,14 +565,167 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
         }
       };
 
-      const auto& maData = MovingAverages::Compute(StockManager::GetSelectedStockData(), StockManager::GetCurrentRange());
       if (tab == TechnicalTab::SMA)
       {
+        const auto& maData = Indicators::MovingAverages::Compute(StockManager::GetSelectedStockData(), StockManager::GetCurrentRange());
         ShowMovingAvg(maData.smaValues, " SMA");
+      }
+      if (tab == TechnicalTab::EMA)
+      {
+        const auto& maData = Indicators::MovingAverages::Compute(StockManager::GetSelectedStockData(), StockManager::GetCurrentRange());
+        ShowMovingAvg(maData.emaValues, " EMA");
+      }
+      if (tab == TechnicalTab::RSI)
+      {
+        const auto& rsiData = Indicators::ComputeRSI(StockManager::GetSelectedStockData());
+        
+        struct RSI_UI
+        {
+          double value = 0.0;                     // latest RSI
+          std::string state;                      // Oversold / Neutral / Overbought
+          std::string trend;                      // Rising / Falling / Flat
+          std::vector<std::string> signals;       // textual signals
+          std::string interpretation;             // human-friendly message
+          ImU32 color;                            // UI color (green/yellow/red)
+          std::vector<double> series;             // full RSI series
+        };
+        
+        auto IsValid = [](double v)
+        {
+          return !std::isnan(v) && !std::isinf(v);
+        };
+        
+        auto BuildRSI_UI = [rsiData, IsValid]()
+        {
+          RSI_UI ui;
+          ui.series = rsiData.series;
+          
+          if (!IsValid(rsiData.last))
+          {
+            ui.value = 0.0;
+            ui.state = "Not enough data";
+            ui.color = KanVasX::Color::TextMuted;
+            ui.trend = "Flat";
+            ui.interpretation = "Insufficient history to compute RSI.";
+            return ui;
+          }
+          
+          ui.value = rsiData.last;
+          
+          // --- Determine State ---
+          if (ui.value < 30)
+          {
+            ui.state = "Oversold";
+            ui.color = KanVasX::Color::Cyan;
+          }
+          else if (ui.value > 70)
+          {
+            ui.state = "Overbought";
+            ui.color = KanVasX::Color::Red;
+          }
+          else
+          {
+            ui.state = "Neutral";
+            ui.color = KanVasX::Color::Yellow;
+          }
+          
+          // --- Determine Trend ---
+          int lastIndex = (int)ui.series.size() - 1;
+          double prev = ui.series[lastIndex - 1];
+          
+          if (!IsValid(prev))
+            ui.trend = "Flat";
+          else if (ui.value > prev)
+            ui.trend = "Rising";
+          else if (ui.value < prev)
+            ui.trend = "Falling";
+          else
+            ui.trend = "Flat";
+          
+          // --- Generate Signals ---
+          if (ui.state == "Oversold")
+          {
+            ui.signals.push_back("Stock in oversold zone");
+          }
+          else if (ui.state == "Overbought")
+          {
+            ui.signals.push_back("Stock in overbought zone");
+          }
+          
+          if (ui.trend == "Rising")
+            ui.signals.push_back("Momentum improving");
+          else if (ui.trend == "Falling")
+            ui.signals.push_back("Momentum weakening");
+          
+          // --- Interpretation ---
+          if (ui.state == "Oversold")
+          {
+            ui.interpretation =
+            "RSI indicates an oversold region. Buying interest may come soon.";
+          }
+          else if (ui.state == "Overbought")
+          {
+            ui.interpretation =
+            "RSI indicates an overbought region. A correction is possible.";
+          }
+          else
+          {
+            ui.interpretation =
+            "RSI is neutral. No extreme momentum visible.";
+          }
+          
+          return ui;
+        };
+        
+        const auto& RSI_UI_Data = BuildRSI_UI();
+        {
+          KanVasX::ScopedColor rsiColor(ImGuiCol_PlotLines, RSI_UI_Data.color);
+
+          std::string rsiString = Utils::FormatDoubleToString(RSI_UI_Data.value);
+          rsiString += " : " + RSI_UI_Data.state;
+          rsiString += " : " + RSI_UI_Data.trend + " Trend";
+          
+          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22), rsiString, KanVasX::UI::AlignX::Center, {0, 0}, RSI_UI_Data.color);
+          
+          if (RSI_UI_Data.series.empty())
+          {
+            ImGui::Text("RSI data unavailable.");
+            return;
+          }
+          
+          std::vector<float> rsiFloat;
+          rsiFloat.reserve(RSI_UI_Data.series.size());
+          for (double v : RSI_UI_Data.series) rsiFloat.push_back(static_cast<float>(v));
+          
+          float rsiMin = 100.0f, rsiMax = 0.0f;
+          for (float v : rsiFloat)
+          {
+            rsiMin = std::min(rsiMin, v);
+            rsiMax = std::max(rsiMax, v);
+          }
+                    
+          // --- RSI Chart ---
+          ImGui::PushItemWidth(-1);
+          ImGui::PlotLines(
+                           "##RSIPlot",
+                           rsiFloat.data(),
+                           (int)rsiFloat.size(),
+                           0,
+                           nullptr,
+                           0.0f,
+                           100.0f,
+                           ImVec2(0, ImGui::GetContentRegionAvail().y)    // Width auto, height 150px
+                           );
+        }
+        
+      }
+      if (tab == TechnicalTab::Pivot)
+      {
+
       }
 
       ImGui::EndChild();
-    }
+    } // Technical Data
     
 //    static std::chrono::steady_clock::time_point s_lastAnalysis = std::chrono::steady_clock::now();
 //    auto now = std::chrono::steady_clock::now();
@@ -614,72 +830,6 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
 //    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
 //    KanVasX::UI::ShiftCursor({xOffset, 10.0f});
 
-//      // Summary
-//      if (tab == TechnicalTab::Summary)
-//      {
-//        float score = static_cast<float>(s_analyzerReport.recommendation.score); // 0-100
-//        
-//        // Determine color based on score
-//        ImU32 scoreColor;
-//        std::string scoreString = "Technically Neutral";
-//        
-//        if (score < 15)      { scoreString = "Technically Strong Bearish"; scoreColor = KanVasX::Color::Red; }
-//        else if (score < 30) { scoreString = "Technically Bearish"; scoreColor = KanVasX::Color::Orange; }
-//        else if (score < 60) { scoreString = "Technically Neutral"; scoreColor = KanVasX::Color::Yellow; }
-//        else if (score < 80) { scoreString = "Technically Bullish"; scoreColor = KanVasX::Color::Cyan; }
-//        else                 { scoreString = "Technically Strong Bullish"; scoreColor = KanVasX::Color::Green; }
-//        
-//        // Scoped color
-//        {
-//          KanVasX::ScopedStyle headerPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2{1.0f, 1.0f});
-//          KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
-//          // Convert score 0-100 to fraction 0.0-1.0
-//          
-//          // Print Score
-//          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), Utils::FormatDoubleToString(score), KanVasX::UI::AlignX::Left, {0, 0}, scoreColor);
-//          
-//          // Print /100
-//          static const std::string totalScoreString = "/100";
-//          ImGui::SameLine();
-//          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), totalScoreString, KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
-//          
-//          ImGui::SameLine();
-//          KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Large), scoreString, KanVasX::UI::AlignX::Right, {0, 5.0f}, scoreColor);
-//          
-//          float fraction = score / 100.0f;
-//          ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
-//        }
-//        
-//        float availX = ImGui::GetContentRegionAvail().x - 30.0f;
-//        float technicalDataSize = availX / 4;
-//        auto TechnicalData = [technicalDataSize](const std::string& title, const std::string& tooltipTag) {
-//          KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), KanVasX::Color::BackgroundDark, KanVasX::Color::TextBright, false, 0.0f, {technicalDataSize, 60});
-//          if (const auto& explainIt = s_analyzerReport.technicals.Explanations.find(tooltipTag); explainIt != s_analyzerReport.technicals.Explanations.end())
-//          {
-//            KanVasX::UI::Tooltip(explainIt->second);
-//          }
-//        };
-//        
-//        TechnicalData(std::string("RSI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.RSI), "RSI"); ImGui::SameLine();
-//        TechnicalData(std::string("MACD \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.MACD), "MACD"); ImGui::SameLine();
-//        TechnicalData(std::string("VWAP \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.VWAP), "VWAP"); ImGui::SameLine();
-//        TechnicalData(std::string("ATR \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.ATR), "ATR");
-//        
-//        TechnicalData(std::string("AwesomeOscillator \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.AwesomeOscillator), "AwesomeOscillator"); ImGui::SameLine();
-//        TechnicalData(std::string("StochasticRSI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.StochasticRSI), "StochasticRSI"); ImGui::SameLine();
-//        TechnicalData(std::string("ADX \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.ADX), "ADX"); ImGui::SameLine();
-//        TechnicalData(std::string("CCI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.CCI), "CCI");
-//        
-//        TechnicalData(std::string("OBV \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.OBV), "OBV"); ImGui::SameLine();
-//        TechnicalData(std::string("MFI \n") + Utils::FormatDoubleToString(s_analyzerReport.technicals.MFI), "MFI");
-//      }
-//      
-//      // EMA
-//      if (tab == TechnicalTab::EMA)
-//      {
-//        ShowMovingAvg(s_analyzerReport.technicals.EMA, " EMA");
-//      }
-//      
 //      // Pivot
 //      if (tab == TechnicalTab::Pivot)
 //      {
