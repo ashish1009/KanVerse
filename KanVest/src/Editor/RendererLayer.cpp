@@ -9,6 +9,8 @@
 
 #include "User/UserManager.hpp"
 
+#include "Stock/StockManager.hpp"
+
 #include "UI/KanVestPanel.hpp"
 
 namespace KanVest
@@ -139,13 +141,11 @@ namespace KanVest
     KanVasX::Widget::SetSettingIcon(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
     
     KanVest::UI::Panel::SetShadowTextureId(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
-    
-//    StockUI::Initialize(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
-    
+        
     // Login popup
     m_loginPopup.Set("KanVest Logic", true /* open flag */, 600, 410, true /* center */);
     
-//    StockManager::StartLiveUpdates(1);
+    StockManager::StartLiveUpdates(1);
   }
   
   void RendererLayer::OnDetach() noexcept
@@ -153,7 +153,7 @@ namespace KanVest
     IK_PROFILE();
     IK_LOG_WARN("RendererLayer", "Detaching '{0}' Layer from application", GetName());
     
-//    StockManager::StopLiveUpdates();
+    StockManager::StopLiveUpdates();
   }
   
   void RendererLayer::OnUpdate(const KanViz::TimeStep& ts)
