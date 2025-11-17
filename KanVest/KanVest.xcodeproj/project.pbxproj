@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B261077D2ECB4B6F006F954D /* StockAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B261077C2ECB4B6F006F954D /* StockAPI.cpp */; };
+		B26107822ECB4BB8006F954D /* APIProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26107812ECB4BB8006F954D /* APIProvider.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -36,6 +38,10 @@
 
 /* Begin PBXFileReference section */
 		B26107782ECB4ADD006F954D /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
+		B261077B2ECB4B6F006F954D /* StockAPI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockAPI.hpp; sourceTree = "<group>"; };
+		B261077C2ECB4B6F006F954D /* StockAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockAPI.cpp; sourceTree = "<group>"; };
+		B26107802ECB4BB8006F954D /* APIProvider.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = APIProvider.hpp; sourceTree = "<group>"; };
+		B26107812ECB4BB8006F954D /* APIProvider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = APIProvider.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -82,6 +88,7 @@
 			isa = PBXGroup;
 			children = (
 				B26107782ECB4ADD006F954D /* StockData.hpp */,
+				B261077B2ECB4B6F006F954D /* StockAPI.hpp */,
 			);
 			path = Stock;
 			sourceTree = "<group>";
@@ -89,8 +96,25 @@
 		B26107772ECB4AA1006F954D /* Stock */ = {
 			isa = PBXGroup;
 			children = (
+				B261077C2ECB4B6F006F954D /* StockAPI.cpp */,
 			);
 			path = Stock;
+			sourceTree = "<group>";
+		};
+		B261077E2ECB4B9A006F954D /* URL_API */ = {
+			isa = PBXGroup;
+			children = (
+				B26107802ECB4BB8006F954D /* APIProvider.hpp */,
+			);
+			path = URL_API;
+			sourceTree = "<group>";
+		};
+		B261077F2ECB4BA4006F954D /* URL_API */ = {
+			isa = PBXGroup;
+			children = (
+				B26107812ECB4BB8006F954D /* APIProvider.cpp */,
+			);
+			path = URL_API;
 			sourceTree = "<group>";
 		};
 		B289E6192EB0E01600937D0B = {
@@ -122,6 +146,7 @@
 				B2B465DA2ECB1A8C00E01770 /* User */,
 				B2B465E22ECB1AB800E01770 /* Portfolio */,
 				B26107762ECB4A98006F954D /* Stock */,
+				B261077E2ECB4B9A006F954D /* URL_API */,
 				B289EE3C2EB3ACDD00937D0B /* UI */,
 			);
 			path = include;
@@ -135,6 +160,7 @@
 				B2B465D52ECB1A7D00E01770 /* User */,
 				B2B465DD2ECB1AAF00E01770 /* Portfolio */,
 				B26107772ECB4AA1006F954D /* Stock */,
+				B261077F2ECB4BA4006F954D /* URL_API */,
 				B289EE3D2EB3ACE300937D0B /* UI */,
 			);
 			path = src;
@@ -308,12 +334,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
+				B26107822ECB4BB8006F954D /* APIProvider.cpp in Sources */,
 				B2B465E52ECB285600E01770 /* KanVestPanel.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B2B465D62ECB1A7D00E01770 /* User.cpp in Sources */,
 				B2B465D72ECB1A7D00E01770 /* UserManager.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
 				B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */,
+				B261077D2ECB4B6F006F954D /* StockAPI.cpp in Sources */,
 				B2B465DE2ECB1AAF00E01770 /* Portfolio.cpp in Sources */,
 				B2B465DF2ECB1AAF00E01770 /* PortfolioController.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
