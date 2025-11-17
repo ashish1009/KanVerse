@@ -22,7 +22,9 @@ namespace KanVest::UI
     static void ShowPortfolioChartTable();
     
     static void ShowPortfolio();
+    static void ShowChart();
     
+    inline static bool s_showCandle = true;
     inline static ImTextureID s_shadowTextureID = 0;
   };
 } // namespace KanVest

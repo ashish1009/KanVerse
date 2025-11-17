@@ -98,7 +98,7 @@ namespace KanVasX
     TableHeaderBg         = Header;
     TableBorderLight      = Separator;
     TableBorderStrong     = Alpha(Separator, 0.5f);
-    TableRowBgAlt         = Alpha(BackgroundDark, 0.6f);
+    TableRowBgAlt         = Alpha(Background, 0.6f);
     
     // Button
     Button                = Saturation(Highlight, 0.4f);
