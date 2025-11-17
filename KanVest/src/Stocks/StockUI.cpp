@@ -17,6 +17,7 @@
 #include "Stocks/Analyzer/Indicators/StochasticCalculator.hpp"
 #include "Stocks/Analyzer/Indicators/Bolinger.hpp"
 #include "Stocks/Analyzer/Indicators/ADXCalculator.hpp"
+#include "Stocks/Analyzer/Indicators/MFICalculator.hpp"
 
 namespace KanVest
 {
@@ -413,7 +414,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       KanVasX::UI::Text(font, "Technical Analysis", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
       ImGui::Separator();
 
-      enum class TechnicalTab {Summary, SMA, EMA, RSI, MACD, ADX, Stochastic, BB, Pivot};
+      enum class TechnicalTab {Summary, SMA, EMA, RSI, MFI, MACD, ADX, Stochastic, BB, Pivot};
       static TechnicalTab tab = TechnicalTab::Summary;
       float availX = ImGui::GetContentRegionAvail().x - 20.0f;
       float technicalButtonSize = availX / 7;
@@ -432,6 +433,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       TechnicalButton("SMA", TechnicalTab::SMA); ImGui::SameLine();
       TechnicalButton("EMA", TechnicalTab::EMA); ImGui::SameLine();
       TechnicalButton("RSI", TechnicalTab::RSI); ImGui::SameLine();
+      TechnicalButton("MFI", TechnicalTab::MFI); ImGui::SameLine();
       TechnicalButton("MACD", TechnicalTab::MACD); ImGui::SameLine();
       TechnicalButton("ADX", TechnicalTab::ADX); ImGui::SameLine();
       TechnicalButton("Stochastic", TechnicalTab::Stochastic); ImGui::SameLine();
@@ -1368,6 +1370,118 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
                          100.0f,
                          ImVec2(0, 80));
         ImGui::PopStyleColor();
+
+      }
+      
+      if (tab == TechnicalTab::MFI)
+      {
+        struct MFI_UI
+        {
+          double value = 0.0;
+          std::string state;         // Oversold / Neutral / Overbought
+          std::string trend;         // Rising / Falling / Flat
+          std::vector<std::string> signals;
+          std::string interpretation;
+          ImU32 color;               // Cyan / Yellow / Red
+          std::vector<double> series;
+        };
+
+        const MFIResult& mfi = MFICalculator::Compute(StockManager::GetSelectedStockData());
+        auto const& BuildMFI_UI = [mfi]()
+        {
+          MFI_UI ui;
+          ui.series = mfi.series;
+          
+          if (!mfi.valid)
+          {
+            ui.state = "Not enough data";
+            ui.color = KanVasX::Color::TextMuted;
+            ui.interpretation = "Insufficient history to compute MFI.";
+            return ui;
+          }
+          
+          ui.value = mfi.last;
+          
+          // --- Determine State ---
+          if (ui.value < 20)
+          {
+            ui.state = "Oversold";
+            ui.color = KanVasX::Color::Cyan;
+          }
+          else if (ui.value > 80)
+          {
+            ui.state = "Overbought";
+            ui.color = KanVasX::Color::Red;
+          }
+          else
+          {
+            ui.state = "Neutral";
+            ui.color = KanVasX::Color::Yellow;
+          }
+          
+          // --- Trend ---
+          if (ui.series.size() > 1)
+          {
+            double prev = ui.series[ui.series.size() - 2];
+            if (ui.value > prev) ui.trend = "Rising";
+            else if (ui.value < prev) ui.trend = "Falling";
+            else ui.trend = "Flat";
+          }
+          
+          // --- Signals ---
+          if (ui.state == "Oversold") ui.signals.push_back("Strong accumulation zone");
+          if (ui.state == "Overbought") ui.signals.push_back("Distribution zone, correction likely");
+          
+          if (ui.trend == "Rising") ui.signals.push_back("Momentum increasing");
+          if (ui.trend == "Falling") ui.signals.push_back("Momentum decreasing");
+          
+          // --- Interpretation ---
+          if (ui.state == "Oversold")
+            ui.interpretation = "MFI indicates oversold conditions, possible upward reversal.";
+          else if (ui.state == "Overbought")
+            ui.interpretation = "MFI indicates overbought region, correction possible.";
+          else
+            ui.interpretation = "MFI remains neutral with no extreme money flow pressure.";
+          
+          return ui;
+        };
+        
+        auto ToFloat = [&](const std::vector<double>& src)
+        {
+          std::vector<float> out;
+          out.reserve(src.size());
+          for (double v : src) out.push_back((float)v);
+          return out;
+        };
+        
+        const auto& MFI_UI_Data = BuildMFI_UI();
+
+        {
+          KanVasX::ScopedColor mfiColor(ImGuiCol_Text, MFI_UI_Data.color);
+          
+          std::string mfiStr = Utils::FormatDoubleToString(MFI_UI_Data.value);
+          mfiStr += " : " + MFI_UI_Data.state;
+          mfiStr += " : " + MFI_UI_Data.trend + " Trend";
+          
+          KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22),
+                            mfiStr,
+                            KanVasX::UI::AlignX::Center,
+                            {0,0},
+                            MFI_UI_Data.color);
+        }
+
+        auto mfiFloat = ToFloat(MFI_UI_Data.series);
+        
+        ImGui::PlotLines(
+                         "##MFIPlot",
+                         mfiFloat.data(),
+                         (int)mfiFloat.size(),
+                         0,
+                         nullptr,
+                         0.0f,
+                         100.0f,
+                         ImVec2(0, 150)
+                         );
 
       }
 
