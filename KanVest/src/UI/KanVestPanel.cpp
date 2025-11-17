@@ -35,11 +35,22 @@ namespace KanVest::UI
       
       return filtered;
     }
+    
+    void ConvertUpper(char* string)
+    {
+      for (char* p = string; *p; ++p)
+        *p = static_cast<char>(toupper(*p));
+    }
+
   } // namespace Utils
   
   void Panel::SetShadowTextureId(ImTextureID shadowTextureID)
   {
     s_shadowTextureID = shadowTextureID;
+  }
+  void Panel::SetReloadTextureId(ImTextureID reloadIconID)
+  {
+    s_reloadIconID = reloadIconID;
   }
 
   void Panel::Show()
@@ -95,6 +106,7 @@ namespace KanVest::UI
         ImGui::TableSetColumnIndex(0);
         if (ImGui::BeginChild("Stock-Data-Cell", ImVec2(firstColWidth, tableHeight))) // fixed height
         {
+          ShowStockData();
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
@@ -714,5 +726,40 @@ namespace KanVest::UI
         ImGui::SameLine();
       }
     }
+  }
+  
+  void Panel::ShowStockData()
+  {
+    IK_PERFORMANCE_FUNC("Panel::ShowStockData");
+    ShowSearchBar();
+    ShowStockBasicData();
+  }
+  
+  void Panel::ShowSearchBar()
+  {
+    IK_PERFORMANCE_FUNC("Panel::ShowSearchBar");
+    const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40.0f);
+    if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX - 50.0f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
+    {
+      Utils::ConvertUpper(s_searchedString);
+    }
+    
+    ImGui::SameLine();
+    float iconSize = ImGui::GetItemRectSize().y - 12;
+    if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {0.0, 6.0}) || ImGui::IsKeyDown(ImGuiKey_Enter))
+    {
+      AddStockInManager(s_searchedString);
+    }
+  }
+  void Panel::ShowStockBasicData()
+  {
+    IK_PERFORMANCE_FUNC("Panel::ShowStockBasicData");
+  }
+
+  void Panel::AddStockInManager(const std::string& symbol)
+  {
+    StockManager::AddStock(symbol);
+    StockManager::SetSelectedStockSymbol(symbol);
   }
 } // namespace KanVest
