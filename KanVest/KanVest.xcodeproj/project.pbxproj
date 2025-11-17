@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B261077D2ECB4B6F006F954D /* StockAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B261077C2ECB4B6F006F954D /* StockAPI.cpp */; };
 		B26107822ECB4BB8006F954D /* APIProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26107812ECB4BB8006F954D /* APIProvider.cpp */; };
+		B26107852ECB4C77006F954D /* StockParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26107842ECB4C77006F954D /* StockParser.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -42,6 +43,8 @@
 		B261077C2ECB4B6F006F954D /* StockAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockAPI.cpp; sourceTree = "<group>"; };
 		B26107802ECB4BB8006F954D /* APIProvider.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = APIProvider.hpp; sourceTree = "<group>"; };
 		B26107812ECB4BB8006F954D /* APIProvider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = APIProvider.cpp; sourceTree = "<group>"; };
+		B26107832ECB4C77006F954D /* StockParser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockParser.hpp; sourceTree = "<group>"; };
+		B26107842ECB4C77006F954D /* StockParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockParser.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -89,6 +92,7 @@
 			children = (
 				B26107782ECB4ADD006F954D /* StockData.hpp */,
 				B261077B2ECB4B6F006F954D /* StockAPI.hpp */,
+				B26107832ECB4C77006F954D /* StockParser.hpp */,
 			);
 			path = Stock;
 			sourceTree = "<group>";
@@ -97,6 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				B261077C2ECB4B6F006F954D /* StockAPI.cpp */,
+				B26107842ECB4C77006F954D /* StockParser.cpp */,
 			);
 			path = Stock;
 			sourceTree = "<group>";
@@ -335,6 +340,7 @@
 			files = (
 				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
 				B26107822ECB4BB8006F954D /* APIProvider.cpp in Sources */,
+				B26107852ECB4C77006F954D /* StockParser.cpp in Sources */,
 				B2B465E52ECB285600E01770 /* KanVestPanel.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B2B465D62ECB1A7D00E01770 /* User.cpp in Sources */,
