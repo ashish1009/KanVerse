@@ -16,6 +16,7 @@
 #include "Stocks/Analyzer/Indicators/MACDCalculator.hpp"
 #include "Stocks/Analyzer/Indicators/StochasticCalculator.hpp"
 #include "Stocks/Analyzer/Indicators/Bolinger.hpp"
+#include "Stocks/Analyzer/Indicators/ADXCalculator.hpp"
 
 namespace KanVest
 {
@@ -412,7 +413,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       KanVasX::UI::Text(font, "Technical Analysis", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::White);
       ImGui::Separator();
 
-      enum class TechnicalTab {Summary, SMA, EMA, RSI, MACD, Stochastic, BB, Pivot};
+      enum class TechnicalTab {Summary, SMA, EMA, RSI, MACD, ADX, Stochastic, BB, Pivot};
       static TechnicalTab tab = TechnicalTab::Summary;
       float availX = ImGui::GetContentRegionAvail().x - 20.0f;
       float technicalButtonSize = availX / 7;
@@ -432,6 +433,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       TechnicalButton("EMA", TechnicalTab::EMA); ImGui::SameLine();
       TechnicalButton("RSI", TechnicalTab::RSI); ImGui::SameLine();
       TechnicalButton("MACD", TechnicalTab::MACD); ImGui::SameLine();
+      TechnicalButton("ADX", TechnicalTab::ADX); ImGui::SameLine();
       TechnicalButton("Stochastic", TechnicalTab::Stochastic); ImGui::SameLine();
       TechnicalButton("BB", TechnicalTab::BB); ImGui::SameLine();
       TechnicalButton("Pivot", TechnicalTab::Pivot);
@@ -1226,6 +1228,146 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
                            FLT_MAX,
                            ImVec2(0, 80));
         }
+
+      }
+      
+      if (tab == TechnicalTab::ADX)
+      {
+        struct ADX_UI
+        {
+          double adxValue = 0.0;               // Latest ADX
+          double diPlus = 0.0;                 // Latest DI+
+          double diMinus = 0.0;                // Latest DI-
+          std::string trendStrength;           // Weak / Moderate / Strong
+          std::string direction;               // Bullish / Bearish / Neutral
+          std::vector<std::string> signals;    // Recommendations
+          std::string interpretation;          // Human readable
+          ImU32 color;                         // Highlight color
+          std::vector<double> adxSeries;
+          std::vector<double> diPlusSeries;
+          std::vector<double> diMinusSeries;
+        };
+
+        const auto& adxData = ADXCalculator::Compute(StockManager::GetSelectedStockData());
+        auto BuildADX_UI = [&]()
+        {
+          ADX_UI ui;
+          
+          if (adxData.adx.empty())
+          {
+            ui.trendStrength = "Not enough data";
+            ui.color = KanVasX::Color::TextMuted;
+            return ui;
+          }
+          
+          // Extract latest values
+          ui.adxSeries     = adxData.adx;
+          ui.diPlusSeries  = adxData.plusDI;
+          ui.diMinusSeries = adxData.minusDI;
+          
+          ui.adxValue  = ui.adxSeries.back();
+          ui.diPlus    = ui.diPlusSeries.back();
+          ui.diMinus   = ui.diMinusSeries.back();
+          
+          // --- Trend Strength ---
+          if (ui.adxValue < 20)
+          {
+            ui.trendStrength = "Weak Trend";
+            ui.color = KanVasX::Color::Yellow;
+          }
+          else if (ui.adxValue < 30)
+          {
+            ui.trendStrength = "Moderate Trend";
+            ui.color = KanVasX::Color::Cyan;
+          }
+          else
+          {
+            ui.trendStrength = "Strong Trend";
+            ui.color = KanVasX::Color::Green;
+          }
+          
+          // --- Direction ---
+          if (ui.diPlus > ui.diMinus)
+            ui.direction = "Bullish";
+          else if (ui.diPlus < ui.diMinus)
+            ui.direction = "Bearish";
+          else
+            ui.direction = "Neutral";
+          
+          // --- Signals ---
+          if (ui.adxValue > 25 && ui.diPlus > ui.diMinus)
+            ui.signals.push_back("Strong bullish momentum");
+          
+          if (ui.adxValue > 25 && ui.diMinus > ui.diPlus)
+            ui.signals.push_back("Strong bearish momentum");
+          
+          if (ui.adxValue < 20)
+            ui.signals.push_back("Avoid trading — low trend strength");
+          
+          // --- Interpretation ---
+          ui.interpretation = ui.trendStrength + " : " + ui.direction;
+          
+          return ui;
+        };
+
+        auto ToFloat = [](const std::vector<double>& v)
+        {
+          std::vector<float> out;
+          out.reserve(v.size());
+          for (double d : v) out.push_back((float)d);
+          return out;
+        };
+
+        const ADX_UI adxUI = BuildADX_UI();
+        
+        std::string header =
+        "ADX: " + std::to_string(adxUI.adxValue) +
+        " | Trend: " + adxUI.trendStrength +
+        " | " + adxUI.direction;
+        
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22),
+                          header,
+                          KanVasX::UI::AlignX::Center,
+                          {0,0},
+                          adxUI.color);
+
+        auto adxF     = ToFloat(adxUI.adxSeries);
+        auto diPlusF  = ToFloat(adxUI.diPlusSeries);
+        auto diMinusF = ToFloat(adxUI.diMinusSeries);
+        
+        ImGui::Text("ADX Line");
+        ImGui::PlotLines("##ADXLine",
+                         adxF.data(),
+                         (int)adxF.size(),
+                         0,
+                         nullptr,
+                         0.0f,
+                         60.0f,
+                         ImVec2(0, 120));
+        
+        ImGui::Text("DI+");
+        ImGui::PushStyleColor(ImGuiCol_PlotLines, IM_COL32(0,255,0,255));
+        ImGui::PlotLines("##DIPlus",
+                         diPlusF.data(),
+                         (int)diPlusF.size(),
+                         0,
+                         nullptr,
+                         0.0f,
+                         100.0f,
+                         ImVec2(0, 80));
+        ImGui::PopStyleColor();
+        
+        ImGui::Text("DI-");
+        ImGui::PushStyleColor(ImGuiCol_PlotLines, IM_COL32(255,0,0,255));
+        ImGui::PlotLines("##DIMinus",
+                         diMinusF.data(),
+                         (int)diMinusF.size(),
+                         0,
+                         nullptr,
+                         0.0f,
+                         100.0f,
+                         ImVec2(0, 80));
+        ImGui::PopStyleColor();
 
       }
 
