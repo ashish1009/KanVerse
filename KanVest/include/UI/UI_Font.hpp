@@ -23,6 +23,7 @@ namespace KanVest::UI
     Header_22, Header_24, Header_26, Header_28, Header_30,
     Header_32, Header_34, Header_36, Header_38, Header_40,
     Header_42, Header_44, Header_46, Header_48, Header_50,
+    Header_52, Header_54, Header_56, Header_58, Header_60,
     Max // Should be at last for loop in class
   };
   

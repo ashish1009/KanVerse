@@ -131,6 +131,11 @@ namespace KanVest
       {UI::FontType::Header_46,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         46}},
       {UI::FontType::Header_48,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         48}},
       {UI::FontType::Header_50,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         50}},
+      {UI::FontType::Header_52,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         52}},
+      {UI::FontType::Header_54,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         54}},
+      {UI::FontType::Header_56,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         56}},
+      {UI::FontType::Header_58,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         58}},
+      {UI::FontType::Header_60,               {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         60}},
     });
     
     KanVasX::Color::Initialize();

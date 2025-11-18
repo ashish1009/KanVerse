@@ -15,8 +15,10 @@
 
 namespace KanVest::UI
 {
+#define Font(font) KanVest::UI::Font::Get(KanVest::UI::FontType::font)
+  
 #define KanVest_Text(font, string, offset, textColor) \
-KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, KanVasX::UI::AlignX::Left, offset, textColor);
+KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textColor);
 
   namespace Utils
   {
@@ -142,8 +144,9 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       // Column 2 Analyzer
       {
         ImGui::TableSetColumnIndex(1);
-        if (ImGui::BeginChild("Stock-Analyzer-Cell", ImVec2(secondColWidth, tableHeight))) // fixed height
+        if (ImGui::BeginChild("Stock-Technical-Cell", ImVec2(secondColWidth, tableHeight))) // fixed height
         {
+          ShowStockTechnicalData();
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
@@ -265,7 +268,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       
       // ---- Header Row ----
       {
-        KanVasX::ScopedFont headerfont(UI::Font::Get(UI::FontType::Large));
+        KanVasX::ScopedFont headerfont(Font(Large));
         ImGui::TableSetupScrollFreeze(ImGui::TableGetColumnCount(), 1);
         ImGui::TableNextRow(ImGuiTableRowFlags_Headers, 22.0f);
         
@@ -503,7 +506,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
       }
       
       KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 30);
-      KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22), "Edit Holding", KanVasX::UI::AlignX::Center);
+      KanVasX::UI::Text(Font(Header_22), "Edit Holding", KanVasX::UI::AlignX::Center);
       KanVasX::UI::ShiftCursorY(10.0f);
       
       const char* visions[] = {"Long Term", "Mid Term", "Short Term"};
@@ -553,7 +556,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     
     if (history.empty())
     {
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_22), "No Chart Available", KanVasX::UI::AlignX::Left);
+      KanVasX::UI::Text(Font(Header_22), "No Chart Available", KanVasX::UI::AlignX::Left);
       return;
     }
     
@@ -767,7 +770,7 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     IK_PERFORMANCE_FUNC("Panel::ShowSearchBar");
     const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
     KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40.0f);
-    if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX - 50.0f, "Enter Symbol ...", UI::Font::Get(UI::FontType::Large), true))
+    if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX - 50.0f, "Enter Symbol ...", Font(Large), true))
     {
       Utils::ConvertUpper(s_searchedString);
     }
@@ -794,9 +797,9 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
     std::string longNameName = stockData.longName != "" ? stockData.longName : stockData.shortName;
     
     static glm::vec2 offset = {20.0f, 10.0f};
-    KanVest_Text(Header_36, name, offset, KanVasX::Color::TextBright);
-    KanVest_Text(Header_24, longNameName, offset, KanVasX::Color::TextBright);
-    KanVest_Text(Header_48, Utils::FormatDoubleToString(stockData.livePrice), offset, KanVasX::Color::TextBright);
+    KanVest_Text(Header_46, name, offset, KanVasX::Color::TextBright);
+    KanVest_Text(Header_34, longNameName, offset, KanVasX::Color::TextBright);
+    KanVest_Text(Header_58, Utils::FormatDoubleToString(stockData.livePrice), offset, KanVasX::Color::TextBright);
 
     // Change
     std::string change = (stockData.change > 0 ? "+" : "") +
@@ -835,5 +838,13 @@ KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::font), string, K
   {
     StockManager::AddStock(symbol);
     StockManager::SetSelectedStockSymbol(symbol);
+  }
+  
+  void Panel::ShowStockTechnicalData()
+  {
+    IK_PERFORMANCE_FUNC("Panel::ShowStockTechnicalData");
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40.0f);
+    
+    KanVasX::UI::Text(Font(Header_26), "Technicals", KanVasX::UI::AlignX::Center, {0.0f, 5.0f});
   }
 } // namespace KanVest
