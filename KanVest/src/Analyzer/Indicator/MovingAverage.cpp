@@ -9,17 +9,95 @@
 
 namespace KanVest
 {
-  // --- Utility: get applicable MA periods based on chart range ---
   static std::vector<int> GetActivePeriods(const std::string& chartRange)
   {
-    if (chartRange == "1mo")
-      return {5, 10, 20};
-    if (chartRange == "3mo")
-      return {5, 10, 20, 30, 50};
+    if (chartRange == "1mo") return {5, 10, 20};
+    if (chartRange == "3mo") return {5, 10, 20, 30, 50};
     return {5, 10, 20, 30, 50, 100, 150, 200};
   }
   
-  // --- Optimized SMA computation (Angel One aligned) ---
+  // -------------------------------------------------------------
+  // Convert raw candles → daily closes based on UNIX timestamps
+  // -------------------------------------------------------------
+  std::vector<double> MovingAverages::BuildDailyCloses(const StockData& data)
+  {
+    if (!data.IsValid())
+      return {};
+    
+    std::map<int64_t, double> dailyMap;    // key = YYYYMMDD, value = close
+    
+    for (const auto& p : data.history)
+    {
+      // Convert timestamp → date bucket (UTC)
+      time_t t = p.timestamp;
+      tm* g = gmtime(&t);
+      
+      int y = g->tm_year + 1900;
+      int m = g->tm_mon + 1;
+      int d = g->tm_mday;
+      
+      int64_t dateKey = y * 10000 + m * 100 + d;
+      
+      // Use the latest close for each date
+      dailyMap[dateKey] = p.close;
+    }
+    
+    // Now build a continuous daily sequence (fill gaps)
+    std::vector<double> daily;
+    
+    auto it = dailyMap.begin();
+    if (it == dailyMap.end()) return daily;
+    
+    int64_t prevDate = it->first;
+    double prevClose = it->second;
+    
+    daily.push_back(prevClose);
+    ++it;
+    
+    for (; it != dailyMap.end(); ++it)
+    {
+      int64_t curDate = it->first;
+      double curClose = it->second;
+      
+      // Fill date gaps with previous close (forward fill)
+      int y1 = prevDate / 10000;
+      int m1 = (prevDate % 10000) / 100;
+      int d1 = prevDate % 100;
+      
+      int y2 = curDate / 10000;
+      int m2 = (curDate % 10000) / 100;
+      int d2 = curDate % 100;
+      
+      // Convert to time_t for date increment
+      tm tm1 = {};
+      tm1.tm_year = y1 - 1900;
+      tm1.tm_mon  = m1 - 1;
+      tm1.tm_mday = d1;
+      time_t t1 = timegm(&tm1);
+      
+      tm tm2 = {};
+      tm2.tm_year = y2 - 1900;
+      tm2.tm_mon  = m2 - 1;
+      tm2.tm_mday = d2;
+      time_t t2 = timegm(&tm2);
+      
+      // Insert missing days
+      for (time_t t = t1 + 86400; t < t2; t += 86400)
+        daily.push_back(prevClose);
+      
+      // Insert current close
+      daily.push_back(curClose);
+      
+      prevDate = curDate;
+      prevClose = curClose;
+    }
+    
+    return daily;
+  }
+  
+  // -------------------------------------------------------------
+  // SMA
+  // -------------------------------------------------------------
   std::vector<double> MovingAverages::ComputeSMA(const std::vector<double>& closes, int period)
   {
     std::vector<double> sma(closes.size(), 0.0);
@@ -38,48 +116,48 @@ namespace KanVest
     return sma;
   }
   
-  // --- Optimized EMA computation (Angel One aligned) ---
+  // -------------------------------------------------------------
+  // EMA
+  // -------------------------------------------------------------
   std::vector<double> MovingAverages::ComputeEMA(const std::vector<double>& closes, int period)
   {
     std::vector<double> ema(closes.size(), 0.0);
-    if (closes.empty())
-      return ema;
+    if (closes.empty()) return ema;
     
-    double multiplier = 2.0 / (period + 1.0);
-    ema[0] = closes[0];  // Angel One starts EMA with first close
+    double mult = 2.0 / (period + 1.0);
+    ema[0] = closes[0];
     
     for (size_t i = 1; i < closes.size(); ++i)
-    {
-      ema[i] = (closes[i] - ema[i - 1]) * multiplier + ema[i - 1];
-    }
+      ema[i] = (closes[i] - ema[i - 1]) * mult + ema[i - 1];
     
     return ema;
   }
   
+  // -------------------------------------------------------------
+  // Compute MA for DAILY-NORMALIZED data (interval independent)
+  // -------------------------------------------------------------
   MAResult MovingAverages::Compute(const StockData& data, const std::string& chartRange)
   {
     MAResult result;
-    if (!data.IsValid() || data.history.size() < 5)
+    
+    if (!data.IsValid())
       return result;
     
-    std::vector<double> closes;
-    closes.reserve(data.history.size());
-    for (auto& p : data.history)
-      closes.push_back(p.close);
+    // FIX: convert ANY raw history (1W,1D,1h..)-> daily
+    auto dailyCloses = BuildDailyCloses(data);
+    if (dailyCloses.size() < 5)
+      return result;
     
     auto periods = GetActivePeriods(chartRange);
     
     for (int p : periods)
     {
-      auto sma = ComputeSMA(closes, p);
-      auto ema = ComputeEMA(closes, p);
+      auto sma = ComputeSMA(dailyCloses, p);
+      auto ema = ComputeEMA(dailyCloses, p);
       
-      if (!sma.empty())
-        result.smaValues[p] = sma.back();  // latest aligned value
-      if (!ema.empty())
-        result.emaValues[p] = ema.back();
+      result.smaValues[p] = sma.back();
+      result.emaValues[p] = ema.back();
     }
-    
     return result;
   }
 } // namespace KanVest

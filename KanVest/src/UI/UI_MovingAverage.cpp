@@ -37,12 +37,12 @@ namespace KanVest
     if (bullish >= bearish)
     {
       std::string smaSummary = stockData.shortName + " is trading above " + std::to_string(bullish) + " out of " + std::to_string(total) + maString + "s";
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::Cyan);
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::Cyan);
     }
     else
     {
       std::string smaSummary = stockData.shortName + " is trading below " + std::to_string(bearish) + " out of " + std::to_string(total) + maString + "s";
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::Red);
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::Red);
     }
     
     {
@@ -54,7 +54,7 @@ namespace KanVest
     }
     
     std::string smaSummary = "If current price is greater than SMA, trend is bullish";
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Small), smaSummary, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::White);
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Small), smaSummary, KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::White);
     
     auto ShowSma = [stockData](int period, double sma) {
       if (sma > 0)
