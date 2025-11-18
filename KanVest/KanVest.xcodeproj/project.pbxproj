@@ -19,6 +19,7 @@
 		B261079E2ECC0675006F954D /* MFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B261079D2ECC0675006F954D /* MFI.cpp */; };
 		B26107A12ECC06C1006F954D /* Stochastic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26107A02ECC06C1006F954D /* Stochastic.cpp */; };
 		B26107A92ECC0736006F954D /* CandleUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26107A82ECC0736006F954D /* CandleUtils.cpp */; };
+		B26107AC2ECC076D006F954D /* CandleDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26107AB2ECC076D006F954D /* CandleDetector.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -73,6 +74,8 @@
 		B26107A42ECC070C006F954D /* CandleData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CandleData.hpp; sourceTree = "<group>"; };
 		B26107A72ECC0736006F954D /* CandleUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CandleUtils.hpp; sourceTree = "<group>"; };
 		B26107A82ECC0736006F954D /* CandleUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CandleUtils.cpp; sourceTree = "<group>"; };
+		B26107AA2ECC076D006F954D /* CandleDetector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CandleDetector.hpp; sourceTree = "<group>"; };
+		B26107AB2ECC076D006F954D /* CandleDetector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CandleDetector.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -202,6 +205,7 @@
 			isa = PBXGroup;
 			children = (
 				B26107A82ECC0736006F954D /* CandleUtils.cpp */,
+				B26107AB2ECC076D006F954D /* CandleDetector.cpp */,
 			);
 			path = Candle;
 			sourceTree = "<group>";
@@ -211,6 +215,7 @@
 			children = (
 				B26107A42ECC070C006F954D /* CandleData.hpp */,
 				B26107A72ECC0736006F954D /* CandleUtils.hpp */,
+				B26107AA2ECC076D006F954D /* CandleDetector.hpp */,
 			);
 			path = Candle;
 			sourceTree = "<group>";
@@ -443,6 +448,7 @@
 				B2B465D62ECB1A7D00E01770 /* User.cpp in Sources */,
 				B2B465D72ECB1A7D00E01770 /* UserManager.cpp in Sources */,
 				B261079B2ECC0643006F954D /* Bolinger.cpp in Sources */,
+				B26107AC2ECC076D006F954D /* CandleDetector.cpp in Sources */,
 				B26107A92ECC0736006F954D /* CandleUtils.cpp in Sources */,
 				B26107952ECC05D1006F954D /* MACD.cpp in Sources */,
 				B26107982ECC0614006F954D /* ADX.cpp in Sources */,
