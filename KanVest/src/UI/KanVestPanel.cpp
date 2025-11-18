@@ -13,6 +13,8 @@
 
 #include "Portfolio/PortfolioController.hpp"
 
+#include "UI/UI_MovingAverage.hpp"
+
 namespace KanVest::UI
 {
 #define Font(font) KanVest::UI::Font::Get(KanVest::UI::FontType::font)
@@ -699,14 +701,17 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
         std::strftime(dateTimeBuf, sizeof(dateTimeBuf), "%Y-%m-%d %H:%M", &tm);
         
         // Draw tooltip near the cursor
-        ImGui::BeginTooltip();
-        ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "%s", dateTimeBuf);
-        ImGui::Separator();
-        ImGui::Text("Open : %.2f", p.open);
-        ImGui::Text("High : %.2f", p.high);
-        ImGui::Text("Low  : %.2f", p.low);
-        ImGui::Text("Close: %.2f", p.close);
-        ImGui::EndTooltip();
+        {
+          KanVasX::ScopedFont formattedText(Font(FixedWidthHeader_16));
+          ImGui::BeginTooltip();
+          ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "%s", dateTimeBuf);
+          ImGui::Separator();
+          ImGui::Text("Open : %.2f", p.open);
+          ImGui::Text("High : %.2f", p.high);
+          ImGui::Text("Low  : %.2f", p.low);
+          ImGui::Text("Close: %.2f", p.close);
+          ImGui::EndTooltip();
+        }
       }
       
       ImPlot::EndPlot();
@@ -846,5 +851,64 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
     KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40.0f);
     
     KanVasX::UI::Text(Font(Header_26), "Technicals", KanVasX::UI::AlignX::Center, {0.0f, 5.0f});
+    
+    enum class TechnicalTab {SMA, EMA, RSI, MACD, ADX, MFI, Stochastic, BB, Pivot};
+    static TechnicalTab tab = TechnicalTab::SMA;
+
+    float availX = ImGui::GetContentRegionAvail().x;
+    float technicalButtonSize = availX * 0.096f;
+    
+    auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab)
+    {
+      if (KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Medium),
+                                  tab == checkerTtab ? KanVasX::Color::ButtonActive : KanVasX::Color::Background,
+                                  KanVasX::Color::TextBright, false, 5.0f, {technicalButtonSize, 30}))
+      {
+        tab = checkerTtab;
+      }
+      KanVasX::UI::DrawItemActivityOutline();
+    };
+
+    KanVasX::UI::ShiftCursor({10.0f, 10.0f});
+    TechnicalButton("SMA", TechnicalTab::SMA); ImGui::SameLine();
+    TechnicalButton("EMA", TechnicalTab::EMA); ImGui::SameLine();
+    TechnicalButton("RSI", TechnicalTab::RSI); ImGui::SameLine();
+    TechnicalButton("MFI", TechnicalTab::MFI); ImGui::SameLine();
+    TechnicalButton("MACD", TechnicalTab::MACD); ImGui::SameLine();
+    TechnicalButton("ADX", TechnicalTab::ADX); ImGui::SameLine();
+    TechnicalButton("Stochastic", TechnicalTab::Stochastic); ImGui::SameLine();
+    TechnicalButton("BB", TechnicalTab::BB); ImGui::SameLine();
+    TechnicalButton("Pivot", TechnicalTab::Pivot);
+    ImGui::Separator();
+    
+    if (tab == TechnicalTab::SMA)
+    {
+      UI_MovingAverage::ShowSMA(StockManager::GetSelectedStockData(), StockManager::GetCurrentRange());
+    }
+    else if (tab == TechnicalTab::EMA)
+    {
+      UI_MovingAverage::ShowEMA(StockManager::GetSelectedStockData(), StockManager::GetCurrentRange());
+    }
+    else if (tab == TechnicalTab::RSI)
+    {
+    }
+    else if (tab == TechnicalTab::MFI)
+    {
+    }
+    else if (tab == TechnicalTab::MACD)
+    {
+    }
+    else if (tab == TechnicalTab::ADX)
+    {
+    }
+    else if (tab == TechnicalTab::Stochastic)
+    {
+    }
+    else if (tab == TechnicalTab::BB)
+    {
+    }
+    else if (tab == TechnicalTab::Pivot)
+    {
+    }
   }
 } // namespace KanVest

@@ -34,7 +34,7 @@ namespace KanVest
   void SupportResistance::Compute(const StockData& data, int pivotRange, double clusterTolerance )
   {
     const auto& candles = data.history;
-    int size = candles.size();
+    int size = (int)candles.size();
     
     if (size < pivotRange * 2 + 1)
       return;

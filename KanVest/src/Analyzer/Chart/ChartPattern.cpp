@@ -60,7 +60,7 @@ namespace KanVest
   ChartPatternResult ChartPatternEngine::DetectDoubleTop(const std::vector<StockPoint>& c, int searchStart, int searchEnd)
   {
     ChartPatternResult res;
-    int N = (int)c.size();
+    [[maybe_unused]] int N = (int)c.size();
     if (searchEnd - searchStart < 6) return res; // need some space
     
     // Find recent local maxima within window
@@ -156,7 +156,7 @@ namespace KanVest
   ChartPatternResult ChartPatternEngine::DetectHeadAndShoulders(const std::vector<StockPoint>& c, int searchStart, int searchEnd)
   {
     ChartPatternResult res;
-    int N = (int)c.size();
+    [[maybe_unused]] int N = (int)c.size();
     if (searchEnd - searchStart < 8) return res;
     
     // naive approach: look for three peaks with head higher than shoulders
@@ -262,7 +262,7 @@ namespace KanVest
   ChartPatternResult ChartPatternEngine::DetectCupAndHandle(const std::vector<StockPoint>& c, int searchStart, int searchEnd)
   {
     ChartPatternResult res;
-    int N = (int)c.size();
+    [[maybe_unused]] int N = (int)c.size();
     if (searchEnd - searchStart < 30) return res; // cup takes time
     
     // naive approach: look for a large rounding bottom (cup) followed by small pullback (handle)
@@ -318,7 +318,7 @@ namespace KanVest
   ChartPatternResult ChartPatternEngine::DetectTriangles(const std::vector<StockPoint>& c, int searchStart, int searchEnd)
   {
     ChartPatternResult res;
-    int N = (int)c.size();
+    [[maybe_unused]] int N = (int)c.size();
     if (searchEnd - searchStart < 10) return res;
     
     // analyze last window
