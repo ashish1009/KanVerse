@@ -18,7 +18,7 @@ namespace KanVest
     std::vector<double> histogram;
   };
   
-  class MACDCalculator
+  class MACD
   {
   public:
     static MACDResult Compute(const StockData& stock);

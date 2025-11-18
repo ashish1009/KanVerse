@@ -11,7 +11,7 @@
 
 namespace KanVest
 {
-  MACDResult MACDCalculator::Compute(const StockData& stock)
+  MACDResult MACD::Compute(const StockData& stock)
   {
     MACDResult result;
     

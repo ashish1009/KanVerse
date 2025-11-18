@@ -11,7 +11,7 @@
 
 namespace KanVest
 {
-  ADXResult ADXCalculator::Compute(const StockData& stock, int period)
+  ADXResult ADX::Compute(const StockData& stock, int period)
   {
     ADXResult result;
     

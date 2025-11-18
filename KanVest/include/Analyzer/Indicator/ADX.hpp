@@ -21,7 +21,7 @@ namespace KanVest
     bool valid = false;
   };
   
-  class ADXCalculator
+  class ADX
   {
   public:
     static ADXResult Compute(const StockData& stock, int period = 14);
