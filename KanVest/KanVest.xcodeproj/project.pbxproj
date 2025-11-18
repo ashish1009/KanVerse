@@ -87,6 +87,7 @@
 		B26107B62ECC082B006F954D /* ChartPattern.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChartPattern.cpp; sourceTree = "<group>"; };
 		B26107B82ECC0AB6006F954D /* IIndicator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IIndicator.hpp; sourceTree = "<group>"; };
 		B26107BB2ECC0AE0006F954D /* Indicators.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Indicators.hpp; sourceTree = "<group>"; };
+		B26107BE2ECC0BED006F954D /* AllIndicatorResults.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AllIndicatorResults.hpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -198,6 +199,7 @@
 				B261079F2ECC06C1006F954D /* Stochastic.hpp */,
 				B26107B82ECC0AB6006F954D /* IIndicator.hpp */,
 				B26107BB2ECC0AE0006F954D /* Indicators.hpp */,
+				B26107BE2ECC0BED006F954D /* AllIndicatorResults.hpp */,
 			);
 			path = Indicator;
 			sourceTree = "<group>";
