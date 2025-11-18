@@ -1,11 +1,11 @@
 //
-//  Bolinger.cpp
+//  BollingerBands.cpp
 //  KanVest
 //
 //  Created by Ashish . on 18/11/25.
 //
 
-#include "Bolinger.hpp"
+#include "BollingerBands.hpp"
 
 namespace KanVest
 {

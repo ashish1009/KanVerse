@@ -1,5 +1,5 @@
 //
-//  Bolinger.hpp
+//  BollingerBands.hpp
 //  KanVest
 //
 //  Created by Ashish . on 18/11/25.
