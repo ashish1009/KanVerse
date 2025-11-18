@@ -15,6 +15,7 @@
 		B26107922ECC0580006F954D /* Momentum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26107912ECC0580006F954D /* Momentum.cpp */; };
 		B26107952ECC05D1006F954D /* MACD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26107942ECC05D1006F954D /* MACD.cpp */; };
 		B26107982ECC0614006F954D /* ADX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26107972ECC0614006F954D /* ADX.cpp */; };
+		B261079B2ECC0643006F954D /* Bolinger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B261079A2ECC0643006F954D /* Bolinger.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -60,6 +61,8 @@
 		B26107942ECC05D1006F954D /* MACD.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MACD.cpp; sourceTree = "<group>"; };
 		B26107962ECC0614006F954D /* ADX.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ADX.hpp; sourceTree = "<group>"; };
 		B26107972ECC0614006F954D /* ADX.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ADX.cpp; sourceTree = "<group>"; };
+		B26107992ECC0643006F954D /* Bolinger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Bolinger.hpp; sourceTree = "<group>"; };
+		B261079A2ECC0643006F954D /* Bolinger.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Bolinger.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -162,6 +165,7 @@
 				B26107902ECC0580006F954D /* Momentum.hpp */,
 				B26107932ECC05D1006F954D /* MACD.hpp */,
 				B26107962ECC0614006F954D /* ADX.hpp */,
+				B26107992ECC0643006F954D /* Bolinger.hpp */,
 			);
 			path = Indicator;
 			sourceTree = "<group>";
@@ -173,6 +177,7 @@
 				B26107912ECC0580006F954D /* Momentum.cpp */,
 				B26107942ECC05D1006F954D /* MACD.cpp */,
 				B26107972ECC0614006F954D /* ADX.cpp */,
+				B261079A2ECC0643006F954D /* Bolinger.cpp */,
 			);
 			path = Indicator;
 			sourceTree = "<group>";
@@ -403,6 +408,7 @@
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B2B465D62ECB1A7D00E01770 /* User.cpp in Sources */,
 				B2B465D72ECB1A7D00E01770 /* UserManager.cpp in Sources */,
+				B261079B2ECC0643006F954D /* Bolinger.cpp in Sources */,
 				B26107952ECC05D1006F954D /* MACD.cpp in Sources */,
 				B26107982ECC0614006F954D /* ADX.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
