@@ -133,9 +133,6 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
         if (ImGui::BeginChild("Stock-Data-Cell", ImVec2(firstColWidth, tableHeight))) // fixed height
         {
           ShowStockData();
-          
-          KanVasX::UI::ShiftCursorY(20.0f);
-          ShowStockTechnicalData();
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
@@ -146,6 +143,7 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
         ImGui::TableSetColumnIndex(1);
         if (ImGui::BeginChild("Stock-Technical-Cell", ImVec2(secondColWidth, tableHeight))) // fixed height
         {
+          ShowStockTechnicalData();
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
@@ -846,7 +844,7 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
   void Panel::ShowStockTechnicalData()
   {
     IK_PERFORMANCE_FUNC("Panel::ShowStockTechnicalData");
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40.0f);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40.0f);
     
     KanVasX::UI::Text(Font(Header_26), "Technicals", KanVasX::UI::AlignX::Center, {0.0f, 5.0f});
     
