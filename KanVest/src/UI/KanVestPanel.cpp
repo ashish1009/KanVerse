@@ -16,6 +16,11 @@
 #include "UI/UI_Utils.hpp"
 #include "UI/UI_MovingAverage.hpp"
 #include "UI/UI_Momentum.hpp"
+#include "UI/UI_MACD.hpp"
+#include "UI/UI_ADX.hpp"
+#include "UI/UI_BollingerBonds.hpp"
+#include "UI/UI_Stochastic.hpp"
+#include "UI/UI_MFI.hpp"
 
 namespace KanVest::UI
 {
@@ -891,18 +896,23 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
     }
     else if (tab == TechnicalTab::MFI)
     {
+      UI_MFI::Show(StockManager::GetSelectedStockData());
     }
     else if (tab == TechnicalTab::MACD)
     {
+      UI_MACD::Show(StockManager::GetSelectedStockData());
     }
     else if (tab == TechnicalTab::ADX)
     {
+      UI_ADX::Show(StockManager::GetSelectedStockData());
     }
     else if (tab == TechnicalTab::Stochastic)
     {
+      UI_Stochastic::Show(StockManager::GetSelectedStockData());
     }
     else if (tab == TechnicalTab::BB)
     {
+      UI_BollingerBonds::Show(StockManager::GetSelectedStockData());
     }
     else if (tab == TechnicalTab::Pivot)
     {
