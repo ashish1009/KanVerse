@@ -60,13 +60,13 @@ namespace KanVest
       double curClose = it->second;
       
       // Fill date gaps with previous close (forward fill)
-      int y1 = prevDate / 10000;
-      int m1 = (prevDate % 10000) / 100;
-      int d1 = prevDate % 100;
+      int y1 = (int)prevDate / 10000;
+      int m1 = ((int)prevDate % 10000) / 100;
+      int d1 = (int)prevDate % 100;
       
-      int y2 = curDate / 10000;
-      int m2 = (curDate % 10000) / 100;
-      int d2 = curDate % 100;
+      int y2 = (int)curDate / 10000;
+      int m2 = ((int)curDate % 10000) / 100;
+      int d2 = (int)curDate % 100;
       
       // Convert to time_t for date increment
       tm tm1 = {};

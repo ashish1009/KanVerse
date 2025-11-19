@@ -13,7 +13,9 @@
 
 #include "Portfolio/PortfolioController.hpp"
 
+#include "UI/UI_Utils.hpp"
 #include "UI/UI_MovingAverage.hpp"
+#include "UI/UI_Momentum.hpp"
 
 namespace KanVest::UI
 {
@@ -47,13 +49,6 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
     {
       for (char* p = string; *p; ++p)
         *p = static_cast<char>(toupper(*p));
-    }
-
-    std::string FormatDoubleToString(double value)
-    {
-      char buf[32];
-      std::snprintf(buf, sizeof(buf), "%.2f", value);
-      return std::string(buf);
     }
 
     std::string FormatLargeNumber(double value)
@@ -138,6 +133,9 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
         if (ImGui::BeginChild("Stock-Data-Cell", ImVec2(firstColWidth, tableHeight))) // fixed height
         {
           ShowStockData();
+          
+          KanVasX::UI::ShiftCursorY(20.0f);
+          ShowStockTechnicalData();
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
@@ -148,7 +146,6 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
         ImGui::TableSetColumnIndex(1);
         if (ImGui::BeginChild("Stock-Technical-Cell", ImVec2(secondColWidth, tableHeight))) // fixed height
         {
-          ShowStockTechnicalData();
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
@@ -794,6 +791,7 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
     StockData stockData = StockManager::GetSelectedStockData();
     if (!stockData.IsValid())
     {
+      KanVasX::UI::Text(Font(Header_24), "No data for stock", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::Error);
       return;
     }
 
@@ -804,13 +802,13 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
     static glm::vec2 offset = {20.0f, 10.0f};
     KanVest_Text(Header_46, name, offset, KanVasX::Color::TextBright);
     KanVest_Text(Header_34, longNameName, offset, KanVasX::Color::TextBright);
-    KanVest_Text(Header_58, Utils::FormatDoubleToString(stockData.livePrice), offset, KanVasX::Color::TextBright);
+    KanVest_Text(Header_58, KanVest::UI::Utils::FormatDoubleToString(stockData.livePrice), offset, KanVasX::Color::TextBright);
 
     // Change
     std::string change = (stockData.change > 0 ? "+" : "") +
-    Utils::FormatDoubleToString(stockData.change) +
+    KanVest::UI::Utils::FormatDoubleToString(stockData.change) +
     (stockData.change > 0 ? " ( +" : " ( ") +
-    Utils::FormatDoubleToString(stockData.changePercent) + "%)";
+    KanVest::UI::Utils::FormatDoubleToString(stockData.changePercent) + "%)";
     
     ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
     ImGui::SameLine();
@@ -820,13 +818,13 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
     KanVasX::UI::ShiftCursorY(10);
     
     // 52-Week Range
-    std::string fiftyTwoWeek = Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " + Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
+    std::string fiftyTwoWeek = KanVest::UI::Utils::FormatDoubleToString(stockData.fiftyTwoLow) + " - " + KanVest::UI::Utils::FormatDoubleToString(stockData.fiftyTwoHigh);
     KanVest_Text(FixedWidthHeader_18, "52-Week Range ", glm::vec2(20.0f, 10.0f), KanVasX::Color::Text);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, fiftyTwoWeek, glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
     
     // Day Range
-    std::string dayRange = Utils::FormatDoubleToString(stockData.dayLow) + " - " + Utils::FormatDoubleToString(stockData.dayHigh);
+    std::string dayRange = KanVest::UI::Utils::FormatDoubleToString(stockData.dayLow) + " - " + KanVest::UI::Utils::FormatDoubleToString(stockData.dayHigh);
     KanVest_Text(FixedWidthHeader_18, "Day Range     ", glm::vec2(20.0f, 10.0f), KanVasX::Color::Text);
     ImGui::SameLine();
     KanVest_Text(FixedWidthHeader_18, dayRange, glm::vec2(20.0f, 0.0f), KanVasX::Color::Text);
@@ -848,7 +846,7 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
   void Panel::ShowStockTechnicalData()
   {
     IK_PERFORMANCE_FUNC("Panel::ShowStockTechnicalData");
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40.0f);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::BackgroundLight, 40.0f);
     
     KanVasX::UI::Text(Font(Header_26), "Technicals", KanVasX::UI::AlignX::Center, {0.0f, 5.0f});
     
@@ -891,6 +889,7 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
     }
     else if (tab == TechnicalTab::RSI)
     {
+      UI_Momentum::ShowRSI(StockManager::GetSelectedStockData());
     }
     else if (tab == TechnicalTab::MFI)
     {

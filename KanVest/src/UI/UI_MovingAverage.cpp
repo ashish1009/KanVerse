@@ -7,20 +7,12 @@
 
 #include "UI_MovingAverage.hpp"
 
+#include "UI/UI_Utils.hpp"
+
 #include "Analyzer/Indicator/MovingAverage.hpp"
 
 namespace KanVest
 {
-  namespace Utils
-  {
-    std::string FormatDoubleToString(double value)
-    {
-      char buf[32];
-      std::snprintf(buf, sizeof(buf), "%.2f", value);
-      return std::string(buf);
-    }
-  }
-  
   void UI_MovingAverage::ShowMovingAverageData(const StockData& stockData, const std::unordered_map<int, double>& maMap, const std::string& maString)
   {
     int bullish = 0;
@@ -63,7 +55,8 @@ namespace KanVest
         KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), datString, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::White);
         ImGui::SameLine();
         auto smaColor = sma > stockData.livePrice ? KanVasX::Color::Red : KanVasX::Color::Cyan;
-        KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), Utils::FormatDoubleToString(sma), KanVasX::UI::AlignX::Right, {0, 0.0f}, smaColor);
+        KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular),
+                          KanVest::UI::Utils::FormatDoubleToString(sma), KanVasX::UI::AlignX::Right, {0, 0.0f}, smaColor);
       }
     };
     
@@ -98,11 +91,22 @@ namespace KanVest
     
   void UI_MovingAverage::ShowSMA(const StockData& stockData, const std::string& range)
   {
+    if (!stockData.IsValid())
+    {
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_24), "No data for stock", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::Error);
+      return;
+    }
+
     const auto& maData = MovingAverages::Compute(stockData, range);
     ShowMovingAverageData(stockData, maData.smaValues, " SMA");
   }
   void UI_MovingAverage::ShowEMA(const StockData& stockData, const std::string& range)
   {
+    if (!stockData.IsValid())
+    {
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_24), "No data for stock", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::Error);
+      return;
+    }
     const auto& maData = MovingAverages::Compute(stockData, range);
     ShowMovingAverageData(stockData, maData.emaValues, " EMA");
   }

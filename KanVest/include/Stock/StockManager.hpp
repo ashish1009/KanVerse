@@ -152,8 +152,8 @@ namespace KanVest
     inline static std::unordered_map<std::string,StockData> s_activeCache;
     inline static std::vector<std::string> s_symbols;
     inline static std::string s_selectedStockSymbol;
-    inline static std::string s_currentInterval = "60m";
-    inline static std::string s_currentRange = "1mo";
+    inline static std::string s_currentInterval = "1d";
+    inline static std::string s_currentRange = "1y";
     
     inline static std::mutex s_mutex;
     inline static std::atomic<bool> s_running = false;
