@@ -9,100 +9,94 @@
 
 #include "Stock/StockData.hpp"
 #include "Analyzer/Indicator/AllIndicatorResults.hpp"
+
 #include "Analyzer/Chart/SupportResistance.hpp"
+#include "Analyzer/Chart/ChartPattern.hpp"
+
+#include "Analyzer/Candle/CandleEngine.hpp"
 
 namespace KanVest
 {
-  // User holding info (optional)
-  struct HoldingInfo
+  enum class RecommendationLevel
   {
-    double shares = 0.0;
-    double avgPrice = 0.0;   // user's average cost per share
-    double cashAvailable = 0.0; // cash user can use to buy more shares
-  };
-  
-  // Suggested action
-  enum class Action
-  {
-    StrongBuy,
-    Buy,
-    Hold,
-    Sell,
-    StrongSell
+    STRONG_BUY, BUY, HOLD, SELL, STRONG_SELL
   };
 
   struct Recommendation
   {
-    double score = 0.0;            // 0..100
-    Action action = Action::Hold;
-    double suggestedQuantity = 0.0; // positive -> buy, negative -> sell, zero -> none
-    double suggestedTradeValue = 0.0; // suggestedQuantity * currentPrice
-    std::vector<std::string> reasons; // human-readable reasons for the decision
-    
-    std::string ToString() const;
+    RecommendationLevel level = RecommendationLevel::HOLD;
+    double score = 50.0; // 0..100
+    int suggestedQuantity = 0; // positive -> buy, negative -> sell (to close/short)
+    std::string rationale;
   };
-  
-  struct RecommendationConfig
+
+  struct Holding
   {
-    // weights (sum doesn't have to be 100; engine will normalize)
-    double wTrend = 30.0;        // moving averages / MACD / ADX
-    double wMomentum = 20.0;     // RSI, Stochastic, MFI
-    double wVolatility = 8.0;    // Bollinger width (preference for tight bands)
-    double wVolume = 8.0;        // volume spikes vs avg
-    double wPatterns = 12.0;     // candle & chart patterns
-    double wProximity = 10.0;    // proximity to 52-week high/low & support/resistance
-    double wReturn = 12.0;       // recent returns / interval-change behavior
-
-    // risk/trade sizing defaults
-    double maxPortfolioAllocation = 0.20; // max fraction of user's portfolio to allocate to this symbol
-    double aggressiveMultiplier = 1.0;    // multiplier for suggested buy if StrongBuy
-    double conservativeMultiplier = 0.6;  // multiplier for suggested buy if Buy
-
-    // thresholds
-    double adxTrendThreshold = 25.0;
-    double rsiOverbought = 70.0;
-    double rsiOversold = 30.0;
-    double macdHistBullThresh = 0.0; // >0 bullish
-    double macdHistBearThresh = 0.0; // <0 bearish
-    double supportProximityPct = 0.03; // within 3% of support considered close
-    double resistanceProximityPct = 0.03; // within 3% of resistance considered close
-
-    // min required history points to compute time-series scores
-    size_t minHistoryPoints = 30;
+    std::string symbol;
+    int quantity = 0;
+    double avgPrice = 0.0;
   };
-  
+
+  struct RecommendationParams
+  {
+    double portfolioValue = 100000.0;   // total portfolio value (INR / USD etc.)
+    double maxPositionPct = 0.05;       // max fraction of portfolio per position (5% default)
+    double riskPerTradePct = 0.01;      // fraction of portfolio risked if stop hits (1%)
+    double weightTechnicals = 0.35;
+    double weightCandles    = 0.15;
+    double weightCharts     = 0.20;
+    double weightSR         = 0.10;
+    double weightHolding    = 0.10; // reward/penalty for existing holding gain/loss
+    double weight52Week     = 0.10;
+    // clamp weights to sum 1.0 recommended, but not required
+  };
+
   class RecommendationEngine
   {
   public:
-    RecommendationEngine(const RecommendationConfig& cfg = RecommendationConfig()) : cfg(cfg) {}
-
-    // Compute a recommendation for a single symbol -> returns Recommendation
-    // - `data` is your StockData with latest history and price
-    // - `inds` is AllIndicatorsResult containing computed indicator series (aligned to history)
-    // - `srLevels` optional support/resistance levels (vector of SRLevel)
-    // - `holding` optional user holding info
-    Recommendation ComputeRecommendation(const StockData& data,
-                                         const AllIndicatorsResult& inds,
-                                         const std::vector<SRLevel>& srLevels = {},
-                                         const std::optional<HoldingInfo>& holding = std::nullopt) const;
+    RecommendationEngine(const RecommendationParams& p = RecommendationParams()) : params(p) {}
     
-
+    // Main analyzer
+    Recommendation Analyze(
+                           const std::string& symbol,
+                           const StockData& stock,
+                           const AllIndicatorsResult& ind,
+                           const std::vector<std::pair<size_t, KanVest::Candle::CandlePattern>>& candlePatterns,
+                           const std::vector<KanVest::ChartPatternResult>& chartResults,
+                           const KanVest::SupportResistance& sr,
+                           const std::vector<Holding>& holdings,
+                           double currentPrice,
+                           double week52High,
+                           double week52Low
+                           );
+    
   private:
-    RecommendationConfig cfg;
+    RecommendationParams params;
     
-    // helper scoring submodules
-    double ScoreTrend(const StockData& data, const AllIndicatorsResult& inds, std::vector<std::string>& reasons) const;
-    double ScoreMomentum(const StockData& data, const AllIndicatorsResult& inds, std::vector<std::string>& reasons) const;
-    double ScoreVolatility(const StockData& data, const AllIndicatorsResult& inds, std::vector<std::string>& reasons) const;
-    double ScoreVolume(const StockData& data, std::vector<std::string>& reasons) const;
-    double ScorePatterns(const StockData& data, const std::vector<SRLevel>& srLevels, std::vector<std::string>& reasons) const;
-    double ScoreProximity(const StockData& data, const AllIndicatorsResult& inds, const std::vector<SRLevel>& srLevels, std::vector<std::string>& reasons) const;
-    double ScoreReturns(const StockData& data, std::vector<std::string>& reasons) const;
+    // Helpers: convert indicator structures to simple numeric signals.
+    // --- IMPORTANT ---
+    // If your AllIndicatorsResult subtypes have different member names, change these functions.
+    // They return normalized sub-scores (range -1 .. +1) where +1 is strongly bullish.
+    
+    double ScoreFromRSI(const AllIndicatorsResult& ind);
+    double ScoreFromMA(const AllIndicatorsResult& ind);
+    double ScoreFromMACD(const AllIndicatorsResult& ind);
+    double ScoreFromADX(const AllIndicatorsResult& ind);
+    double ScoreFromBB(const AllIndicatorsResult& ind);
+    double ScoreFromMFI(const AllIndicatorsResult& ind);
+    double ScoreFromStochastic(const AllIndicatorsResult& ind);
+    
+    double CandleAggregateScore(const std::vector<std::pair<size_t, KanVest::Candle::CandlePattern>>& patterns, const StockData& stock);
+    double ChartAggregateScore(const std::vector<KanVest::ChartPatternResult>& charts);
+    double SRScore(const KanVest::SupportResistance& sr, double price);
+    double HoldingScore(const std::vector<Holding>& holdings, const std::string& symbol, double price);
+    double Week52Score(double price, double hi, double lo);
     
     // utility
-    static double SafeLast(const std::vector<double>& v);
-    static bool IsValidNumber(double v);
-    static double Clamp(double v, double lo, double hi);
-
+    static double Clamp01(double v) { return std::max(0.0, std::min(1.0, v)); }
+    static double SigToRange(double v) { return std::max(-1.0, std::min(1.0, v)); }
+    
+    // Suggested quantity: positive means buy more, negative means sell to close
+    int SuggestQuantity(double score, double price, const std::vector<Holding>& holdings, const std::string& symbol);
   };
 } // namespace KanVest
