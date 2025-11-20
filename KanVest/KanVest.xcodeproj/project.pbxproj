@@ -14,6 +14,7 @@
 		B25435142ECDD9D10071D664 /* UI_BollingerBonds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B25435132ECDD9D10071D664 /* UI_BollingerBonds.cpp */; };
 		B25435172ECDD9DE0071D664 /* UI_MFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B25435162ECDD9DE0071D664 /* UI_MFI.cpp */; };
 		B254351A2ECDD9E80071D664 /* UI_Stochastic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B25435192ECDD9E80071D664 /* UI_Stochastic.cpp */; };
+		B254351D2ECECAB70071D664 /* RecommendationEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B254351C2ECECAB70071D664 /* RecommendationEngine.cpp */; };
 		B261077D2ECB4B6F006F954D /* StockAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B261077C2ECB4B6F006F954D /* StockAPI.cpp */; };
 		B26107822ECB4BB8006F954D /* APIProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26107812ECB4BB8006F954D /* APIProvider.cpp */; };
 		B26107852ECB4C77006F954D /* StockParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26107842ECB4C77006F954D /* StockParser.cpp */; };
@@ -74,6 +75,8 @@
 		B25435162ECDD9DE0071D664 /* UI_MFI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_MFI.cpp; sourceTree = "<group>"; };
 		B25435182ECDD9E80071D664 /* UI_Stochastic.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Stochastic.hpp; sourceTree = "<group>"; };
 		B25435192ECDD9E80071D664 /* UI_Stochastic.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Stochastic.cpp; sourceTree = "<group>"; };
+		B254351B2ECECAB70071D664 /* RecommendationEngine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RecommendationEngine.hpp; sourceTree = "<group>"; };
+		B254351C2ECECAB70071D664 /* RecommendationEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RecommendationEngine.cpp; sourceTree = "<group>"; };
 		B26107782ECB4ADD006F954D /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
 		B261077B2ECB4B6F006F954D /* StockAPI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockAPI.hpp; sourceTree = "<group>"; };
 		B261077C2ECB4B6F006F954D /* StockAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockAPI.cpp; sourceTree = "<group>"; };
@@ -200,6 +203,7 @@
 				B26107B12ECC07EE006F954D /* Chart */,
 				B26107A22ECC06FC006F954D /* Candle */,
 				B261078C2ECC04C0006F954D /* Indicator */,
+				B254351C2ECECAB70071D664 /* RecommendationEngine.cpp */,
 			);
 			path = Analyzer;
 			sourceTree = "<group>";
@@ -210,6 +214,7 @@
 				B26107B02ECC07E8006F954D /* Chart */,
 				B26107A32ECC0701006F954D /* Candle */,
 				B261078B2ECC04B9006F954D /* Indicator */,
+				B254351B2ECECAB70071D664 /* RecommendationEngine.hpp */,
 			);
 			path = Analyzer;
 			sourceTree = "<group>";
@@ -548,6 +553,7 @@
 				B289EE402EB3ACF200937D0B /* UI_Font.cpp in Sources */,
 				B261077D2ECB4B6F006F954D /* StockAPI.cpp in Sources */,
 				B2B465DE2ECB1AAF00E01770 /* Portfolio.cpp in Sources */,
+				B254351D2ECECAB70071D664 /* RecommendationEngine.cpp in Sources */,
 				B26107B72ECC082B006F954D /* ChartPattern.cpp in Sources */,
 				B2B465DF2ECB1AAF00E01770 /* PortfolioController.cpp in Sources */,
 				B261078F2ECC04D0006F954D /* MovingAverage.cpp in Sources */,
