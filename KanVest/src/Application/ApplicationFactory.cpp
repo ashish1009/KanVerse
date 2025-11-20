@@ -24,7 +24,7 @@ namespace KanVest
         .width = 1600,
         .height = 900,
         .samples = 8,
-        .isFullScreen = true,
+        .isFullScreen = false,
         .resizable = true,
         .maximized = true,
         .hideTitleBar = true,

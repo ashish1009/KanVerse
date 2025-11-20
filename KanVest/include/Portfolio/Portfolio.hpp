@@ -35,6 +35,8 @@ namespace KanVest
     std::vector<Holding>& GetHoldings();
     /// This function returns the holding
     const std::vector<Holding>& GetHoldings() const;
+    /// This function returns the holding
+    const Holding& GetHolding(const std::string& symbol) const;
     
   private:
     /// This function adds the holding in data base

@@ -31,6 +31,7 @@ namespace KanVest::UI
     static void ShowStockBasicData();
     
     static void ShowStockTechnicalData();
+    static void ShowStockRecommendation();
 
     static void AddStockInManager(const std::string& symbol);
 

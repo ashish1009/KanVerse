@@ -49,6 +49,19 @@ namespace KanVest
     return m_holdings;
   }
   
+  const Holding& Portfolio::GetHolding(const std::string &symbol) const
+  {
+    static Holding EmptyHolding;
+    for (const auto& h : m_holdings)
+    {
+      if (h.symbol == symbol)
+      {
+        return h;
+      }
+    }
+    return EmptyHolding;
+  }
+  
   //--------------------------------------------
   // Save Portfolio → YAML
   //--------------------------------------------

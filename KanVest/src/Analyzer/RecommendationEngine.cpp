@@ -9,4 +9,5 @@
 
 namespace KanVest
 {
+  
 } // namespace KanVest

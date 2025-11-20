@@ -400,7 +400,6 @@
 			children = (
 				B25435092ECDD6160071D664 /* UI_Utils.hpp */,
 				B289EE3E2EB3ACF200937D0B /* UI_Font.hpp */,
-				B2B465E32ECB285600E01770 /* KanVestPanel.hpp */,
 				B26107C42ECCB842006F954D /* UI_MovingAverage.hpp */,
 				B25435062ECDD44E0071D664 /* UI_Momentum.hpp */,
 				B254350C2ECDD9B60071D664 /* UI_MACD.hpp */,
@@ -408,6 +407,7 @@
 				B25435122ECDD9D10071D664 /* UI_BollingerBonds.hpp */,
 				B25435182ECDD9E80071D664 /* UI_Stochastic.hpp */,
 				B25435152ECDD9DE0071D664 /* UI_MFI.hpp */,
+				B2B465E32ECB285600E01770 /* KanVestPanel.hpp */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -417,7 +417,6 @@
 			children = (
 				B254350A2ECDD6160071D664 /* UI_Utils.cpp */,
 				B289EE3F2EB3ACF200937D0B /* UI_Font.cpp */,
-				B2B465E42ECB285600E01770 /* KanVestPanel.cpp */,
 				B26107C52ECCB842006F954D /* UI_MovingAverage.cpp */,
 				B25435072ECDD44E0071D664 /* UI_Momentum.cpp */,
 				B254350D2ECDD9B60071D664 /* UI_MACD.cpp */,
@@ -425,6 +424,7 @@
 				B25435132ECDD9D10071D664 /* UI_BollingerBonds.cpp */,
 				B25435192ECDD9E80071D664 /* UI_Stochastic.cpp */,
 				B25435162ECDD9DE0071D664 /* UI_MFI.cpp */,
+				B2B465E42ECB285600E01770 /* KanVestPanel.cpp */,
 			);
 			path = UI;
 			sourceTree = "<group>";
