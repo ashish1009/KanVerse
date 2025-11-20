@@ -96,8 +96,4 @@ namespace KanVest
       }
     }
   }
-  SupportResistance::SupportResistance(const StockData& data, int pivotRange, double clusterTolerance )
-  {
-    Compute(data, pivotRange, clusterTolerance);
-  }
 } // namespace KanVest

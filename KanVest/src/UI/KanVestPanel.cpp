@@ -930,41 +930,41 @@ KanVasX::UI::Text(Font(font), string, KanVasX::UI::AlignX::Left, offset, textCol
       return;
     }
     
-    Recommender recommender;
-    recommender.SetHoldings(UserManager::GetCurrentUser().portfolio->GetHoldings());
-    Recommendation recommendation = recommender.Recommend(stockData);
-    
-    float score = static_cast<float>(recommendation.score);
-
-    // Determine color based on score
-    ImU32 scoreColor;
-    std::string scoreString = "Technically Neutral";
-    
-    if (score < 15)      { scoreString = "Technically Strong Bearish"; scoreColor = KanVasX::Color::Red; }
-    else if (score < 30) { scoreString = "Technically Bearish"; scoreColor = KanVasX::Color::Orange; }
-    else if (score < 60) { scoreString = "Technically Neutral"; scoreColor = KanVasX::Color::Yellow; }
-    else if (score < 80) { scoreString = "Technically Bullish"; scoreColor = KanVasX::Color::Cyan; }
-    else                 { scoreString = "Technically Strong Bullish"; scoreColor = KanVasX::Color::Green; }
-
-    // Scoped color
-    {
-      KanVasX::ScopedStyle headerPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2{1.0f, 1.0f});
-      KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
-      // Convert score 0-100 to fraction 0.0-1.0
-      
-      // Print Score
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), Utils::FormatDoubleToString(score), KanVasX::UI::AlignX::Left, {0, 0}, scoreColor);
-      
-      // Print /100
-      static const std::string totalScoreString = "/100";
-      ImGui::SameLine();
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), totalScoreString, KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
-      
-      ImGui::SameLine();
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Large), scoreString, KanVasX::UI::AlignX::Right, {0, 5.0f}, scoreColor);
-      
-      float fraction = score / 100.0f;
-      ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
-    }
+//    Recommender recommender;
+//    recommender.SetHoldings(UserManager::GetCurrentUser().portfolio->GetHoldings());
+//    Recommendation recommendation = recommender.Recommend(stockData);
+//    
+//    float score = static_cast<float>(recommendation.score);
+//
+//    // Determine color based on score
+//    ImU32 scoreColor;
+//    std::string scoreString = "Technically Neutral";
+//    
+//    if (score < 15)      { scoreString = "Technically Strong Bearish"; scoreColor = KanVasX::Color::Red; }
+//    else if (score < 30) { scoreString = "Technically Bearish"; scoreColor = KanVasX::Color::Orange; }
+//    else if (score < 60) { scoreString = "Technically Neutral"; scoreColor = KanVasX::Color::Yellow; }
+//    else if (score < 80) { scoreString = "Technically Bullish"; scoreColor = KanVasX::Color::Cyan; }
+//    else                 { scoreString = "Technically Strong Bullish"; scoreColor = KanVasX::Color::Green; }
+//
+//    // Scoped color
+//    {
+//      KanVasX::ScopedStyle headerPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2{1.0f, 1.0f});
+//      KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
+//      // Convert score 0-100 to fraction 0.0-1.0
+//      
+//      // Print Score
+//      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), Utils::FormatDoubleToString(score), KanVasX::UI::AlignX::Left, {0, 0}, scoreColor);
+//      
+//      // Print /100
+//      static const std::string totalScoreString = "/100";
+//      ImGui::SameLine();
+//      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), totalScoreString, KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
+//      
+//      ImGui::SameLine();
+//      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Large), scoreString, KanVasX::UI::AlignX::Right, {0, 5.0f}, scoreColor);
+//      
+//      float fraction = score / 100.0f;
+//      ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
+//    }
   }
 } // namespace KanVest

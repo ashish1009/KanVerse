@@ -20,12 +20,9 @@ namespace KanVest
   
   struct SupportResistance
   {
-    std::vector<SRLevel> supports;
-    std::vector<SRLevel> resistances;
+    inline static std::vector<SRLevel> supports;
+    inline static std::vector<SRLevel> resistances;
     
-    SupportResistance(const StockData& data, int pivotRange = 3, double clusterTolerance = 0.30);
-    
-  private:
-    void Compute(const StockData& data, int pivotRange = 3, double clusterTolerance = 0.30);
+    static void Compute(const StockData& data, int pivotRange = 3, double clusterTolerance = 0.30);
   };
 } // namespace KanVest
