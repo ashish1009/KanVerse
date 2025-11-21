@@ -36,9 +36,9 @@ namespace KanVasX
     // Colors ----------------------------------------------------------------------------------------------------------------------------------------
     // Values -----------------------------
     // Window
-    BackgroundDark        = IM_COL32(8, 12, 17, 155);
+    BackgroundDark        = IM_COL32(8, 12, 17, 255);
     Background            = IM_COL32(12, 20, 30, 255);
-    BackgroundLight       = IM_COL32(36, 42, 56, 155);
+    BackgroundLight       = IM_COL32(36, 42, 56, 255);
 
     // Highlight
     Highlight             = IM_COL32(40, 48, 58, 255);;
@@ -140,7 +140,7 @@ namespace KanVasX
     colors[ImGuiCol_TextSelectedBg]         = ImGui::ColorConvertU32ToFloat4(TextSelectedBg);
     
     // Window
-    colors[ImGuiCol_WindowBg]               = ImGui::ColorConvertU32ToFloat4(Background);
+    colors[ImGuiCol_WindowBg]               = ImGui::ColorConvertU32ToFloat4(BackgroundLight);
     colors[ImGuiCol_ChildBg]                = ImGui::ColorConvertU32ToFloat4(ChildBackground);
     colors[ImGuiCol_PopupBg]                = ImGui::ColorConvertU32ToFloat4(PopupBackground);
     colors[ImGuiCol_Border]                 = ImGui::ColorConvertU32ToFloat4(Border);

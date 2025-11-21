@@ -9,6 +9,8 @@
 
 #include "User/UserManager.hpp"
 
+#include "UI/UI_KanVestPanel.hpp"
+
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
@@ -143,6 +145,10 @@ namespace KanVest
     
     // Login popup
     m_loginPopup.Set("KanVest Logic", true /* open flag */, 600, 410, true /* center */);
+    
+    // KanVest panel
+    KanVest::UI::Panel::SetShadowTextureId(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
+    KanVest::UI::Panel::SetReloadTextureId(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
   }
   
   void RendererLayer::OnDetach() noexcept
@@ -164,6 +170,7 @@ namespace KanVest
     if (UserManager::GetCurrentUser().Valid())
     {
       UI_StartMainWindowDocking();
+      KanVest::UI::Panel::Show();
       UI_EndMainWindowDocking();
     }
   }

@@ -29,10 +29,10 @@ namespace KanVest
     }
     
     // Sync all holdings with live manager
-    for (auto& h : m_portfolio.GetHoldings())
-    {
+//    for (auto& h : m_portfolio.GetHoldings())
+//    {
 //      StockManager::AddStock(h.symbol);
-    }
+//    }
     
     return true;
   }

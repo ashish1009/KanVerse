@@ -29,9 +29,10 @@ namespace KanVest
   void User::LoadPortfolio()
   {
     portfolio = std::make_shared<Portfolio>();
-    // If file doesn’t exist, create a new empty one
     
     PortfolioController portfolioController(*portfolio);
+
+    // If file doesn’t exist, create a new empty one
     if (!std::filesystem::exists(portfolioPath))
     {
       portfolioController.SavePortfolio(portfolioPath);
