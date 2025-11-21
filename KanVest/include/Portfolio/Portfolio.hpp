@@ -45,6 +45,7 @@ namespace KanVest
     std::vector<Holding> m_holdings;
     
     friend class PortfolioSerializer;
+    friend class PortfolioController;
   };
   
   class PortfolioSerializer
@@ -61,5 +62,7 @@ namespace KanVest
     ///   - path: file path
     ///   - portfolio: portfolio reference
     static bool LoadFromYAML(const std::filesystem::path& path, Portfolio& portfolio);
+    
+    friend class PortfolioController;
   };
 } // namespace KanVest

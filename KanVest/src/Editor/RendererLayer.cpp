@@ -161,8 +161,11 @@ namespace KanVest
     UI_LoginPage();
     UI_SignupPage();
 
-    UI_StartMainWindowDocking();
-    UI_EndMainWindowDocking();
+    if (UserManager::GetCurrentUser().Valid())
+    {
+      UI_StartMainWindowDocking();
+      UI_EndMainWindowDocking();
+    }
   }
   
   void RendererLayer::OnEvent(KanViz::Event& event)
