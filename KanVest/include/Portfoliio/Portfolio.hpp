@@ -18,12 +18,13 @@ namespace KanVest
     
     // Compute dynamic not serisalize
     float stockValue;
-    float investment;
-    float value;
     float dayChange;
     float dayChangePercent;
-    float profitLoss;
-    float profitLossPercent;
+
+    float GetTotalInvestment() const {return quantity * averagePrice;};
+    float GetTotalValue() const {return quantity * stockValue;};
+    float GetProfitLoss() const {return GetTotalValue() - GetTotalInvestment();};
+    float GetProfitLossPercent() const {return ((GetProfitLoss() * 100) / GetTotalInvestment());};
   };
   
   class Portfolio
