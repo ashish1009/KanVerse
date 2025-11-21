@@ -300,6 +300,7 @@ namespace KanVest
         static bool loginSuccess = false;
         if (KanVasX::UI::DrawButton("Login", UI::Font::Get(UI::FontType::Bold)) or ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
         {
+          loginSuccess = UserManager::HandleLogin(usernameBuffer, passwordBuffer, loginMessage);
           if (loginSuccess)
           {
             ImGui::CloseCurrentPopup();
@@ -393,7 +394,7 @@ namespace KanVest
           }
           else
           {
-
+            signUpSuccess = UserManager::HandleSignUp(usernameBuffer, passwordBuffer, signUpMessage);
           }
         }
 
