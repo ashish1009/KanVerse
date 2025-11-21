@@ -7,6 +7,8 @@
 
 #include "RendererLayer.hpp"
 
+#include "User/UserManager.hpp"
+
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";

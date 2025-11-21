@@ -9,6 +9,8 @@
 
 #include "RendererLayer.hpp"
 
+#include "User/UserManager.hpp"
+
 namespace KanVest
 {
   Application::Application(const KanViz::ApplicationSpecification& appSpec)
@@ -28,6 +30,9 @@ namespace KanVest
   {
     IK_PROFILE();
  
+    // TODO: get from args
+    UserManager::SetDatabaseFilePath("../../../KanVest/UserData");
+
     // Creating a renderer layer and pushing it onto the application stack.
     m_layer = KanViz::CreateScope<RendererLayer>();
     PushLayer(std::move(m_layer));
