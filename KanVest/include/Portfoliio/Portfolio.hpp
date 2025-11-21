@@ -25,4 +25,22 @@ namespace KanVest
     float profitLoss;
     float profitLossPercent;
   };
+  
+  class Portfolio
+  {
+  public:
+    /// This function returns the holding
+    std::vector<Holding>& GetHoldings();
+    /// This function returns the holding
+    const std::vector<Holding>& GetHoldings() const;
+    /// This function returns the holding
+    const Holding& GetHolding(const std::string& symbol) const;
+
+  private:
+    /// This function adds the holding in data base
+    /// - Parameter holding: holding instnace
+    void AddHolding(const Holding& holding);
+
+    std::vector<Holding> m_holdings;
+  };
 } // namespace KanVest
