@@ -7,12 +7,6 @@
 
 #include "RendererLayer.hpp"
 
-#include "User/UserManager.hpp"
-
-#include "Stock/StockManager.hpp"
-
-#include "UI/KanVestPanel.hpp"
-
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
@@ -145,21 +139,14 @@ namespace KanVest
     KanVasX::Widget::SetSearchIcon(KanVasX::UI::GetTextureID(m_searchIcon->GetRendererID()));
     KanVasX::Widget::SetSettingIcon(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
     
-    KanVest::UI::Panel::SetShadowTextureId(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
-    KanVest::UI::Panel::SetReloadTextureId(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
-
     // Login popup
     m_loginPopup.Set("KanVest Logic", true /* open flag */, 600, 410, true /* center */);
-    
-    StockManager::StartLiveUpdates(1);
   }
   
   void RendererLayer::OnDetach() noexcept
   {
     IK_PROFILE();
     IK_LOG_WARN("RendererLayer", "Detaching '{0}' Layer from application", GetName());
-    
-    StockManager::StopLiveUpdates();
   }
   
   void RendererLayer::OnUpdate(const KanViz::TimeStep& ts)
@@ -171,13 +158,9 @@ namespace KanVest
   {
     UI_LoginPage();
     UI_SignupPage();
-    
-    if (UserManager::GetCurrentUser().Valid())
-    {
-      UI_StartMainWindowDocking();
-      KanVest::UI::Panel::Show();
-      UI_EndMainWindowDocking();
-    }
+
+    UI_StartMainWindowDocking();
+    UI_EndMainWindowDocking();
   }
   
   void RendererLayer::OnEvent(KanViz::Event& event)
@@ -317,7 +300,6 @@ namespace KanVest
         static bool loginSuccess = false;
         if (KanVasX::UI::DrawButton("Login", UI::Font::Get(UI::FontType::Bold)) or ImGui::IsKeyDown(ImGuiKey::ImGuiKey_Enter))
         {
-          loginSuccess = UserManager::HandleLogin(usernameBuffer, passwordBuffer, loginMessage);
           if (loginSuccess)
           {
             ImGui::CloseCurrentPopup();
@@ -411,7 +393,7 @@ namespace KanVest
           }
           else
           {
-            signUpSuccess = UserManager::HandleSignUp(usernameBuffer, passwordBuffer, signUpMessage);
+
           }
         }
 
