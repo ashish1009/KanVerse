@@ -43,5 +43,23 @@ namespace KanVest
     void AddHolding(const Holding& holding);
 
     std::vector<Holding> m_holdings;
+    
+    friend class PortfolioSerializer;
+  };
+  
+  class PortfolioSerializer
+  {
+  private:
+    /// This function saves portfolio data in file
+    /// - Parameters:
+    ///   - path: file path
+    ///   - portfolio: portfolio data
+    static bool SaveToYAML(const std::filesystem::path& path, const Portfolio& portfolio);
+
+    /// This function loads the portfolio from file
+    /// - Parameters:
+    ///   - path: file path
+    ///   - portfolio: portfolio reference
+    static bool LoadFromYAML(const std::filesystem::path& path, Portfolio& portfolio);
   };
 } // namespace KanVest

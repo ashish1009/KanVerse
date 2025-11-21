@@ -60,4 +60,79 @@ namespace KanVest
     return EmptyHolding;
   }
 
+  bool PortfolioSerializer::SaveToYAML(const std::filesystem::path& path, const Portfolio& portfolio)
+  {
+    try {
+      YAML::Emitter out;
+      out << YAML::BeginMap;
+      out << YAML::Key << "Holdings" << YAML::Value << YAML::BeginSeq;
+
+      for (const auto& h : portfolio.GetHoldings())
+      {
+        out << YAML::BeginMap;
+        out << YAML::Key << "Symbol"       << YAML::Value << h.symbolName;
+        out << YAML::Key << "AveragePrice" << YAML::Value << h.averagePrice;
+        out << YAML::Key << "Quantity"     << YAML::Value << h.quantity;
+        out << YAML::EndMap;
+      }
+
+      out << YAML::EndSeq;
+      out << YAML::EndMap;
+
+      std::ofstream fout(path);
+      if (!fout.is_open())
+      {
+        std::cerr << "❌ Cannot open file for saving: " << path << "\n";
+        return false;
+      }
+
+      fout << out.c_str();
+      fout.close();
+
+      std::cout << "✅ Portfolio saved to " << path << "\n";
+      return true;
+    }
+    catch (const std::exception& e)
+    {
+      std::cerr << "❌ Exception in SaveToYAML: " << e.what() << "\n";
+      return false;
+    }
+  }
+  
+  bool PortfolioSerializer::LoadFromYAML(const std::filesystem::path& path, Portfolio& portfolio)
+  {
+    if (!std::filesystem::exists(path))
+    {
+      std::cerr << "⚠️ Portfolio file does not exist: " << path << "\n";
+      return false;
+    }
+    
+    try
+    {
+      YAML::Node data = YAML::LoadFile(path);
+      if (!data["Holdings"])
+      {
+        std::cerr << "⚠️ No holdings found in YAML: " << path << "\n";
+        return false;
+      }
+      
+      portfolio.GetHoldings().clear();
+      for (const auto& node : data["Holdings"])
+      {
+        Holding h;
+        h.symbolName   = node["Symbol"].as<std::string>();
+        h.averagePrice = node["AveragePrice"].as<double>();
+        h.quantity     = node["Quantity"].as<int32_t>();
+        portfolio.AddHolding(h);
+      }
+      
+      std::cout << "✅ Portfolio loaded from " << path << "\n";
+      return true;
+    }
+    catch (const std::exception& e)
+    {
+      std::cerr << "❌ Exception in LoadFromYAML: " << e.what() << "\n";
+      return false;
+    }
+  }
 } // namespace KanVest
