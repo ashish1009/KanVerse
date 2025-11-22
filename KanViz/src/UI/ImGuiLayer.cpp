@@ -143,13 +143,20 @@ namespace KanViz::UI
       return;
     }
     
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = ImGui::GetIO();
     io.Fonts->ClearFonts();
     
     IK_LOG_INFO(LogModule::UI, "Loading ImGui Fonts");
     for (const auto& font : otherFonts)
     {
-      if (io.Fonts->AddFontFromFileTTF(font.filePath.c_str(), font.size) == nullptr)
+      static const ImWchar ranges[] = {
+        0x0020, 0x00FF,   // Basic Latin
+        0x0900, 0x097F,   // Devanagari (ensures Indian fonts load properly)
+        0x20A0, 0x20CF,   // Currency symbols (includes ₹ at 20B9)
+        0
+      };
+
+      if (io.Fonts->AddFontFromFileTTF(font.filePath.c_str(), font.size, nullptr, ranges) == nullptr)
       {
         IK_LOG_ERROR(LogModule::UI, "Failed to load font from {0}", font.filePath.string());
       }

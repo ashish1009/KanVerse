@@ -21,10 +21,10 @@ namespace KanVest
     float dayChange;
     float dayChangePercent;
 
-    float GetTotalInvestment() const {return quantity * averagePrice;};
-    float GetTotalValue() const {return quantity * stockValue;};
-    float GetProfitLoss() const {return GetTotalValue() - GetTotalInvestment();};
-    float GetProfitLossPercent() const {return ((GetProfitLoss() * 100) / GetTotalInvestment());};
+    float investment;
+    float value;
+    float profitLoss;
+    float profitLossPercent;
   };
   
   class Portfolio
@@ -36,6 +36,10 @@ namespace KanVest
     const std::vector<Holding>& GetHoldings() const;
     /// This function returns the holding
     const Holding& GetHolding(const std::string& symbol) const;
+    /// This funciton returns the total investment
+    float GetTotalInvestment();
+    /// This funciton returns the total investment
+    float GetTotalValue();
 
   private:
     /// This function adds the holding in data base

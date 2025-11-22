@@ -19,6 +19,8 @@ namespace KanVest::UI
     static void SetReloadTextureId(ImTextureID reloadTextureID);
 
   private:
+    static void ShowPortfolio();
+    
     inline static ImTextureID s_shadowTextureID = 0;
     inline static ImTextureID s_reloadIconID = 0;
   };

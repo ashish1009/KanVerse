@@ -29,7 +29,7 @@ namespace KanVasX
 
     inline static ImU32 Error                 = IM_COL32(215, 55, 25, 255);
     
-    inline static ImU32 Highlight             = IM_COL32(20, 90, 222, 222);
+    inline static ImU32 Highlight             = IM_COL32(45, 57, 76, 222);
     inline static ImU32 HighlightMuted        = IM_COL32(20, 90, 222, 222);
     inline static ImU32 HighlightContrast     = IM_COL32(255, 255, 255, 222);
     

@@ -59,7 +59,23 @@ namespace KanVest
     }
     return EmptyHolding;
   }
-
+  
+  float Portfolio::GetTotalInvestment()
+  {
+    return std::accumulate(m_holdings.begin(),m_holdings.end(),0.0f,
+                           [](float total, const Holding& h) {
+                             return total + h.investment;
+                           });
+  }
+  
+  float Portfolio::GetTotalValue()
+  {
+    return std::accumulate(m_holdings.begin(),m_holdings.end(),0.0f,
+                           [](float total, const Holding& h) {
+                             return total + h.value;
+                           });
+  }
+  
   bool PortfolioSerializer::SaveToYAML(const std::filesystem::path& path, const Portfolio& portfolio)
   {
     try {

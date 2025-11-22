@@ -7,8 +7,18 @@
 
 #include "UI_KanVestPanel.hpp"
 
+#include "User/UserManager.hpp"
+
+#include "Portfolio/PortfolioController.hpp"
+
+#include "UI/UI_Utils.hpp"
+
 namespace KanVest::UI
 {
+#define Font(font) KanVest::UI::Font::Get(KanVest::UI::FontType::font)
+
+  using Align = KanVasX::UI::AlignX;
+  
   void Panel::SetShadowTextureId(ImTextureID shadowTextureID)
   {
     s_shadowTextureID = shadowTextureID;
@@ -21,29 +31,100 @@ namespace KanVest::UI
   void Panel::Show()
   {
     IK_PERFORMANCE_FUNC("Panel::Show");
+
+    static float Spacing = 2.0f;
+    KanVasX::ScopedStyle WindowPadding(ImGuiStyleVar_WindowPadding, ImVec2(Spacing, Spacing));
+    KanVasX::ScopedStyle ItemSpacing(ImGuiStyleVar_ItemSpacing, ImVec2(Spacing, Spacing));
+    
     KanVasX::Panel::Begin("Stock Analyzer");
+
+    /*
+      - Stock basic data
+        - Stock name
+        - Stock price
+        - Stock change
+        - 52 week high low (Graph)
+        - Day high low
+      - Portfolio
+      - Watchlist
+      - Recommendation
+      - Chart (Wide)
+      - Technical data (Wide)
+        - Data
+        - Corresponding chart
+     */
     
     {
-//      KanVasX::ScopedColor windowBgColor(ImGuiCol_WindowBg, KanVasX::Color::BackgroundLight);
-//      KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundLight);
-//
-//      float totalWidth  = ImGui::GetContentRegionAvail().x;
-//      float totalHeight = ImGui::GetContentRegionAvail().y;
-//      float childHeight = totalHeight * 0.6f;
-//      
-//      if (ImGui::BeginChild(" Stock-Analyzer ", ImVec2(totalWidth, childHeight)))
-//      {
-//        KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
-//      }
-//      ImGui::EndChild();
-//      
-//      if (ImGui::BeginChild(" Portfolio-Chart ", ImVec2(totalWidth, 0)))
-//      {
-//        KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
-//      }
-//      ImGui::EndChild();
+      KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Background);
+
+      float totalWidth  = ImGui::GetContentRegionAvail().x;
+      float totalHeight = ImGui::GetContentRegionAvail().y;
+      
+      if (ImGui::BeginChild(" Stock - Data ", ImVec2(totalWidth * 0.3, totalHeight )))
+      {
+      }
+      ImGui::EndChild();
+      ImGui::SameLine();
+      
+      if (ImGui::BeginChild(" Cell 2 ", ImVec2(totalWidth * 0.4, totalHeight )))
+      {
+      }
+      ImGui::EndChild();
+      ImGui::SameLine();
+      
+      if (ImGui::BeginChild(" Portfolio ", ImVec2(totalWidth * 0.298, totalHeight )))
+      {
+        ShowPortfolio();
+      }
+
+      ImGui::EndChild();
     }
 
     KanVasX::Panel::End(0);
+  }
+  
+  void Panel::ShowPortfolio()
+  {
+    IK_PERFORMANCE_FUNC("Panel::ShowPortfolio");
+    float totalHeight = ImGui::GetContentRegionAvail().y;
+
+    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Highlight, 0.2f));
+    if (ImGui::BeginChild(" Summary ", ImVec2(0.0f, totalHeight * 0.2f )))
+    {
+      static bool g_sortAscending = true;
+      static int g_sortColumn = 0;
+
+      // Get portfolio
+      Portfolio* portfolio = UserManager::GetCurrentUser().portfolio.get();
+      
+      // Get holding
+      std::vector<Holding>& holdings = portfolio->GetHoldings();
+
+      // ---- Sorting ----
+      std::sort(holdings.begin(), holdings.end(), [](const Holding& a, const Holding& b)
+                {
+        auto cmp = [&](auto& x, auto& y) { return g_sortAscending ? x < y : x > y; };
+        switch (g_sortColumn)
+        {
+          case 0: return cmp(a.symbolName, b.symbolName);
+          case 1: return cmp(a.averagePrice, b.averagePrice);
+          case 2: return cmp(a.quantity, b.quantity);
+          case 3: return cmp(a.stockValue, b.stockValue);
+          case 4: return cmp(a.investment, b.investment);
+          case 5: return cmp(a.value, b.value);
+          case 6: return cmp(a.profitLoss, b.profitLoss);
+          case 7: return cmp(a.profitLossPercent, b.profitLossPercent);
+          case 8: return cmp(a.dayChange, b.dayChange);
+          case 9: return cmp(a.dayChangePercent, b.dayChangePercent);
+          default: return false;
+        }
+      });
+      
+      std::string totalPortfolioValueString = "₹ " + std::to_string((int32_t)portfolio->GetTotalValue());
+      KanVasX::UI::Text(Font(Header_28), totalPortfolioValueString, Align::Left, {20.0f, 10.0f});
+      
+      KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+    }
+    ImGui::EndChild();
   }
 } // namespace KanVest::UI

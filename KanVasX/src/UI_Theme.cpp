@@ -140,7 +140,7 @@ namespace KanVasX
     colors[ImGuiCol_TextSelectedBg]         = ImGui::ColorConvertU32ToFloat4(TextSelectedBg);
     
     // Window
-    colors[ImGuiCol_WindowBg]               = ImGui::ColorConvertU32ToFloat4(BackgroundLight);
+    colors[ImGuiCol_WindowBg]               = ImGui::ColorConvertU32ToFloat4(Background);
     colors[ImGuiCol_ChildBg]                = ImGui::ColorConvertU32ToFloat4(ChildBackground);
     colors[ImGuiCol_PopupBg]                = ImGui::ColorConvertU32ToFloat4(PopupBackground);
     colors[ImGuiCol_Border]                 = ImGui::ColorConvertU32ToFloat4(Border);
