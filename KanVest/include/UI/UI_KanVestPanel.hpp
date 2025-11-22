@@ -22,10 +22,16 @@ namespace KanVest::UI
 
   private:
     static void ShowPortfolio();
+    static void ShowStockData();
+    static void ShowSearchBar();
+
+    static void AddStockInManager(const std::string& symbol);
     
     inline static ImTextureID s_shadowTextureID = 0;
     inline static ImTextureID s_reloadIconID = 0;
     inline static ImTextureID s_openEyeTextureID = 0;
     inline static ImTextureID s_closeEyeTextureID = 0;
+    
+    inline static char s_searchedString[128] = "Nifty";
   };
 } // namespace KanVest::UI
