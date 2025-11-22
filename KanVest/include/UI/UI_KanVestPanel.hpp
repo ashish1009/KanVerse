@@ -27,7 +27,7 @@ namespace KanVest::UI
     static void ShowPortfolioSummary(Portfolio* portfolio);
     
     static void ShowStockData();
-    static void ShowSearchBar();
+    static void ShowSearchBar(char* searchString, float height);
 
     static void AddStockInManager(const std::string& symbol);
     

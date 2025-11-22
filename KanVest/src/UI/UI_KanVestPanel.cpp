@@ -95,7 +95,7 @@ namespace KanVest::UI
       
       if (ImGui::BeginChild(" Cell 2 ", ImVec2(totalWidth * 0.4, totalHeight )))
       {
-        ShowSearchBar();
+        ShowSearchBar(s_searchedString, 10.0f);
       }
       ImGui::EndChild();
       ImGui::SameLine();
@@ -207,6 +207,10 @@ namespace KanVest::UI
     // Show summary data
     ShowPortfolioSummary(portfolio);
 
+    KanVasX::UI::ShiftCursor({5.0f, 5.0f});
+    ShowSearchBar(s_searchedString, 5.0f);
+    KanVasX::UI::ShiftCursorY(5.0f);
+
     for (int idx = 0; idx < holdings.size(); idx++)
     {
       auto& h = holdings[idx];
@@ -224,6 +228,15 @@ namespace KanVest::UI
         h.dayChange = stockData.change;
         h.dayChangePercent = stockData.changePercent;
       }
+      
+      std::string holdingChildID = "Holding" + std::to_string(idx);
+      KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Highlight, 0.2f));
+      if (ImGui::BeginChild(holdingChildID.c_str(), ImVec2(0.0f, 100.0f )))
+      {
+//        KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID, 5.0f);
+      }
+      ImGui::EndChild();
+      KanVasX::UI::ShiftCursorY(5.0f);
     }
   }
   
@@ -322,21 +335,20 @@ namespace KanVest::UI
     ImGui::EndChild();
   }
   
-  void Panel::ShowSearchBar()
+  void Panel::ShowSearchBar(char* searchString, float height)
   {
     IK_PERFORMANCE_FUNC("Panel::ShowSearchBar");
     const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::FrameBg, 40.0f);
-    if (KanVasX::Widget::Search(s_searchedString, 128, KanVasX::Settings::FrameHeight, contentRegionAvailX - 50.0f, "Enter Symbol ...", Font(Large), true))
+    if (KanVasX::Widget::Search(searchString, 128, height, contentRegionAvailX - 40.0f, "Enter Symbol ...", Font(Large), true))
     {
-      Utils::ConvertUpper(s_searchedString);
+      Utils::ConvertUpper(searchString);
     }
     
     ImGui::SameLine();
     float iconSize = ImGui::GetItemRectSize().y - 12;
     if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {0.0, 6.0}) || ImGui::IsKeyDown(ImGuiKey_Enter))
     {
-      AddStockInManager(s_searchedString);
+      AddStockInManager(searchString);
     }
   }
 
