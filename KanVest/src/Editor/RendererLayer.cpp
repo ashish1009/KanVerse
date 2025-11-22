@@ -11,6 +11,8 @@
 
 #include "UI/UI_KanVestPanel.hpp"
 
+#include "Stock/StockManager.hpp"
+
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
@@ -149,12 +151,16 @@ namespace KanVest
     // KanVest panel
     KanVest::UI::Panel::SetShadowTextureId(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
     KanVest::UI::Panel::SetReloadTextureId(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
+    
+    StockManager::StartLiveUpdates(10);
   }
   
   void RendererLayer::OnDetach() noexcept
   {
     IK_PROFILE();
     IK_LOG_WARN("RendererLayer", "Detaching '{0}' Layer from application", GetName());
+    
+    StockManager::StopLiveUpdates();
   }
   
   void RendererLayer::OnUpdate(const KanViz::TimeStep& ts)

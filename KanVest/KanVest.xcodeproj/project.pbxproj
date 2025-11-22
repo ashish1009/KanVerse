@@ -14,6 +14,8 @@
 		B2065B642ED0B896007F186E /* UI_KanVestPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2065B632ED0B896007F186E /* UI_KanVestPanel.cpp */; };
 		B2065B672ED1B91E007F186E /* UI_Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2065B662ED1B91E007F186E /* UI_Utils.cpp */; };
 		B26336652ED1BF1D00D46F96 /* StockManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336642ED1BF1D00D46F96 /* StockManager.cpp */; };
+		B263366B2ED1C4EC00D46F96 /* StockParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B263366A2ED1C4EC00D46F96 /* StockParser.cpp */; };
+		B26336702ED1C53100D46F96 /* APIProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B263366F2ED1C53100D46F96 /* APIProvider.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -52,6 +54,10 @@
 		B26336632ED1BF1D00D46F96 /* StockManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockManager.hpp; sourceTree = "<group>"; };
 		B26336642ED1BF1D00D46F96 /* StockManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockManager.cpp; sourceTree = "<group>"; };
 		B26336662ED1BFDE00D46F96 /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
+		B26336692ED1C4EC00D46F96 /* StockParser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockParser.hpp; sourceTree = "<group>"; };
+		B263366A2ED1C4EC00D46F96 /* StockParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockParser.cpp; sourceTree = "<group>"; };
+		B263366E2ED1C53100D46F96 /* APIProvider.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = APIProvider.hpp; sourceTree = "<group>"; };
+		B263366F2ED1C53100D46F96 /* APIProvider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = APIProvider.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -124,6 +130,7 @@
 			isa = PBXGroup;
 			children = (
 				B26336642ED1BF1D00D46F96 /* StockManager.cpp */,
+				B263366A2ED1C4EC00D46F96 /* StockParser.cpp */,
 			);
 			path = Stock;
 			sourceTree = "<group>";
@@ -133,8 +140,25 @@
 			children = (
 				B26336632ED1BF1D00D46F96 /* StockManager.hpp */,
 				B26336662ED1BFDE00D46F96 /* StockData.hpp */,
+				B26336692ED1C4EC00D46F96 /* StockParser.hpp */,
 			);
 			path = Stock;
+			sourceTree = "<group>";
+		};
+		B263366C2ED1C51500D46F96 /* URL_API */ = {
+			isa = PBXGroup;
+			children = (
+				B263366E2ED1C53100D46F96 /* APIProvider.hpp */,
+			);
+			path = URL_API;
+			sourceTree = "<group>";
+		};
+		B263366D2ED1C51D00D46F96 /* URL_API */ = {
+			isa = PBXGroup;
+			children = (
+				B263366F2ED1C53100D46F96 /* APIProvider.cpp */,
+			);
+			path = URL_API;
 			sourceTree = "<group>";
 		};
 		B289E6192EB0E01600937D0B = {
@@ -167,6 +191,7 @@
 				B2065B4D2ED0AC00007F186E /* User */,
 				B2065B522ED0AC50007F186E /* Portfolio */,
 				B26336622ED1BF0900D46F96 /* Stock */,
+				B263366C2ED1C51500D46F96 /* URL_API */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -180,6 +205,7 @@
 				B2065B4E2ED0AC09007F186E /* User */,
 				B2065B532ED0AC57007F186E /* Portfolio */,
 				B26336612ED1BF0400D46F96 /* Stock */,
+				B263366D2ED1C51D00D46F96 /* URL_API */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -319,6 +345,7 @@
 			files = (
 				B26336652ED1BF1D00D46F96 /* StockManager.cpp in Sources */,
 				B2065B5B2ED0B2D0007F186E /* User.cpp in Sources */,
+				B263366B2ED1C4EC00D46F96 /* StockParser.cpp in Sources */,
 				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
@@ -327,6 +354,7 @@
 				B2065B562ED0AC79007F186E /* Portfolio.cpp in Sources */,
 				B2065B592ED0B247007F186E /* UserManager.cpp in Sources */,
 				B2065B612ED0B521007F186E /* PortfolioController.cpp in Sources */,
+				B26336702ED1C53100D46F96 /* APIProvider.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
 				B2065B642ED0B896007F186E /* UI_KanVestPanel.cpp in Sources */,
 			);

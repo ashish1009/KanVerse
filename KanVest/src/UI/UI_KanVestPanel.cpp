@@ -13,6 +13,8 @@
 
 #include "UI/UI_Utils.hpp"
 
+#include "Stock/StockManager.hpp"
+
 namespace KanVest::UI
 {
 #define Font(font) KanVest::UI::Font::Get(KanVest::UI::FontType::font)
@@ -100,6 +102,25 @@ namespace KanVest::UI
       // Get holding
       std::vector<Holding>& holdings = portfolio->GetHoldings();
 
+      // Update computed data for holdings
+      for (int idx = 0; idx < holdings.size(); idx++)
+      {
+        auto& h = holdings[idx];
+        
+        StockData stockData("");
+        StockManager::GetStockData(h.symbolName, stockData);
+        if (stockData.IsValid())
+        {
+          h.stockValue = stockData.livePrice;
+          h.investment = h.averagePrice * h.quantity;
+          h.value = h.stockValue * h.quantity;
+          h.profitLoss = h.value - h.investment;
+          h.profitLossPercent = (h.profitLoss * 100) / h.investment;
+          h.dayChange = stockData.change;
+          h.dayChangePercent = stockData.changePercent;
+        }
+      }
+      
       // ---- Sorting ----
       std::sort(holdings.begin(), holdings.end(), [](const Holding& a, const Holding& b)
                 {
@@ -120,7 +141,7 @@ namespace KanVest::UI
         }
       });
       
-      std::string totalPortfolioValueString = "₹ " + std::to_string((int32_t)portfolio->GetTotalValue());
+      std::string totalPortfolioValueString = "₹ " + std::to_string((int32_t)portfolio->GetTotalInvestment());
       KanVasX::UI::Text(Font(Header_28), totalPortfolioValueString, Align::Left, {20.0f, 10.0f});
       
       KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
