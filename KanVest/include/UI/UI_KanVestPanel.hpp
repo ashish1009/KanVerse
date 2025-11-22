@@ -17,11 +17,15 @@ namespace KanVest::UI
     
     static void SetShadowTextureId(ImTextureID shadowTextureID);
     static void SetReloadTextureId(ImTextureID reloadTextureID);
+    static void SetOpenEyeTextureId(ImTextureID openTextureID);
+    static void SetCloseEyeTextureId(ImTextureID closeTextureID);
 
   private:
     static void ShowPortfolio();
     
     inline static ImTextureID s_shadowTextureID = 0;
     inline static ImTextureID s_reloadIconID = 0;
+    inline static ImTextureID s_openEyeTextureID = 0;
+    inline static ImTextureID s_closeEyeTextureID = 0;
   };
 } // namespace KanVest::UI

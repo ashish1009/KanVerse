@@ -138,35 +138,50 @@ namespace KanViz::UI
   void ImGuiLayer::LoadFonts(const std::vector<UI::ImGuiFont>& otherFonts)
   {
     IK_PROFILE();
-    if (otherFonts.size() == 0)
-    {
+    if (otherFonts.empty())
       return;
-    }
     
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->ClearFonts();
     
     IK_LOG_INFO(LogModule::UI, "Loading ImGui Fonts");
+    
     for (const auto& font : otherFonts)
     {
+      // Custom ranges: Basic Latin + Devanagari + Currency + arrows
       static const ImWchar ranges[] = {
         0x0020, 0x00FF,   // Basic Latin
-        0x0900, 0x097F,   // Devanagari (ensures Indian fonts load properly)
-        0x20A0, 0x20CF,   // Currency symbols (includes ₹ at 20B9)
+        0x0900, 0x097F,   // Devanagari
+        0x20A0, 0x20CF,   // Currency symbols (₹ included)
+        0x2191, 0x2191,   // Up arrow ↑
+        0x2193, 0x2193,   // Down arrow ↓
         0
       };
-
-      if (io.Fonts->AddFontFromFileTTF(font.filePath.c_str(), font.size, nullptr, ranges) == nullptr)
+      
+      ImFont* f = io.Fonts->AddFontFromFileTTF(font.filePath.c_str(), font.size, nullptr, ranges);
+      if (!f)
       {
         IK_LOG_ERROR(LogModule::UI, "Failed to load font from {0}", font.filePath.string());
       }
       else
       {
-        IK_LOG_INFO(LogModule::UI, "  Font    {0} Size {1}", Utils::FileSystem::Absolute(font.filePath).string(), font.size);
+        IK_LOG_INFO(LogModule::UI, "  Font Loaded: {0} Size {1}",
+                    Utils::FileSystem::Absolute(font.filePath).string(),
+                    font.size);
       }
     }
     
-    // Default font is Regular
+    // Set default font
     io.FontDefault = io.Fonts->Fonts[0];
+    
+    // ---- Rebuild & upload font atlas for OpenGL ----
+    unsigned char* pixels;
+    int width, height;
+    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+    
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    ImGui_ImplOpenGL3_CreateFontsTexture();
+    // ------------------------------------------------
   }
+
 } // namespace KanViz::UI

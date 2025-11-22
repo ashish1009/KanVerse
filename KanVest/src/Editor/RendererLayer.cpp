@@ -116,26 +116,26 @@ namespace KanVest
       {UI::FontType::FixedWidthHeader_38,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       38}},
       {UI::FontType::FixedWidthHeader_40,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       40}},
 
-      {UI::FontType::Header_22,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         22}},
-      {UI::FontType::Header_24,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         24}},
-      {UI::FontType::Header_26,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         26}},
-      {UI::FontType::Header_28,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         28}},
-      {UI::FontType::Header_30,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         30}},
-      {UI::FontType::Header_32,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         32}},
-      {UI::FontType::Header_34,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         34}},
-      {UI::FontType::Header_36,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         36}},
-      {UI::FontType::Header_38,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         38}},
-      {UI::FontType::Header_40,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         40}},
-      {UI::FontType::Header_42,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         42}},
-      {UI::FontType::Header_44,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         44}},
-      {UI::FontType::Header_46,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         46}},
-      {UI::FontType::Header_48,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         48}},
-      {UI::FontType::Header_50,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         50}},
-      {UI::FontType::Header_52,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         52}},
-      {UI::FontType::Header_54,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         54}},
-      {UI::FontType::Header_56,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         56}},
-      {UI::FontType::Header_58,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         58}},
-      {UI::FontType::Header_60,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Bold.ttf"),         60}},
+      {UI::FontType::Header_22,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         22}},
+      {UI::FontType::Header_24,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         24}},
+      {UI::FontType::Header_26,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         26}},
+      {UI::FontType::Header_28,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         28}},
+      {UI::FontType::Header_30,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         30}},
+      {UI::FontType::Header_32,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         32}},
+      {UI::FontType::Header_34,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         34}},
+      {UI::FontType::Header_36,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         36}},
+      {UI::FontType::Header_38,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         38}},
+      {UI::FontType::Header_40,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         40}},
+      {UI::FontType::Header_42,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         42}},
+      {UI::FontType::Header_44,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         44}},
+      {UI::FontType::Header_46,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         46}},
+      {UI::FontType::Header_48,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         48}},
+      {UI::FontType::Header_50,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         50}},
+      {UI::FontType::Header_52,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         52}},
+      {UI::FontType::Header_54,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         54}},
+      {UI::FontType::Header_56,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         56}},
+      {UI::FontType::Header_58,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         58}},
+      {UI::FontType::Header_60,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         60}},
     });
     
     KanVasX::Color::Initialize();
@@ -151,7 +151,9 @@ namespace KanVest
     // KanVest panel
     KanVest::UI::Panel::SetShadowTextureId(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
     KanVest::UI::Panel::SetReloadTextureId(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
-    
+    KanVest::UI::Panel::SetOpenEyeTextureId(KanVasX::UI::GetTextureID(m_openEyeIcon->GetRendererID()));
+    KanVest::UI::Panel::SetCloseEyeTextureId(KanVasX::UI::GetTextureID(m_closeEyeIcon->GetRendererID()));
+
     StockManager::StartLiveUpdates(10);
   }
   

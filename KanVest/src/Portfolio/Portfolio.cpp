@@ -76,6 +76,14 @@ namespace KanVest
                            });
   }
   
+  float Portfolio::GetTodayChange()
+  {
+    return std::accumulate(m_holdings.begin(),m_holdings.end(),0.0f,
+                           [](float total, const Holding& h) {
+                              return total + h.dayChange;
+    });
+  }
+  
   bool PortfolioSerializer::SaveToYAML(const std::filesystem::path& path, const Portfolio& portfolio)
   {
     try {

@@ -40,7 +40,9 @@ namespace KanVest
     float GetTotalInvestment();
     /// This funciton returns the total investment
     float GetTotalValue();
-
+    /// This funciton returns today change
+    float GetTodayChange();
+    
   private:
     /// This function adds the holding in data base
     /// - Parameter holding: holding instnace
