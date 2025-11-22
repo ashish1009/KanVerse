@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "Portfolio/PortfolioController.hpp"
+
 namespace KanVest::UI
 {
   class Panel
@@ -22,6 +24,8 @@ namespace KanVest::UI
 
   private:
     static void ShowPortfolio();
+    static void ShowPortfolioSummary(Portfolio* portfolio);
+    
     static void ShowStockData();
     static void ShowSearchBar();
 

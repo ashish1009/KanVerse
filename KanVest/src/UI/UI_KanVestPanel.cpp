@@ -9,8 +9,6 @@
 
 #include "User/UserManager.hpp"
 
-#include "Portfolio/PortfolioController.hpp"
-
 #include "UI/UI_Utils.hpp"
 
 #include "Stock/StockManager.hpp"
@@ -18,6 +16,15 @@
 namespace KanVest::UI
 {
 #define Font(font) KanVest::UI::Font::Get(KanVest::UI::FontType::font)
+
+  static bool g_showInvestment = true;
+  static bool g_sortAscending = true;
+  static int g_sortColumn = 0;
+  static const std::string g_hiddenString = "*****";
+  
+  auto FinalString = [](const std::string & data) {
+    return g_showInvestment ? data : g_hiddenString;
+  };
 
   using Align = KanVasX::UI::AlignX;
 
@@ -104,6 +111,69 @@ namespace KanVest::UI
     KanVasX::Panel::End(0);
   }
   
+  void Panel::ShowPortfolioSummary(Portfolio* portfolio)
+  {
+    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Highlight, 0.2f));
+    if (ImGui::BeginChild(" Summary ", ImVec2(0.0f, 180.0f )))
+    {
+      float totalPortfolioValue = portfolio->GetTotalValue();
+      float totalPortfolioInvestment = portfolio->GetTotalInvestment();
+      
+      float profitLoss = totalPortfolioValue - totalPortfolioInvestment;
+      float profitLossPercent = (profitLoss * 100) / totalPortfolioInvestment;
+      
+      float todayChange = portfolio->GetTodayChange();
+      float todayChangePercent = (todayChange * 100) / totalPortfolioInvestment;
+      
+      // Total Value UI
+      std::string totalPortfolioValueString = "₹" + FinalString(Utils::FormatWithCommas((int32_t)totalPortfolioValue));
+      KanVasX::UI::Text(Font(Header_56), totalPortfolioValueString, Align::Left, {20.0f, 10.0f});
+      
+      ImGui::SameLine();
+      if (KanVasX::UI::DrawButtonImage("ShowInvestment", g_showInvestment ? s_openEyeTextureID : s_closeEyeTextureID,
+                                       false, {20.0f, 20.0f}, {5.0f, 20.0f}))
+      {
+        g_showInvestment ^= 1;
+      }
+      
+      // Profit loss UI
+      std::string profitLossTag = profitLoss > 0 ? "Overall Gain" : "Overall Loss";
+      std::string pnlSign = profitLoss > 0 ? "+" : "-";
+      ImU32 profitLossColor = profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+      
+      KanVasX::UI::Text(Font(Header_26), profitLossTag, Align::Left, {20.0f, -5.0f});
+      
+      std::string profitLossString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)profitLoss));
+      ImGui::SameLine();
+      KanVasX::UI::Text(Font(Header_30), profitLossString, Align::Left, {0.0f, 0.0f}, profitLossColor);
+      
+      profitLossString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(profitLossPercent)) + "%)";
+      ImGui::SameLine();
+      KanVasX::UI::Text(Font(Header_28), profitLossString, Align::Left, {0.0f, 0.0f});
+      
+      // Total Investment
+      KanVasX::UI::Text(Font(Header_26), "Invested Value", Align::Left, {20.0f, 5.0f});
+      ImGui::SameLine();
+      std::string dayProfitLossTag = profitLoss > 0 ? "Today's Gain" : "Today's Loss";
+      KanVasX::UI::Text(Font(Header_26), dayProfitLossTag, Align::Right, {-20.0f, 0.0f});
+      
+      std::string totalPortfolioInvestmentString = "₹" + FinalString(Utils::FormatWithCommas((int32_t)totalPortfolioInvestment));
+      KanVasX::UI::Text(Font(Header_30), totalPortfolioInvestmentString, Align::Left, {20.0f, 0.0f});
+      
+      ImGui::SameLine();
+      std::string dayChangeString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)todayChange));
+      ImGui::SameLine();
+      KanVasX::UI::Text(Font(Header_30), dayChangeString, Align::Right, {-100.0f, 0.0f}, profitLossColor);
+      
+      profitLossString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(todayChangePercent)) + "%)";
+      ImGui::SameLine();
+      KanVasX::UI::Text(Font(Header_24), profitLossString, Align::Left, {0.0f, 5.0f});
+      
+      KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+    }
+    ImGui::EndChild();
+  }
+  
   void Panel::ShowPortfolio()
   {
     IK_PERFORMANCE_FUNC("Panel::ShowPortfolio");
@@ -113,9 +183,6 @@ namespace KanVest::UI
 
     // Get holding
     std::vector<Holding>& holdings = portfolio->GetHoldings();
-
-    static bool g_sortAscending = true;
-    static int g_sortColumn = 0;
     
     // ---- Sorting ----
     std::sort(holdings.begin(), holdings.end(), [](const Holding& a, const Holding& b)
@@ -137,78 +204,14 @@ namespace KanVest::UI
       }
     });
 
-    static bool showInvestment = true;
-    static const std::string HiddenString = "*****";
+    // Show summary data
+    ShowPortfolioSummary(portfolio);
 
-    auto FinalString = [](const std::string & data) {
-      return showInvestment ? data : HiddenString;
-    };
-
-    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Highlight, 0.2f));
-    if (ImGui::BeginChild(" Summary ", ImVec2(0.0f, 180.0f )))
-    {
-      float totalPortfolioValue = portfolio->GetTotalValue();
-      float totalPortfolioInvestment = portfolio->GetTotalInvestment();
-
-      float profitLoss = totalPortfolioValue - totalPortfolioInvestment;
-      float profitLossPercent = (profitLoss * 100) / totalPortfolioInvestment;
-
-      float todayChange = portfolio->GetTodayChange();
-      float todayChangePercent = (todayChange * 100) / totalPortfolioInvestment;
-
-      // Total Value UI
-      std::string totalPortfolioValueString = "₹" + FinalString(Utils::FormatWithCommas((int32_t)totalPortfolioValue));
-      KanVasX::UI::Text(Font(Header_56), totalPortfolioValueString, Align::Left, {20.0f, 10.0f});
-      
-      ImGui::SameLine();
-      if (KanVasX::UI::DrawButtonImage("ShowInvestment", showInvestment ? s_openEyeTextureID : s_closeEyeTextureID,
-                                       false, {20.0f, 20.0f}, {5.0f, 20.0f}))
-      {
-        showInvestment ^= 1;
-      }
-      
-      // Profit loss UI
-      std::string profitLossTag = profitLoss > 0 ? "Overall Gain" : "Overall Loss";
-      std::string pnlSign = profitLoss > 0 ? "+" : "-";
-      ImU32 profitLossColor = profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
-
-      KanVasX::UI::Text(Font(Header_26), profitLossTag, Align::Left, {20.0f, -5.0f});
-
-      std::string profitLossString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)profitLoss));
-      ImGui::SameLine();
-      KanVasX::UI::Text(Font(Header_30), profitLossString, Align::Left, {0.0f, 0.0f}, profitLossColor);
-      
-      profitLossString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(profitLossPercent)) + "%)";
-      ImGui::SameLine();
-      KanVasX::UI::Text(Font(Header_28), profitLossString, Align::Left, {0.0f, 0.0f});
-
-      // Total Investment
-      KanVasX::UI::Text(Font(Header_26), "Invested Value", Align::Left, {20.0f, 5.0f});
-      ImGui::SameLine();
-      std::string dayProfitLossTag = profitLoss > 0 ? "Today's Gain" : "Today's Loss";
-      KanVasX::UI::Text(Font(Header_26), dayProfitLossTag, Align::Right, {-20.0f, 0.0f});
-
-      std::string totalPortfolioInvestmentString = "₹" + FinalString(Utils::FormatWithCommas((int32_t)totalPortfolioInvestment));
-      KanVasX::UI::Text(Font(Header_30), totalPortfolioInvestmentString, Align::Left, {20.0f, 0.0f});
-
-      ImGui::SameLine();
-      std::string dayChangeString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)todayChange));
-      ImGui::SameLine();
-      KanVasX::UI::Text(Font(Header_30), dayChangeString, Align::Right, {-100.0f, 0.0f}, profitLossColor);
-
-      profitLossString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(todayChangePercent)) + "%)";
-      ImGui::SameLine();
-      KanVasX::UI::Text(Font(Header_24), profitLossString, Align::Left, {0.0f, 5.0f});
-      
-      KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
-    }
-    ImGui::EndChild();
-
-    // Update computed data for holdings
     for (int idx = 0; idx < holdings.size(); idx++)
     {
       auto& h = holdings[idx];
       
+      // Update Stock Data
       StockData stockData("");
       StockManager::GetStockData(h.symbolName, stockData);
       if (stockData.IsValid())
