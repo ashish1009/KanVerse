@@ -7,6 +7,11 @@
 
 #include "StockManager.hpp"
 
+#include "URL_API/APIProvider.hpp"
+
+#include "Stock/StockParser.hpp"
+#include "Stock/StockAPI.hpp"
+
 namespace KanVest
 {
   namespace Utils
@@ -22,6 +27,22 @@ namespace KanVest
       if (symbol.find('.') == std::string::npos)
         symbol += ".NS";
       return symbol;
+    }
+    
+    static std::string FetchStockFallbackData(const std::string& symbol, const std::string& interval, const std::string& range, const APIKeys& keys)
+    {
+      std::string data = StockAPI::FetchLiveData(symbol, interval, range);
+      
+      if (data.find("\"" + keys.price + "\"") == std::string::npos &&
+          symbol.find(".NS") != std::string::npos)
+      {
+        std::string altSymbol = symbol.substr(0, symbol.find(".NS")) + ".BO";
+        std::string altData = StockAPI::FetchLiveData(altSymbol, interval, range);
+        if (altData.find("\"" + keys.price + "\"") != std::string::npos)
+          return altData;
+      }
+      
+      return data;
     }
     
     // Internal fetch + parse utility
