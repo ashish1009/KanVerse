@@ -67,6 +67,7 @@ namespace KanVest
     std::condition_variable m_cv;
     bool m_done;
   };
+  
   // Cache key representing symbol+interval+range
   struct CacheKey
   {
@@ -94,11 +95,66 @@ namespace KanVest
   class StockManager
   {
   public:
+    inline static const char* ValidIntervals[] =
+    {"1m","2m","5m","15m","30m","60m","90m","1h","1d","5d","1wk","1mo","3mo"};
+    inline static const char* ValidRange[] =
+    {"1d","5d","1mo","6mo","ytd","1y","5y","max"};
+    
+    inline static std::unordered_map<std::string,std::vector<std::string>> RangeIntervalMap =
+    {
+      {"1d",   {"1m","5m","15m","30m","60m"}},
+      {"5d",   {"1m","5m","15m","30m","60m"}},
+      {"1mo",  {"5m","15m","30m","60m","1d"}},
+      {"6mo",  {"1h","1d","1wk"}},
+      {"ytd",  {"1h","1wk","1mo"}},
+      {"1y",   {"1d","1wk","1mo"}},
+      {"5y",   {"1d","1wk","1mo"}},
+      {"max",   {"1d","1wk","1mo"}}
+    };
+
+    // Stock operations
+    static bool AddStock(const std::string& symbol);
+    static bool EditStock(const std::string& symbol);
+    static void RemoveStock(const std::string& symbol);
+    static bool GetStockData(const std::string& symbol, StockData& outData);
+
+    // Refresh operations
+    static void RefreshAllBlocking();
+    static void RefreshStockAsync(const std::string& symbol);
+    static bool RefreshStockBlocking(const std::string& symbol);
+    
+    // Live updates
+    static void StartLiveUpdates(int intervalMilliseconds = 1000);
+    static void StopLiveUpdates();
+    
+    // Selection / active stock
+    static void SetSelectedStockSymbol(const std::string& stockSymbol);
+    static const std::string& GetSelectedStockSymbol();
+    static StockData GetSelectedStockData();
+    static const std::unordered_map<std::string,StockData>& GetStockCache();
+    
+    // Interval / range
+    static void SetCurrentInterval(const std::string& interval);
+    static const std::string& GetCurrentInterval();
+    static void SetCurrentRange(const std::string& range);
+    static const std::string& GetCurrentRange();
+
+  private:
+    static void UpdateLoop(int intervalMilliseconds);
+    static bool UpdateStockInternal(const std::string& symbol, bool forceRefresh = false);
+
     inline static std::unordered_map<CacheKey, StockData, CacheKeyHash> s_stockDataCache;
     inline static std::unordered_map<std::string,StockData> s_activeCache;
     inline static std::vector<std::string> s_symbols;
     inline static std::string s_selectedStockSymbol;
     inline static std::string s_currentInterval = "1d";
     inline static std::string s_currentRange = "1y";
+    
+    inline static std::mutex s_mutex;
+    inline static std::atomic<bool> s_running = false;
+    inline static std::thread s_updateThread;
+    
+    // Thread pool for async updates
+    inline static std::unique_ptr<ThreadPool> s_threadPool;
   };
 } // namespace KanVest
