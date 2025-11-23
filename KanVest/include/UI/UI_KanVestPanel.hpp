@@ -19,6 +19,7 @@ namespace KanVest::UI
     
     static void SetShadowTextureId(ImTextureID shadowTextureID);
     static void SetReloadTextureId(ImTextureID reloadTextureID);
+    static void SetSettingTextureId(ImTextureID settingIconID);
     static void SetOpenEyeTextureId(ImTextureID openTextureID);
     static void SetCloseEyeTextureId(ImTextureID closeTextureID);
 
@@ -27,15 +28,18 @@ namespace KanVest::UI
     static void ShowPortfolioSummary(Portfolio* portfolio);
     
     static void ShowStockData();
-    static void ShowSearchBar(char* searchString, float height);
+    static void ShowStockSearchBar(float height);
+    static void ShowHoldingSearchBar(float height);
 
     static void AddStockInManager(const std::string& symbol);
     
     inline static ImTextureID s_shadowTextureID = 0;
     inline static ImTextureID s_reloadIconID = 0;
+    inline static ImTextureID s_settingIconID = 0;
     inline static ImTextureID s_openEyeTextureID = 0;
     inline static ImTextureID s_closeEyeTextureID = 0;
     
-    inline static char s_searchedString[128] = "Nifty";
+    inline static char s_searchedStockString[128] = "Nifty";
+    inline static char s_searchedHoldingString[128] = "";
   };
 } // namespace KanVest::UI

@@ -19,7 +19,11 @@ namespace KanVest::UI
 
   static bool g_showInvestment = true;
   static bool g_sortAscending = true;
+  static bool g_showEditModal = false;
+
   static int g_sortColumn = 0;
+  static int g_editIndex = -1;
+
   static const std::string g_hiddenString = "*****";
   
   auto FinalString = [](const std::string & data) {
@@ -44,6 +48,10 @@ namespace KanVest::UI
   void Panel::SetReloadTextureId(ImTextureID reloadIconID)
   {
     s_reloadIconID = reloadIconID;
+  }
+  void Panel::SetSettingTextureId(ImTextureID settingIconID)
+  {
+    s_settingIconID = settingIconID;
   }
   void Panel::SetOpenEyeTextureId(ImTextureID openEyeTextureID)
   {
@@ -95,7 +103,7 @@ namespace KanVest::UI
       
       if (ImGui::BeginChild(" Cell 2 ", ImVec2(totalWidth * 0.4, totalHeight )))
       {
-        ShowSearchBar(s_searchedString, 10.0f);
+        ShowStockSearchBar(10.0f);
       }
       ImGui::EndChild();
       ImGui::SameLine();
@@ -208,7 +216,7 @@ namespace KanVest::UI
     ShowPortfolioSummary(portfolio);
 
     KanVasX::UI::ShiftCursor({5.0f, 5.0f});
-    ShowSearchBar(s_searchedString, 5.0f);
+    ShowHoldingSearchBar(5.0f);
     KanVasX::UI::ShiftCursorY(5.0f);
 
     float totalWidth  = ImGui::GetContentRegionAvail().x;
@@ -241,125 +249,141 @@ namespace KanVest::UI
         KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::BackgroundDark, 0.2f));
         if (ImGui::BeginChild(holdingChildID.c_str(), childSize, true))
         {
-          std::string pnlSign = h.profitLoss > 0 ? "+" : "-";
-          ImU32 profitLossColor = h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
-
-          // Symbol PL
+          if (g_showEditModal and g_editIndex == idx)
           {
-            KanVasX::UI::Text(Font(Header_34), h.symbolName, Align::Left, {5.0f, 5.0f});
-            ImGui::SameLine();
-
-            // Right Data
+            
+          }
+          else
+          {
+            std::string pnlSign = h.profitLoss > 0 ? "+" : "-";
+            ImU32 profitLossColor = h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+            
+            // Symbol PL
             {
-              std::string profitLossString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)h.profitLoss));
-              std::string profitLossPercentString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.profitLossPercent)) + "%)";
+              KanVasX::UI::Text(Font(Header_34), h.symbolName, Align::Left, {5.0f, 5.0f});
+              ImGui::SameLine();
               
-              KanVasX::ScopedFont header(Font(Header_26));
+              // Right Data
               {
-                KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+                std::string profitLossString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)h.profitLoss));
+                std::string profitLossPercentString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.profitLossPercent)) + "%)";
                 
-                float textSize = ImGui::CalcTextSize(profitLossString.data()).x + ImGui::CalcTextSize(profitLossPercentString.data()).x;
+                KanVasX::ScopedFont header(Font(Header_26));
+                {
+                  KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+                  
+                  float textSize = ImGui::CalcTextSize(profitLossString.data()).x + ImGui::CalcTextSize(profitLossPercentString.data()).x;
+                  float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
+                  
+                  ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY() + 5.0f});
+                  ImGui::Text("%s", profitLossString.data());
+                }
+                ImGui::SameLine();
+                KanVasX::UI::ShiftCursorY(5.0f);
+                ImGui::Text("%s", profitLossPercentString.data());
+              }
+            }
+            
+            // ATP LTP
+            {
+              KanVasX::UI::Text(Font(Header_18), "ATP ", Align::Left, {5.0f, 5.0f});
+              ImGui::SameLine();
+              std::string atpString = "₹" + Utils::FormatDoubleToString(h.averagePrice);
+              KanVasX::UI::Text(Font(Header_18), atpString, Align::Left, {0.0f, 0.0f});
+              
+              // Right Data
+              {
+                ImGui::SameLine();
+                
+                std::string ltpString = "LTP ";
+                std::string ltpValueString = "₹" + Utils::FormatDoubleToString(h.stockValue);
+                std::string ltpPerString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.dayChangePercent)) + "%)";
+                
+                KanVasX::ScopedFont header(Font(Header_18));
+                float textSize = ImGui::CalcTextSize(ltpString.data()).x + ImGui::CalcTextSize(ltpValueString.data()).x + ImGui::CalcTextSize(ltpPerString.data()).x;
+                float xOffset = (ImGui::GetColumnWidth() - textSize - 8.0f) ;
+                
+                ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
+                ImGui::Text("%s", ltpString.data());
+                
+                {
+                  KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+                  ImGui::SameLine();
+                  ImGui::Text("%s", ltpValueString.data());
+                }
+                
+                ImGui::SameLine();
+                ImGui::Text("%s", ltpPerString.data());
+              }
+            }
+            
+            // Shares
+            {
+              KanVasX::UI::Text(Font(Header_18), "Shares ", Align::Left, {5.0f, 0.0f});
+              ImGui::SameLine();
+              KanVasX::UI::Text(Font(Header_18), std::to_string(h.quantity), Align::Left, {0.0f, 0.0f});
+              
+              // Right Data
+              {
+                ImGui::SameLine();
+                
+                std::string gainTagString = h.profitLoss > 0 ? "Today's Gain " : "Today's Loss";
+                std::string gainValueString = "₹" + Utils::FormatDoubleToString(h.dayChange);
+                
+                KanVasX::ScopedFont header(Font(Header_18));
+                float textSize = ImGui::CalcTextSize(gainTagString.data()).x + ImGui::CalcTextSize(gainValueString.data()).x;
                 float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
                 
-                ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY() + 5.0f});
-                ImGui::Text("%s", profitLossString.data());
+                ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
+                ImGui::Text("%s", gainTagString.data());
+                
+                {
+                  KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+                  ImGui::SameLine();
+                  ImGui::Text("%s", gainValueString.data());
+                }
               }
-              ImGui::SameLine();
-              KanVasX::UI::ShiftCursorY(5.0f);
-              ImGui::Text("%s", profitLossPercentString.data());
             }
-          }
-          
-          // ATP LTP
-          {
-            KanVasX::UI::Text(Font(Header_18), "ATP ", Align::Left, {5.0f, 5.0f});
-            ImGui::SameLine();
-            std::string atpString = "₹" + Utils::FormatDoubleToString(h.averagePrice);
-            KanVasX::UI::Text(Font(Header_18), atpString, Align::Left, {0.0f, 0.0f});
-
-            // Right Data
-            {
-              ImGui::SameLine();
-
-              std::string ltpString = "LTP ";
-              std::string ltpValueString = "₹" + Utils::FormatDoubleToString(h.stockValue);
-              std::string ltpPerString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.dayChangePercent)) + "%)";
-              
-              KanVasX::ScopedFont header(Font(Header_18));
-              float textSize = ImGui::CalcTextSize(ltpString.data()).x + ImGui::CalcTextSize(ltpValueString.data()).x + ImGui::CalcTextSize(ltpPerString.data()).x;
-              float xOffset = (ImGui::GetColumnWidth() - textSize - 8.0f) ;
-              
-              ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
-              ImGui::Text("%s", ltpString.data());
-
-              {
-                KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
-                ImGui::SameLine();
-                ImGui::Text("%s", ltpValueString.data());
-              }
-
-              ImGui::SameLine();
-              ImGui::Text("%s", ltpPerString.data());
-            }
-          }
-
-          // Shares
-          {
-            KanVasX::UI::Text(Font(Header_18), "Shares ", Align::Left, {5.0f, 0.0f});
-            ImGui::SameLine();
-            KanVasX::UI::Text(Font(Header_18), std::to_string(h.quantity), Align::Left, {0.0f, 0.0f});
             
-            // Right Data
-            {
-              ImGui::SameLine();
-
-              std::string gainTagString = h.profitLoss > 0 ? "Today's Gain " : "Today's Loss";
-              std::string gainValueString = "₹" + Utils::FormatDoubleToString(h.dayChange);
-              
-              KanVasX::ScopedFont header(Font(Header_18));
-              float textSize = ImGui::CalcTextSize(gainTagString.data()).x + ImGui::CalcTextSize(gainValueString.data()).x;
-              float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
-              
-              ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
-              ImGui::Text("%s", gainTagString.data());
-              
-              {
-                KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
-                ImGui::SameLine();
-                ImGui::Text("%s", gainValueString.data());
-              }
-            }
-          }
-          
-          KanVasX::UI::ShiftCursorY(5.0f);
-          KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
-
-          // Invested
-          {
-            KanVasX::UI::Text(Font(Header_20), "Invested ", Align::Left, {5.0f, 4.0f});
-            ImGui::SameLine();
-            KanVasX::UI::Text(Font(Header_20), Utils::FormatWithCommas(int32_t(h.investment)), Align::Left, {0.0f, 0.0f});
+            KanVasX::UI::ShiftCursorY(5.0f);
+            KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
             
-            // Right Data
+            // Invested
             {
+              KanVasX::UI::Text(Font(Header_20), "Invested ", Align::Left, {5.0f, 4.0f});
               ImGui::SameLine();
+              KanVasX::UI::Text(Font(Header_20), Utils::FormatWithCommas(int32_t(h.investment)), Align::Left, {0.0f, 0.0f});
               
-              std::string valueTagString = "Current ";
-              std::string valueValueString = "₹" + Utils::FormatWithCommas(int32_t(h.investment));
-              
-              KanVasX::ScopedFont header(Font(Header_20));
-              float textSize = ImGui::CalcTextSize(valueTagString.data()).x + ImGui::CalcTextSize(valueValueString.data()).x;
-              float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
-              
-              ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
-              ImGui::Text("%s", valueTagString.data());
-              
-              ImGui::SameLine();
-              ImGui::Text("%s", valueValueString.data());
+              // Right Data
+              {
+                ImGui::SameLine();
+                
+                std::string valueTagString = "Current ";
+                std::string valueValueString = "₹" + Utils::FormatWithCommas(int32_t(h.investment));
+                
+                KanVasX::ScopedFont header(Font(Header_20));
+                float textSize = ImGui::CalcTextSize(valueTagString.data()).x + ImGui::CalcTextSize(valueValueString.data()).x;
+                float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
+                
+                ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
+                ImGui::Text("%s", valueTagString.data());
+                
+                ImGui::SameLine();
+                ImGui::Text("%s", valueValueString.data());
+              }
             }
           }
         }
         ImGui::EndChild();
+        if (ImGui::IsItemClicked())
+        {
+          StockManager::SetSelectedStockSymbol(h.symbolName);
+        }
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+        {
+          g_editIndex = idx;
+          g_showEditModal = true;
+        }
 
         KanVasX::UI::ShiftCursorY(5.0f);
       }
@@ -462,20 +486,37 @@ namespace KanVest::UI
     ImGui::EndChild();
   }
   
-  void Panel::ShowSearchBar(char* searchString, float height)
+  void Panel::ShowStockSearchBar(float height)
   {
     IK_PERFORMANCE_FUNC("Panel::ShowSearchBar");
     const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
-    if (KanVasX::Widget::Search(searchString, 128, height, contentRegionAvailX - 40.0f, "Enter Symbol ...", Font(Large), true))
+    if (KanVasX::Widget::Search(s_searchedStockString, 128, height, contentRegionAvailX - 40.0f, "Enter Symbol ...", Font(Large), true))
     {
-      Utils::ConvertUpper(searchString);
+      Utils::ConvertUpper(s_searchedStockString);
     }
     
     ImGui::SameLine();
     float iconSize = ImGui::GetItemRectSize().y - 12;
     if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {0.0, 6.0}) || ImGui::IsKeyDown(ImGuiKey_Enter))
     {
-      AddStockInManager(searchString);
+      AddStockInManager(s_searchedStockString);
+    }
+  }
+
+  void Panel::ShowHoldingSearchBar(float height)
+  {
+    IK_PERFORMANCE_FUNC("Panel::ShowSearchBar");
+    const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
+    if (KanVasX::Widget::Search(s_searchedHoldingString, 128, height, contentRegionAvailX - 40.0f, "Enter Symbol ...", Font(Large), true))
+    {
+      Utils::ConvertUpper(s_searchedHoldingString);
+    }
+    
+    ImGui::SameLine();
+    float iconSize = ImGui::GetItemRectSize().y - 12;
+    if (KanVasX::UI::DrawButtonImage("Setting", s_settingIconID, false, {iconSize, iconSize}, {0.0, 6.0}))
+    {
+      // Add popup  
     }
   }
 
