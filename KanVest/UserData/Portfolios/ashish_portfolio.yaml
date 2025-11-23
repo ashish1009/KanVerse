@@ -2,6 +2,9 @@ Holdings:
   - Symbol: BEL
     AveragePrice: 345
     Quantity: 1280
+  - Symbol: BHEL
+    AveragePrice: 345
+    Quantity: 23
   - Symbol: BSE
     AveragePrice: 2342
     Quantity: 23
@@ -14,6 +17,3 @@ Holdings:
   - Symbol: IDEA
     AveragePrice: 10.2299995
     Quantity: 1400
-  - Symbol: BHEL
-    AveragePrice: 234
-    Quantity: 23
