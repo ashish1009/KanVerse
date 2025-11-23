@@ -34,7 +34,35 @@ namespace KanVasX
       ImGui::EndDisabled();
     }
   }
-
+  bool UI::BeginPopup(const char* strID, ImGuiWindowFlags flags)
+  {
+    bool opened = false;
+    if (ImGui::BeginPopup(strID, flags))
+    {
+      opened = true;
+      // Fill background wiht nice gradient
+      const float padding = ImGui::GetStyle().WindowBorderSize;
+      const ImRect windowRect = UI::RectExpanded(ImGui::GetCurrentWindow()->Rect(), -padding, -padding);
+      ImGui::PushClipRect(windowRect.Min, windowRect.Max, false);
+      
+      const ImColor col1 = ImGui::GetStyleColorVec4(ImGuiCol_PopupBg);// Colours::Theme::backgroundPopup;
+      const ImColor col2 = KanVasX::Color::MultipliedValue(col1, 0.8f);
+      
+      ImGui::GetWindowDrawList()->AddRectFilledMultiColor(windowRect.Min, windowRect.Max, col1, col1, col2, col2);
+      ImGui::GetWindowDrawList()->AddRect(windowRect.Min, windowRect.Max, KanVasX::Color::MultipliedValue(col1, 1.1f));
+      ImGui::PopClipRect();
+      
+      // Popped in EndPopup()
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(1.0f, 1.0f));
+    }
+    
+    return opened;
+  }
+  void UI::EndPopup()
+  {
+    ImGui::PopStyleVar();   // WindowPadding;
+    ImGui::EndPopup();
+  }
   void UI::PushID()
   {
     ImGui::PushID(s_UIContextID++);

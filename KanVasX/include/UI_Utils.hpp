@@ -34,6 +34,11 @@ namespace KanVasX
     static void BeginDisabled(bool disabled = true);
     /// This function Ends the disable
     static void EndDisabled();
+    /// This function begins the popup
+    /// - Parameter strID: string ID
+    static bool BeginPopup(const char* strID, ImGuiWindowFlags flags = 0);
+    /// This function ends the popup
+    static void EndPopup();
 
     // Wrappers --------------------------------------------------------------------------------------------------------------------------------------
     /// This function push unque id for ImGui

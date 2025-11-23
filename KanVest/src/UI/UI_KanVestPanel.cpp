@@ -23,6 +23,7 @@ namespace KanVest::UI
   static bool g_sortAscending = true;
   static bool g_showEditModal = false;
   static bool g_showAddRow = false;
+  static bool g_showSettingModel = false;
 
   static int g_sortColumn = 0;
   static int g_selectedIdx = -1;
@@ -174,13 +175,15 @@ namespace KanVest::UI
       if (ImGui::BeginChild(" Stock - Data ", ImVec2(totalWidth * 0.3, totalHeight )))
       {
         ShowStockData();
+        
+        KanVasX::UI::ShiftCursorY(ImGui::GetContentRegionAvail().y - 35.0f);
+        ShowStockSearchBar(5.0f);
       }
       ImGui::EndChild();
       ImGui::SameLine();
       
       if (ImGui::BeginChild(" Cell 2 ", ImVec2(totalWidth * 0.4, totalHeight )))
       {
-        ShowStockSearchBar(10.0f);
       }
       ImGui::EndChild();
       ImGui::SameLine();
@@ -199,7 +202,7 @@ namespace KanVest::UI
   void Panel::ShowPortfolioSummary(Portfolio* portfolio)
   {
     KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Highlight, 1.0f));
-    if (ImGui::BeginChild(" Summary ", ImVec2(0.0f, 180.0f )))
+    if (ImGui::BeginChild(" Summary ", ImVec2(0.0f, 160.0f )))
     {
       float totalPortfolioValue = portfolio->GetTotalValue();
       float totalPortfolioInvestment = portfolio->GetTotalInvestment();
@@ -212,7 +215,7 @@ namespace KanVest::UI
       
       // Total Value UI
       std::string totalPortfolioValueString = "₹" + FinalString(Utils::FormatWithCommas((int32_t)totalPortfolioValue));
-      KanVasX::UI::Text(Font(Header_56), totalPortfolioValueString, Align::Left, {20.0f, 10.0f});
+      KanVasX::UI::Text(Font(Header_48), totalPortfolioValueString, Align::Left, {20.0f, 10.0f});
       
       ImGui::SameLine();
       if (KanVasX::UI::DrawButtonImage("ShowInvestment", g_showInvestment ? s_openEyeTextureID : s_closeEyeTextureID,
@@ -226,33 +229,33 @@ namespace KanVest::UI
       std::string pnlSign = profitLoss > 0 ? "+" : "-";
       ImU32 profitLossColor = profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
       
-      KanVasX::UI::Text(Font(Header_26), profitLossTag, Align::Left, {20.0f, -5.0f});
+      KanVasX::UI::Text(Font(Header_22), profitLossTag, Align::Left, {20.0f, -5.0f});
       
       std::string profitLossString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)profitLoss));
       ImGui::SameLine();
-      KanVasX::UI::Text(Font(Header_30), profitLossString, Align::Left, {0.0f, 0.0f}, profitLossColor);
+      KanVasX::UI::Text(Font(Header_28), profitLossString, Align::Left, {0.0f, 0.0f}, profitLossColor);
       
       profitLossString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(profitLossPercent)) + "%)";
       ImGui::SameLine();
-      KanVasX::UI::Text(Font(Header_28), profitLossString, Align::Left, {0.0f, 0.0f});
+      KanVasX::UI::Text(Font(Header_26), profitLossString, Align::Left, {0.0f, 0.0f});
       
       // Total Investment
-      KanVasX::UI::Text(Font(Header_26), "Invested Value", Align::Left, {20.0f, 5.0f});
+      KanVasX::UI::Text(Font(Header_24), "Invested Value", Align::Left, {20.0f, 5.0f});
       ImGui::SameLine();
       std::string dayProfitLossTag = profitLoss > 0 ? "Today's Gain" : "Today's Loss";
-      KanVasX::UI::Text(Font(Header_26), dayProfitLossTag, Align::Right, {-20.0f, 0.0f});
+      KanVasX::UI::Text(Font(Header_24), dayProfitLossTag, Align::Right, {-20.0f, 0.0f});
       
       std::string totalPortfolioInvestmentString = "₹" + FinalString(Utils::FormatWithCommas((int32_t)totalPortfolioInvestment));
-      KanVasX::UI::Text(Font(Header_30), totalPortfolioInvestmentString, Align::Left, {20.0f, 0.0f});
+      KanVasX::UI::Text(Font(Header_28), totalPortfolioInvestmentString, Align::Left, {20.0f, 0.0f});
       
       ImGui::SameLine();
       std::string dayChangeString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)todayChange));
       ImGui::SameLine();
-      KanVasX::UI::Text(Font(Header_30), dayChangeString, Align::Right, {-100.0f, 0.0f}, profitLossColor);
+      KanVasX::UI::Text(Font(Header_28), dayChangeString, Align::Right, {-100.0f, 0.0f}, profitLossColor);
       
       profitLossString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(todayChangePercent)) + "%)";
       ImGui::SameLine();
-      KanVasX::UI::Text(Font(Header_24), profitLossString, Align::Left, {0.0f, 5.0f});
+      KanVasX::UI::Text(Font(Header_22), profitLossString, Align::Left, {0.0f, 5.0f});
       
       KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
     }
@@ -261,7 +264,7 @@ namespace KanVest::UI
   
   void Panel::ShowHolding(Holding& h)
   {
-    ImVec2 childSize(ImGui::GetContentRegionAvail().x, 125.0f);
+    ImVec2 childSize(ImGui::GetContentRegionAvail().x, 120.0f);
     KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::BackgroundDark, 0.2f));
     if (ImGui::BeginChild(h.symbolName.c_str(), childSize, true))
     {
@@ -270,7 +273,7 @@ namespace KanVest::UI
       
       // Symbol PL
       {
-        KanVasX::UI::Text(Font(Header_34), h.symbolName, Align::Left, {5.0f, 5.0f});
+        KanVasX::UI::Text(Font(Header_28), h.symbolName, Align::Left, {5.0f, 5.0f});
         ImGui::SameLine();
         
         // Right Data
@@ -285,11 +288,10 @@ namespace KanVest::UI
             float textSize = ImGui::CalcTextSize(profitLossString.data()).x + ImGui::CalcTextSize(profitLossPercentString.data()).x;
             float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
             
-            ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY() + 5.0f});
+            ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
             ImGui::Text("%s", profitLossString.data());
           }
           ImGui::SameLine();
-          KanVasX::UI::ShiftCursorY(5.0f);
           ImGui::Text("%s", profitLossPercentString.data());
         }
       }
@@ -549,7 +551,7 @@ namespace KanVest::UI
   }
   void Panel::NewHolding(Portfolio* portfolio)
   {
-    ImVec2 childSize(ImGui::GetContentRegionAvail().x, 135.0f);
+    ImVec2 childSize(ImGui::GetContentRegionAvail().x, 110.0f);
     KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::BackgroundDark, 0.2f));
     if (ImGui::BeginChild("New Holding", childSize, true))
     {
@@ -640,9 +642,9 @@ namespace KanVest::UI
     // Show summary data
     ShowPortfolioSummary(portfolio);
 
-    KanVasX::UI::ShiftCursor({5.0f, 5.0f});
+    KanVasX::UI::ShiftCursor({5.0f, 1.0f});
     ShowHoldingSearchBar(5.0f);
-    KanVasX::UI::ShiftCursorY(5.0f);
+    KanVasX::UI::ShiftCursorY(1.0f);
 
     float totalWidth  = ImGui::GetContentRegionAvail().x;
     float totalHeight = ImGui::GetContentRegionAvail().y;
@@ -701,7 +703,7 @@ namespace KanVest::UI
           avgPrice = h.averagePrice;
           quantity = h.quantity;
         }
-        KanVasX::UI::ShiftCursorY(5.0f);
+        KanVasX::UI::ShiftCursorY(1.0f);
       }
       
       if (ImGui::IsKeyDown(ImGuiKey_LeftSuper) && ImGui::IsKeyPressed(ImGuiKey_N))
@@ -817,7 +819,7 @@ namespace KanVest::UI
   {
     IK_PERFORMANCE_FUNC("Panel::ShowSearchBar");
     const float contentRegionAvailX = ImGui::GetContentRegionAvail().x;
-    if (KanVasX::Widget::Search(s_searchedStockString, 128, height, contentRegionAvailX - 40.0f, "Enter Symbol ...", Font(Large), true))
+    if (KanVasX::Widget::Search(s_searchedStockString, 128, height, contentRegionAvailX - 30.0f, "Enter Symbol ...", Font(Large), true))
     {
       Utils::ConvertUpper(s_searchedStockString);
     }
@@ -843,7 +845,13 @@ namespace KanVest::UI
     float iconSize = ImGui::GetItemRectSize().y - 12;
     if (KanVasX::UI::DrawButtonImage("Setting", s_settingIconID, false, {iconSize, iconSize}, {0.0, 6.0}))
     {
-      // Add popup
+      ImGui::OpenPopup("SettingModel");
+      g_showSettingModel = false;
+    }
+    
+    if (KanVasX::UI::BeginPopup("SettingModel"))
+    {
+      KanVasX::UI::EndPopup();
     }
   }
 
