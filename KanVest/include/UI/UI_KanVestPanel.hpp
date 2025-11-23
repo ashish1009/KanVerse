@@ -38,7 +38,8 @@ namespace KanVest::UI
     
     static void ShowChart();
     static void ShowStockAnalyzerSummary();
-
+    static void ShowStockTechnicalData();
+    
     static void AddStockInManager(const std::string& symbol);
     
     inline static ImTextureID s_shadowTextureID = 0;

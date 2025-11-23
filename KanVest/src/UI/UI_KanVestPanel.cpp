@@ -196,7 +196,6 @@ namespace KanVest::UI
       if (ImGui::BeginChild(" Stock - Data ", ImVec2(totalWidth * 0.3, totalHeight )))
       {
         ShowStockData();
-        ShowStockAnalyzerSummary();
         
         KanVasX::UI::ShiftCursorY(ImGui::GetContentRegionAvail().y - 35.0f);
         ShowStockSearchBar(5.0f);
@@ -204,10 +203,21 @@ namespace KanVest::UI
       ImGui::EndChild();
       ImGui::SameLine();
       
-      if (ImGui::BeginChild(" Chart ", ImVec2(totalWidth * 0.45, totalHeight )))
+      static float chioldWidth = totalWidth * 0.45;
+      if (ImGui::BeginChild(" Chart-Technicals ", ImVec2(chioldWidth, totalHeight )))
       {
-        ShowChart();
-        
+        if (ImGui::BeginChild(" Technical ", ImVec2(chioldWidth, totalHeight - 330.0f )))
+        {
+          ShowStockTechnicalData();
+        }
+        ImGui::EndChild();
+        if (ImGui::BeginChild(" Chart ", ImVec2(chioldWidth, 0.0f)))
+        {
+          ShowChart();
+          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+        }
+        ImGui::EndChild();
+
         KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 80.0f, ImGui::GetContentRegionAvail().y - 22.0f});
         KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::Gray);
         ImGui::Text("FPS : %.1f", ImGui::GetIO().Framerate);
@@ -230,7 +240,7 @@ namespace KanVest::UI
   {
     IK_PERFORMANCE_FUNC("Panel::ShowPortfolioSummary");
 
-    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Highlight, 1.0f));
+    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Value(KanVasX::Color::Background, 2.0f), 0.2f));
     if (ImGui::BeginChild(" Summary ", ImVec2(0.0f, 160.0f )))
     {
       float totalPortfolioValue = portfolio->GetTotalValue();
@@ -759,8 +769,8 @@ namespace KanVest::UI
   {
     IK_PERFORMANCE_FUNC("Panel::ShowStockData");
     
-    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Highlight, 0.2f));
-    if (ImGui::BeginChild(" Stock Data ", ImVec2(0.0f, 250.0f )))
+    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Value(KanVasX::Color::Background, 2.0f), 0.2f));
+    if (ImGui::BeginChild(" Stock Data ", ImVec2(0.0f, 310.0f )))
     {
       StockData stockData = StockManager::GetSelectedStockData();
       if (!stockData.IsValid())
@@ -844,6 +854,11 @@ namespace KanVest::UI
       KanVasX::UI::Text(Font(FixedWidthHeader_18), "Volume  " , Align::Left, {20.0f, 10.0f}, KanVasX::Color::Text);
       ImGui::SameLine();
       KanVasX::UI::Text(Font(FixedWidthHeader_18), Utils::FormatLargeNumber(stockData.volume) , Align::Left, {0.0f, 0.0f}, KanVasX::Color::Text);
+
+      KanVasX::UI::ShiftCursorY(5.0f);
+      KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
+      
+      ShowStockAnalyzerSummary();
 
       KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
     }
@@ -1106,6 +1121,8 @@ namespace KanVest::UI
         ImGui::SameLine();
       }
     }
+    
+    ImGui::NewLine();
   }
   
   void Panel::ShowStockAnalyzerSummary()
@@ -1157,6 +1174,43 @@ namespace KanVest::UI
       float fraction = score / 100.0f;
       ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
     }
+  }
+  
+  void Panel::ShowStockTechnicalData()
+  {
+    IK_PERFORMANCE_FUNC("Panel::ShowStockTechnicalData");
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Alpha(KanVasX::Color::Value(KanVasX::Color::Background, 2.0f), 0.2f), 30.0f);
+    
+    KanVasX::UI::Text(Font(Header_26), "Technicals", KanVasX::UI::AlignX::Center, {0.0f, 2.0f});
+    
+    enum class TechnicalTab {SMA, EMA, RSI, MACD, ADX, MFI, Stochastic, BB, Pivot, Max};
+    static TechnicalTab tab = TechnicalTab::SMA;
+    
+    float availX = ImGui::GetContentRegionAvail().x;
+    float technicalButtonSize = (availX / (uint32_t)TechnicalTab::Max) - 2.0f;
+    
+    auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab)
+    {
+      if (KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Medium),
+                                  tab == checkerTtab ? KanVasX::Color::Value(KanVasX::Color::Background, 1.0f) : KanVasX::Color::BackgroundDark,
+                                  KanVasX::Color::TextBright, false, 5.0f, {technicalButtonSize, 30}))
+      {
+        tab = checkerTtab;
+      }
+      KanVasX::UI::DrawItemActivityOutline();
+    };
+    
+    KanVasX::UI::ShiftCursor({2.0f, 1.0f});
+    TechnicalButton("SMA", TechnicalTab::SMA); ImGui::SameLine();
+    TechnicalButton("EMA", TechnicalTab::EMA); ImGui::SameLine();
+    TechnicalButton("RSI", TechnicalTab::RSI); ImGui::SameLine();
+    TechnicalButton("MFI", TechnicalTab::MFI); ImGui::SameLine();
+    TechnicalButton("MACD", TechnicalTab::MACD); ImGui::SameLine();
+    TechnicalButton("ADX", TechnicalTab::ADX); ImGui::SameLine();
+    TechnicalButton("Stochastic", TechnicalTab::Stochastic); ImGui::SameLine();
+    TechnicalButton("BB", TechnicalTab::BB); ImGui::SameLine();
+    TechnicalButton("Pivot", TechnicalTab::Pivot);
+    ImGui::Separator();
 
   }
 

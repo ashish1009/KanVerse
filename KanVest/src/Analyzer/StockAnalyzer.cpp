@@ -7,11 +7,17 @@
 
 #include "StockAnalyzer.hpp"
 
+#include "Analyzer/Indicator/MovingAverage.hpp"
+
 namespace KanVest
 {
   const Recommendation& Analyzer::AnalzeStock(const StockData &stockData)
   {
     static Recommendation EmptyRecommendation;
+    
+    // Moving averages
+    MAResult maResults = MovingAverage::Compute(stockData);
+    
     return EmptyRecommendation;
   }
   
