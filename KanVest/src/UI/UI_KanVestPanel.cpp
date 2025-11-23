@@ -7,6 +7,8 @@
 
 #include "UI_KanVestPanel.hpp"
 
+#include <Vendors/Choc/text/choc_StringUtilities.h>
+
 #include "User/UserManager.hpp"
 
 #include "UI/UI_Utils.hpp"
@@ -34,10 +36,75 @@ namespace KanVest::UI
 
   namespace Utils
   {
+    std::string ToLower(const std::string& string)
+    {
+      std::string result;
+      result.reserve(string.size());
+      
+      for (const char c : string)
+      {
+        result += static_cast<char>(std::tolower(c));
+      }
+      
+      return result;
+    }
     void ConvertUpper(char* string)
     {
       for (char* p = string; *p; ++p)
         *p = static_cast<char>(toupper(*p));
+    }
+
+    bool IsMatchingSearch(const std::string& item, const std::string_view& searchQuery,
+                          bool caseSensitive = false, bool stripWhiteSpaces = false, bool stripUnderscores = false)
+    {
+      if (searchQuery.empty())
+      {
+        return true;
+      }
+      
+      if (item.empty())
+      {
+        return false;
+      }
+      
+      std::string itemSanitized = stripUnderscores ? choc::text::replace(item, "_", " ") : item;
+      
+      if (stripWhiteSpaces)
+      {
+        itemSanitized = choc::text::replace(itemSanitized, " ", "");
+      }
+      
+      std::string searchString = stripWhiteSpaces ? choc::text::replace(searchQuery, " ", "") : std::string(searchQuery);
+      
+      if (!caseSensitive)
+      {
+        itemSanitized = ToLower(itemSanitized);
+        searchString = ToLower(searchString);
+      }
+      
+      bool result = false;
+      if (choc::text::contains(searchString, " "))
+      {
+        std::vector<std::string> searchTerms = choc::text::splitAtWhitespace(searchString);
+        for (const auto& searchTerm : searchTerms)
+        {
+          if (!searchTerm.empty() and choc::text::contains(itemSanitized, searchTerm))
+          {
+            result = true;
+          }
+          else
+          {
+            result = false;
+            break;
+          }
+        }
+      }
+      else
+      {
+        result = choc::text::contains(itemSanitized, searchString);
+      }
+      
+      return result;
     }
   }
   
@@ -228,6 +295,11 @@ namespace KanVest::UI
       for (int idx = 0; idx < holdings.size(); idx++)
       {
         auto& h = holdings[idx];
+        
+        if (!Utils::IsMatchingSearch(h.symbolName, s_searchedHoldingString))
+        {
+          continue;
+        }
         
         // Update Stock Data
         StockData stockData("");
@@ -516,7 +588,7 @@ namespace KanVest::UI
     float iconSize = ImGui::GetItemRectSize().y - 12;
     if (KanVasX::UI::DrawButtonImage("Setting", s_settingIconID, false, {iconSize, iconSize}, {0.0, 6.0}))
     {
-      // Add popup  
+      // Add popup
     }
   }
 

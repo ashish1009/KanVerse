@@ -497,6 +497,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
 				HEADER_SEARCH_PATHS = (
+					"${PROJECT_DIR}",
 					"${PROJECT_DIR}/include",
 					"${PROJECT_DIR}/../KanViz/include",
 					"${PROJECT_DIR}/../KanViz/vendors/spd_log/include",
@@ -522,6 +523,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
 				HEADER_SEARCH_PATHS = (
+					"${PROJECT_DIR}",
 					"${PROJECT_DIR}/include",
 					"${PROJECT_DIR}/../KanViz/include",
 					"${PROJECT_DIR}/../KanViz/vendors/spd_log/include",
