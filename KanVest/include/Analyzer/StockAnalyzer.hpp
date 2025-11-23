@@ -1,0 +1,47 @@
+//
+//  StockAnalyzer.hpp
+//  KanVest
+//
+//  Created by Ashish . on 23/11/25.
+//
+
+#pragma once
+
+#include "Stock/StockData.hpp"
+
+#include "Portfolio/Portfolio.hpp"
+
+namespace KanVest
+{
+  enum class RecommendationGrade
+  {
+    STRONG_SELL,
+    SELL,
+    HOLD,
+    BUY,
+    STRONG_BUY
+  };
+
+  struct Recommendation
+  {
+    RecommendationGrade grade = RecommendationGrade::HOLD;
+    double score = 50.0;
+    int qtyDelta = 0;
+    std::string rationale;
+  };
+
+  class Analyzer
+  {
+  public:
+    /// This function analyze stock from data
+    /// - Parameter stockData: stock data
+    static const Recommendation& AnalzeStock(const StockData& stockData);
+    
+    /// This function sets the holding data for analuzer
+    /// - Parameter holding: holding data
+    static void SetHoldings(const Holding& holding);
+    
+  private:
+    inline static Holding s_stockHolding;
+  };
+} // namespace KanVest

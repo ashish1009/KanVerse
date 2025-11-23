@@ -15,6 +15,8 @@
 
 #include "Stock/StockManager.hpp"
 
+#include "Analyzer/StockAnalyzer.hpp"
+
 namespace KanVest::UI
 {
 #define Font(font) KanVest::UI::Font::Get(KanVest::UI::FontType::font)
@@ -194,6 +196,7 @@ namespace KanVest::UI
       if (ImGui::BeginChild(" Stock - Data ", ImVec2(totalWidth * 0.3, totalHeight )))
       {
         ShowStockData();
+        ShowStockAnalyzerSummary();
         
         KanVasX::UI::ShiftCursorY(ImGui::GetContentRegionAvail().y - 35.0f);
         ShowStockSearchBar(5.0f);
@@ -205,7 +208,7 @@ namespace KanVest::UI
       {
         ShowChart();
         
-        KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 80.0f, ImGui::GetContentRegionAvail().y - 20.0f});
+        KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 80.0f, ImGui::GetContentRegionAvail().y - 22.0f});
         KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::Gray);
         ImGui::Text("FPS : %.1f", ImGui::GetIO().Framerate);
       }
@@ -777,9 +780,9 @@ namespace KanVest::UI
                         KanVasX::Color::TextBright);
 
       // Change
-      std::string change = (stockData.change > 0 ? "+" : "-") +
+      std::string change = (stockData.change > 0 ? "+" : "") +
       KanVest::UI::Utils::FormatDoubleToString(stockData.change) +
-      (stockData.change > 0 ? " ( +" : " ( -") +
+      (stockData.change > 0 ? " ( +" : " ( ") +
       KanVest::UI::Utils::FormatDoubleToString(stockData.changePercent) + "%)";
       
       ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
@@ -975,7 +978,7 @@ namespace KanVest::UI
       labelPtrs.push_back(s.c_str());
 
     // Start plotting
-    if (ImPlot::BeginPlot("##", ImVec2(ImGui::GetContentRegionAvail().x - 1.0f, 400.0f)))
+    if (ImPlot::BeginPlot("##", ImVec2(ImGui::GetContentRegionAvail().x - 1.0f, 300.0f)))
     {
       // We use AutoFit for X and set Y limits explicitly
       ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
@@ -1085,6 +1088,7 @@ namespace KanVest::UI
     ImGui::SameLine();
     std::vector<std::string> intervalValues = StockManager::RangeIntervalMap[StockManager::GetCurrentRange()];
     KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x - (intervalValues.size() * 40));
+    
     for (int i = 0; i < intervalValues.size(); ++i)
     {
       auto buttonColor = intervalValues[i] == StockManager::GetCurrentInterval() ? KanVasX::Color::Gray : KanVasX::Color::BackgroundDark;
@@ -1102,6 +1106,58 @@ namespace KanVest::UI
         ImGui::SameLine();
       }
     }
+  }
+  
+  void Panel::ShowStockAnalyzerSummary()
+  {
+    IK_PERFORMANCE_FUNC("Panel::ShowChart");
+    
+    // Selected stock data
+    StockData stockData = StockManager::GetSelectedStockData();
+    if (!stockData.IsValid())
+    {
+      return;
+    }
+    
+    // Set current holding
+    Analyzer::SetHoldings(UserManager::GetCurrentUser().portfolio->GetHolding(stockData.symbol));
+    
+    // Get recommendataion data
+    Recommendation recommendation = Analyzer::AnalzeStock(stockData);
+    
+    float score = static_cast<float>(recommendation.score);
+    
+    // Determine color based on score
+    ImU32 scoreColor;
+    std::string scoreString = "Technically Neutral";
+
+    if (score < 15)      { scoreString = "Technically Strong Bearish"; scoreColor = KanVasX::Color::Red; }
+    else if (score < 30) { scoreString = "Technically Bearish"; scoreColor = KanVasX::Color::Orange; }
+    else if (score < 60) { scoreString = "Technically Neutral"; scoreColor = KanVasX::Color::Yellow; }
+    else if (score < 80) { scoreString = "Technically Bullish"; scoreColor = KanVasX::Color::Cyan; }
+    else                 { scoreString = "Technically Strong Bullish"; scoreColor = KanVasX::Color::Green; }
+
+    // Scoped color
+    {
+      KanVasX::ScopedStyle headerPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2{1.0f, 1.0f});
+      KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
+      // Convert score 0-100 to fraction 0.0-1.0
+
+      // Print Score
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), Utils::FormatDoubleToString(score), KanVasX::UI::AlignX::Left, {10.0f, 0}, scoreColor);
+
+      // Print /100
+      static const std::string totalScoreString = "/100";
+      ImGui::SameLine();
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), totalScoreString, KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
+
+      ImGui::SameLine();
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Large), scoreString, KanVasX::UI::AlignX::Right, {-10.0f, 5.0f}, scoreColor);
+
+      float fraction = score / 100.0f;
+      ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
+    }
+
   }
 
   void Panel::AddStockInManager(const std::string& symbol)

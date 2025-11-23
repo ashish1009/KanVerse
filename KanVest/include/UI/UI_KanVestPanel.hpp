@@ -37,6 +37,7 @@ namespace KanVest::UI
     static void ShowHoldingSearchBar(float height);
     
     static void ShowChart();
+    static void ShowStockAnalyzerSummary();
 
     static void AddStockInManager(const std::string& symbol);
     
