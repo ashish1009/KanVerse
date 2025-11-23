@@ -22,7 +22,7 @@ namespace KanVest
   
   void PortfolioController::EditHolding(const Holding& holding)
   {
-    StockManager::EditStock(holding.symbolName);
+    m_portfolio.EditHolding(holding);
   }
   
   bool PortfolioController::LoadPortfolio(const std::filesystem::path& path)

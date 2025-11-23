@@ -26,6 +26,8 @@ namespace KanVest::UI
   private:
     static void ShowPortfolio();
     static void ShowPortfolioSummary(Portfolio* portfolio);
+    static void ShowHolding(Holding& h);
+    static void EditHolding(Portfolio* portfolio, Holding& h);
     
     static void ShowStockData();
     static void ShowStockSearchBar(float height);

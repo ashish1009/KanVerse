@@ -47,6 +47,9 @@ namespace KanVest
     /// This function adds the holding in data base
     /// - Parameter holding: holding instnace
     void AddHolding(const Holding& holding);
+    /// This function edits the holding in data base
+    /// - Parameter holding: holding instnace
+    void EditHolding(const Holding& holding);
 
     std::vector<Holding> m_holdings;
     

@@ -1,21 +1,16 @@
 Holdings:
   - Symbol: BEL
-    AveragePrice: 386
-    Quantity: 160
-    Vision: LongTerm
+    AveragePrice: 345
+    Quantity: 1280
   - Symbol: BSE
-    AveragePrice: 2346
+    AveragePrice: 4323
     Quantity: 23
-    Vision: LongTerm
   - Symbol: ETERNAL
-    AveragePrice: 298
+    AveragePrice: 324
     Quantity: 370
-    Vision: LongTerm
-  - Symbol: IDEA
-    AveragePrice: 9.6000003814697266
-    Quantity: 1400
-    Vision: LongTerm
   - Symbol: GROWW
     AveragePrice: 123
     Quantity: 100
-    Vision: LongTerm
+  - Symbol: IDEA
+    AveragePrice: 10.2299995
+    Quantity: 1400

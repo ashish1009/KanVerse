@@ -36,6 +36,20 @@ namespace KanVest
       m_holdings.emplace_back(holding);
     }
   }
+  void Portfolio::EditHolding(const Holding &holding)
+  {
+    // Check if holding already exists
+    auto it = std::find_if(m_holdings.begin(), m_holdings.end(),
+                           [&](const Holding& existing) {
+      return existing.symbolName == holding.symbolName;
+    });
+    
+    if (it != m_holdings.end())
+    {
+      it->averagePrice = holding.averagePrice;
+      it->quantity = holding.quantity;
+    }
+  }
   
   std::vector<Holding>& Portfolio::GetHoldings()
   {

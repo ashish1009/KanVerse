@@ -24,10 +24,14 @@ namespace KanVest::UI
   static bool g_showEditModal = false;
 
   static int g_sortColumn = 0;
-  static int g_editIndex = -1;
+  static int g_selectedIdx = -1;
 
   static const std::string g_hiddenString = "*****";
-  
+
+  static char symbolBuf[32];
+  static float avgPrice;
+  static int quantity;
+
   auto FinalString = [](const std::string & data) {
     return g_showInvestment ? data : g_hiddenString;
   };
@@ -249,6 +253,272 @@ namespace KanVest::UI
     ImGui::EndChild();
   }
   
+  void Panel::ShowHolding(Holding& h)
+  {
+    std::string pnlSign = h.profitLoss > 0 ? "+" : "-";
+    ImU32 profitLossColor = h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+    
+    // Symbol PL
+    {
+      KanVasX::UI::Text(Font(Header_34), h.symbolName, Align::Left, {5.0f, 5.0f});
+      ImGui::SameLine();
+      
+      // Right Data
+      {
+        std::string profitLossString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)h.profitLoss));
+        std::string profitLossPercentString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.profitLossPercent)) + "%)";
+        
+        KanVasX::ScopedFont header(Font(Header_26));
+        {
+          KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+          
+          float textSize = ImGui::CalcTextSize(profitLossString.data()).x + ImGui::CalcTextSize(profitLossPercentString.data()).x;
+          float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
+          
+          ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY() + 5.0f});
+          ImGui::Text("%s", profitLossString.data());
+        }
+        ImGui::SameLine();
+        KanVasX::UI::ShiftCursorY(5.0f);
+        ImGui::Text("%s", profitLossPercentString.data());
+      }
+    }
+    
+    // ATP LTP
+    {
+      KanVasX::UI::Text(Font(Header_18), "ATP ", Align::Left, {5.0f, 5.0f});
+      ImGui::SameLine();
+      std::string atpString = "₹" + Utils::FormatDoubleToString(h.averagePrice);
+      KanVasX::UI::Text(Font(Header_18), atpString, Align::Left, {0.0f, 0.0f});
+      
+      // Right Data
+      {
+        ImGui::SameLine();
+        
+        std::string ltpString = "LTP ";
+        std::string ltpValueString = "₹" + Utils::FormatDoubleToString(h.stockValue);
+        std::string ltpPerString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.dayChangePercent)) + "%)";
+        
+        KanVasX::ScopedFont header(Font(Header_18));
+        float textSize = ImGui::CalcTextSize(ltpString.data()).x + ImGui::CalcTextSize(ltpValueString.data()).x + ImGui::CalcTextSize(ltpPerString.data()).x;
+        float xOffset = (ImGui::GetColumnWidth() - textSize - 8.0f) ;
+        
+        ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
+        ImGui::Text("%s", ltpString.data());
+        
+        {
+          KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+          ImGui::SameLine();
+          ImGui::Text("%s", ltpValueString.data());
+        }
+        
+        ImGui::SameLine();
+        ImGui::Text("%s", ltpPerString.data());
+      }
+    }
+    
+    // Shares
+    {
+      KanVasX::UI::Text(Font(Header_18), "Shares ", Align::Left, {5.0f, 0.0f});
+      ImGui::SameLine();
+      KanVasX::UI::Text(Font(Header_18), std::to_string(h.quantity), Align::Left, {0.0f, 0.0f});
+      
+      // Right Data
+      {
+        ImGui::SameLine();
+        
+        std::string gainTagString = h.profitLoss > 0 ? "Today's Gain " : "Today's Loss";
+        std::string gainValueString = "₹" + Utils::FormatDoubleToString(h.dayChange);
+        
+        KanVasX::ScopedFont header(Font(Header_18));
+        float textSize = ImGui::CalcTextSize(gainTagString.data()).x + ImGui::CalcTextSize(gainValueString.data()).x;
+        float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
+        
+        ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
+        ImGui::Text("%s", gainTagString.data());
+        
+        {
+          KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+          ImGui::SameLine();
+          ImGui::Text("%s", gainValueString.data());
+        }
+      }
+    }
+    
+    KanVasX::UI::ShiftCursorY(5.0f);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
+    
+    // Invested
+    {
+      KanVasX::UI::Text(Font(Header_20), "Invested ", Align::Left, {5.0f, 4.0f});
+      ImGui::SameLine();
+      std::string invextedString = "₹" + Utils::FormatWithCommas(int32_t(h.investment));
+      KanVasX::UI::Text(Font(Header_20), invextedString, Align::Left, {0.0f, 0.0f});
+      
+      // Right Data
+      {
+        ImGui::SameLine();
+        
+        std::string valueTagString = "Current ";
+        std::string valueString = "₹" + Utils::FormatWithCommas(int32_t(h.value));
+        
+        KanVasX::ScopedFont header(Font(Header_20));
+        float textSize = ImGui::CalcTextSize(valueTagString.data()).x + ImGui::CalcTextSize(valueString.data()).x;
+        float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
+        
+        ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
+        ImGui::Text("%s", valueTagString.data());
+        
+        ImGui::SameLine();
+        ImGui::Text("%s", valueString.data());
+      }
+    }
+  }
+  
+  void Panel::EditHolding(Portfolio* portfolio, Holding &h)
+  {
+    std::string pnlSign = h.profitLoss > 0 ? "+" : "-";
+    ImU32 profitLossColor = h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+    
+    // Symbol PL
+    {
+      KanVasX::UI::Text(Font(Header_34), h.symbolName, Align::Left, {5.0f, 5.0f});
+      ImGui::SameLine();
+      
+      // Right Data
+      {
+        std::string profitLossString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)h.profitLoss));
+        std::string profitLossPercentString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.profitLossPercent)) + "%)";
+        
+        KanVasX::ScopedFont header(Font(Header_26));
+        {
+          KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+          
+          float textSize = ImGui::CalcTextSize(profitLossString.data()).x + ImGui::CalcTextSize(profitLossPercentString.data()).x;
+          float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
+          
+          ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY() + 5.0f});
+          ImGui::Text("%s", profitLossString.data());
+        }
+        ImGui::SameLine();
+        KanVasX::UI::ShiftCursorY(5.0f);
+        ImGui::Text("%s", profitLossPercentString.data());
+      }
+    }
+    
+    // ATP LTP
+    {
+      KanVasX::UI::Text(Font(Header_18), "ATP ", Align::Left, {5.0f, 5.0f});
+      ImGui::SameLine();
+      
+      ImGui::PushItemWidth(50);
+      ImGui::InputFloat("##avg", &avgPrice, 0, 0, "%.2f");
+
+      //      std::string atpString = "₹" + Utils::FormatDoubleToString(h.averagePrice);
+//      KanVasX::UI::Text(Font(Header_18), atpString, Align::Left, {0.0f, 0.0f});
+      
+      // Right Data
+      {
+        ImGui::SameLine();
+        
+        std::string ltpString = "LTP ";
+        std::string ltpValueString = "₹" + Utils::FormatDoubleToString(h.stockValue);
+        std::string ltpPerString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.dayChangePercent)) + "%)";
+        
+        KanVasX::ScopedFont header(Font(Header_18));
+        float textSize = ImGui::CalcTextSize(ltpString.data()).x + ImGui::CalcTextSize(ltpValueString.data()).x + ImGui::CalcTextSize(ltpPerString.data()).x;
+        float xOffset = (ImGui::GetColumnWidth() - textSize - 8.0f) ;
+        
+        ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
+        ImGui::Text("%s", ltpString.data());
+        
+        {
+          KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+          ImGui::SameLine();
+          ImGui::Text("%s", ltpValueString.data());
+        }
+        
+        ImGui::SameLine();
+        ImGui::Text("%s", ltpPerString.data());
+      }
+    }
+    
+    // Shares
+    {
+      KanVasX::UI::Text(Font(Header_18), "Shares ", Align::Left, {5.0f, 0.0f});
+      ImGui::SameLine();
+      KanVasX::UI::Text(Font(Header_18), std::to_string(h.quantity), Align::Left, {0.0f, 0.0f});
+      
+      // Right Data
+      {
+        ImGui::SameLine();
+        
+        std::string gainTagString = h.profitLoss > 0 ? "Today's Gain " : "Today's Loss";
+        std::string gainValueString = "₹" + Utils::FormatDoubleToString(h.dayChange);
+        
+        KanVasX::ScopedFont header(Font(Header_18));
+        float textSize = ImGui::CalcTextSize(gainTagString.data()).x + ImGui::CalcTextSize(gainValueString.data()).x;
+        float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
+        
+        ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
+        ImGui::Text("%s", gainTagString.data());
+        
+        {
+          KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+          ImGui::SameLine();
+          ImGui::Text("%s", gainValueString.data());
+        }
+      }
+    }
+    
+    KanVasX::UI::ShiftCursorY(5.0f);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
+    
+    // Invested
+    {
+      KanVasX::UI::Text(Font(Header_20), "Invested ", Align::Left, {5.0f, 4.0f});
+      ImGui::SameLine();
+      std::string invextedString = "₹" + Utils::FormatWithCommas(int32_t(h.investment));
+      KanVasX::UI::Text(Font(Header_20), invextedString, Align::Left, {0.0f, 0.0f});
+      
+      // Right Data
+      {
+        ImGui::SameLine();
+        
+        std::string valueTagString = "Current ";
+        std::string valueString = "₹" + Utils::FormatWithCommas(int32_t(h.value));
+        
+        KanVasX::ScopedFont header(Font(Header_20));
+        float textSize = ImGui::CalcTextSize(valueTagString.data()).x + ImGui::CalcTextSize(valueString.data()).x;
+        float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
+        
+        ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
+        ImGui::Text("%s", valueTagString.data());
+        
+        ImGui::SameLine();
+        ImGui::Text("%s", valueString.data());
+      }
+    }
+    
+    if (ImGui::IsKeyPressed(ImGuiKey_Enter))
+    {
+      std::string symbol = symbolBuf;
+      if (!symbol.empty() && avgPrice > 0 && quantity > 0)
+      {
+        Holding h;
+        h.symbolName = symbol;
+        h.averagePrice = avgPrice;
+        h.quantity = quantity;
+        
+        PortfolioController portfolioController(*portfolio);
+        portfolioController.EditHolding(h);        
+        UserManager::GetCurrentUser().SavePortfolio();
+        
+        g_showEditModal = false;
+      }
+    }
+  }
+  
   void Panel::ShowPortfolio()
   {
     IK_PERFORMANCE_FUNC("Panel::ShowPortfolio");
@@ -321,140 +591,29 @@ namespace KanVest::UI
         KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::BackgroundDark, 0.2f));
         if (ImGui::BeginChild(holdingChildID.c_str(), childSize, true))
         {
-          if (g_showEditModal and g_editIndex == idx)
+          if (g_showEditModal and g_selectedIdx == idx)
           {
-            
+            EditHolding(portfolio, h);
           }
           else
           {
-            std::string pnlSign = h.profitLoss > 0 ? "+" : "-";
-            ImU32 profitLossColor = h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
-            
-            // Symbol PL
-            {
-              KanVasX::UI::Text(Font(Header_34), h.symbolName, Align::Left, {5.0f, 5.0f});
-              ImGui::SameLine();
-              
-              // Right Data
-              {
-                std::string profitLossString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)h.profitLoss));
-                std::string profitLossPercentString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.profitLossPercent)) + "%)";
-                
-                KanVasX::ScopedFont header(Font(Header_26));
-                {
-                  KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
-                  
-                  float textSize = ImGui::CalcTextSize(profitLossString.data()).x + ImGui::CalcTextSize(profitLossPercentString.data()).x;
-                  float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
-                  
-                  ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY() + 5.0f});
-                  ImGui::Text("%s", profitLossString.data());
-                }
-                ImGui::SameLine();
-                KanVasX::UI::ShiftCursorY(5.0f);
-                ImGui::Text("%s", profitLossPercentString.data());
-              }
-            }
-            
-            // ATP LTP
-            {
-              KanVasX::UI::Text(Font(Header_18), "ATP ", Align::Left, {5.0f, 5.0f});
-              ImGui::SameLine();
-              std::string atpString = "₹" + Utils::FormatDoubleToString(h.averagePrice);
-              KanVasX::UI::Text(Font(Header_18), atpString, Align::Left, {0.0f, 0.0f});
-              
-              // Right Data
-              {
-                ImGui::SameLine();
-                
-                std::string ltpString = "LTP ";
-                std::string ltpValueString = "₹" + Utils::FormatDoubleToString(h.stockValue);
-                std::string ltpPerString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.dayChangePercent)) + "%)";
-                
-                KanVasX::ScopedFont header(Font(Header_18));
-                float textSize = ImGui::CalcTextSize(ltpString.data()).x + ImGui::CalcTextSize(ltpValueString.data()).x + ImGui::CalcTextSize(ltpPerString.data()).x;
-                float xOffset = (ImGui::GetColumnWidth() - textSize - 8.0f) ;
-                
-                ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
-                ImGui::Text("%s", ltpString.data());
-                
-                {
-                  KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
-                  ImGui::SameLine();
-                  ImGui::Text("%s", ltpValueString.data());
-                }
-                
-                ImGui::SameLine();
-                ImGui::Text("%s", ltpPerString.data());
-              }
-            }
-            
-            // Shares
-            {
-              KanVasX::UI::Text(Font(Header_18), "Shares ", Align::Left, {5.0f, 0.0f});
-              ImGui::SameLine();
-              KanVasX::UI::Text(Font(Header_18), std::to_string(h.quantity), Align::Left, {0.0f, 0.0f});
-              
-              // Right Data
-              {
-                ImGui::SameLine();
-                
-                std::string gainTagString = h.profitLoss > 0 ? "Today's Gain " : "Today's Loss";
-                std::string gainValueString = "₹" + Utils::FormatDoubleToString(h.dayChange);
-                
-                KanVasX::ScopedFont header(Font(Header_18));
-                float textSize = ImGui::CalcTextSize(gainTagString.data()).x + ImGui::CalcTextSize(gainValueString.data()).x;
-                float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
-                
-                ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
-                ImGui::Text("%s", gainTagString.data());
-                
-                {
-                  KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
-                  ImGui::SameLine();
-                  ImGui::Text("%s", gainValueString.data());
-                }
-              }
-            }
-            
-            KanVasX::UI::ShiftCursorY(5.0f);
-            KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
-            
-            // Invested
-            {
-              KanVasX::UI::Text(Font(Header_20), "Invested ", Align::Left, {5.0f, 4.0f});
-              ImGui::SameLine();
-              KanVasX::UI::Text(Font(Header_20), Utils::FormatWithCommas(int32_t(h.investment)), Align::Left, {0.0f, 0.0f});
-              
-              // Right Data
-              {
-                ImGui::SameLine();
-                
-                std::string valueTagString = "Current ";
-                std::string valueValueString = "₹" + Utils::FormatWithCommas(int32_t(h.investment));
-                
-                KanVasX::ScopedFont header(Font(Header_20));
-                float textSize = ImGui::CalcTextSize(valueTagString.data()).x + ImGui::CalcTextSize(valueValueString.data()).x;
-                float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
-                
-                ImGui::SetCursorPos({ImGui::GetCursorPosX() + xOffset, ImGui::GetCursorPosY()});
-                ImGui::Text("%s", valueTagString.data());
-                
-                ImGui::SameLine();
-                ImGui::Text("%s", valueValueString.data());
-              }
-            }
+            ShowHolding(h);
           }
         }
         ImGui::EndChild();
         if (ImGui::IsItemClicked())
         {
+          g_selectedIdx = idx;
           StockManager::SetSelectedStockSymbol(h.symbolName);
         }
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
-          g_editIndex = idx;
+          g_selectedIdx = idx;
           g_showEditModal = true;
+          
+          memcpy(symbolBuf, h.symbolName.c_str(), 32);
+          avgPrice = h.averagePrice;
+          quantity = h.quantity;
         }
 
         KanVasX::UI::ShiftCursorY(5.0f);
