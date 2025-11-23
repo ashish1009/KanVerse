@@ -14,6 +14,8 @@ namespace KanVest::UI
   class Panel
   {
   public:
+    /// This function initializes the stock panel
+    static void Initialize();
     /// This is primary stock UI panel
     static void Show();
     
@@ -28,7 +30,8 @@ namespace KanVest::UI
     static void ShowPortfolioSummary(Portfolio* portfolio);
     static void ShowHolding(Holding& h);
     static void EditHolding(Portfolio* portfolio, Holding& h);
-    
+    static void NewHolding(Portfolio* portfolio);
+
     static void ShowStockData();
     static void ShowStockSearchBar(float height);
     static void ShowHoldingSearchBar(float height);

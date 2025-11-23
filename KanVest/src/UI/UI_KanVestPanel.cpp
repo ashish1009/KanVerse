@@ -22,6 +22,7 @@ namespace KanVest::UI
   static bool g_showInvestment = true;
   static bool g_sortAscending = true;
   static bool g_showEditModal = false;
+  static bool g_showAddRow = false;
 
   static int g_sortColumn = 0;
   static int g_selectedIdx = -1;
@@ -110,6 +111,11 @@ namespace KanVest::UI
       
       return result;
     }
+  }
+  
+  void Panel::Initialize()
+  {
+    AddStockInManager(s_searchedStockString);
   }
   
   void Panel::SetShadowTextureId(ImTextureID shadowTextureID)
@@ -380,7 +386,7 @@ namespace KanVest::UI
     }
     ImGui::EndChild();
   }
-  
+ 
   void Panel::EditHolding(Portfolio* portfolio, Holding &h)
   {
     ImVec2 childSize(ImGui::GetContentRegionAvail().x, 135.0f);
@@ -463,7 +469,7 @@ namespace KanVest::UI
         ImGui::SameLine();
         {
           KanVasX::ScopedFont header(Font(Header_18));
-          ImGui::InputFloat("##avg", &quantity, 0, 0, "%.2f");
+          ImGui::InputFloat("##qty", &quantity, 0, 0, "%.2f");
         }
         
         // Right Data
@@ -521,7 +527,7 @@ namespace KanVest::UI
       {
         g_showEditModal = false;
       }
-      if (ImGui::IsKeyPressed(ImGuiKey_Enter))
+      if (g_showEditModal and (ImGui::IsKeyDown(ImGuiKey_LeftSuper) and ImGui::IsKeyPressed(ImGuiKey_Enter)))
       {
         std::string symbol = symbolBuf;
         if (!symbol.empty() && avgPrice > 0 && quantity > 0)
@@ -536,6 +542,65 @@ namespace KanVest::UI
           UserManager::GetCurrentUser().SavePortfolio();
           
           g_showEditModal = false;
+        }
+      }
+    }
+    ImGui::EndChild();
+  }
+  void Panel::NewHolding(Portfolio* portfolio)
+  {
+    ImVec2 childSize(ImGui::GetContentRegionAvail().x, 135.0f);
+    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::BackgroundDark, 0.2f));
+    if (ImGui::BeginChild("New Holding", childSize, true))
+    {
+      // Symbol PL
+      {
+        KanVasX::ScopedFont header(Font(Header_32));
+        ImGui::PushItemWidth(100);
+        ImGui::InputTextWithHint("##symbol", "Symbol", symbolBuf, IM_ARRAYSIZE(symbolBuf));
+      }
+      
+      // ATP LTP
+      {
+        KanVasX::UI::Text(Font(Header_18), "ATP ", Align::Left, {5.0f, 5.0f});
+        ImGui::SameLine();
+        
+        {
+          KanVasX::ScopedFont header(Font(Header_18));
+          ImGui::PushItemWidth(50);
+          ImGui::InputFloat("##avg", &avgPrice, 0, 0, "%.2f");
+        }
+      }
+      
+      // Shares
+      {
+        KanVasX::UI::Text(Font(Header_18), "Shares ", Align::Left, {5.0f, 0.0f});
+        ImGui::SameLine();
+        {
+          KanVasX::ScopedFont header(Font(Header_18));
+          ImGui::InputFloat("##qty", &quantity, 0, 0, "%.2f");
+        }
+      }
+            
+      if (ImGui::IsKeyPressed(ImGuiKey_Escape))
+      {
+        g_showAddRow = false;
+      }
+      if (g_showAddRow and ImGui::IsKeyDown(ImGuiKey_LeftSuper) and ImGui::IsKeyPressed(ImGuiKey_Enter))
+      {
+        std::string symbol = symbolBuf;
+        if (!symbol.empty() && avgPrice > 0 && quantity > 0)
+        {
+          Holding h;
+          h.symbolName = symbol;
+          h.averagePrice = avgPrice;
+          h.quantity = quantity;
+          
+          PortfolioController portfolioController(*portfolio);
+          portfolioController.AddHolding(h);
+          UserManager::GetCurrentUser().SavePortfolio();
+          
+          g_showAddRow = false;
         }
       }
     }
@@ -582,6 +647,11 @@ namespace KanVest::UI
     float totalWidth  = ImGui::GetContentRegionAvail().x;
     float totalHeight = ImGui::GetContentRegionAvail().y;
     
+    if (g_showAddRow)
+    {
+      NewHolding(portfolio);
+    }
+
     KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Highlight, 0.2f));
     if (ImGui::BeginChild("Holding Data", ImVec2(totalWidth, totalHeight), false, ImGuiWindowFlags_NoScrollbar))
     {
@@ -631,8 +701,18 @@ namespace KanVest::UI
           avgPrice = h.averagePrice;
           quantity = h.quantity;
         }
-
         KanVasX::UI::ShiftCursorY(5.0f);
+      }
+      
+      if (ImGui::IsKeyDown(ImGuiKey_LeftSuper) && ImGui::IsKeyPressed(ImGuiKey_N))
+      {
+        g_showAddRow = !g_showAddRow;
+        if (g_showAddRow)
+        {
+          symbolBuf[0] = '\0';
+          avgPrice = 0.0f;
+          quantity = 0;
+        }
       }
     }
     ImGui::EndChild();
@@ -744,7 +824,7 @@ namespace KanVest::UI
     
     ImGui::SameLine();
     float iconSize = ImGui::GetItemRectSize().y - 12;
-    if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {0.0, 6.0}))
+    if (KanVasX::UI::DrawButtonImage("Refresh", s_reloadIconID, false, {iconSize, iconSize}, {0.0, 6.0}) or ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
       AddStockInManager(s_searchedStockString);
     }
