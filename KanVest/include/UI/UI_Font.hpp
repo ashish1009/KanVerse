@@ -20,6 +20,8 @@ namespace KanVest::UI
     FixedWidthHeader_22, FixedWidthHeader_24, FixedWidthHeader_26, FixedWidthHeader_28, FixedWidthHeader_30,
     FixedWidthHeader_32, FixedWidthHeader_34, FixedWidthHeader_36, FixedWidthHeader_38, FixedWidthHeader_40,
 
+    Header_02, Header_04, Header_06, Header_08, Header_10,
+    Header_12, Header_14, Header_16, Header_18, Header_20,
     Header_22, Header_24, Header_26, Header_28, Header_30,
     Header_32, Header_34, Header_36, Header_38, Header_40,
     Header_42, Header_44, Header_46, Header_48, Header_50,

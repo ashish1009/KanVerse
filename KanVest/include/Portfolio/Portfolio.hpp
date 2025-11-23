@@ -17,14 +17,14 @@ namespace KanVest
     uint32_t quantity = 0;
     
     // Compute dynamic not serisalize
-    float stockValue;
-    float dayChange;
-    float dayChangePercent;
+    float stockValue = 0.0f;
+    float dayChange = 0.0f;
+    float dayChangePercent = 0.0f;
 
-    float investment;
-    float value;
-    float profitLoss;
-    float profitLossPercent;
+    float investment = 0.0f;
+    float value = 0.0f;
+    float profitLoss = 0.0f;
+    float profitLossPercent = 0.0f;
   };
   
   class Portfolio
