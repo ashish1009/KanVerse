@@ -97,6 +97,54 @@ namespace KanVest
     return raw * weight;
   }
   
+  double GetPivotScore(const PivotResults& pivots, double livePrice, int totalCandles, double weight = 10.0)
+  {
+    if (totalCandles <= 0) return 0.0;
+    
+    const int maxLevels = 4;
+    
+    // --- Sort supports and resistances by strength (count + recency) ---
+    auto sortByStrength = [&](const SRLevel& a, const SRLevel& b) {
+      double scoreA = a.count + static_cast<double>(a.lastTouchIdx) / totalCandles;
+      double scoreB = b.count + static_cast<double>(b.lastTouchIdx) / totalCandles;
+      return scoreA > scoreB; // strongest first
+    };
+    
+    std::vector<SRLevel> sortedSupports = pivots.supports;
+    std::vector<SRLevel> sortedResistances = pivots.resistances;
+    std::sort(sortedSupports.begin(), sortedSupports.end(), sortByStrength);
+    std::sort(sortedResistances.begin(), sortedResistances.end(), sortByStrength);
+    
+    // --- Take top 4 levels for each ---
+    int nSupports = std::min(maxLevels, (int)sortedSupports.size());
+    int nResistances = std::min(maxLevels, (int)sortedResistances.size());
+    
+    double supportScore = 0.0;
+    for (int i = 0; i < nSupports; i++)
+    {
+      double rel = (livePrice - sortedSupports[i].price) / livePrice; // bullish if price > support
+      supportScore += std::clamp(rel, -1.0, 1.0);
+    }
+    if (nSupports > 0) supportScore /= nSupports; // average
+    
+    double resistanceScore = 0.0;
+    for (int i = 0; i < nResistances; i++)
+    {
+      double rel = (sortedResistances[i].price - livePrice) / livePrice; // bearish if price < resistance
+      resistanceScore += std::clamp(rel, -1.0, 1.0);
+    }
+    if (nResistances > 0) resistanceScore /= nResistances; // average
+    
+    // --- Combine support and resistance scores ---
+    // Support positive → bullish, Resistance positive → bearish, so invert resistance
+    double combined = (supportScore - resistanceScore) / 2.0;
+    
+    // Clamp and apply weight
+    combined = std::clamp(combined, -1.0, 1.0);
+    return combined * weight;
+  }
+
+  
   Recommendation Analyzer::AnalzeStock(const StockData &stockData)
   {
     Recommendation recommendation;
@@ -114,7 +162,8 @@ namespace KanVest
     recommendation.score += GetEMAScore(stockData.livePrice, s_maResults.emaValues);
     recommendation.score += GetRSIScore(s_rsiSeries);
     recommendation.score += GetMACDScore(s_macdResult);
-    
+    recommendation.score += GetPivotScore(s_pivots, stockData.livePrice, (int32_t)stockData.history.size());
+
     return recommendation;
   }
   
