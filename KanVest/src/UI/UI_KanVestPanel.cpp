@@ -781,17 +781,16 @@ namespace KanVest::UI
   {
     IK_PERFORMANCE_FUNC("Panel::ShowStockData");
     
-    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Value(KanVasX::Color::Background, 2.0f), 0.2f));
-    if (ImGui::BeginChild(" Stock Data ", ImVec2(0.0f, 310.0f )))
+    StockData stockData = StockManager::GetSelectedStockData();
+    if (!stockData.IsValid())
     {
-      StockData stockData = StockManager::GetSelectedStockData();
-      if (!stockData.IsValid())
-      {
-        KanVasX::UI::Text(Font(Header_24), "No data for stock", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::Error);
-        ImGui::EndChild();
-        return;
-      }
+      KanVasX::UI::Text(Font(Header_24), "No data for stock", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::Error);
+      return;
+    }
 
+    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Value(KanVasX::Color::Background, 2.0f), 0.2f));
+    if (ImGui::BeginChild(" Stock Data ", ImVec2(0.0f, 150.0f )))
+    {
       // Name & price
       std::string name = stockData.shortName;
       std::string longNameName = stockData.longName != "" ? stockData.longName : stockData.shortName;
@@ -800,7 +799,7 @@ namespace KanVest::UI
       KanVasX::UI::Text(Font(Header_26), longNameName, Align::Left, {20.0f, 0.0f}, KanVasX::Color::TextBright);
       KanVasX::UI::Text(Font(Header_56), KanVest::UI::Utils::FormatDoubleToString(stockData.livePrice), Align::Left, {20.0f, 0.0f},
                         KanVasX::Color::TextBright);
-
+      
       // Change
       std::string change = (stockData.change > 0 ? "+" : "") +
       KanVest::UI::Utils::FormatDoubleToString(stockData.change) +
@@ -811,70 +810,68 @@ namespace KanVest::UI
       ImGui::SameLine();
       KanVasX::UI::Text(Font(Header_30), change, Align::Left, {20.0f, 15.0f}, changeColor);
 
-      KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
-      KanVasX::UI::ShiftCursorY(5.0f);
-
-      // Progress bar
-      auto ShowPriceProgress = [](float low, float high, float currentPrice)
-      {
-        // Avoid division by zero
-        if (high <= low) return;
-        
-        // Calculate fraction for progress bar (0.0 = low, 1.0 = high)
-        float fraction = (currentPrice - low) / (high - low);
-        fraction = std::clamp(fraction, 0.0f, 1.0f);
-        
-        {
-          // Choose color based on fraction
-          ImU32 scoreColor;
-          if (fraction < 0.15)      { scoreColor = KanVasX::Color::Red; }
-          else if (fraction < 0.30) { scoreColor = KanVasX::Color::Orange; }
-          else if (fraction < 0.60) { scoreColor = KanVasX::Color::Yellow; }
-          else if (fraction < 0.80) { scoreColor = KanVasX::Color::Cyan; }
-          else                    { scoreColor = KanVasX::Color::Green; }
-          
-          KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
-          KanVasX::ScopedColor frameColor(ImGuiCol_FrameBg, KanVasX::Color::Gray);
-          
-          ImGui::ProgressBar(fraction, ImVec2(ImGui::GetContentRegionAvail().x * 0.98, 0), " ");
-          
-          // Draw low/high text on top of the bar
-          ImVec2 p = ImGui::GetItemRectMin();   // top-left of bar
-          ImVec2 size = ImGui::GetItemRectSize();
-          
-          ImGui::SetCursorScreenPos(p);
-          KanVasX::UI::Text(Font(Header_22), KanVest::UI::Utils::FormatDoubleToString(low), Align::Left, {5.0f, 0.0f}, KanVasX::Color::Black);
-          
-          ImGui::SetCursorScreenPos(ImVec2(p.x + size.x - ImGui::CalcTextSize(std::to_string((int)high).c_str()).x, p.y));
-          KanVasX::UI::Text(Font(Header_22), KanVest::UI::Utils::FormatDoubleToString(high), Align::Right, {-10.0f, 0.0f}, KanVasX::Color::Black);
-        }
-      };
-      
-      // 52 - Week change
-      KanVasX::UI::Text(Font(FixedWidthHeader_18), "52-Week " , Align::Left, {20.0f, 10.0f}, KanVasX::Color::Text);
-      ImGui::SameLine();
-      KanVasX::UI::ShiftCursorY(-5.0f);
-      ShowPriceProgress(stockData.fiftyTwoLow, stockData.fiftyTwoHigh, stockData.livePrice);
-
-      // Day change
-      KanVasX::UI::Text(Font(FixedWidthHeader_18), "Day     " , Align::Left, {20.0f, 10.0f}, KanVasX::Color::Text);
-      ImGui::SameLine();
-      KanVasX::UI::ShiftCursorY(-5.0f);
-      ShowPriceProgress(stockData.dayLow, stockData.dayHigh, stockData.livePrice);
-
-      // Volume
-      KanVasX::UI::Text(Font(FixedWidthHeader_18), "Volume  " , Align::Left, {20.0f, 10.0f}, KanVasX::Color::Text);
-      ImGui::SameLine();
-      KanVasX::UI::Text(Font(FixedWidthHeader_18), Utils::FormatLargeNumber(stockData.volume) , Align::Left, {0.0f, 0.0f}, KanVasX::Color::Text);
-
-      KanVasX::UI::ShiftCursorY(5.0f);
-      KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
-      
-      ShowStockAnalyzerSummary();
-
       KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
     }
     ImGui::EndChild();
+  
+    KanVasX::UI::ShiftCursorY(5.0f);
+    // Progress bar
+    auto ShowPriceProgress = [](float low, float high, float currentPrice)
+    {
+      // Avoid division by zero
+      if (high <= low) return;
+      
+      // Calculate fraction for progress bar (0.0 = low, 1.0 = high)
+      float fraction = (currentPrice - low) / (high - low);
+      fraction = std::clamp(fraction, 0.0f, 1.0f);
+      
+      {
+        // Choose color based on fraction
+        ImU32 scoreColor;
+        if (fraction < 0.15)      { scoreColor = KanVasX::Color::Red; }
+        else if (fraction < 0.30) { scoreColor = KanVasX::Color::Orange; }
+        else if (fraction < 0.60) { scoreColor = KanVasX::Color::Yellow; }
+        else if (fraction < 0.80) { scoreColor = KanVasX::Color::Cyan; }
+        else                    { scoreColor = KanVasX::Color::Green; }
+        
+        KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
+        KanVasX::ScopedColor frameColor(ImGuiCol_FrameBg, KanVasX::Color::Gray);
+        
+        ImGui::ProgressBar(fraction, ImVec2(ImGui::GetContentRegionAvail().x * 0.98, 0), " ");
+        
+        // Draw low/high text on top of the bar
+        ImVec2 p = ImGui::GetItemRectMin();   // top-left of bar
+        ImVec2 size = ImGui::GetItemRectSize();
+        
+        ImGui::SetCursorScreenPos(p);
+        KanVasX::UI::Text(Font(Header_22), KanVest::UI::Utils::FormatDoubleToString(low), Align::Left, {5.0f, 0.0f}, KanVasX::Color::Black);
+        
+        ImGui::SetCursorScreenPos(ImVec2(p.x + size.x - ImGui::CalcTextSize(std::to_string((int)high).c_str()).x, p.y));
+        KanVasX::UI::Text(Font(Header_22), KanVest::UI::Utils::FormatDoubleToString(high), Align::Right, {-10.0f, 0.0f}, KanVasX::Color::Black);
+      }
+    };
+    
+    // 52 - Week change
+    KanVasX::UI::Text(Font(FixedWidthHeader_18), "52-Week " , Align::Left, {20.0f, 10.0f}, KanVasX::Color::Text);
+    ImGui::SameLine();
+    KanVasX::UI::ShiftCursorY(-5.0f);
+    ShowPriceProgress(stockData.fiftyTwoLow, stockData.fiftyTwoHigh, stockData.livePrice);
+
+    // Day change
+    KanVasX::UI::Text(Font(FixedWidthHeader_18), "Day     " , Align::Left, {20.0f, 10.0f}, KanVasX::Color::Text);
+    ImGui::SameLine();
+    KanVasX::UI::ShiftCursorY(-5.0f);
+    ShowPriceProgress(stockData.dayLow, stockData.dayHigh, stockData.livePrice);
+
+    // Volume
+    KanVasX::UI::Text(Font(FixedWidthHeader_18), "Volume  " , Align::Left, {20.0f, 10.0f}, KanVasX::Color::Text);
+    ImGui::SameLine();
+    KanVasX::UI::Text(Font(FixedWidthHeader_18), Utils::FormatLargeNumber(stockData.volume) , Align::Left, {0.0f, 0.0f}, KanVasX::Color::Text);
+
+    KanVasX::UI::ShiftCursorY(5.0f);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
+    
+    ShowStockAnalyzerSummary();
   }
   
   void Panel::ShowStockSearchBar(float height)

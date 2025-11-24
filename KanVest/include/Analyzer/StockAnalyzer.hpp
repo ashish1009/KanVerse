@@ -35,7 +35,7 @@ namespace KanVest
   public:
     /// This function analyze stock from data
     /// - Parameter stockData: stock data
-    static const Recommendation& AnalzeStock(const StockData& stockData);
+    static Recommendation AnalzeStock(const StockData& stockData);
     
     /// This function sets the holding data for analuzer
     /// - Parameter holding: holding data
