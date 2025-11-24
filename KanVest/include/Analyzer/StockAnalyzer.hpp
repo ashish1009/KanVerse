@@ -13,6 +13,7 @@
 
 #include "Analyzer/Indicator/MovingAverage.hpp"
 #include "Analyzer/Indicator/Momentum.hpp"
+#include "Analyzer/Indicator/MACD.hpp"
 
 namespace KanVest
 {
@@ -47,11 +48,13 @@ namespace KanVest
     static const std::map<int, double>& GetSMA();
     static const std::map<int, double>& GetEMA();
     static const RSISeries& GetRSI();
-    
+    static const MACDResult& GetMACD();
+
   private:
     inline static Holding s_stockHolding;
     
     inline static MAResult s_maResults;
     inline static RSISeries s_rsiSeries;
+    inline static MACDResult s_macdResult;
   };
 } // namespace KanVest

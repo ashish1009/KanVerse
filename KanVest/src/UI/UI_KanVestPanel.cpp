@@ -1220,8 +1220,8 @@ namespace KanVest::UI
     TechnicalButton("SMA", TechnicalTab::SMA, "Simple Moving Average"); ImGui::SameLine();
     TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average"); ImGui::SameLine();
     TechnicalButton("RSI", TechnicalTab::RSI, "Relative Strength Indicator"); ImGui::SameLine();
-    TechnicalButton("MFI", TechnicalTab::MFI, "Tooltip"); ImGui::SameLine();
     TechnicalButton("MACD", TechnicalTab::MACD, "Tooltip"); ImGui::SameLine();
+    TechnicalButton("MFI", TechnicalTab::MFI, "Tooltip"); ImGui::SameLine();
     TechnicalButton("ADX", TechnicalTab::ADX, "Tooltip"); ImGui::SameLine();
     TechnicalButton("Stochastic", TechnicalTab::Stochastic, "Tooltip"); ImGui::SameLine();
     TechnicalButton("BB", TechnicalTab::BB, "Tooltip"); ImGui::SameLine();
@@ -1238,7 +1238,11 @@ namespace KanVest::UI
     }
     else if (tab == TechnicalTab::RSI)
     {
-      UI_Momentum::ShowRSI(StockManager::GetSelectedStockData(), s_shadowTextureID);
+      UI_Momentum::ShowRSI(StockManager::GetSelectedStockData());
+    }
+    else if (tab == TechnicalTab::MACD)
+    {
+      UI_MACD::Show(StockManager::GetSelectedStockData());
     }
   }
 

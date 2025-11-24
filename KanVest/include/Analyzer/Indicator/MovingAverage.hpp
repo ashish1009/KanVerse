@@ -25,5 +25,7 @@ namespace KanVest
   private:
     static std::vector<double> ComputeSMA(const std::vector<double>& closes, int period);
     static std::vector<double> ComputeEMA(const std::vector<double>& closes, int period);
+    
+    friend class MACD;
   };
 } // namespace KanVest

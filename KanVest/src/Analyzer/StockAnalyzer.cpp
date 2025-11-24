@@ -84,6 +84,7 @@ namespace KanVest
     // Technicals computation
     s_maResults = MovingAverage::Compute(stockData);
     s_rsiSeries = RSI::Compute(stockData);
+    s_macdResult = MACD::Compute(stockData);
 
     // Score
     recommendation.score += GetSMAScore(stockData.livePrice, s_maResults.smaValues);
@@ -109,5 +110,9 @@ namespace KanVest
   const RSISeries& Analyzer::GetRSI()
   {
     return s_rsiSeries;
+  }
+  const MACDResult& Analyzer::GetMACD()
+  {
+    return s_macdResult;
   }
 } // namespace KanVest

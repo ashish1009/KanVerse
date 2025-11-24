@@ -14,6 +14,6 @@ namespace KanVest
   class UI_Momentum
   {
   public:
-    static void ShowRSI(const StockData& stockData, ImTextureID shadowTexture = 0);
+    static void ShowRSI(const StockData& stockData);
   };
 } // namespace KanVest

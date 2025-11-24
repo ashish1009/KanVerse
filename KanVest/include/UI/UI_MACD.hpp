@@ -5,9 +5,15 @@
 //  Created by Ashish . on 24/11/25.
 //
 
-#ifndef UI_MACD_hpp
-#define UI_MACD_hpp
+#pragma once
 
-#include <stdio.h>
+#include "Stock/StockData.hpp"
 
-#endif /* UI_MACD_hpp */
+namespace KanVest
+{
+  class UI_MACD
+  {
+  public:
+    static void Show(const StockData& stockData);
+  };
+} // namespace KanVest

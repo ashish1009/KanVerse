@@ -219,12 +219,6 @@
 			children = (
 				B263368B2ED3594A00D46F96 /* Indicator */,
 				B26336882ED352D500D46F96 /* StockAnalyzer.cpp */,
-				B26336932ED443AC00D46F96 /* Momentum.cpp */,
-				B26336962ED443B300D46F96 /* ADX.cpp */,
-				B26336992ED443BF00D46F96 /* MACD.cpp */,
-				B263369C2ED443C600D46F96 /* MFI.cpp */,
-				B263369F2ED443D400D46F96 /* Stochastic.cpp */,
-				B26336A22ED443DD00D46F96 /* BollingerBand.cpp */,
 			);
 			path = Analyzer;
 			sourceTree = "<group>";
@@ -256,6 +250,12 @@
 			isa = PBXGroup;
 			children = (
 				B263368D2ED3595800D46F96 /* MovingAverage.cpp */,
+				B26336932ED443AC00D46F96 /* Momentum.cpp */,
+				B26336962ED443B300D46F96 /* ADX.cpp */,
+				B26336992ED443BF00D46F96 /* MACD.cpp */,
+				B263369C2ED443C600D46F96 /* MFI.cpp */,
+				B263369F2ED443D400D46F96 /* Stochastic.cpp */,
+				B26336A22ED443DD00D46F96 /* BollingerBand.cpp */,
 			);
 			path = Indicator;
 			sourceTree = "<group>";
@@ -286,11 +286,11 @@
 			children = (
 				B289EDEE2EB2558400937D0B /* Application */,
 				B289EDF02EB2559500937D0B /* Editor */,
-				B289EE3C2EB3ACDD00937D0B /* UI */,
 				B2065B4D2ED0AC00007F186E /* User */,
 				B2065B522ED0AC50007F186E /* Portfolio */,
 				B26336622ED1BF0900D46F96 /* Stock */,
 				B263366C2ED1C51500D46F96 /* URL_API */,
+				B289EE3C2EB3ACDD00937D0B /* UI */,
 				B26336862ED352C600D46F96 /* Analyzer */,
 			);
 			path = include;
@@ -301,11 +301,11 @@
 			children = (
 				B289EDED2EB2558200937D0B /* Application */,
 				B289EDEF2EB2558E00937D0B /* Editor */,
-				B289EE3D2EB3ACE300937D0B /* UI */,
 				B2065B4E2ED0AC09007F186E /* User */,
 				B2065B532ED0AC57007F186E /* Portfolio */,
 				B26336612ED1BF0400D46F96 /* Stock */,
 				B263366D2ED1C51D00D46F96 /* URL_API */,
+				B289EE3D2EB3ACE300937D0B /* UI */,
 				B26336852ED352BC00D46F96 /* Analyzer */,
 			);
 			path = src;

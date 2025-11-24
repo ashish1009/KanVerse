@@ -113,7 +113,7 @@ namespace KanVest
     return ui;
   }
   
-  void UI_Momentum::ShowRSI(const StockData& stockData, ImTextureID shadowTexture)
+  void UI_Momentum::ShowRSI(const StockData& stockData)
   {
     if (!stockData.IsValid())
     {
