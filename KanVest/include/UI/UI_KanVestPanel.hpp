@@ -9,6 +9,8 @@
 
 #include "Portfolio/PortfolioController.hpp"
 
+#include "Analyzer/Chart/Pivot.hpp"
+
 namespace KanVest::UI
 {
   class Panel
@@ -42,6 +44,8 @@ namespace KanVest::UI
     
     static void AddStockInManager(const std::string& symbol);
     
+    static void DrawSRLevels(const PivotResults& pivots, double xMin, double xMax);
+    
     inline static ImTextureID s_shadowTextureID = 0;
     inline static ImTextureID s_reloadIconID = 0;
     inline static ImTextureID s_settingIconID = 0;
@@ -49,6 +53,8 @@ namespace KanVest::UI
     inline static ImTextureID s_closeEyeTextureID = 0;
 
     inline static bool s_showCandle = true;
+    inline static bool s_showPivots = true;
+    inline static int32_t s_numPivotLevel = 1;
 
     inline static char s_searchedStockString[128] = "Nifty";
     inline static char s_searchedHoldingString[128] = "";

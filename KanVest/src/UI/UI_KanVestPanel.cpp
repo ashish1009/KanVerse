@@ -922,10 +922,8 @@ namespace KanVest::UI
     }
   }
   
-  void DrawSRLevels(const PivotResults& pivots, double xMin, double xMax)
+  void Panel::DrawSRLevels(const PivotResults& pivots, double xMin, double xMax)
   {
-    const int maxLevels = 1;   // show only 4 supports & 4 resistances
-    
     // Copy to local so we can sort
     std::vector<SRLevel> supports = pivots.supports;
     std::vector<SRLevel> resistances = pivots.resistances;
@@ -948,8 +946,8 @@ namespace KanVest::UI
     std::stable_sort(resistances.begin(), resistances.end(), priceSortResistance);
 
     // Trim to top N levels
-    if (supports.size() > maxLevels) supports.resize(maxLevels);
-    if (resistances.size() > maxLevels) resistances.resize(maxLevels);
+    if (supports.size() > s_numPivotLevel) supports.resize(s_numPivotLevel);
+    if (resistances.size() > s_numPivotLevel) resistances.resize(s_numPivotLevel);
     
     // --- Draw Supports (green) ---
     ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(0, 200, 0, 255));
@@ -1150,7 +1148,10 @@ namespace KanVest::UI
         }
       }
       
-      DrawSRLevels(Analyzer::GetPivots(), 0, stockData.history.size() - 1);
+      if (s_showPivots)
+      {
+        DrawSRLevels(Analyzer::GetPivots(), 0, stockData.history.size() - 1);
+      }
 
       ImPlot::EndPlot();
     }
@@ -1176,9 +1177,32 @@ namespace KanVest::UI
     }
     
     ImGui::SameLine();
-    KanVasX::UI::ShiftCursorX(20);
-    ImGui::Checkbox(" Show Candle", &s_showCandle);
+    KanVasX::UI::ShiftCursorX(10);
+    ImGui::Checkbox(" Candle", &s_showCandle);
+
+    ImGui::SameLine();
+    KanVasX::UI::ShiftCursorX(10);
+    ImGui::Checkbox(" Pivots", &s_showPivots);
+
+
+    ImGui::SameLine();
+    ImGui::Text("Pivot Level");
     
+    ImGui::SameLine();
+    if (ImGui::Button("-"))
+    {
+      s_numPivotLevel = std::max(1, s_numPivotLevel - 1); // prevent going below 1
+    }
+    
+    ImGui::SameLine();
+    ImGui::Text("%d", s_numPivotLevel);
+    
+    ImGui::SameLine();
+    if (ImGui::Button("+"))
+    {
+      s_numPivotLevel = std::max(4, s_numPivotLevel + 1); // prevent going above 4
+    }
+
     ImGui::SameLine();
     std::vector<std::string> intervalValues = StockManager::RangeIntervalMap[StockManager::GetCurrentRange()];
     KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x - (intervalValues.size() * 40));
