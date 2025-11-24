@@ -13,6 +13,12 @@
 
 #include "UI/UI_Utils.hpp"
 #include "UI/UI_MovingAverage.hpp"
+#include "UI/UI_Momentum.hpp"
+#include "UI/UI_ADX.hpp"
+#include "UI/UI_MACD.hpp"
+#include "UI/UI_MFI.hpp"
+#include "UI/UI_Stochastic.hpp"
+#include "UI/UI_BollingerBand.hpp"
 
 #include "Stock/StockManager.hpp"
 
@@ -1225,9 +1231,13 @@ namespace KanVest::UI
     {
       UI_MovingAverage::ShowSMA(StockManager::GetSelectedStockData(), s_shadowTextureID);
     }
-    if (tab == TechnicalTab::EMA)
+    else if (tab == TechnicalTab::EMA)
     {
       UI_MovingAverage::ShowEMA(StockManager::GetSelectedStockData(), s_shadowTextureID);
+    }
+    else if (tab == TechnicalTab::RSI)
+    {
+      UI_Momentum::ShowRSI(StockManager::GetSelectedStockData(), s_shadowTextureID);
     }
   }
 

@@ -11,6 +11,8 @@
 
 #include "Analyzer/Indicator/MovingAverage.hpp"
 
+#include "Analyzer/StockAnalyzer.hpp"
+
 namespace KanVest
 {
   void UI_MovingAverage::ShowSMA(const StockData& stockData, ImTextureID shadowTexture)
@@ -21,8 +23,8 @@ namespace KanVest
       return;
     }
     
-    const auto& maData = MovingAverage::Compute(stockData);
-    ShowMovingAverageData(stockData, maData.smaValues, " SMA", shadowTexture);
+    const auto& smaData = Analyzer::GetSMA();
+    ShowMovingAverageData(stockData, smaData, " SMA", shadowTexture);
   }
   void UI_MovingAverage::ShowEMA(const StockData& stockData, ImTextureID shadowTexture)
   {
@@ -32,8 +34,8 @@ namespace KanVest
       return;
     }
     
-    const auto& maData = MovingAverage::Compute(stockData);
-    ShowMovingAverageData(stockData, maData.emaValues, " EMA", shadowTexture);
+    const auto& emaData = Analyzer::GetEMA();
+    ShowMovingAverageData(stockData, emaData, " EMA", shadowTexture);
   }
     
   void UI_MovingAverage::ShowMovingAverageData(const StockData& stockData, const std::map<int, double>& maMap, const std::string& maString, ImTextureID shadowTexture)

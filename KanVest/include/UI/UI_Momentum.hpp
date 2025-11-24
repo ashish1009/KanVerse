@@ -5,9 +5,15 @@
 //  Created by Ashish . on 24/11/25.
 //
 
-#ifndef UI_Momentum_hpp
-#define UI_Momentum_hpp
+#pragma once
 
-#include <stdio.h>
+#include "Stock/StockData.hpp"
 
-#endif /* UI_Momentum_hpp */
+namespace KanVest
+{
+  class UI_Momentum
+  {
+  public:
+    static void ShowRSI(const StockData& stockData, ImTextureID shadowTexture = 0);
+  };
+} // namespace KanVest

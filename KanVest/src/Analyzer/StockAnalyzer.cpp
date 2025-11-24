@@ -7,8 +7,6 @@
 
 #include "StockAnalyzer.hpp"
 
-#include "Analyzer/Indicator/MovingAverage.hpp"
-
 namespace KanVest
 {
   // Normalize raw score (-count to +count) to -1 to +1
@@ -62,11 +60,12 @@ namespace KanVest
     Recommendation recommendation;
     
     // Technicals computation
-    MAResult maResults = MovingAverage::Compute(stockData);
-    
+    s_maResults = MovingAverage::Compute(stockData);
+    s_rsiSeries = RSI::Compute(stockData);
+
     // Score
-    recommendation.score += GetSMAScore(stockData.livePrice, maResults.smaValues);
-    recommendation.score += GetEMAScore(stockData.livePrice, maResults.emaValues);
+    recommendation.score += GetSMAScore(stockData.livePrice, s_maResults.smaValues);
+    recommendation.score += GetEMAScore(stockData.livePrice, s_maResults.emaValues);
     
     return recommendation;
   }
@@ -74,5 +73,18 @@ namespace KanVest
   void Analyzer::SetHoldings(const Holding &holding)
   {
     s_stockHolding = holding;
+  }
+  
+  const std::map<int, double>& Analyzer::GetSMA()
+  {
+    return s_maResults.smaValues;
+  }
+  const std::map<int, double>& Analyzer::GetEMA()
+  {
+    return s_maResults.emaValues;
+  }
+  const RSISeries& Analyzer::GetRSI()
+  {
+    return s_rsiSeries;
   }
 } // namespace KanVest

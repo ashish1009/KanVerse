@@ -11,6 +11,9 @@
 
 #include "Portfolio/Portfolio.hpp"
 
+#include "Analyzer/Indicator/MovingAverage.hpp"
+#include "Analyzer/Indicator/Momentum.hpp"
+
 namespace KanVest
 {
   enum class RecommendationGrade
@@ -41,7 +44,14 @@ namespace KanVest
     /// - Parameter holding: holding data
     static void SetHoldings(const Holding& holding);
     
+    static const std::map<int, double>& GetSMA();
+    static const std::map<int, double>& GetEMA();
+    static const RSISeries& GetRSI();
+    
   private:
     inline static Holding s_stockHolding;
+    
+    inline static MAResult s_maResults;
+    inline static RSISeries s_rsiSeries;
   };
 } // namespace KanVest
