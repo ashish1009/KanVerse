@@ -14,8 +14,10 @@
 #include "UI/UI_Utils.hpp"
 #include "UI/UI_MovingAverage.hpp"
 #include "UI/UI_Momentum.hpp"
-#include "UI/UI_ADX.hpp"
 #include "UI/UI_MACD.hpp"
+#include "UI/UI_Pivot.hpp"
+
+#include "UI/UI_ADX.hpp"
 #include "UI/UI_MFI.hpp"
 #include "UI/UI_Stochastic.hpp"
 #include "UI/UI_BollingerBand.hpp"
@@ -920,6 +922,66 @@ namespace KanVest::UI
     }
   }
   
+  void DrawSRLevels(const PivotResults& pivots, double xMin, double xMax)
+  {
+    const int maxLevels = 1;   // show only 4 supports & 4 resistances
+    
+    // Copy to local so we can sort
+    std::vector<SRLevel> supports = pivots.supports;
+    std::vector<SRLevel> resistances = pivots.resistances;
+    
+    // --- Sort strongest first: higher count → more recent → lower price ---
+    auto sortSR = [](const SRLevel& a, const SRLevel& b) {
+      if (a.count != b.count)      return a.count > b.count;          // stronger first
+      if (a.lastTouchIdx != b.lastTouchIdx) return a.lastTouchIdx > b.lastTouchIdx; // recent first
+      return a.price < b.price;                                        // tie-break by price
+    };
+    
+    std::sort(supports.begin(), supports.end(), sortSR);
+    std::sort(resistances.begin(), resistances.end(), sortSR);
+    
+    // --- Sort for display visually: supports low->high, resistances high->low ---
+    auto priceSortSupport = [](const SRLevel& a, const SRLevel& b) { return a.price < b.price; };
+    auto priceSortResistance = [](const SRLevel& a, const SRLevel& b) { return a.price < b.price; };
+
+    std::stable_sort(supports.begin(), supports.end(), priceSortSupport);
+    std::stable_sort(resistances.begin(), resistances.end(), priceSortResistance);
+
+    // Trim to top N levels
+    if (supports.size() > maxLevels) supports.resize(maxLevels);
+    if (resistances.size() > maxLevels) resistances.resize(maxLevels);
+    
+    // --- Draw Supports (green) ---
+    ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(0, 200, 0, 255));
+    
+    for (size_t i = 0; i < supports.size(); i++)
+    {
+      const auto& s = supports[i];
+      double xs[2] = { xMin, xMax };
+      double ys[2] = { s.price, s.price };
+      
+      std::string label = "S" + std::to_string(i + 1);
+      ImPlot::PlotLine(label.c_str(), xs, ys, 2);
+    }
+    
+    ImPlot::PopStyleColor();
+    
+    // --- Draw Resistances (red) ---
+    ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(200, 0, 0, 255));
+    
+    for (size_t i = 0; i < resistances.size(); i++)
+    {
+      const auto& r = resistances[i];
+      double xs[2] = { xMin, xMax };
+      double ys[2] = { r.price, r.price };
+      
+      std::string label = "R" + std::to_string(i + 1);
+      ImPlot::PlotLine(label.c_str(), xs, ys, 2);
+    }
+    
+    ImPlot::PopStyleColor();
+  }
+  
   void Panel::ShowChart()
   {
     IK_PERFORMANCE_FUNC("Panel::ShowChart");
@@ -1088,6 +1150,8 @@ namespace KanVest::UI
         }
       }
       
+      DrawSRLevels(Analyzer::GetPivots(), 0, stockData.history.size() - 1);
+
       ImPlot::EndPlot();
     }
     
@@ -1221,11 +1285,11 @@ namespace KanVest::UI
     TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average"); ImGui::SameLine();
     TechnicalButton("RSI", TechnicalTab::RSI, "Relative Strength Indicator"); ImGui::SameLine();
     TechnicalButton("MACD", TechnicalTab::MACD, "Moving Average Convergence Divergence"); ImGui::SameLine();
-    TechnicalButton("Pivot", TechnicalTab::Pivot, "Tooltip");
+    TechnicalButton("Pivot", TechnicalTab::Pivot, "Tooltip"); ImGui::SameLine();
     TechnicalButton("MFI", TechnicalTab::MFI, "Tooltip"); ImGui::SameLine();
     TechnicalButton("ADX", TechnicalTab::ADX, "Tooltip"); ImGui::SameLine();
     TechnicalButton("Stochastic", TechnicalTab::Stochastic, "Tooltip"); ImGui::SameLine();
-    TechnicalButton("BB", TechnicalTab::BB, "Tooltip"); ImGui::SameLine();
+    TechnicalButton("BB", TechnicalTab::BB, "Tooltip");
     ImGui::Separator();
     
     if (tab == TechnicalTab::SMA)
@@ -1246,7 +1310,7 @@ namespace KanVest::UI
     }
     else if (tab == TechnicalTab::Pivot)
     {
-//      UI_MACD::Show(StockManager::GetSelectedStockData());
+      UI_Pivot::Show(StockManager::GetSelectedStockData(), s_shadowTextureID);
     }
   }
 
