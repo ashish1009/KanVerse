@@ -1204,7 +1204,7 @@ namespace KanVest::UI
     float availX = ImGui::GetContentRegionAvail().x;
     float technicalButtonSize = (availX / (uint32_t)TechnicalTab::Max) - 2.0f;
     
-    auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab)
+    auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab, const std::string& tooltip)
     {
       if (KanVasX::UI::DrawButton(title, KanVest::UI::Font::Get(KanVest::UI::FontType::Medium),
                                   tab == checkerTtab ? KanVasX::Color::Value(KanVasX::Color::Background, 1.0f) : KanVasX::Color::BackgroundDark,
@@ -1212,19 +1212,20 @@ namespace KanVest::UI
       {
         tab = checkerTtab;
       }
+      KanVasX::UI::Tooltip(tooltip);
       KanVasX::UI::DrawItemActivityOutline();
     };
     
     KanVasX::UI::ShiftCursor({2.0f, 1.0f});
-    TechnicalButton("SMA", TechnicalTab::SMA); ImGui::SameLine();
-    TechnicalButton("EMA", TechnicalTab::EMA); ImGui::SameLine();
-    TechnicalButton("RSI", TechnicalTab::RSI); ImGui::SameLine();
-    TechnicalButton("MFI", TechnicalTab::MFI); ImGui::SameLine();
-    TechnicalButton("MACD", TechnicalTab::MACD); ImGui::SameLine();
-    TechnicalButton("ADX", TechnicalTab::ADX); ImGui::SameLine();
-    TechnicalButton("Stochastic", TechnicalTab::Stochastic); ImGui::SameLine();
-    TechnicalButton("BB", TechnicalTab::BB); ImGui::SameLine();
-    TechnicalButton("Pivot", TechnicalTab::Pivot);
+    TechnicalButton("SMA", TechnicalTab::SMA, "Simple Moving Average"); ImGui::SameLine();
+    TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average"); ImGui::SameLine();
+    TechnicalButton("RSI", TechnicalTab::RSI, "Relative Strength Indicator"); ImGui::SameLine();
+    TechnicalButton("MFI", TechnicalTab::MFI, "Tooltip"); ImGui::SameLine();
+    TechnicalButton("MACD", TechnicalTab::MACD, "Tooltip"); ImGui::SameLine();
+    TechnicalButton("ADX", TechnicalTab::ADX, "Tooltip"); ImGui::SameLine();
+    TechnicalButton("Stochastic", TechnicalTab::Stochastic, "Tooltip"); ImGui::SameLine();
+    TechnicalButton("BB", TechnicalTab::BB, "Tooltip"); ImGui::SameLine();
+    TechnicalButton("Pivot", TechnicalTab::Pivot, "Tooltip");
     ImGui::Separator();
     
     if (tab == TechnicalTab::SMA)
