@@ -15,6 +15,8 @@
 #include "Analyzer/Indicator/Momentum.hpp"
 #include "Analyzer/Indicator/MACD.hpp"
 
+#include "Analyzer/Chart/Pivot.hpp"
+
 namespace KanVest
 {
   enum class RecommendationGrade
@@ -49,6 +51,8 @@ namespace KanVest
     static const std::map<int, double>& GetEMA();
     static const RSISeries& GetRSI();
     static const MACDResult& GetMACD();
+    
+    static const PivotResults& GetPivots();
 
   private:
     inline static Holding s_stockHolding;
@@ -56,5 +60,7 @@ namespace KanVest
     inline static MAResult s_maResults;
     inline static RSISeries s_rsiSeries;
     inline static MACDResult s_macdResult;
+    
+    inline static PivotResults s_pivots;
   };
 } // namespace KanVest

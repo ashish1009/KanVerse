@@ -14,7 +14,7 @@ namespace KanVest
   {
     return static_cast<double>(raw) / static_cast<double>(count);
   }
-
+  
   float GetSMAScore(double price, const std::map<int, double>& smaValues, double weight = 10.0)
   {
     if (smaValues.empty()) return 0.0;
@@ -48,7 +48,7 @@ namespace KanVest
     
     return normalized * weight;
   }
-
+  
   double GetRSIScore(const RSISeries& rsiData, double weight = 10.0)
   {
     double rsi = rsiData.last;    // latest value
@@ -67,7 +67,7 @@ namespace KanVest
     
     return normalized * weight;
   }
-
+  
   double GetMACDScore(const MACDResult& macd, double weight = 10.0)
   {
     const auto& macdSeries   = macd.macdLine;
@@ -96,7 +96,7 @@ namespace KanVest
     // --- Apply weight ---
     return raw * weight;
   }
-
+  
   Recommendation Analyzer::AnalzeStock(const StockData &stockData)
   {
     Recommendation recommendation;
@@ -106,12 +106,15 @@ namespace KanVest
     s_rsiSeries = RSI::Compute(stockData);
     s_macdResult = MACD::Compute(stockData);
 
+    // chart
+    s_pivots = Pivot::Compute(stockData);
+
     // Score
     recommendation.score += GetSMAScore(stockData.livePrice, s_maResults.smaValues);
     recommendation.score += GetEMAScore(stockData.livePrice, s_maResults.emaValues);
     recommendation.score += GetRSIScore(s_rsiSeries);
     recommendation.score += GetMACDScore(s_macdResult);
-
+    
     return recommendation;
   }
   
@@ -135,5 +138,10 @@ namespace KanVest
   const MACDResult& Analyzer::GetMACD()
   {
     return s_macdResult;
+  }
+  
+  const PivotResults& Analyzer::GetPivots()
+  {
+    return s_pivots;
   }
 } // namespace KanVest

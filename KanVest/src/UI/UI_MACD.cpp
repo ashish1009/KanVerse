@@ -15,11 +15,6 @@
 
 namespace KanVest
 {
-  static bool IsValid(double v)
-  {
-    return !std::isnan(v) && !std::isinf(v);
-  };
-
   struct MACD_UI
   {
     double macd = 0.0;

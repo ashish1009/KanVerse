@@ -1221,11 +1221,11 @@ namespace KanVest::UI
     TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average"); ImGui::SameLine();
     TechnicalButton("RSI", TechnicalTab::RSI, "Relative Strength Indicator"); ImGui::SameLine();
     TechnicalButton("MACD", TechnicalTab::MACD, "Moving Average Convergence Divergence"); ImGui::SameLine();
+    TechnicalButton("Pivot", TechnicalTab::Pivot, "Tooltip");
     TechnicalButton("MFI", TechnicalTab::MFI, "Tooltip"); ImGui::SameLine();
     TechnicalButton("ADX", TechnicalTab::ADX, "Tooltip"); ImGui::SameLine();
     TechnicalButton("Stochastic", TechnicalTab::Stochastic, "Tooltip"); ImGui::SameLine();
     TechnicalButton("BB", TechnicalTab::BB, "Tooltip"); ImGui::SameLine();
-    TechnicalButton("Pivot", TechnicalTab::Pivot, "Tooltip");
     ImGui::Separator();
     
     if (tab == TechnicalTab::SMA)
@@ -1243,6 +1243,10 @@ namespace KanVest::UI
     else if (tab == TechnicalTab::MACD)
     {
       UI_MACD::Show(StockManager::GetSelectedStockData());
+    }
+    else if (tab == TechnicalTab::Pivot)
+    {
+//      UI_MACD::Show(StockManager::GetSelectedStockData());
     }
   }
 
