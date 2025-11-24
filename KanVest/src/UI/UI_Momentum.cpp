@@ -136,7 +136,8 @@ namespace KanVest
       }
       else
       {
-        KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22), RSI_UI_Data.interpretation, KanVasX::UI::AlignX::Center, {0, 0}, RSI_UI_Data.color);
+        KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22), rsiString, KanVasX::UI::AlignX::Center, {0, 0}, RSI_UI_Data.color);
+        KanVasX::UI::Tooltip(RSI_UI_Data.interpretation);
       }
       
       std::vector<float> rsiFloat;
@@ -151,7 +152,7 @@ namespace KanVest
         rsiMax = std::max(rsiMax, v);
       }
 
-      if (ImPlot::BeginPlot(rsiString.c_str(), ImVec2(-1, 200)))
+      if (ImPlot::BeginPlot("##RSIPlot", ImVec2(-1, 250)))
       {
         const auto& rsi = RSI_UI_Data.series;
         size_t n = rsi.size();
@@ -187,17 +188,15 @@ namespace KanVest
         // Line at 30
         {
           double ys[2] = {30.0, 30.0};
-          ImPlot::PushStyleColor(ImPlotCol_Line, ImVec4(1, 0, 0, 1)); // Your red
+          KanVasX::ScopedColor color(ImPlotCol_Line, KanVasX::Color::DarkRed);
           ImPlot::PlotLine("30", xs, ys, 2);
-          ImPlot::PopStyleColor();
         }
         
         // Line at 70
         {
           double ys[2] = {70.0, 70.0};
-          ImPlot::PushStyleColor(ImPlotCol_Line, ImVec4(0, 1, 0, 1)); // Your green
+          KanVasX::ScopedColor color(ImPlotCol_Line, KanVasX::Color::Background);
           ImPlot::PlotLine("70", xs, ys, 2);
-          ImPlot::PopStyleColor();
         }
         
         ImPlot::PopStyleVar();

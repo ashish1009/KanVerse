@@ -28,7 +28,6 @@
 		B26336A32ED443DD00D46F96 /* BollingerBand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336A22ED443DD00D46F96 /* BollingerBand.cpp */; };
 		B26336A62ED443FB00D46F96 /* UI_Momentum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336A52ED443FB00D46F96 /* UI_Momentum.cpp */; };
 		B26336A92ED4440100D46F96 /* UI_ADX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336A82ED4440100D46F96 /* UI_ADX.cpp */; };
-		B26336AC2ED4440800D46F96 /* UI_RSI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336AB2ED4440800D46F96 /* UI_RSI.cpp */; };
 		B26336AF2ED4440E00D46F96 /* UI_MACD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336AE2ED4440E00D46F96 /* UI_MACD.cpp */; };
 		B26336B22ED4441600D46F96 /* UI_MFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336B12ED4441600D46F96 /* UI_MFI.cpp */; };
 		B26336B52ED4442100D46F96 /* UI_BollingerBand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336B42ED4442100D46F96 /* UI_BollingerBand.cpp */; };
@@ -99,8 +98,6 @@
 		B26336A52ED443FB00D46F96 /* UI_Momentum.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Momentum.cpp; sourceTree = "<group>"; };
 		B26336A72ED4440100D46F96 /* UI_ADX.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_ADX.hpp; sourceTree = "<group>"; };
 		B26336A82ED4440100D46F96 /* UI_ADX.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_ADX.cpp; sourceTree = "<group>"; };
-		B26336AA2ED4440800D46F96 /* UI_RSI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_RSI.hpp; sourceTree = "<group>"; };
-		B26336AB2ED4440800D46F96 /* UI_RSI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_RSI.cpp; sourceTree = "<group>"; };
 		B26336AD2ED4440E00D46F96 /* UI_MACD.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_MACD.hpp; sourceTree = "<group>"; };
 		B26336AE2ED4440E00D46F96 /* UI_MACD.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_MACD.cpp; sourceTree = "<group>"; };
 		B26336B02ED4441600D46F96 /* UI_MFI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_MFI.hpp; sourceTree = "<group>"; };
@@ -374,7 +371,6 @@
 				B26336A42ED443FB00D46F96 /* UI_Momentum.hpp */,
 				B26336A72ED4440100D46F96 /* UI_ADX.hpp */,
 				B26336AD2ED4440E00D46F96 /* UI_MACD.hpp */,
-				B26336AA2ED4440800D46F96 /* UI_RSI.hpp */,
 				B26336B02ED4441600D46F96 /* UI_MFI.hpp */,
 				B26336B32ED4442100D46F96 /* UI_BollingerBand.hpp */,
 				B26336B62ED4442C00D46F96 /* UI_Stochastic.hpp */,
@@ -392,7 +388,6 @@
 				B26336A52ED443FB00D46F96 /* UI_Momentum.cpp */,
 				B26336A82ED4440100D46F96 /* UI_ADX.cpp */,
 				B26336AE2ED4440E00D46F96 /* UI_MACD.cpp */,
-				B26336AB2ED4440800D46F96 /* UI_RSI.cpp */,
 				B26336B12ED4441600D46F96 /* UI_MFI.cpp */,
 				B26336B42ED4442100D46F96 /* UI_BollingerBand.cpp */,
 				B26336B72ED4442C00D46F96 /* UI_Stochastic.cpp */,
@@ -486,7 +481,6 @@
 				B2065B592ED0B247007F186E /* UserManager.cpp in Sources */,
 				B2065B612ED0B521007F186E /* PortfolioController.cpp in Sources */,
 				B26336892ED352D500D46F96 /* StockAnalyzer.cpp in Sources */,
-				B26336AC2ED4440800D46F96 /* UI_RSI.cpp in Sources */,
 				B26336B22ED4441600D46F96 /* UI_MFI.cpp in Sources */,
 				B26336702ED1C53100D46F96 /* APIProvider.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,

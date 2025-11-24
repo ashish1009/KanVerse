@@ -1220,7 +1220,7 @@ namespace KanVest::UI
     TechnicalButton("SMA", TechnicalTab::SMA, "Simple Moving Average"); ImGui::SameLine();
     TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average"); ImGui::SameLine();
     TechnicalButton("RSI", TechnicalTab::RSI, "Relative Strength Indicator"); ImGui::SameLine();
-    TechnicalButton("MACD", TechnicalTab::MACD, "Tooltip"); ImGui::SameLine();
+    TechnicalButton("MACD", TechnicalTab::MACD, "Moving Average Convergence Divergence"); ImGui::SameLine();
     TechnicalButton("MFI", TechnicalTab::MFI, "Tooltip"); ImGui::SameLine();
     TechnicalButton("ADX", TechnicalTab::ADX, "Tooltip"); ImGui::SameLine();
     TechnicalButton("Stochastic", TechnicalTab::Stochastic, "Tooltip"); ImGui::SameLine();
