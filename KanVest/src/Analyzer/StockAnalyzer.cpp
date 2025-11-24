@@ -15,9 +15,6 @@ namespace KanVest
     return static_cast<double>(raw) / static_cast<double>(count);
   }
 
-  // ------------------------------------------------------------
-  // SMA Score  (Weight = 10)
-  // ------------------------------------------------------------
   float GetSMAScore(double price, const std::map<int, double>& smaValues, double weight = 10.0)
   {
     if (smaValues.empty()) return 0.0;
@@ -35,9 +32,6 @@ namespace KanVest
     return normalized * weight;
   }
   
-  // ------------------------------------------------------------
-  // EMA Score  (Weight = 10)
-  // ------------------------------------------------------------
   float GetEMAScore(double price, const std::map<int, double>& emaValues, double weight = 10.0)
   {
     if (emaValues.empty()) return 0.0;
@@ -55,9 +49,6 @@ namespace KanVest
     return normalized * weight;
   }
 
-  // ------------------------------------------------------------
-  // EMA Score  (Weight = 10)
-  // ------------------------------------------------------------
   double GetRSIScore(const RSISeries& rsiData, double weight = 10.0)
   {
     double rsi = rsiData.last;    // latest value
@@ -77,6 +68,35 @@ namespace KanVest
     return normalized * weight;
   }
 
+  double GetMACDScore(const MACDResult& macd, double weight = 10.0)
+  {
+    const auto& macdSeries   = macd.macdLine;
+    const auto& signalSeries = macd.signalLine;
+    const auto& histSeries   = macd.histogram;
+    
+    size_t n = macdSeries.size();
+    if (n < 2) return 0.0;
+    
+    double macdNow  = macdSeries[n - 1];
+    double macdPrev = macdSeries[n - 2];
+    
+    double sigNow   = signalSeries[n - 1];
+    
+    double histNow  = histSeries[n - 1];
+    double histPrev = histSeries[n - 2];
+    
+    // --- individual normalized parts (-1 or +1) ---
+    double crossover = (macdNow > sigNow) ? +1.0 : -1.0;
+    double momentum  = (histNow > histPrev) ? +1.0 : -1.0;
+    double slope     = (macdNow > macdPrev) ? +1.0 : -1.0;
+    
+    // --- Normalize to range -1 to +1 ---
+    double raw = (crossover + momentum + slope) / 3.0;
+    
+    // --- Apply weight ---
+    return raw * weight;
+  }
+
   Recommendation Analyzer::AnalzeStock(const StockData &stockData)
   {
     Recommendation recommendation;
@@ -90,6 +110,7 @@ namespace KanVest
     recommendation.score += GetSMAScore(stockData.livePrice, s_maResults.smaValues);
     recommendation.score += GetEMAScore(stockData.livePrice, s_maResults.emaValues);
     recommendation.score += GetRSIScore(s_rsiSeries);
+    recommendation.score += GetMACDScore(s_macdResult);
 
     return recommendation;
   }
