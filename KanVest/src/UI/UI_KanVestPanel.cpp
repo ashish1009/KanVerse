@@ -266,12 +266,12 @@ namespace KanVest::UI
       
       // Profit loss UI
       std::string profitLossTag = profitLoss > 0 ? "Overall Gain" : "Overall Loss";
-      std::string pnlSign = profitLoss > 0 ? "+" : "-";
+      std::string pnlSign = profitLoss > 0 ? "+" : "";
       ImU32 profitLossColor = profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
       
       KanVasX::UI::Text(Font(Header_22), profitLossTag, Align::Left, {20.0f, -5.0f});
       
-      std::string profitLossString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)profitLoss));
+      std::string profitLossString = "₹" + pnlSign + FinalString(Utils::FormatWithCommas((int32_t)profitLoss));
       ImGui::SameLine();
       KanVasX::UI::Text(Font(Header_28), profitLossString, Align::Left, {0.0f, 0.0f}, profitLossColor);
       
@@ -282,20 +282,23 @@ namespace KanVest::UI
       // Total Investment
       KanVasX::UI::Text(Font(Header_24), "Invested Value", Align::Left, {20.0f, 5.0f});
       ImGui::SameLine();
-      std::string dayProfitLossTag = profitLoss > 0 ? "Today's Gain" : "Today's Loss";
-      KanVasX::UI::Text(Font(Header_24), dayProfitLossTag, Align::Right, {-20.0f, 0.0f});
+      std::string dayProfitLossTag = todayChange > 0 ? "Today's Gain" : "Today's Loss";
+      KanVasX::UI::Text(Font(Header_24), dayProfitLossTag, Align::Right, {-20.0f, 5.0f});
       
       std::string totalPortfolioInvestmentString = "₹" + FinalString(Utils::FormatWithCommas((int32_t)totalPortfolioInvestment));
       KanVasX::UI::Text(Font(Header_28), totalPortfolioInvestmentString, Align::Left, {20.0f, 0.0f});
       
       ImGui::SameLine();
-      std::string dayChangeString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)todayChange));
+      std::string dayPnlSign = todayChange > 0 ? "+" : "";
+      ImU32 dayProfitLossColor = todayChange > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+
+      std::string dayChangeString = dayPnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)todayChange));
       ImGui::SameLine();
-      KanVasX::UI::Text(Font(Header_28), dayChangeString, Align::Right, {-100.0f, 0.0f}, profitLossColor);
+      KanVasX::UI::Text(Font(Header_28), dayChangeString, Align::Right, {-100.0f, 0.0f}, dayProfitLossColor);
       
-      profitLossString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(todayChangePercent)) + "%)";
+      profitLossString = " (" + dayPnlSign + FinalString(Utils::FormatDoubleToString(todayChangePercent)) + "%)";
       ImGui::SameLine();
-      KanVasX::UI::Text(Font(Header_22), profitLossString, Align::Left, {0.0f, 5.0f});
+      KanVasX::UI::Text(Font(Header_22), profitLossString, Align::Left, {0.0f, 0.0f});
       
       KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
     }
@@ -310,8 +313,6 @@ namespace KanVest::UI
     KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::BackgroundDark, 0.2f));
     if (ImGui::BeginChild(h.symbolName.c_str(), childSize, true))
     {
-      std::string pnlSign = h.profitLoss > 0 ? "+" : "";
-      ImU32 profitLossColor = h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
       
       // Symbol PL
       {
@@ -320,9 +321,11 @@ namespace KanVest::UI
         
         // Right Data
         {
+          ImU32 profitLossColor = h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+          std::string pnlSign = h.profitLoss > 0 ? "+" : "";
           std::string profitLossString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)h.profitLoss));
           std::string profitLossPercentString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.profitLossPercent)) + "%)";
-          
+
           KanVasX::ScopedFont header(Font(Header_26));
           {
             KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
@@ -349,6 +352,9 @@ namespace KanVest::UI
         {
           ImGui::SameLine();
           
+          std::string pnlSign = h.dayChangePercent > 0 ? "+" : "";
+          ImU32 ltpColor = h.dayChangePercent > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+
           std::string ltpString = "LTP ";
           std::string ltpValueString = "₹" + Utils::FormatDoubleToString(h.stockValue);
           std::string ltpPerString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.dayChangePercent)) + "%)";
@@ -361,7 +367,6 @@ namespace KanVest::UI
           ImGui::Text("%s", ltpString.data());
           
           {
-            ImU32 ltpColor = h.dayChange > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
             KanVasX::ScopedColor textColor(ImGuiCol_Text, ltpColor);
             ImGui::SameLine();
             ImGui::Text("%s", ltpValueString.data());
@@ -382,6 +387,9 @@ namespace KanVest::UI
         {
           ImGui::SameLine();
           
+          std::string pnlSign = h.dayChange > 0 ? "+" : "";
+          ImU32 ltpColor = h.dayChange > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+
           std::string gainTagString = h.profitLoss > 0 ? "Today's Gain " : "Today's Loss";
           std::string gainValueString = "₹" + Utils::FormatDoubleToString(h.dayChange);
           
@@ -393,7 +401,6 @@ namespace KanVest::UI
           ImGui::Text("%s", gainTagString.data());
           
           {
-            ImU32 ltpColor = h.dayChange > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
             KanVasX::ScopedColor textColor(ImGuiCol_Text, ltpColor);
             ImGui::SameLine();
             ImGui::Text("%s", gainValueString.data());
@@ -441,9 +448,6 @@ namespace KanVest::UI
     KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::BackgroundDark, 0.2f));
     if (ImGui::BeginChild(h.symbolName.c_str(), childSize, true))
     {
-      std::string pnlSign = h.profitLoss > 0 ? "+" : "-";
-      ImU32 profitLossColor = h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
-      
       // Symbol PL
       {
         {
@@ -455,9 +459,11 @@ namespace KanVest::UI
         
         // Right Data
         {
+          std::string pnlSign = h.profitLoss > 0 ? "+" : "-";
           std::string profitLossString = pnlSign + "₹" + FinalString(Utils::FormatWithCommas((int32_t)h.profitLoss));
           std::string profitLossPercentString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.profitLossPercent)) + "%)";
-          
+          ImU32 profitLossColor = h.profitLoss > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+
           KanVasX::ScopedFont header(Font(Header_26));
           {
             KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
@@ -489,10 +495,12 @@ namespace KanVest::UI
         {
           ImGui::SameLine();
           
+          std::string pnlSign = h.dayChangePercent > 0 ? "+" : "-";
           std::string ltpString = "LTP ";
           std::string ltpValueString = "₹" + Utils::FormatDoubleToString(h.stockValue);
           std::string ltpPerString = " (" + pnlSign + FinalString(Utils::FormatDoubleToString(h.dayChangePercent)) + "%)";
-          
+          ImU32 profitLossColor = h.dayChangePercent > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+
           KanVasX::ScopedFont header(Font(Header_18));
           float textSize = ImGui::CalcTextSize(ltpString.data()).x + ImGui::CalcTextSize(ltpValueString.data()).x + ImGui::CalcTextSize(ltpPerString.data()).x;
           float xOffset = (ImGui::GetColumnWidth() - textSize - 8.0f) ;
@@ -526,7 +534,8 @@ namespace KanVest::UI
           
           std::string gainTagString = h.profitLoss > 0 ? "Today's Gain " : "Today's Loss";
           std::string gainValueString = "₹" + Utils::FormatDoubleToString(h.dayChange);
-          
+          ImU32 profitLossColor = h.dayChangePercent > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+
           KanVasX::ScopedFont header(Font(Header_18));
           float textSize = ImGui::CalcTextSize(gainTagString.data()).x + ImGui::CalcTextSize(gainValueString.data()).x;
           float xOffset = (ImGui::GetColumnWidth() - textSize - 5.0f) ;
@@ -724,8 +733,8 @@ namespace KanVest::UI
           h.value = h.stockValue * h.quantity;
           h.profitLoss = h.value - h.investment;
           h.profitLossPercent = (h.profitLoss * 100) / h.investment;
-          h.dayChange = stockData.dayChange;
-          h.dayChangePercent = stockData.dayChangePercent;
+          h.dayChange = stockData.change;
+          h.dayChangePercent = stockData.changePercent;
         }
 
         if (g_showEditModal and g_selectedIdx == idx)
