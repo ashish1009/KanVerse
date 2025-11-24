@@ -186,7 +186,7 @@ namespace KanVest::UI
       float totalWidth  = ImGui::GetContentRegionAvail().x;
       float totalHeight = ImGui::GetContentRegionAvail().y;
       
-      if (ImGui::BeginChild(" Stock - Data - Chart ", ImVec2(totalWidth * 0.75, totalHeight )))
+      if (ImGui::BeginChild(" Stock - Data - Chart ", ImVec2(totalWidth * 0.7, totalHeight )))
       {
         float stcoDataChartWidth  = ImGui::GetContentRegionAvail().x;
         float stcoDataChartHeight = ImGui::GetContentRegionAvail().y;
@@ -201,6 +201,7 @@ namespace KanVest::UI
             ShowStockSearchBar(5.0f);
             ShowStockData();
           }
+          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
           ImGui::EndChild();
 
           ImGui::SameLine();
@@ -209,7 +210,6 @@ namespace KanVest::UI
             ShowStockTechnicalData();
           }
           ImGui::EndChild();
-
         }
         ImGui::EndChild();
         
@@ -219,21 +219,21 @@ namespace KanVest::UI
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
-
       }
       ImGui::EndChild();
       
       ImGui::SameLine();
-      if (ImGui::BeginChild(" Portfolio ", ImVec2(totalWidth * 0.248, totalHeight)))
+      if (ImGui::BeginChild(" Portfolio ", ImVec2(totalWidth * 0.298, totalHeight)))
       {
         ShowPortfolio();
 
         KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 80.0f, ImGui::GetContentRegionAvail().y - 22.0f});
         KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::Gray);
         ImGui::Text("FPS : %.1f", ImGui::GetIO().Framerate);
+
+        KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
       }
       ImGui::EndChild();
-
     }
 
     KanVasX::Panel::End(0);
@@ -714,7 +714,8 @@ namespace KanVest::UI
     }
 
     KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Highlight, 0.2f));
-    if (ImGui::BeginChild("Holding Data", ImVec2(totalWidth, totalHeight), false, ImGuiWindowFlags_NoScrollbar))
+    KanVasX::UI::ShiftCursorX(10.0f);
+    if (ImGui::BeginChild("Holding Data", ImVec2(totalWidth - 20.0f, totalHeight), false, ImGuiWindowFlags_NoScrollbar))
     {
       for (int idx = 0; idx < holdings.size(); idx++)
       {
@@ -790,32 +791,33 @@ namespace KanVest::UI
       return;
     }
 
-    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Value(KanVasX::Color::Background, 2.0f), 0.2f));
-    if (ImGui::BeginChild(" Stock Data ", ImVec2(0.0f, 150.0f )))
     {
-      // Name & price
-      std::string name = stockData.shortName;
-      std::string longNameName = stockData.longName != "" ? stockData.longName : stockData.shortName;
-
-      KanVasX::UI::Text(Font(Header_46), name, Align::Left, {20.0f, 10.0f}, KanVasX::Color::TextBright);
-      KanVasX::UI::Text(Font(Header_26), longNameName, Align::Left, {20.0f, 0.0f}, KanVasX::Color::TextBright);
-      KanVasX::UI::Text(Font(Header_56), KanVest::UI::Utils::FormatDoubleToString(stockData.livePrice), Align::Left, {20.0f, 0.0f},
-                        KanVasX::Color::TextBright);
-      
-      // Change
-      std::string change = (stockData.change > 0 ? "+" : "") +
-      KanVest::UI::Utils::FormatDoubleToString(stockData.change) +
-      (stockData.change > 0 ? " ( +" : " ( ") +
-      KanVest::UI::Utils::FormatDoubleToString(stockData.changePercent) + "%)";
-      
-      ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
-      ImGui::SameLine();
-      KanVasX::UI::Text(Font(Header_30), change, Align::Left, {20.0f, 15.0f}, changeColor);
-
-      KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+      KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Alpha(KanVasX::Color::Value(KanVasX::Color::Background, 2.0f), 0.2f));
+      if (ImGui::BeginChild(" Stock Data ", ImVec2(0.0f, 150.0f )))
+      {
+        // Name & price
+        std::string name = stockData.shortName;
+        std::string longNameName = stockData.longName != "" ? stockData.longName : stockData.shortName;
+        
+        KanVasX::UI::Text(Font(Header_46), name, Align::Left, {20.0f, 10.0f}, KanVasX::Color::TextBright);
+        KanVasX::UI::Text(Font(Header_26), longNameName, Align::Left, {20.0f, 0.0f}, KanVasX::Color::TextBright);
+        KanVasX::UI::Text(Font(Header_56), KanVest::UI::Utils::FormatDoubleToString(stockData.livePrice), Align::Left, {20.0f, 0.0f},
+                          KanVasX::Color::TextBright);
+        
+        // Change
+        std::string change = (stockData.change > 0 ? "+" : "") +
+        KanVest::UI::Utils::FormatDoubleToString(stockData.change) +
+        (stockData.change > 0 ? " ( +" : " ( ") +
+        KanVest::UI::Utils::FormatDoubleToString(stockData.changePercent) + "%)";
+        
+        ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+        ImGui::SameLine();
+        KanVasX::UI::Text(Font(Header_30), change, Align::Left, {20.0f, 15.0f}, changeColor);
+        
+        KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+      }
+      ImGui::EndChild();
     }
-    ImGui::EndChild();
-  
     KanVasX::UI::ShiftCursorY(5.0f);
     // Progress bar
     auto ShowPriceProgress = [](float low, float high, float currentPrice)
@@ -839,7 +841,7 @@ namespace KanVest::UI
         KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
         KanVasX::ScopedColor frameColor(ImGuiCol_FrameBg, KanVasX::Color::Gray);
         
-        ImGui::ProgressBar(fraction, ImVec2(ImGui::GetContentRegionAvail().x * 0.98, 0), " ");
+        ImGui::ProgressBar(fraction, ImVec2(ImGui::GetContentRegionAvail().x -20.0f, 0), " ");
         
         // Draw low/high text on top of the bar
         ImVec2 p = ImGui::GetItemRectMin();   // top-left of bar
@@ -849,7 +851,7 @@ namespace KanVest::UI
         KanVasX::UI::Text(Font(Header_22), KanVest::UI::Utils::FormatDoubleToString(low), Align::Left, {5.0f, 0.0f}, KanVasX::Color::Black);
         
         ImGui::SetCursorScreenPos(ImVec2(p.x + size.x - ImGui::CalcTextSize(std::to_string((int)high).c_str()).x, p.y));
-        KanVasX::UI::Text(Font(Header_22), KanVest::UI::Utils::FormatDoubleToString(high), Align::Right, {-10.0f, 0.0f}, KanVasX::Color::Black);
+        KanVasX::UI::Text(Font(Header_22), KanVest::UI::Utils::FormatDoubleToString(high), Align::Right, {-20.0f, 0.0f}, KanVasX::Color::Black);
       }
     };
     
@@ -916,7 +918,7 @@ namespace KanVest::UI
     }
   }
   
-  void Panel::DrawSRLevels(const PivotResults& pivots, double xMin, double xMax)
+  void Panel::DrawSRLevels(const PivotResults& pivots, double xMin, double xMax, double livePrice)
   {
     // Copy to local so we can sort
     std::vector<SRLevel> supports = pivots.supports;
@@ -944,34 +946,46 @@ namespace KanVest::UI
     if (resistances.size() > s_numPivotLevel) resistances.resize(s_numPivotLevel);
     
     // --- Draw Supports (green) ---
-    ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(0, 200, 0, 255));
     
     for (size_t i = 0; i < supports.size(); i++)
     {
       const auto& s = supports[i];
+      if (s.price < livePrice)
+      {
+        ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(0, 200, 180, 255));
+      }
+      else
+      {
+        ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(0, 100, 80, 255));
+      }
+      
       double xs[2] = { xMin, xMax };
       double ys[2] = { s.price, s.price };
       
       std::string label = "S" + std::to_string(i + 1);
       ImPlot::PlotLine(label.c_str(), xs, ys, 2);
+      ImPlot::PopStyleColor();
     }
-    
-    ImPlot::PopStyleColor();
-    
+        
     // --- Draw Resistances (red) ---
-    ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(200, 0, 0, 255));
-    
     for (size_t i = 0; i < resistances.size(); i++)
     {
       const auto& r = resistances[i];
+      if (r.price > livePrice)
+      {
+        ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(200, 0, 0, 255));
+      }
+      else
+      {
+        ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(100, 0, 0, 255));
+      }
       double xs[2] = { xMin, xMax };
       double ys[2] = { r.price, r.price };
       
       std::string label = "R" + std::to_string(i + 1);
       ImPlot::PlotLine(label.c_str(), xs, ys, 2);
+      ImPlot::PopStyleColor();
     }
-    
-    ImPlot::PopStyleColor();
   }
   
   void Panel::ShowChart(float chartSize)
@@ -1144,7 +1158,7 @@ namespace KanVest::UI
       
       if (s_showPivots)
       {
-        DrawSRLevels(Analyzer::GetPivots(), 0, stockData.history.size() - 1);
+        DrawSRLevels(Analyzer::GetPivots(), 0, stockData.history.size() - 1, stockData.livePrice);
       }
 
       ImPlot::EndPlot();
@@ -1260,6 +1274,7 @@ namespace KanVest::UI
       // Convert score 0-100 to fraction 0.0-1.0
 
       // Print Score
+      KanVasX::UI::ShiftCursorX(10.0f);
       KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), Utils::FormatDoubleToString(score), KanVasX::UI::AlignX::Left, {10.0f, 0}, scoreColor);
 
       // Print /100
@@ -1268,10 +1283,11 @@ namespace KanVest::UI
       KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), totalScoreString, KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
 
       ImGui::SameLine();
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Large), scoreString, KanVasX::UI::AlignX::Right, {-10.0f, 5.0f}, scoreColor);
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Large), scoreString, KanVasX::UI::AlignX::Right, {-20.0f, 5.0f}, scoreColor);
 
       float fraction = score / 100.0f;
-      ImGui::ProgressBar(fraction, ImVec2(-1, 0), "");
+      KanVasX::UI::ShiftCursorX(20.0f);
+      ImGui::ProgressBar(fraction, ImVec2(ImGui::GetContentRegionAvail().x - 20.0f, 0), "");
     }
   }
   

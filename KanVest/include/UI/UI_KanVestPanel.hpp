@@ -44,7 +44,7 @@ namespace KanVest::UI
     
     static void AddStockInManager(const std::string& symbol);
     
-    static void DrawSRLevels(const PivotResults& pivots, double xMin, double xMax);
+    static void DrawSRLevels(const PivotResults& pivots, double xMin, double xMax, double livePrice);
     
     inline static ImTextureID s_shadowTextureID = 0;
     inline static ImTextureID s_reloadIconID = 0;
