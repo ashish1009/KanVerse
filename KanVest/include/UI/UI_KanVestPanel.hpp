@@ -38,7 +38,7 @@ namespace KanVest::UI
     static void ShowStockSearchBar(float height);
     static void ShowHoldingSearchBar(float height);
     
-    static void ShowChart();
+    static void ShowChart(float chartSize);
     static void ShowStockAnalyzerSummary();
     static void ShowStockTechnicalData();
     

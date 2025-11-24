@@ -179,57 +179,51 @@ namespace KanVest::UI
     KanVasX::ScopedStyle ItemSpacing(ImGuiStyleVar_ItemSpacing, ImVec2(Spacing, Spacing));
     
     KanVasX::Panel::Begin("Stock Analyzer");
-
-    /*
-      - Stock basic data
-        - Stock name
-        - Stock price
-        - Stock change
-        - 52 week high low (Graph)
-        - Day high low
-      - Portfolio
-      - Watchlist
-      - Recommendation
-      - Chart (Wide)
-      - Technical data (Wide)
-        - Data
-        - Corresponding chart
-     */
     
     {
       KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundLight);
-
+      
       float totalWidth  = ImGui::GetContentRegionAvail().x;
       float totalHeight = ImGui::GetContentRegionAvail().y;
       
-      if (ImGui::BeginChild(" Stock - Data ", ImVec2(totalWidth * 0.3, totalHeight )))
+      if (ImGui::BeginChild(" Stock - Data - Chart ", ImVec2(totalWidth * 0.75, totalHeight )))
       {
-        ShowStockData();
-        
-        KanVasX::UI::ShiftCursorY(ImGui::GetContentRegionAvail().y - 35.0f);
-        ShowStockSearchBar(5.0f);
-      }
-      ImGui::EndChild();
-      ImGui::SameLine();
-      
-      static float chioldWidth = totalWidth * 0.45;
-      if (ImGui::BeginChild(" Chart-Technicals ", ImVec2(chioldWidth, totalHeight )))
-      {
-        if (ImGui::BeginChild(" Technical ", ImVec2(chioldWidth, totalHeight - 330.0f )))
+        float stcoDataChartWidth  = ImGui::GetContentRegionAvail().x;
+        float stcoDataChartHeight = ImGui::GetContentRegionAvail().y;
+
+        float ChartChildSize = 400.0f;
+        if (ImGui::BeginChild(" Stock - Data ", ImVec2(stcoDataChartWidth, stcoDataChartHeight - ChartChildSize - 2.0 )))
         {
-          ShowStockTechnicalData();
+          float stcoDataWidth  = ImGui::GetContentRegionAvail().x;
+          float stcoDataHeight = ImGui::GetContentRegionAvail().y;
+          if (ImGui::BeginChild(" Stock ", ImVec2(stcoDataWidth * 0.4f, stcoDataHeight)))
+          {
+            ShowStockSearchBar(5.0f);
+            ShowStockData();
+          }
+          ImGui::EndChild();
+
+          ImGui::SameLine();
+          if (ImGui::BeginChild(" Technicals ", ImVec2(stcoDataWidth * 0.598, stcoDataHeight )))
+          {
+            ShowStockTechnicalData();
+          }
+          ImGui::EndChild();
+
         }
         ImGui::EndChild();
-        if (ImGui::BeginChild(" Chart ", ImVec2(chioldWidth, 0)))
+        
+        if (ImGui::BeginChild(" Chart ", ImVec2(stcoDataChartWidth, ChartChildSize)))
         {
-          ShowChart();
+          ShowChart(ChartChildSize);
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
+
       }
       ImGui::EndChild();
-      ImGui::SameLine();
       
+      ImGui::SameLine();
       if (ImGui::BeginChild(" Portfolio ", ImVec2(totalWidth * 0.248, totalHeight)))
       {
         ShowPortfolio();
@@ -238,8 +232,8 @@ namespace KanVest::UI
         KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::Gray);
         ImGui::Text("FPS : %.1f", ImGui::GetIO().Framerate);
       }
-
       ImGui::EndChild();
+
     }
 
     KanVasX::Panel::End(0);
@@ -980,7 +974,7 @@ namespace KanVest::UI
     ImPlot::PopStyleColor();
   }
   
-  void Panel::ShowChart()
+  void Panel::ShowChart(float chartSize)
   {
     IK_PERFORMANCE_FUNC("Panel::ShowChart");
     StockData stockData = StockManager::GetSelectedStockData();
@@ -1068,7 +1062,7 @@ namespace KanVest::UI
       labelPtrs.push_back(s.c_str());
 
     // Start plotting
-    if (ImPlot::BeginPlot("##", ImVec2(ImGui::GetContentRegionAvail().x - 1.0f, 300.0f)))
+    if (ImPlot::BeginPlot("##", ImVec2(ImGui::GetContentRegionAvail().x - 1.0f, chartSize - 30.0f)))
     {
       // We use AutoFit for X and set Y limits explicitly
       ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
@@ -1177,15 +1171,15 @@ namespace KanVest::UI
     }
     
     ImGui::SameLine();
-    KanVasX::UI::ShiftCursorX(10);
+    KanVasX::UI::ShiftCursorX(20);
     ImGui::Checkbox(" Candle", &s_showCandle);
 
     ImGui::SameLine();
-    KanVasX::UI::ShiftCursorX(10);
+    KanVasX::UI::ShiftCursorX(20);
     ImGui::Checkbox(" Pivots", &s_showPivots);
 
-
     ImGui::SameLine();
+    KanVasX::UI::ShiftCursorX(20);
     ImGui::Text("Pivot Level");
     
     ImGui::SameLine();
@@ -1195,12 +1189,14 @@ namespace KanVest::UI
     }
     
     ImGui::SameLine();
+    KanVasX::UI::ShiftCursorX(10);
     ImGui::Text("%d", s_numPivotLevel);
     
     ImGui::SameLine();
+    KanVasX::UI::ShiftCursorX(10);
     if (ImGui::Button("+"))
     {
-      s_numPivotLevel = std::max(4, s_numPivotLevel + 1); // prevent going above 4
+      s_numPivotLevel = std::min(4, s_numPivotLevel + 1); // prevent going above 4
     }
 
     ImGui::SameLine();
