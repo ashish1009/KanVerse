@@ -282,8 +282,8 @@ namespace KanVest::UI
       // Total Investment
       KanVasX::UI::Text(Font(Header_24), "Invested Value", Align::Left, {20.0f, 5.0f});
       ImGui::SameLine();
-      std::string dayProfitLossTag = todayChange > 0 ? "Today's Gain" : "Today's Loss";
-      KanVasX::UI::Text(Font(Header_24), dayProfitLossTag, Align::Right, {-20.0f, 5.0f});
+      std::string dayProfitLossTag = todayChange > 0 ? "Range Gain" : "Range Loss";
+      KanVasX::UI::Text(Font(Header_24), dayProfitLossTag, Align::Right, {-20.0f, 0.0f});
       
       std::string totalPortfolioInvestmentString = "₹" + FinalString(Utils::FormatWithCommas((int32_t)totalPortfolioInvestment));
       KanVasX::UI::Text(Font(Header_28), totalPortfolioInvestmentString, Align::Left, {20.0f, 0.0f});
@@ -390,7 +390,7 @@ namespace KanVest::UI
           std::string pnlSign = h.dayChange > 0 ? "+" : "";
           ImU32 ltpColor = h.dayChange > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
 
-          std::string gainTagString = h.profitLoss > 0 ? "Today's Gain " : "Today's Loss";
+          std::string gainTagString = h.profitLoss > 0 ? "Range Gain " : "Range Loss";
           std::string gainValueString = "₹" + Utils::FormatDoubleToString(h.dayChange);
           
           KanVasX::ScopedFont header(Font(Header_18));
@@ -532,7 +532,7 @@ namespace KanVest::UI
         {
           ImGui::SameLine();
           
-          std::string gainTagString = h.profitLoss > 0 ? "Today's Gain " : "Today's Loss";
+          std::string gainTagString = h.profitLoss > 0 ? "Range Gain " : "Range Loss ";
           std::string gainValueString = "₹" + Utils::FormatDoubleToString(h.dayChange);
           ImU32 profitLossColor = h.dayChangePercent > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
 
@@ -1227,6 +1227,10 @@ namespace KanVest::UI
     if (tab == TechnicalTab::SMA)
     {
       UI_MovingAverage::ShowSMA(StockManager::GetSelectedStockData());
+    }
+    if (tab == TechnicalTab::EMA)
+    {
+      UI_MovingAverage::ShowEMA(StockManager::GetSelectedStockData());
     }
   }
 
