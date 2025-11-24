@@ -12,6 +12,7 @@
 #include "User/UserManager.hpp"
 
 #include "UI/UI_Utils.hpp"
+#include "UI/UI_MovingAverage.hpp"
 
 #include "Stock/StockManager.hpp"
 
@@ -211,16 +212,12 @@ namespace KanVest::UI
           ShowStockTechnicalData();
         }
         ImGui::EndChild();
-        if (ImGui::BeginChild(" Chart ", ImVec2(chioldWidth, 0.0f)))
+        if (ImGui::BeginChild(" Chart ", ImVec2(chioldWidth, 0)))
         {
           ShowChart();
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
-
-        KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 80.0f, ImGui::GetContentRegionAvail().y - 22.0f});
-        KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::Gray);
-        ImGui::Text("FPS : %.1f", ImGui::GetIO().Framerate);
       }
       ImGui::EndChild();
       ImGui::SameLine();
@@ -228,6 +225,10 @@ namespace KanVest::UI
       if (ImGui::BeginChild(" Portfolio ", ImVec2(totalWidth * 0.248, totalHeight)))
       {
         ShowPortfolio();
+
+        KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 80.0f, ImGui::GetContentRegionAvail().y - 22.0f});
+        KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::Gray);
+        ImGui::Text("FPS : %.1f", ImGui::GetIO().Framerate);
       }
 
       ImGui::EndChild();
@@ -360,7 +361,8 @@ namespace KanVest::UI
           ImGui::Text("%s", ltpString.data());
           
           {
-            KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+            ImU32 ltpColor = h.dayChange > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+            KanVasX::ScopedColor textColor(ImGuiCol_Text, ltpColor);
             ImGui::SameLine();
             ImGui::Text("%s", ltpValueString.data());
           }
@@ -391,7 +393,8 @@ namespace KanVest::UI
           ImGui::Text("%s", gainTagString.data());
           
           {
-            KanVasX::ScopedColor textColor(ImGuiCol_Text, profitLossColor);
+            ImU32 ltpColor = h.dayChange > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+            KanVasX::ScopedColor textColor(ImGuiCol_Text, ltpColor);
             ImGui::SameLine();
             ImGui::Text("%s", gainValueString.data());
           }
@@ -721,8 +724,8 @@ namespace KanVest::UI
           h.value = h.stockValue * h.quantity;
           h.profitLoss = h.value - h.investment;
           h.profitLossPercent = (h.profitLoss * 100) / h.investment;
-          h.dayChange = stockData.change;
-          h.dayChangePercent = stockData.changePercent;
+          h.dayChange = stockData.dayChange;
+          h.dayChangePercent = stockData.dayChangePercent;
         }
 
         if (g_showEditModal and g_selectedIdx == idx)
@@ -1211,7 +1214,11 @@ namespace KanVest::UI
     TechnicalButton("BB", TechnicalTab::BB); ImGui::SameLine();
     TechnicalButton("Pivot", TechnicalTab::Pivot);
     ImGui::Separator();
-
+    
+    if (tab == TechnicalTab::SMA)
+    {
+      UI_MovingAverage::ShowSMA(StockManager::GetSelectedStockData());
+    }
   }
 
   void Panel::AddStockInManager(const std::string& symbol)

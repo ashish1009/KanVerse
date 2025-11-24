@@ -73,7 +73,7 @@ namespace KanVest
       data.fiftyTwoLow  = StockParser::ExtractValue(response, apiKeys.fiftyTwoLow);
       data.dayHigh      = StockParser::ExtractValue(response, apiKeys.dayHigh);
       data.dayLow       = StockParser::ExtractValue(response, apiKeys.dayLow);
-      
+
       std::vector<double> timestamps = StockParser::ExtractArray(response, "timestamp");
       std::vector<double> closes     = StockParser::ExtractArray(response, "close");
       std::vector<double> opens      = StockParser::ExtractArray(response, "open");
@@ -301,7 +301,7 @@ namespace KanVest
         {
           // already cached -- ensure active cache points to this data
           s_activeCache[symbol] = it->second;
-          return true;
+//          return true;
         }
       }
       

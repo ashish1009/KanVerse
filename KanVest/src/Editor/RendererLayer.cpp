@@ -166,7 +166,7 @@ namespace KanVest
     KanVest::UI::Panel::SetOpenEyeTextureId(KanVasX::UI::GetTextureID(m_openEyeIcon->GetRendererID()));
     KanVest::UI::Panel::SetCloseEyeTextureId(KanVasX::UI::GetTextureID(m_closeEyeIcon->GetRendererID()));
 
-    StockManager::StartLiveUpdates(10);
+    StockManager::StartLiveUpdates(1);
   }
   
   void RendererLayer::OnDetach() noexcept
