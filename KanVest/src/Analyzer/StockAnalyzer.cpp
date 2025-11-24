@@ -55,6 +55,28 @@ namespace KanVest
     return normalized * weight;
   }
 
+  // ------------------------------------------------------------
+  // EMA Score  (Weight = 10)
+  // ------------------------------------------------------------
+  double GetRSIScore(const RSISeries& rsiData, double weight = 10.0)
+  {
+    double rsi = rsiData.last;    // latest value
+    
+    if (std::isnan(rsi))
+      return 0.0;
+    
+    // Normalize RSI:
+    // 0  -> +1 (strong bullish)
+    // 50 -> 0  (neutral)
+    // 100-> -1 (strong bearish)
+    double normalized = (50.0 - rsi) / 50.0;
+    
+    // clamp to [-1, 1]
+    normalized = std::max(-1.0, std::min(1.0, normalized));
+    
+    return normalized * weight;
+  }
+
   Recommendation Analyzer::AnalzeStock(const StockData &stockData)
   {
     Recommendation recommendation;
@@ -66,7 +88,8 @@ namespace KanVest
     // Score
     recommendation.score += GetSMAScore(stockData.livePrice, s_maResults.smaValues);
     recommendation.score += GetEMAScore(stockData.livePrice, s_maResults.emaValues);
-    
+    recommendation.score += GetRSIScore(s_rsiSeries);
+
     return recommendation;
   }
   

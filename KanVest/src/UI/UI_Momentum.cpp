@@ -107,7 +107,7 @@ namespace KanVest
     else
     {
       ui.interpretation =
-      "RSI is neutral. No extreme momentum visible.";
+      "RSI is Neutral. No extreme momentum visible.";
     }
     
     return ui;
@@ -129,7 +129,6 @@ namespace KanVest
       rsiString += " : " + RSI_UI_Data.state;
       rsiString += " : " + RSI_UI_Data.trend + " Trend";
       
-  
       if (RSI_UI_Data.series.empty())
       {
         KanVasX::UI::Text(UI::Font::Get(UI::FontType::Header_22), "RSI data unavailable", KanVasX::UI::AlignX::Center, {0, 0}, KanVasX::Color::Error);
@@ -164,7 +163,8 @@ namespace KanVest
         std::vector<double> y;
         y.reserve(n);
         
-        for (size_t i = 0; i < n; i++) {
+        for (size_t i = 0; i < n; i++)
+        {
           x.push_back((double)i);
           y.push_back(std::isnan(rsi[i]) ? NAN : rsi[i]);
         }
