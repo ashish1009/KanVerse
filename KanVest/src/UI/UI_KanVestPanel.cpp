@@ -1226,11 +1226,11 @@ namespace KanVest::UI
     
     if (tab == TechnicalTab::SMA)
     {
-      UI_MovingAverage::ShowSMA(StockManager::GetSelectedStockData());
+      UI_MovingAverage::ShowSMA(StockManager::GetSelectedStockData(), s_shadowTextureID);
     }
     if (tab == TechnicalTab::EMA)
     {
-      UI_MovingAverage::ShowEMA(StockManager::GetSelectedStockData());
+      UI_MovingAverage::ShowEMA(StockManager::GetSelectedStockData(), s_shadowTextureID);
     }
   }
 

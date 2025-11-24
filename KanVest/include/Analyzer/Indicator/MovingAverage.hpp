@@ -13,8 +13,8 @@ namespace KanVest
 {
   struct MAResult
   {
-    std::unordered_map<int, double> smaValues;
-    std::unordered_map<int, double> emaValues;
+    std::map<int, double> smaValues;
+    std::map<int, double> emaValues;
   };
 
   class MovingAverage
@@ -24,5 +24,6 @@ namespace KanVest
     
   private:
     static std::vector<double> ComputeSMA(const std::vector<double>& closes, int period);
+    static std::vector<double> ComputeEMA(const std::vector<double>& closes, int period);
   };
 } // namespace KanVest

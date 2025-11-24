@@ -13,7 +13,7 @@
 
 namespace KanVest
 {
-  void UI_MovingAverage::ShowSMA(const StockData& stockData)
+  void UI_MovingAverage::ShowSMA(const StockData& stockData, ImTextureID shadowTexture)
   {
     if (!stockData.IsValid())
     {
@@ -22,9 +22,9 @@ namespace KanVest
     }
     
     const auto& maData = MovingAverage::Compute(stockData);
-    ShowMovingAverageData(stockData, maData.smaValues, " SMA");
+    ShowMovingAverageData(stockData, maData.smaValues, " SMA", shadowTexture);
   }
-  void UI_MovingAverage::ShowEMA(const StockData& stockData)
+  void UI_MovingAverage::ShowEMA(const StockData& stockData, ImTextureID shadowTexture)
   {
     if (!stockData.IsValid())
     {
@@ -33,10 +33,10 @@ namespace KanVest
     }
     
     const auto& maData = MovingAverage::Compute(stockData);
-    ShowMovingAverageData(stockData, maData.emaValues, " EMA");
+    ShowMovingAverageData(stockData, maData.emaValues, " EMA", shadowTexture);
   }
     
-  void UI_MovingAverage::ShowMovingAverageData(const StockData& stockData, const std::unordered_map<int, double>& maMap, const std::string& maString)
+  void UI_MovingAverage::ShowMovingAverageData(const StockData& stockData, const std::map<int, double>& maMap, const std::string& maString, ImTextureID shadowTexture)
   {
     int bullish = 0;
     int bearish = 0;
@@ -61,46 +61,53 @@ namespace KanVest
       KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), smaSummary, KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::Red);
     }
     
+    KanVasX::UI::SameLine();
+    std::string smaSummary = "If current price is greater than SMA, trend is bullish";
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Small), smaSummary, KanVasX::UI::AlignX::Right, {-5.0f, 0.0f}, KanVasX::Color::White);
+
     {
       KanVasX::ScopedColor frameBg(ImGuiCol_FrameBg, KanVasX::Color::Alpha(KanVasX::Color::DarkRed, 0.7));
       KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, KanVasX::Color::Alpha(KanVasX::Color::Cyan, 0.7));
       
       float fraction = (float)bullish / (float)total;
-      ImGui::ProgressBar(fraction, ImVec2(ImGui::GetContentRegionAvail().x * 0.98, 0), " ");
+      ImGui::ProgressBar(fraction, ImVec2(ImGui::GetContentRegionAvail().x, 0), " ");
     }
-    
-    std::string smaSummary = "If current price is greater than SMA, trend is bullish";
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Small), smaSummary, KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::White);
-    
+        
     auto ShowSma = [stockData](int period, double sma) {
       if (sma > 0)
       {
         std::string datString = std::to_string(period) + "d";
-        KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), datString, KanVasX::UI::AlignX::Left, {0, 0.0f}, KanVasX::Color::White);
+        KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular), datString, KanVasX::UI::AlignX::Left, {20.0f, 5.0f}, KanVasX::Color::White);
         ImGui::SameLine();
         auto smaColor = sma > stockData.livePrice ? KanVasX::Color::Red : KanVasX::Color::Cyan;
         KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Regular),
-                          KanVest::UI::Utils::FormatDoubleToString(sma), KanVasX::UI::AlignX::Right, {0, 0.0f}, smaColor);
+                          KanVest::UI::Utils::FormatDoubleToString(sma), KanVasX::UI::AlignX::Right, {-20.0f, 0.0f}, smaColor);
       }
     };
 
-    ImVec2 smaChildSize = {(ImGui::GetContentRegionAvail().x / 2) - 6.0f, 100.0f};
+    ImVec2 smaChildSize = {(ImGui::GetContentRegionAvail().x / 2), 120.0f};
 
     int idx = 0;
     bool allChildEnded = true;
 
+    KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::BackgroundLight);
     for (const auto& [period, ma] : maMap)
     {
       if (idx % 4 == 0)
       {
         ImGui::BeginChild(std::to_string(period).c_str(), smaChildSize, true);
+        KanVasX::UI::ShiftCursorY(5.0f);
         allChildEnded = false;
       }
-      
+
       ShowSma(period, ma);
       
       if (idx % 4 == 3)
       {
+        if (shadowTexture)
+        {
+          KanVasX::UI::DrawShadowAllDirection(shadowTexture);
+        }
         ImGui::EndChild();
         ImGui::SameLine();
         allChildEnded = true;
@@ -111,6 +118,10 @@ namespace KanVest
     
     if (!allChildEnded)
     {
+      if (shadowTexture)
+      {
+        KanVasX::UI::DrawShadowAllDirection(shadowTexture);
+      }
       ImGui::EndChild();
     }
   }
