@@ -1352,7 +1352,6 @@ namespace KanVest::UI
 
   void Panel::AddStockInManager(const std::string& symbol)
   {
-//    StockManager::AddStock(symbol);
     StockManager::SetSelectedStockSymbol(symbol);
   }
 } // namespace KanVest::UI

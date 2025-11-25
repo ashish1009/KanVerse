@@ -21,73 +21,29 @@ namespace KanVest
     if (!data.IsValid())
       return {};
     
-    std::map<int64_t, double> dailyMap;    // key = YYYYMMDD, value = close
+    std::map<int64_t, double> dailyMap; // key = YYYYMMDD → last close
     
     for (const auto& p : data.history)
     {
-      // Convert timestamp → date bucket (UTC)
       time_t t = p.timestamp;
       tm* g = gmtime(&t);
       
       int y = g->tm_year + 1900;
-      int m = g->tm_mon + 1;
+      int m = g->tm_mon  + 1;
       int d = g->tm_mday;
       
-      int64_t dateKey = y * 10000 + m * 100 + d;
+      int64_t key = y * 10000 + m * 100 + d;
       
-      // Use the latest close for each date
-      dailyMap[dateKey] = p.close;
+      // overwrite = keep last close of the day
+      dailyMap[key] = p.close;
     }
     
-    // Now build a continuous daily sequence (fill gaps)
+    // Extract in sorted order
     std::vector<double> daily;
+    daily.reserve(dailyMap.size());
     
-    auto it = dailyMap.begin();
-    if (it == dailyMap.end()) return daily;
-    
-    int64_t prevDate = it->first;
-    double prevClose = it->second;
-    
-    daily.push_back(prevClose);
-    ++it;
-    
-    for (; it != dailyMap.end(); ++it)
-    {
-      int64_t curDate = it->first;
-      double curClose = it->second;
-      
-      // Fill date gaps with previous close (forward fill)
-      int y1 = (int)prevDate / 10000;
-      int m1 = ((int)prevDate % 10000) / 100;
-      int d1 = (int)prevDate % 100;
-      
-      int y2 = (int)curDate / 10000;
-      int m2 = ((int)curDate % 10000) / 100;
-      int d2 = (int)curDate % 100;
-      
-      // Convert to time_t for date increment
-      tm tm1 = {};
-      tm1.tm_year = y1 - 1900;
-      tm1.tm_mon  = m1 - 1;
-      tm1.tm_mday = d1;
-      time_t t1 = timegm(&tm1);
-      
-      tm tm2 = {};
-      tm2.tm_year = y2 - 1900;
-      tm2.tm_mon  = m2 - 1;
-      tm2.tm_mday = d2;
-      time_t t2 = timegm(&tm2);
-      
-      // Insert missing days
-      for (time_t t = t1 + 86400; t < t2; t += 86400)
-        daily.push_back(prevClose);
-      
-      // Insert current close
-      daily.push_back(curClose);
-      
-      prevDate = curDate;
-      prevClose = curClose;
-    }
+    for (auto& kv : dailyMap)
+      daily.push_back(kv.second);
     
     return daily;
   }

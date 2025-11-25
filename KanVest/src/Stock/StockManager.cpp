@@ -302,11 +302,15 @@ namespace KanVest
         {
           // already cached -- ensure active cache points to this data
           s_activeCache[symbol] = it->second;
-//          return true;
         }
       }
       
       // Fetch and parse outside lock
+#if 0
+      std::string range = symbolName == s_selectedStockSymbol ? key.range : "1d";
+      std::string interval = symbolName == s_selectedStockSymbol ? key.interval : "5m";
+#endif
+        
       StockData newData = Utils::FetchAndParse(symbol, key.interval, key.range);
       if (!newData.IsValid()) return false;
       
