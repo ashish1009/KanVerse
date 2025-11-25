@@ -1298,7 +1298,7 @@ namespace KanVest::UI
     
     KanVasX::UI::Text(Font(Header_26), "Technicals", KanVasX::UI::AlignX::Center, {0.0f, 2.0f});
     
-    enum class TechnicalTab {SMA, EMA, RSI, MACD, ADX, MFI, Stochastic, BB, Pivot, Max};
+    enum class TechnicalTab {SMA, EMA, RSI, MACD, Pivot, Max, ADX, MFI, Stochastic, BB};
     static TechnicalTab tab = TechnicalTab::SMA;
     
     float availX = ImGui::GetContentRegionAvail().x;
@@ -1321,11 +1321,13 @@ namespace KanVest::UI
     TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average"); ImGui::SameLine();
     TechnicalButton("RSI", TechnicalTab::RSI, "Relative Strength Indicator"); ImGui::SameLine();
     TechnicalButton("MACD", TechnicalTab::MACD, "Moving Average Convergence Divergence"); ImGui::SameLine();
-    TechnicalButton("Pivot", TechnicalTab::Pivot, "Tooltip"); ImGui::SameLine();
+    TechnicalButton("Pivot", TechnicalTab::Pivot, "Support and Resistance"); ImGui::SameLine();
+#if 0
     TechnicalButton("MFI", TechnicalTab::MFI, "Tooltip"); ImGui::SameLine();
     TechnicalButton("ADX", TechnicalTab::ADX, "Tooltip"); ImGui::SameLine();
     TechnicalButton("Stochastic", TechnicalTab::Stochastic, "Tooltip"); ImGui::SameLine();
     TechnicalButton("BB", TechnicalTab::BB, "Tooltip");
+#endif
     ImGui::Separator();
     
     if (tab == TechnicalTab::SMA)
