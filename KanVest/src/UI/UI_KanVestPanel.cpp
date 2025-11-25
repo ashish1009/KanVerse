@@ -936,7 +936,7 @@ namespace KanVest::UI
     
     // --- Sort for display visually: supports low->high, resistances high->low ---
     auto priceSortSupport = [](const SRLevel& a, const SRLevel& b) { return a.price < b.price; };
-    auto priceSortResistance = [](const SRLevel& a, const SRLevel& b) { return a.price < b.price; };
+    auto priceSortResistance = [](const SRLevel& a, const SRLevel& b) { return a.price > b.price; };
 
     std::stable_sort(supports.begin(), supports.end(), priceSortSupport);
     std::stable_sort(resistances.begin(), resistances.end(), priceSortResistance);
@@ -1352,7 +1352,7 @@ namespace KanVest::UI
 
   void Panel::AddStockInManager(const std::string& symbol)
   {
-    StockManager::AddStock(symbol);
+//    StockManager::AddStock(symbol);
     StockManager::SetSelectedStockSymbol(symbol);
   }
 } // namespace KanVest::UI

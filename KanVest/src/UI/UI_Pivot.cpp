@@ -43,7 +43,7 @@ namespace KanVest
     
     // --- Sort for display visually: supports low->high, resistances high->low ---
     auto priceSortSupport = [](const SRLevel& a, const SRLevel& b) { return a.price < b.price; };
-    auto priceSortResistance = [](const SRLevel& a, const SRLevel& b) { return a.price < b.price; };
+    auto priceSortResistance = [](const SRLevel& a, const SRLevel& b) { return a.price > b.price; };
     
     std::stable_sort(supports.begin(), supports.end(), priceSortSupport);
     std::stable_sort(resistances.begin(), resistances.end(), priceSortResistance);
@@ -54,8 +54,7 @@ namespace KanVest
     
     // --- Display Supports ---
     ImGui::BeginChild("Support", smaChildSize, true);
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26),
-                      "Support",
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26), "Support",
                       KanVasX::UI::AlignX::Center, {0.0f, 0.0f}, KanVasX::Color::White);
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
 
@@ -85,8 +84,7 @@ namespace KanVest
     
     // --- Display Resistances ---
     ImGui::BeginChild("Resistance", smaChildSize, true);
-    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26),
-                      "Resistance",
+    KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_26), "Resistance",
                       KanVasX::UI::AlignX::Center, {0.0f, 0.0f}, KanVasX::Color::White);
     KanVasX::UI::DrawFilledRect(KanVasX::Color::Separator, 1);
 

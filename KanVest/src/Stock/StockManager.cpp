@@ -165,6 +165,7 @@ namespace KanVest
         UpdateStockInternal(sym, false);
       }));
     }
+    UpdateStockInternal(s_selectedStockSymbol, false);
     for (auto& f : futs) f.wait();
   }
   void StockManager::RefreshStockAsync(const std::string& symbolName)

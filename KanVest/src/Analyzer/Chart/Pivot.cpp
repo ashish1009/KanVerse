@@ -9,14 +9,14 @@
 
 namespace KanVest
 {
-  // -------------------------------
-  // Improved Swing High / Low
-  // -------------------------------
+  // -------------------------------------
+  // Swing High / Low with equality tolerance
+  // -------------------------------------
   bool isSwingHigh(const StockData& data, int i, int range)
   {
     const auto& h = data.history;
     for (int j = 1; j <= range; j++)
-      if (h[i].high <= h[i - j].high || h[i].high <= h[i + j].high)
+      if (h[i].high < h[i - j].high || h[i].high < h[i + j].high)
         return false;
     return true;
   }
@@ -25,48 +25,39 @@ namespace KanVest
   {
     const auto& h = data.history;
     for (int j = 1; j <= range; j++)
-      if (h[i].low >= h[i - j].low || h[i].low >= h[i + j].low)
+      if (h[i].low > h[i - j].low || h[i].low > h[i + j].low)
         return false;
     return true;
   }
   
-  
-  // -----------------------------------------
-  // Score pivot strength:
-  // score = (count * 2) + recencyWeight
-  // -----------------------------------------
-  double computeScore(const SRLevel& lvl, int total)
+  // -------------------------------------
+  // Pivot strength score
+  // -------------------------------------
+  double computeScore(const SRLevel& lvl, int totalCandles)
   {
-    double recency = (double)lvl.lastTouchIdx / (double)total;
-    return lvl.count * 2.0 + recency;
+    double recency = static_cast<double>(lvl.lastTouchIdx) / totalCandles;
+    return lvl.count * 2.0 + recency; // weighted count + recency
   }
   
-  
-  // -----------------------------------------
-  // MAIN PIVOT COMPUTATION (REPLACEMENT)
-  // -----------------------------------------
+  // -------------------------------------
+  // Pivot detection with clustering
+  // -------------------------------------
   PivotResults Pivot::Compute(const StockData& data, int pivotRange, double unused)
   {
     PivotResults result;
     const auto& candles = data.history;
-    int size = (int)candles.size();
+    int size = static_cast<int>(candles.size());
+    if (size < pivotRange * 2 + 1) return result;
     
-    if (size < pivotRange * 2 + 1)
-      return result;
+    // Dynamic cluster tolerance (~0.7% of last close)
+    double clusterTolerance = candles.back().close * 0.007;
     
-    // Adaptive cluster tolerance (0.5% of price)
-    double avgPrice = candles[size - 1].close;
-    double clusterTolerance = avgPrice * 0.005;   // MUCH better value
-    
-    // ---------------------------------------------------------
-    // STEP 1: Detect raw swing highs/lows and cluster them
-    // ---------------------------------------------------------
     for (int i = pivotRange; i < size - pivotRange; i++)
     {
       double high = candles[i].high;
-      double low  = candles[i].low;
+      double low = candles[i].low;
       
-      // ----------------- RESISTANCE -----------------
+      // RESISTANCE
       if (isSwingHigh(data, i, pivotRange))
       {
         bool merged = false;
@@ -81,11 +72,10 @@ namespace KanVest
             break;
           }
         }
-        if (!merged)
-          result.resistances.push_back({ high, 1, i });
+        if (!merged) result.resistances.push_back({high, 1, i});
       }
       
-      // ----------------- SUPPORT -----------------
+      // SUPPORT
       if (isSwingLow(data, i, pivotRange))
       {
         bool merged = false;
@@ -100,33 +90,17 @@ namespace KanVest
             break;
           }
         }
-        if (!merged)
-          result.supports.push_back({ low, 1, i });
+        if (!merged) result.supports.push_back({low, 1, i});
       }
     }
     
-    // ---------------------------------------------------------
-    // STEP 2: Sort by strength (strongest first)
-    // ---------------------------------------------------------
+    // Sort strongest first
     auto sorter = [&](const SRLevel& a, const SRLevel& b) {
       return computeScore(a, size) > computeScore(b, size);
     };
-    
     std::sort(result.supports.begin(), result.supports.end(), sorter);
     std::sort(result.resistances.begin(), result.resistances.end(), sorter);
-    
-    // ---------------------------------------------------------
-    // STEP 3: Keep only top 4 levels each
-    // ---------------------------------------------------------
-    int MAX_LEVELS = 4;
-    
-    if (result.supports.size() > MAX_LEVELS)
-      result.supports.resize(MAX_LEVELS);
-    
-    if (result.resistances.size() > MAX_LEVELS)
-      result.resistances.resize(MAX_LEVELS);
-    
+        
     return result;
   }
-  
 } // namespace KanVest
