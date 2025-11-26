@@ -151,18 +151,18 @@ namespace KanVest
     
     // Technicals computation
     s_maResults = MovingAverage::Compute(stockData);
-    s_rsiSeries = RSI::Compute(stockData);
-    s_macdResult = MACD::Compute(stockData);
+//    s_rsiSeries = RSI::Compute(stockData);
+//    s_macdResult = MACD::Compute(stockData);
 
     // chart
-    s_pivots = Pivot::Compute(stockData);
+//    s_pivots = Pivot::Compute(stockData);
 
     // Score
     recommendation.score += GetSMAScore(stockData.livePrice, s_maResults.smaValues);
-    recommendation.score += GetEMAScore(stockData.livePrice, s_maResults.emaValues);
-    recommendation.score += GetRSIScore(s_rsiSeries);
-    recommendation.score += GetMACDScore(s_macdResult);
-    recommendation.score += GetPivotScore(s_pivots, stockData.livePrice, (int32_t)stockData.history.size());
+//    recommendation.score += GetEMAScore(stockData.livePrice, s_maResults.emaValues);
+//    recommendation.score += GetRSIScore(s_rsiSeries);
+//    recommendation.score += GetMACDScore(s_macdResult);
+//    recommendation.score += GetPivotScore(s_pivots, stockData.livePrice, (int32_t)stockData.history.size());
 
     return recommendation;
   }

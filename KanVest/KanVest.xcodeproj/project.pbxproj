@@ -35,6 +35,7 @@
 		B26336BD2ED45D1000D46F96 /* Pivot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336BC2ED45D1000D46F96 /* Pivot.cpp */; };
 		B26336C02ED4620700D46F96 /* UI_Pivot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336BF2ED4620700D46F96 /* UI_Pivot.cpp */; };
 		B26336C32ED5CC6800D46F96 /* ChartPattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336C22ED5CC6800D46F96 /* ChartPattern.cpp */; };
+		B26336C62ED7184700D46F96 /* IndicatorUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336C52ED7184700D46F96 /* IndicatorUtils.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -115,6 +116,8 @@
 		B26336BF2ED4620700D46F96 /* UI_Pivot.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Pivot.cpp; sourceTree = "<group>"; };
 		B26336C12ED5CC6800D46F96 /* ChartPattern.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ChartPattern.hpp; sourceTree = "<group>"; };
 		B26336C22ED5CC6800D46F96 /* ChartPattern.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChartPattern.cpp; sourceTree = "<group>"; };
+		B26336C42ED7184700D46F96 /* IndicatorUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IndicatorUtils.hpp; sourceTree = "<group>"; };
+		B26336C52ED7184700D46F96 /* IndicatorUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IndicatorUtils.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -243,6 +246,7 @@
 		B263368A2ED3594400D46F96 /* Indicator */ = {
 			isa = PBXGroup;
 			children = (
+				B26336C42ED7184700D46F96 /* IndicatorUtils.hpp */,
 				B263368C2ED3595800D46F96 /* MovingAverage.hpp */,
 				B26336922ED443AC00D46F96 /* Momentum.hpp */,
 				B26336952ED443B300D46F96 /* ADX.hpp */,
@@ -257,6 +261,7 @@
 		B263368B2ED3594A00D46F96 /* Indicator */ = {
 			isa = PBXGroup;
 			children = (
+				B26336C52ED7184700D46F96 /* IndicatorUtils.cpp */,
 				B263368D2ED3595800D46F96 /* MovingAverage.cpp */,
 				B26336932ED443AC00D46F96 /* Momentum.cpp */,
 				B26336962ED443B300D46F96 /* ADX.cpp */,
@@ -515,6 +520,7 @@
 				B2065B592ED0B247007F186E /* UserManager.cpp in Sources */,
 				B2065B612ED0B521007F186E /* PortfolioController.cpp in Sources */,
 				B26336892ED352D500D46F96 /* StockAnalyzer.cpp in Sources */,
+				B26336C62ED7184700D46F96 /* IndicatorUtils.cpp in Sources */,
 				B26336B22ED4441600D46F96 /* UI_MFI.cpp in Sources */,
 				B26336702ED1C53100D46F96 /* APIProvider.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,

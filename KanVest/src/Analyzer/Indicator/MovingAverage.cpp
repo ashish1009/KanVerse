@@ -7,6 +7,8 @@
 
 #include "MovingAverage.hpp"
 
+#include "Analyzer/Indicator/IndicatorUtils.hpp"
+
 namespace KanVest
 {
   static std::vector<int> GetActivePeriods(const std::string& chartRange)
@@ -14,38 +16,6 @@ namespace KanVest
     if (chartRange == "1mo") return {5, 10, 20};
     if (chartRange == "3mo") return {5, 10, 20, 30, 50};
     return {5, 10, 20, 30, 50, 100, 150, 200};
-  }
-  
-  std::vector<double> BuildDailyCloses(const StockData& data)
-  {
-    if (!data.IsValid())
-      return {};
-    
-    std::map<int64_t, double> dailyMap; // key = YYYYMMDD → last close
-    
-    for (const auto& p : data.history)
-    {
-      time_t t = p.timestamp;
-      tm* g = gmtime(&t);
-      
-      int y = g->tm_year + 1900;
-      int m = g->tm_mon  + 1;
-      int d = g->tm_mday;
-      
-      int64_t key = y * 10000 + m * 100 + d;
-      
-      // overwrite = keep last close of the day
-      dailyMap[key] = p.close;
-    }
-    
-    // Extract in sorted order
-    std::vector<double> daily;
-    daily.reserve(dailyMap.size());
-    
-    for (auto& kv : dailyMap)
-      daily.push_back(kv.second);
-    
-    return daily;
   }
 
   MAResult MovingAverage::Compute(const StockData& data)
@@ -58,7 +28,7 @@ namespace KanVest
     }
 
     // FIX: convert ANY raw history (1W,1D,1h..)-> daily
-    auto dailyCloses = BuildDailyCloses(data);
+    auto dailyCloses = Indicator::Utils::BuildDailyCloses(data);
     if (dailyCloses.size() < 5)
     {
       return result;
