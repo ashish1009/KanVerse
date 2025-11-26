@@ -25,6 +25,13 @@ namespace KanVest
     
     const auto& smaData = Analyzer::GetSMA();
     ShowMovingAverageData(stockData, smaData, " SMA", shadowTexture);
+    
+//    ImGui::Separator();
+//    const auto& summary = Analyzer::GetSummary("SMA");
+//    if (summary != "")
+//    {
+//      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_24), summary, KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::Error);
+//    }
   }
   void UI_MovingAverage::ShowEMA(const StockData& stockData, ImTextureID shadowTexture)
   {

@@ -33,7 +33,7 @@ namespace KanVest
     RecommendationGrade grade = RecommendationGrade::HOLD;
     double score = 50.0;
     int qtyDelta = 0;
-    std::string rationale;
+    std::unordered_map<std::string, std::string> summary;
   };
 
   class Analyzer
@@ -47,6 +47,8 @@ namespace KanVest
     /// - Parameter holding: holding data
     static void SetHoldings(const Holding& holding);
     
+    static const std::string& GetSummary(const std::string& tagKey);
+    
     static const std::map<int, double>& GetSMA();
     static const std::map<int, double>& GetEMA();
     static const RSISeries& GetRSI();
@@ -55,6 +57,8 @@ namespace KanVest
     static const PivotResults& GetPivots();
 
   private:
+    inline static Recommendation s_recommendation;
+    
     inline static Holding s_stockHolding;
     
     inline static MAResult s_maResults;

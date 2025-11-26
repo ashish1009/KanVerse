@@ -143,7 +143,7 @@ namespace KanVest
 
   private:
     static void UpdateLoop(int intervalMilliseconds);
-    static bool UpdateStockInternal(const std::string& symbol, bool forceRefresh = false);
+    static bool UpdateStockInternal(const std::string& symbol);
 
     inline static std::unordered_map<CacheKey, StockData, CacheKeyHash> s_stockDataCache;
     inline static std::unordered_map<std::string,StockData> s_activeCache;
@@ -157,6 +157,7 @@ namespace KanVest
     inline static std::thread s_updateThread;
     
     inline static bool s_updatePortfolioLive = false;
+    inline static bool s_forceRefresh = false;
     
     // Thread pool for async updates
     inline static std::unique_ptr<ThreadPool> s_threadPool;

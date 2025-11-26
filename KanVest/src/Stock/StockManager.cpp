@@ -162,23 +162,23 @@ namespace KanVest
     for (const auto& sym : symbolsCopy)
     {
       futs.push_back(std::async(std::launch::async, [sym]() {
-        UpdateStockInternal(sym, false);
+        UpdateStockInternal(sym);
       }));
     }
-    UpdateStockInternal(s_selectedStockSymbol, false);
+    UpdateStockInternal(s_selectedStockSymbol);
     for (auto& f : futs) f.wait();
   }
   void StockManager::RefreshStockAsync(const std::string& symbolName)
   {
     std::string symbol = Utils::NormalizeSymbol(symbolName);
     if (!s_threadPool) s_threadPool = std::make_unique<ThreadPool>(4);
-    s_threadPool->Enqueue([symbol]() { UpdateStockInternal(symbol, false); });
+    s_threadPool->Enqueue([symbol]() { UpdateStockInternal(symbol); });
   }
   
   bool StockManager::RefreshStockBlocking(const std::string& symbolName)
   {
     std::string symbol = Utils::NormalizeSymbol(symbolName);
-    auto fut = std::async(std::launch::async, [symbol]() { return UpdateStockInternal(symbol, false); });
+    auto fut = std::async(std::launch::async, [symbol]() { return UpdateStockInternal(symbol); });
     return fut.get();
   }
   
@@ -213,6 +213,8 @@ namespace KanVest
     // ensure active cache entry exists
     if (s_activeCache.find(s_selectedStockSymbol) == s_activeCache.end())
       s_activeCache.emplace(s_selectedStockSymbol, StockData(s_selectedStockSymbol));
+    
+    s_forceRefresh = true;
   }
   
   const std::string& StockManager::GetSelectedStockSymbol()
@@ -288,7 +290,7 @@ namespace KanVest
     }
   }
   
-  bool StockManager::UpdateStockInternal(const std::string& symbolName, bool forceRefresh)
+  bool StockManager::UpdateStockInternal(const std::string& symbolName)
   {
     try
     {
@@ -298,7 +300,7 @@ namespace KanVest
       {
         std::scoped_lock lock(s_mutex);
         auto it = s_stockDataCache.find(key);
-        if (it != s_stockDataCache.end() && it->second.IsValid() && !forceRefresh)
+        if (it != s_stockDataCache.end() && it->second.IsValid() && !s_forceRefresh)
         {
           // already cached -- ensure active cache points to this data
           s_activeCache[symbol] = it->second;
@@ -309,19 +311,19 @@ namespace KanVest
         }
       }
       
-      // Fetch and parse outside lock
-#if 0
+      // User different range for chart and portfolio
       std::string range = symbolName == s_selectedStockSymbol ? key.range : "1d";
       std::string interval = symbolName == s_selectedStockSymbol ? key.interval : "5m";
-#endif
         
-      StockData newData = Utils::FetchAndParse(symbol, key.interval, key.range);
+      // Fetch and parse outside lock
+      StockData newData = Utils::FetchAndParse(symbol, interval, range);
       if (!newData.IsValid()) return false;
-      
       {
         std::scoped_lock lock(s_mutex);
         s_stockDataCache[key] = newData;
         s_activeCache[symbol] = newData; // update active view
+        
+        s_forceRefresh = false;
       }
       return true;
     }

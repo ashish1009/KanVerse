@@ -284,7 +284,7 @@ namespace KanVest::UI
       // Total Investment
       KanVasX::UI::Text(Font(Header_24), "Invested Value", Align::Left, {20.0f, 5.0f});
       ImGui::SameLine();
-      std::string dayProfitLossTag = todayChange > 0 ? "Range Gain" : "Range Loss";
+      std::string dayProfitLossTag = todayChange > 0 ? "Today's Gain" : "Today's Loss";
       KanVasX::UI::Text(Font(Header_24), dayProfitLossTag, Align::Right, {-20.0f, 0.0f});
       
       std::string totalPortfolioInvestmentString = "₹" + FinalString(Utils::FormatWithCommas((int32_t)totalPortfolioInvestment));
@@ -392,7 +392,7 @@ namespace KanVest::UI
           std::string pnlSign = h.dayChange > 0 ? "+" : "";
           ImU32 ltpColor = h.dayChange > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
 
-          std::string gainTagString = h.profitLoss > 0 ? "Range Gain " : "Range Loss";
+          std::string gainTagString = h.profitLoss > 0 ? "Today's Gain " : "Today's Loss";
           std::string gainValueString = "₹" + Utils::FormatDoubleToString(h.dayChange);
           
           KanVasX::ScopedFont header(Font(Header_18));
@@ -534,7 +534,7 @@ namespace KanVest::UI
         {
           ImGui::SameLine();
           
-          std::string gainTagString = h.profitLoss > 0 ? "Range Gain " : "Range Loss ";
+          std::string gainTagString = h.profitLoss > 0 ? "Today's Gain " : "Today's Loss ";
           std::string gainValueString = "₹" + Utils::FormatDoubleToString(h.dayChange);
           ImU32 profitLossColor = h.dayChangePercent > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
 

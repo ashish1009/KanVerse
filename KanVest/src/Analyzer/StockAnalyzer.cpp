@@ -15,39 +15,117 @@ namespace KanVest
     return static_cast<double>(raw) / static_cast<double>(count);
   }
   
-  float GetSMAScore(double price, const std::map<int, double>& smaValues, double weight = 10.0)
+  struct ScoreResult
   {
-    if (smaValues.empty()) return 0.0;
+    float score;
+    std::string explanation;
+  };
+  
+  ScoreResult GetSMAScore(double price, const std::map<int, double>& smaValues, double weight = 10.0)
+  {
+    ScoreResult result { 0.0f, "" };
+    
+    if (smaValues.empty())
+    {
+      result.explanation = "No SMA values available to calculate score.";
+      return result;
+    }
     
     int rawScore = 0;
+    std::ostringstream oss;
+    
+    oss << "SMA Score Explanation:\n";
+    oss << "Price: " << price << "\n\n";
+    
     for (const auto& kv : smaValues)
     {
-      rawScore += (price > kv.second) ? 1 : -1;
+      int period = kv.first;
+      double sma = kv.second;
+      
+      oss << "SMA(" << period << ") = " << sma;
+      
+      if (price > sma)
+      {
+        oss << " → Price is ABOVE SMA → Bullish\n";
+        rawScore += 1;
+      }
+      else
+      {
+        oss << " → Price is BELOW SMA → Bearish\n";
+        rawScore -= 1;
+      }
     }
     
-    // Normalize to -1 → +1
     double normalized = NormalizeScore(rawScore, (int32_t)smaValues.size());
+    float finalScore = normalized * weight;
     
-    // Weight scaling
-    return normalized * weight;
+    oss << "\nRaw Score: " << rawScore
+    << "\nNormalized (-1 to +1): " << normalized
+    << "\nFinal SMA Score: " << finalScore << "\n\n";
+    
+    oss << "What SMA Means:\n"
+    << "SMA (Simple Moving Average) shows the average price of the last N candles.\n"
+    << "If the price is above most SMAs → trend is generally upward (bullish).\n"
+    << "If the price is below them → trend is downward (bearish).\n";
+    
+    result.score = finalScore;
+    result.explanation = oss.str();
+    return result;
   }
   
-  float GetEMAScore(double price, const std::map<int, double>& emaValues, double weight = 10.0)
+  ScoreResult GetEMAScore(double price, const std::map<int, double>& emaValues, double weight = 10.0)
   {
-    if (emaValues.empty()) return 0.0;
+    ScoreResult result { 0.0f, "" };
     
-    int rawScore = 0;
-    for (const auto& kv : emaValues)
+    if (emaValues.empty())
     {
-      rawScore += (price > kv.second) ? 1 : -1;
+      result.explanation = "No EMA values available to calculate score.";
+      return result;
     }
     
-    // Normalize (-1 to +1)
-    double normalized = static_cast<double>(rawScore) /
-    static_cast<double>(emaValues.size());
+    int rawScore = 0;
+    std::ostringstream oss;
     
-    return normalized * weight;
+    oss << "EMA Score Explanation:\n";
+    oss << "Price: " << price << "\n\n";
+    
+    for (const auto& kv : emaValues)
+    {
+      int period = kv.first;
+      double ema = kv.second;
+      
+      oss << "EMA(" << period << ") = " << ema;
+      
+      if (price > ema)
+      {
+        oss << " → Price is ABOVE EMA → Bullish\n";
+        rawScore += 1;
+      }
+      else
+      {
+        oss << " → Price is BELOW EMA → Bearish\n";
+        rawScore -= 1;
+      }
+    }
+    
+    double normalized = static_cast<double>(rawScore) / emaValues.size();
+    float finalScore = normalized * weight;
+    
+    oss << "\nRaw Score: " << rawScore
+    << "\nNormalized (-1 to +1): " << normalized
+    << "\nFinal EMA Score: " << finalScore << "\n\n";
+    
+    oss << "What EMA Means:\n"
+    << "EMA (Exponential Moving Average) gives more weight to recent prices.\n"
+    << "This makes it react faster to trend changes compared to SMA.\n"
+    << "Price above EMA → strong upward momentum (bullish).\n"
+    << "Price below EMA → weak or downward momentum (bearish).\n";
+    
+    result.score = finalScore;
+    result.explanation = oss.str();
+    return result;
   }
+
   
   double GetRSIScore(const RSISeries& rsiData, double weight = 10.0)
   {
@@ -147,8 +225,6 @@ namespace KanVest
   
   Recommendation Analyzer::AnalzeStock(const StockData &stockData)
   {
-    Recommendation recommendation;
-    
     // Technicals computation
     s_maResults = MovingAverage::Compute(stockData);
 //    s_rsiSeries = RSI::Compute(stockData);
@@ -158,18 +234,33 @@ namespace KanVest
 //    s_pivots = Pivot::Compute(stockData);
 
     // Score
-    recommendation.score += GetSMAScore(stockData.livePrice, s_maResults.smaValues);
-//    recommendation.score += GetEMAScore(stockData.livePrice, s_maResults.emaValues);
+    auto UpdateSummaryData = [](const std::string& tag, const ScoreResult& result) {
+      s_recommendation.score += result.score;
+      s_recommendation.summary[tag] = result.explanation;
+    };
+    
+    UpdateSummaryData("SMA", GetSMAScore(stockData.livePrice, s_maResults.smaValues));
+    UpdateSummaryData("EMA", GetEMAScore(stockData.livePrice, s_maResults.emaValues));
+    
 //    recommendation.score += GetRSIScore(s_rsiSeries);
 //    recommendation.score += GetMACDScore(s_macdResult);
 //    recommendation.score += GetPivotScore(s_pivots, stockData.livePrice, (int32_t)stockData.history.size());
 
-    return recommendation;
+    return s_recommendation;
   }
   
   void Analyzer::SetHoldings(const Holding &holding)
   {
     s_stockHolding = holding;
+  }
+  
+  const std::string& Analyzer::GetSummary(const std::string& tagKey)
+  {
+    if (auto it = s_recommendation.summary.find(tagKey); it != s_recommendation.summary.end() )
+    {
+      return it->second;
+    }
+    return "";
   }
   
   const std::map<int, double>& Analyzer::GetSMA()
