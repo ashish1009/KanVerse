@@ -302,6 +302,10 @@ namespace KanVest
         {
           // already cached -- ensure active cache points to this data
           s_activeCache[symbol] = it->second;
+          if (!s_updatePortfolioLive)
+          {
+            return true;
+          }
         }
       }
       
@@ -328,4 +332,8 @@ namespace KanVest
     return false;
   }
 
+  void StockManager::SetUpdatePortfolioLive(bool flag)
+  {
+    s_updatePortfolioLive = flag;
+  }
 } // namespace KanVest

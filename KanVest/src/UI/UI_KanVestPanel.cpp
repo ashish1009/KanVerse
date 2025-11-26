@@ -914,6 +914,17 @@ namespace KanVest::UI
     
     if (KanVasX::UI::BeginPopup("SettingModel"))
     {
+      {
+        KanVasX::ScopedColor popupColor(ImGuiCol_FrameBg, KanVasX::Color::BackgroundLight);
+        KanVasX::UI::Text(Font(Regular), "Update Portfolio Live", Align::Left);
+        ImGui::SameLine();
+        KanVasX::UI::ShiftCursorX(50.0f);
+        static bool updatePortfolioLive = false;
+        if (ImGui::Checkbox("##UpdatePortfolioLive", &updatePortfolioLive))
+        {
+          StockManager::SetUpdatePortfolioLive(updatePortfolioLive);
+        }
+      }
       KanVasX::UI::EndPopup();
     }
   }
@@ -1174,7 +1185,7 @@ namespace KanVest::UI
       if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
       {
         StockManager::SetCurrentRange(StockManager::ValidRange[i]);
-        StockManager::SetCurrentInterval(StockManager::RangeIntervalMap[StockManager::GetCurrentRange()][1].c_str());
+        StockManager::SetCurrentInterval(StockManager::RangeIntervalMap[StockManager::GetCurrentRange()][0].c_str());
         
         modify = true;
       }

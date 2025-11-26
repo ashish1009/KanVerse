@@ -138,6 +138,8 @@ namespace KanVest
     static const std::string& GetCurrentInterval();
     static void SetCurrentRange(const std::string& range);
     static const std::string& GetCurrentRange();
+    
+    static void SetUpdatePortfolioLive(bool flag);
 
   private:
     static void UpdateLoop(int intervalMilliseconds);
@@ -153,6 +155,8 @@ namespace KanVest
     inline static std::mutex s_mutex;
     inline static std::atomic<bool> s_running = false;
     inline static std::thread s_updateThread;
+    
+    inline static bool s_updatePortfolioLive = false;
     
     // Thread pool for async updates
     inline static std::unique_ptr<ThreadPool> s_threadPool;
