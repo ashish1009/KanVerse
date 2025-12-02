@@ -47,11 +47,6 @@ namespace KanVest
     /// This function ends Main ImGui window with Docking
     void UI_EndMainWindowDocking();
     
-    /// This function show login page
-    void UI_LoginPage();
-    /// This function show login page
-    void UI_SignupPage();
-    
     /// This function shows Performance pane;
     void UI_PerformancePanel();
     
@@ -72,9 +67,6 @@ namespace KanVest
     KanViz::Ref<KanViz::Image> m_searchIcon, m_settingIcon;        //< WIdget Icons
     KanViz::Ref<KanViz::Image> m_reloadIcon;                       //< Reload Icon
     KanViz::Ref<KanViz::Image> m_closeEyeIcon, m_openEyeIcon;      //< Eye Icon
-
-    KanVasX::Popup m_loginPopup {"KanVest Login"};                 //< Popup for welcome screen
-    KanVasX::Popup m_signUpPopup {"KanVest SignUp"};               //< Popup for welcome screen
 
     static RendererLayer* s_instance;                              //< Renderer Layer single instance
   };
