@@ -7,6 +7,8 @@
 
 #include "RendererLayer.hpp"
 
+#include "UI/UI_KanVestPanel.hpp"
+
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
@@ -164,6 +166,9 @@ namespace KanVest
   void RendererLayer::OnImGuiRender()
   {
     UI_StartMainWindowDocking();
+    
+    KanVest::UI::Panel::Show();
+    
     UI_EndMainWindowDocking();
   }
   
