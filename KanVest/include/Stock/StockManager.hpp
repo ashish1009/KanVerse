@@ -9,6 +9,8 @@
 
 #include "Stock/StockData.hpp"
 
+#include "URL_API/APIProvider.hpp"
+
 namespace KanVest
 {
   enum class Range
@@ -32,5 +34,12 @@ namespace KanVest
     [[nodiscard("Stock Data can not be discarded")]] static StockData GetStockData(const std::string& stockSymbolName, Range range, Interval interval);
     
   private:
+    /// This function fetch data for stock as fallback, search for .BS if not available in .NS
+    /// - Parameters:
+    ///   - symbol: Stock symbol name
+    ///   - range: Range for URL
+    ///   - interval: Interval for URL
+    ///   - keys: API Keys
+    [[nodiscard("Stock Data can not be discarded")]] static std::string FetchStockFallbackData(const std::string& symbol, Range range, Interval interval, const APIKeys& keys);
   };
 } // namespace KanVest

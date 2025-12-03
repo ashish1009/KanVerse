@@ -9,8 +9,6 @@
 
 #include "Stock/StockUtils.hpp"
 
-#include "URL_API/APIProvider.hpp"
-
 namespace KanVest
 {
   StockData StockManager::GetStockData(const std::string& stockSymbolName, Range range, Interval interval)
@@ -19,8 +17,28 @@ namespace KanVest
     std::string symbol = Utils::NormalizeSymbol(stockSymbolName);
 
     // Get API Keys to extract data
-    auto apiKeys = API_Provider::GetAPIKeys();
+    APIKeys apiKeys = API_Provider::GetAPIKeys();
+
+    // Fetch Data
+    std::string response = FetchStockFallbackData(symbol, range, interval, apiKeys);
 
     return StockData();
   }
+  
+  std::string StockManager::FetchStockFallbackData(const std::string& symbol, Range range, Interval interval, const APIKeys& keys)
+  {
+    std::string data = StockAPI::FetchLiveData(symbol, range, interval);
+    
+    if (data.find("\"" + keys.price + "\"") == std::string::npos &&
+        symbol.find(".NS") != std::string::npos)
+    {
+      std::string altSymbol = symbol.substr(0, symbol.find(".NS")) + ".BO";
+      std::string altData = StockAPI::FetchLiveData(altSymbol, interval, range);
+      if (altData.find("\"" + keys.price + "\"") != std::string::npos)
+        return altData;
+    }
+    
+    return data;
+  }
+
 }
