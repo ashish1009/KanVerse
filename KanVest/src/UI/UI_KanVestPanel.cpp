@@ -21,7 +21,7 @@ namespace KanVest::UI
     KanVasX::Panel::Begin("Stock Analyzer");
     
     static constexpr std::string symbolName = "Nifty";
-    StockData data = StockManager::GetStockData(symbolName);
+    StockData data = StockManager::GetStockData(symbolName, Range::_1D, Interval::_5M);
     if (!data.IsValid())
     {
       std::string errorMessage = "Invalid stock data for " + symbolName;

@@ -9,13 +9,16 @@
 
 #include "Stock/StockUtils.hpp"
 
+#include "URL_API/APIProvider.hpp"
+
 namespace KanVest
 {
-  StockData StockManager::GetStockData(const std::string& stockSymbolName, const std::string& range, const std::string& interval)
+  StockData StockManager::GetStockData(const std::string& stockSymbolName, Range range, Interval interval)
   {
     // Normalize the symbol. Add required .NS to Fetch data
     std::string symbol = Utils::NormalizeSymbol(stockSymbolName);
 
+    // Get API Keys to extract data
     auto apiKeys = API_Provider::GetAPIKeys();
 
     return StockData();
