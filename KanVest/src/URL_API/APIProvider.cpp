@@ -47,4 +47,30 @@ namespace KanVest
   {
     return s_apiKeys;
   }
+  
+  std::string API_Provider::GetURL()
+  {
+    switch (s_stockAPIProvider)
+    {
+      case StockAPIProvider::Yahoo : return "https://query1.finance.yahoo.com/v8/finance/chart/";
+      default:
+        IK_ASSERT(false, "Invalid API")
+    }
+    return "";
+  }
+  
+  std::string API_Provider::GetValueParserPattern(const std::string& key)
+  {
+    return "\"" + key + "\"\\s*:\\s*([-+]?[0-9]*\\.?[0-9]+)";
+  }
+  
+  std::string API_Provider::GetStringParserPattern(const std::string& key)
+  {
+    return "\"" + key + "\"\\s*:\\s*\"([^\"]+)\"";
+  }
+  std::string API_Provider::GetArrayParserPattern(const std::string& key)
+  {
+    return "\"" + key + "\"\\s*:\\s*\\[([^\\]]+)\\]";
+  }
+
 } // namespace KanVest

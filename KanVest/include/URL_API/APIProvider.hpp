@@ -44,6 +44,19 @@ namespace KanVest
     
     /// This function returns the API Keys
     static APIKeys GetAPIKeys();
+    
+    /// This function returns the URL based on API provider
+    static std::string GetURL();
+    
+    /// This function retruns double data from patterns
+    /// - Parameter key: key string
+    static std::string GetValueParserPattern(const std::string& key);
+    /// This function retruns string data from patterns
+    /// - Parameter key: key string
+    static std::string GetStringParserPattern(const std::string& key);
+    /// This function retruns array data from patterns
+    /// - Parameter key: key string
+    static std::string GetArrayParserPattern(const std::string& key);
 
   private:
     inline static StockAPIProvider s_stockAPIProvider = StockAPIProvider::Yahoo;
