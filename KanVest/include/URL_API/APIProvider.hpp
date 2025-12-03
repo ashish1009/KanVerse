@@ -76,7 +76,7 @@ namespace KanVest
     static std::string GetRangeString(Range range);
 
   private:
-    inline static StockAPIProvider s_stockAPIProvider = StockAPIProvider::Yahoo;
+    inline static StockAPIProvider s_stockAPIProvider;
     inline static APIKeys s_apiKeys;
   };
 } // namespace KanVest

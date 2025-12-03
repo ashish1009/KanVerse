@@ -19,7 +19,7 @@ namespace KanVasX
   {
     ScopedColor textColor(ImGuiCol_Text, Color::HighlightContrast);
     ScopedColorStack tabColors(ImGuiCol_TabHovered, Color::TabHovered, ImGuiCol_Tab, Color::Tab, ImGuiCol_TabActive, Color::TabActive,
-                                   ImGuiCol_TabUnfocused, Color::TabUnfocused, ImGuiCol_TabUnfocusedActive, Color::TabUnfocusedActive);
+                               ImGuiCol_TabUnfocused, Color::TabUnfocused, ImGuiCol_TabUnfocusedActive, Color::TabUnfocusedActive);
     
     return ImGui::Begin(title.data(), isOpen, flags | ImGuiWindowFlags_NoTitleBar);
   }

@@ -9,6 +9,8 @@
 
 #include "RendererLayer.hpp"
 
+#include "URL_API/APIProvider.hpp"
+
 namespace KanVest
 {
   Application::Application(const KanViz::ApplicationSpecification& appSpec)
@@ -31,6 +33,8 @@ namespace KanVest
     // Creating a renderer layer and pushing it onto the application stack.
     m_layer = KanViz::CreateScope<RendererLayer>();
     PushLayer(std::move(m_layer));
+    
+    API_Provider::Initialize(StockAPIProvider::Yahoo);
   }
   
   void Application::OnShutdown()
