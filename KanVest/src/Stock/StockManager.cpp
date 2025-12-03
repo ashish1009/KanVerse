@@ -9,6 +9,8 @@
 
 #include "Stock/StockUtils.hpp"
 
+#include "Stock/StockAPI.hpp"
+
 namespace KanVest
 {
   StockData StockManager::GetStockData(const std::string& stockSymbolName, Range range, Interval interval)
@@ -33,7 +35,7 @@ namespace KanVest
         symbol.find(".NS") != std::string::npos)
     {
       std::string altSymbol = symbol.substr(0, symbol.find(".NS")) + ".BO";
-      std::string altData = StockAPI::FetchLiveData(altSymbol, interval, range);
+      std::string altData = StockAPI::FetchLiveData(altSymbol, range, interval);
       if (altData.find("\"" + keys.price + "\"") != std::string::npos)
         return altData;
     }

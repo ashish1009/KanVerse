@@ -9,6 +9,16 @@
 
 namespace KanVest
 {
+  enum class Range
+  {
+    _1D, _5D, _1MO, _6MO, _YTD, _1Y, _5Y, _MAX
+  };
+  
+  enum class Interval
+  {
+    _1M, _2M, _5M, _15M, _30M, _60M, _90M, _1H, _1D, _5D, _1WK, _1MO, _3MO
+  };
+  
   enum class StockAPIProvider
   {
     Yahoo,
@@ -57,6 +67,13 @@ namespace KanVest
     /// This function retruns array data from patterns
     /// - Parameter key: key string
     static std::string GetArrayParserPattern(const std::string& key);
+    
+    /// This function returns the interval as string from enum
+    /// - Parameter interval: interval enum
+    static std::string GetIntervalString(Interval interval);
+    /// This function returns the range as string from enum
+    /// - Parameter range: range enum
+    static std::string GetRangeString(Range range);
 
   private:
     inline static StockAPIProvider s_stockAPIProvider = StockAPIProvider::Yahoo;

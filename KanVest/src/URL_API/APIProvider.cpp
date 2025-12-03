@@ -73,4 +73,46 @@ namespace KanVest
     return "\"" + key + "\"\\s*:\\s*\\[([^\\]]+)\\]";
   }
 
+  std::string API_Provider::GetIntervalString(Interval interval)
+  {
+    switch (interval)
+    {
+      case Interval::_1M: return "1m";
+      case Interval::_2M: return "2m";
+      case Interval::_5M: return "5m";
+      case Interval::_15M: return "15m";
+      case Interval::_30M: return "30m";
+      case Interval::_60M: return "60m";
+      case Interval::_90M: return "90m";
+      case Interval::_1H: return "1h";
+      case Interval::_1D: return "1d";
+      case Interval::_5D: return "5d";
+      case Interval::_1WK: return "1wk";
+      case Interval::_1MO: return "1mo";
+      case Interval::_3MO: return "3mo";
+      default:
+        break;
+    }
+    IK_ASSERT(false, "Invalid interval")
+    return "";
+  }
+  std::string API_Provider::GetRangeString(Range range)
+  {
+    switch (range)
+    {
+      case Range::_1D: return "1d";
+      case Range::_5D: return "5d";
+      case Range::_1MO: return "1mo";
+      case Range::_6MO: return "6mo";
+      case Range::_YTD: return "ytd";
+      case Range::_1Y: return "1y";
+      case Range::_5Y: return "5y";
+      case Range::_MAX: return "max";
+      default:
+        break;
+    }
+    IK_ASSERT(false, "Invalid renage")
+    return "";
+  }
+
 } // namespace KanVest

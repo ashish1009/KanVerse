@@ -18,13 +18,13 @@ namespace KanVest
     return totalSize;
   }
   
-  std::string StockAPI::FetchLiveData(const std::string& symbolName, const std::string& range, const std::string& interval)
+  std::string StockAPI::FetchLiveData(const std::string& symbolName, Range range, Interval interval)
   {
     CURL* curl = curl_easy_init();
     std::string response;
     if (curl)
     {
-      std::string url = API_Provider::GetURL() + symbolName + "?interval=" + interval + "&range=" + range;
+      std::string url = API_Provider::GetURL() + symbolName + "?interval=" + API_Provider::GetIntervalString(interval) + "&range=" + API_Provider::GetRangeString(range);
       std::cout << "URL : " << url << "\n";
       
       curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
