@@ -13,37 +13,6 @@
 
 namespace KanVest
 {
-  // Live updates
-  void StockManager::StartLiveUpdates(int intervalMilliseconds)
-  {
-    if (s_running)
-    {
-      return;
-    }
-    
-    if (!s_threadPool)
-    {
-      s_threadPool = std::make_unique<ThreadPool>(4);
-    }
-    
-    s_running = true;
-    s_updateThread = std::thread(UpdateLoop, intervalMilliseconds);
-  }
-  
-  void StockManager::StopLiveUpdates()
-  {
-    if (!s_running)
-    {
-      return;
-    }
-    
-    s_running = false;
-    if (s_updateThread.joinable())
-    {
-      s_updateThread.join();
-    }
-  }
-
   StockData StockManager::GetStockData(const std::string& stockSymbolName, Range range, Interval interval)
   {
     static StockData EmotyData;
@@ -136,8 +105,4 @@ namespace KanVest
     return data;
   }
 
-  void StockManager::UpdateLoop(int intervalMilliseconds)
-  {
-    
-  }
 }
