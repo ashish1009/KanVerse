@@ -53,7 +53,6 @@ namespace KanVest::UI
       ImGui::Text("dayLow : %f ", stockData.dayLow);
     }
     
-    // FPS section
     KanVasX::UI::ShiftCursor({ImGui::GetContentRegionAvail().x - 80.0f, ImGui::GetContentRegionAvail().y - 22.0f});
     KanVasX::ScopedColor textColor(ImGuiCol_Text, KanVasX::Color::Gray);
     ImGui::Text("FPS : %.1f", ImGui::GetIO().Framerate);
