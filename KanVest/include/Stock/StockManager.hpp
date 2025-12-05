@@ -73,6 +73,12 @@ namespace KanVest
   class StockManager
   {
   public:
+    // Live updates
+    /// This function Sets update time interval
+    static void StartLiveUpdates(int intervalMilliseconds = 1000);
+    /// This functon stops live update
+    static void StopLiveUpdates();
+
     /// This function fetch data for stock from symbol, range and interval
     /// - Parameters:
     ///   - stockSymbolName: stock symbol name (May or May not contain .NS)
@@ -81,6 +87,10 @@ namespace KanVest
     [[nodiscard("Stock Data can not be discarded")]] static StockData GetStockData(const std::string& stockSymbolName, Range range, Interval interval);
     
   private:
+    /// This function updates the stock loop
+    /// - Parameter intervalMilliseconds: interval
+    static void UpdateLoop(int intervalMilliseconds);
+
     /// This function fetch data for stock as fallback, search for .BS if not available in .NS
     /// - Parameters:
     ///   - symbol: Stock symbol name
@@ -88,5 +98,11 @@ namespace KanVest
     ///   - interval: Interval for URL
     ///   - keys: API Keys
     [[nodiscard("Stock Data can not be discarded")]] static std::string FetchStockFallbackData(const std::string& symbol, Range range, Interval interval, const APIKeys& keys);
+    
+    inline static std::atomic<bool> s_running = false;
+    inline static std::thread s_updateThread;
+
+    // Thread pool for async updates
+    inline static std::unique_ptr<ThreadPool> s_threadPool;
   };
 } // namespace KanVest
