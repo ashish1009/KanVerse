@@ -14,5 +14,25 @@ namespace KanVest::UI
   public:
     /// This is primary stock UI panel
     static void Show();
+
+    // Sets the texutre icon IDs
+    static void SetShadowTextureId(ImTextureID shadowTextureID);
+    static void SetReloadTextureId(ImTextureID reloadTextureID);
+    static void SetSettingTextureId(ImTextureID settingIconID);
+    static void SetOpenEyeTextureId(ImTextureID openTextureID);
+    static void SetCloseEyeTextureId(ImTextureID closeTextureID);
+
+  private:
+    /// This function show stock search bar
+    static void ShowStockSearchBar();
+
+    inline static char s_searchedStockString[128] = "Nifty";
+    
+    inline static ImTextureID s_shadowTextureID = 0;
+    inline static ImTextureID s_reloadIconID = 0;
+    inline static ImTextureID s_settingIconID = 0;
+    inline static ImTextureID s_openEyeTextureID = 0;
+    inline static ImTextureID s_closeEyeTextureID = 0;
+
   };
 } // namespace KanVest::UI

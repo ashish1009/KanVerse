@@ -347,7 +347,7 @@ namespace KanVasX
     DrawButtonImageImpl(image, image, image, rectangle.Min, rectangle.Max, normalColor, hoveredColor, pressedColor);
   }
   bool UI::DrawButtonImage(const std::string_view title, ImTextureID image, bool highlight, const ImVec2& size, const ImVec2& offset,
-                       const ImU32& normalColor, const ImU32& hoveredColor, const ImU32& pressedColor)
+                           const ImU32& normalColor, const ImU32& hoveredColor, const ImU32& pressedColor)
   {
     // Shift the offset
     UI::ShiftCursor(offset);
