@@ -36,9 +36,9 @@ namespace KanVasX
     // Colors ----------------------------------------------------------------------------------------------------------------------------------------
     // Values -----------------------------
     // Window
-    BackgroundDark        = IM_COL32(8, 12, 17, 255);
-    Background            = IM_COL32(22, 30, 40, 255);
-    BackgroundLight       = IM_COL32(36, 42, 56, 255);
+    BackgroundDark        = IM_COL32(2, 3, 4, 255);
+    Background            = IM_COL32(12, 13, 14, 255);
+    BackgroundLight       = IM_COL32(42, 43, 45, 255);
 
     // Highlight
     Highlight             = IM_COL32(40, 48, 58, 255);;
@@ -49,7 +49,7 @@ namespace KanVasX
     TextBright            = IM_COL32(255, 255, 255, 255);
     
     // Frame : Checkbox BG, Text BG, Drop Menu
-    FrameBg               = IM_COL32(24, 30, 35, 255);
+    FrameBg               = IM_COL32(34, 35, 36, 255);
     
     // Commons ----------------------------
     // Highlight

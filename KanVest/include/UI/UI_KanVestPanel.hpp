@@ -12,6 +12,8 @@ namespace KanVest::UI
   class Panel
   {
   public:
+    /// This function intialize stock UI
+    static void Initialize();
     /// This is primary stock UI panel
     static void Show();
 
@@ -24,9 +26,9 @@ namespace KanVest::UI
 
   private:
     /// This function show stock search bar
-    static void ShowStockSearchBar();
+    static void ShowStockSearchBar(float width, float height);
 
-    inline static char s_searchedStockString[128] = "Nifty";
+    inline static char s_searchedStockString[128] = "";
     
     inline static ImTextureID s_shadowTextureID = 0;
     inline static ImTextureID s_reloadIconID = 0;

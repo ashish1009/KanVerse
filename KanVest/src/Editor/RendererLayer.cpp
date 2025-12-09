@@ -153,6 +153,7 @@ namespace KanVest
     KanVasX::Widget::SetSearchIcon(KanVasX::UI::GetTextureID(m_searchIcon->GetRendererID()));
     KanVasX::Widget::SetSettingIcon(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
 
+    KanVest::UI::Panel::Initialize();
     KanVest::UI::Panel::SetShadowTextureId(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
     KanVest::UI::Panel::SetReloadTextureId(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
     KanVest::UI::Panel::SetSettingTextureId(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
