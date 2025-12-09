@@ -18,10 +18,17 @@ namespace KanVest::UI
   {
     IK_PERFORMANCE_FUNC("Panel::Show");
     
+    static bool TempInit = true;
+    if (TempInit)
+    {
+      StockManager::AddRequest("Nifty", Range::_1D, Interval::_5M);
+      TempInit = false;
+    }
+    
     KanVasX::Panel::Begin("Stock Analyzer");
     
     static constexpr std::string symbolName = "Nifty";
-    StockData stockData = StockManager::GetStockData(symbolName, Range::_1D, Interval::_5M);
+    StockData stockData = StockManager::GetLatest(symbolName);
     if (!stockData.IsValid())
     {
       std::string errorMessage = "Invalid stock data for " + symbolName;
