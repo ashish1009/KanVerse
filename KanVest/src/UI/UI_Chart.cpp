@@ -18,6 +18,32 @@ namespace KanVest
   using Align = KanVasX::UI::AlignX;
   using Color = KanVasX::Color;
 
+  // -----------------------------------------------------------------------------
+  // Draw a dashed horizontal line inside an ImPlot using pixel-space rendering.
+  // Works on ALL ImPlot versions.
+  // -----------------------------------------------------------------------------
+  static void DrawDashedHLine(double reference, double xMin, double xMax, ImU32 color, float thickness = 1.5f, float dashLen = 10.0f, float gapLen = 5.0f)
+  {
+    // Convert start & end plot coordinates to pixel positions
+    ImVec2 p1 = ImPlot::PlotToPixels(xMin, reference);
+    ImVec2 p2 = ImPlot::PlotToPixels(xMax, reference);
+    
+    ImDrawList* dl = ImPlot::GetPlotDrawList();
+    float x = p1.x;
+    
+    while (x < p2.x)
+    {
+      float xEnd = x + dashLen;
+      if (xEnd > p2.x)
+      {
+        xEnd = p2.x;
+      }
+      
+      dl->AddLine(ImVec2(x, p1.y), ImVec2(xEnd, p1.y), color, thickness);
+      x += dashLen + gapLen;
+    }
+  }
+
   void Chart::Show(const StockData &stockData)
   {
     IK_PERFORMANCE_FUNC("Chart::Show");
@@ -143,28 +169,21 @@ namespace KanVest
       
       if (refValue < ymin_plot) refValue = static_cast<float>(ymin_plot);
       if (refValue > ymax_plot) refValue = static_cast<float>(ymax_plot);
-      
-      // Reference line coordinates
-      double x[2] = { xs.front(), xs.back() };
-      double y[2] = { refValue, refValue };
-      
-      ImPlot::PushStyleColor(ImPlotCol_Line, Color::Gray);
-      ImPlot::PlotLine("##ReferenceLine", x, y, 2);
-      ImPlot::PopStyleColor();
-      
+            
+      // Dashed line
+      DrawDashedHLine(refValue, xs.front(), xs.back(), Color::Gray, 1.5f, 5.0f, 5.0f);
+
       // Convert plot coordinates to pixel position
       ImVec2 pixPos = ImPlot::PlotToPixels(xs.front(), refValue);
       
       // Apply pixel offset (0 right, +10 down)
-      pixPos.x += 0;
+      pixPos.x += 100;
       pixPos.y += 10;
       
       // Draw text manually with no background
       ImDrawList* dl = ImPlot::GetPlotDrawList();
-      ImU32 txtCol = IM_COL32(255, 255, 255, 255); // white
       dl->AddText(Font(Header_24), ImGui::GetFontSize(), pixPos,
-                  txtCol, ("Prev Close: " + KanVest::UI::Utils::FormatDoubleToString(refValue)).c_str());
-
+                  Color::Gray, ("Prev Close: " + KanVest::UI::Utils::FormatDoubleToString(refValue)).c_str());
 
       ImPlot::EndPlot();
     }
