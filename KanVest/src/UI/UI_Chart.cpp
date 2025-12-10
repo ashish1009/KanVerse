@@ -22,11 +22,11 @@ namespace KanVest
   // Draw a dashed horizontal line inside an ImPlot using pixel-space rendering.
   // Works on ALL ImPlot versions.
   // -----------------------------------------------------------------------------
-  static void DrawDashedHLine(double reference, double xMin, double xMax, ImU32 color, float thickness = 1.5f, float dashLen = 10.0f, float gapLen = 5.0f)
+  static void DrawDashedHLine(double refValue, double xMin, double xMax, ImU32 color, float thickness = 1.5f, float dashLen = 10.0f, float gapLen = 5.0f)
   {
     // Convert start & end plot coordinates to pixel positions
-    ImVec2 p1 = ImPlot::PlotToPixels(xMin, reference);
-    ImVec2 p2 = ImPlot::PlotToPixels(xMax, reference);
+    ImVec2 p1 = ImPlot::PlotToPixels(xMin, refValue);
+    ImVec2 p2 = ImPlot::PlotToPixels(xMax, refValue);
     
     ImDrawList* dl = ImPlot::GetPlotDrawList();
     float x = p1.x;
@@ -42,6 +42,44 @@ namespace KanVest
       dl->AddLine(ImVec2(x, p1.y), ImVec2(xEnd, p1.y), color, thickness);
       x += dashLen + gapLen;
     }
+  }
+  
+  static void ShowReferenceLine(float refValue, double yminPlot, double ymaxPlot, const std::vector<double>& xs, const ImU32& color)
+  {
+    if (refValue < yminPlot)
+    {
+      refValue = static_cast<float>(yminPlot);
+    }
+    if (refValue > ymaxPlot)
+    {
+      refValue = static_cast<float>(ymaxPlot);
+    }
+    
+    // Dashed line
+    DrawDashedHLine(refValue, xs.front(), xs.back(), color, 1.5f, 5.0f, 5.0f);
+    
+    // Convert plot coordinates to pixel position
+    ImVec2 pixPos = ImPlot::PlotToPixels(xs.front(), refValue);
+    
+    // Apply pixel offset (0 right, +10 down)
+    pixPos.x += 0;
+    pixPos.y += 5;
+    
+    // Draw text manually with no background
+    ImDrawList* dl = ImPlot::GetPlotDrawList();
+    dl->AddText(Font(Header_24), ImGui::GetFontSize(), pixPos,
+                color, ("Prev Close: " + KanVest::UI::Utils::FormatDoubleToString(refValue)).c_str());
+
+  }
+  
+  static void ShowLinePlot(const StockData& stockData, const std::vector<double>& xs, const std::vector<double>& closes)
+  {
+    double priceChange = stockData.livePrice - stockData.prevClose;
+    ImU32 color = priceChange > 0 ? Color::Cyan : Color::Red;
+    
+    ImVec4 col4 = ImGui::ColorConvertU32ToFloat4(color);
+    ImPlot::SetNextLineStyle(col4, 2.0f);
+    ImPlot::PlotLine("", xs.data(), closes.data(), static_cast<int>(xs.size()));
   }
 
   void Chart::Show(const StockData &stockData)
@@ -113,15 +151,23 @@ namespace KanVest
     // Lable string
     for (size_t i = 0; i < n; i += labelStep)
     {
-      // Convert timestamp to UTC date string
       time_t t = static_cast<time_t>(filteredDaysCandles[i].timestamp);
-      struct tm tm{};
       
-      gmtime_r(&t, &tm);
+      struct tm tm{};
+      localtime_r(&t, &tm);   // Use IST instead of UTC
       
       char buf[64];
-      // Format: YYYY-MM-DD (change format if you want time too)
-      std::strftime(buf, sizeof(buf), "%Y-%m-%d", &tm);
+      
+      // Date + Time + AM/PM
+      if (stockData.range == "1d")
+      {
+        std::strftime(buf, sizeof(buf), "%I:%M %p", &tm);
+      }
+      else
+      {
+        std::strftime(buf, sizeof(buf), "%Y-%m-%d %I:%M %p", &tm);
+      }
+      
       labelStrings.emplace_back(buf);
       labelPositions.push_back(static_cast<double>(i));
     }
@@ -140,8 +186,9 @@ namespace KanVest
     if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x - 1.0f, 500.0f), ChartFlag))
     {
       // We use AutoFit for X and set Y limits explicitly
-      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines,
-                        ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
+      ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
+      
+      // Axis limit setup
       ImPlot::SetupAxisLimits(ImAxis_Y1, ymin - 1.0, ymax + 1.0, ImGuiCond_Always);
 
       // Setup X axis ticks with our custom positions and labels (compressed timeline)
@@ -152,38 +199,11 @@ namespace KanVest
         ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), static_cast<int>(labelPositions.size()), labelPtrs.data());
       }
 
-      // Plot close line (optional)
-      double priceChange = stockData.livePrice - stockData.prevClose;
-      ImU32 color = priceChange > 0 ? Color::Cyan : Color::Red;
+      // Plot close line
+      ShowLinePlot(stockData, xs, closes);
 
-      ImVec4 col4 = ImGui::ColorConvertU32ToFloat4(color);
-      ImPlot::SetNextLineStyle(col4, 2.0f);
-      ImPlot::PlotLine("", xs.data(), closes.data(), static_cast<int>(xs.size()));
-
-      // Reference Line
-      float refValue = stockData.prevClose;
-      
-      // ------------------- Clamp refValue inside Y-axis -------------------
-      double ymin_plot = ymin - 1.0;
-      double ymax_plot = ymax + 1.0;
-      
-      if (refValue < ymin_plot) refValue = static_cast<float>(ymin_plot);
-      if (refValue > ymax_plot) refValue = static_cast<float>(ymax_plot);
-            
-      // Dashed line
-      DrawDashedHLine(refValue, xs.front(), xs.back(), Color::Gray, 1.5f, 5.0f, 5.0f);
-
-      // Convert plot coordinates to pixel position
-      ImVec2 pixPos = ImPlot::PlotToPixels(xs.front(), refValue);
-      
-      // Apply pixel offset (0 right, +10 down)
-      pixPos.x += 100;
-      pixPos.y += 10;
-      
-      // Draw text manually with no background
-      ImDrawList* dl = ImPlot::GetPlotDrawList();
-      dl->AddText(Font(Header_24), ImGui::GetFontSize(), pixPos,
-                  Color::Gray, ("Prev Close: " + KanVest::UI::Utils::FormatDoubleToString(refValue)).c_str());
+      // Reference Line and value
+      ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Alpha(Color::Gray, 0.5f));
 
       ImPlot::EndPlot();
     }
