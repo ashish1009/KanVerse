@@ -18,22 +18,27 @@ namespace KanVest
   using Align = KanVasX::UI::AlignX;
   using Color = KanVasX::Color;
   
-  static void GetTimeString(char* buf, uint64_t timestamp, const std::string& range)
+  static void GetTimeString(char* buf, size_t bufSize, uint64_t timestamp, const std::string& range)
   {
-    time_t t = static_cast<time_t>(timestamp);
+    if (bufSize == 0) return;
     
+    time_t t = static_cast<time_t>(timestamp);
     struct tm tm{};
     localtime_r(&t, &tm);   // Use IST instead of UTC
-        
-    // Date + Time + AM/PM
+    
+    size_t written = 0;
     if (range == "1d")
     {
-      std::strftime(buf, sizeof(buf), "%I:%M %p", &tm);
+      written = std::strftime(buf, bufSize, "%I:%M %p", &tm);
     }
     else
     {
-      std::strftime(buf, sizeof(buf), "%Y-%m-%d %I:%M %p", &tm);
+      written = std::strftime(buf, bufSize, "%Y-%m-%d %I:%M %p", &tm);
     }
+    
+    // Ensure null-termination in case strftime fails
+    if (written == 0)
+      buf[0] = '\0';
   }
 
   void Chart::Show(const StockData &stockData)
@@ -115,7 +120,7 @@ namespace KanVest
     for (size_t i = 0; i < n; i += labelStep)
     {
       char buf[64];
-      GetTimeString(buf, filteredDaysCandles[i].timestamp, stockData.range);
+      GetTimeString(buf, 64, filteredDaysCandles[i].timestamp, stockData.range);
       
       labelStrings.emplace_back(buf);
       labelPositions.push_back(static_cast<double>(i));
@@ -138,12 +143,6 @@ namespace KanVest
       // We use AutoFit for X and set Y limits explicitly
       ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
       ImPlot::SetupAxisLimits(ImAxis_Y1, ymin - 1.0, ymax + 1.0, ImGuiCond_Always);
-
-      // Setup axis for volume
-      ImPlot::SetupAxis(ImAxis_Y2, "");   // right side
-      ImPlot::SetupAxisLimits(ImAxis_Y2, 0, maxVolume * 1.1, ImGuiCond_Always);
-
-      // Axis limit setup
 
       // Setup X axis ticks with our custom positions and labels (compressed timeline)
       if (!labelPositions.empty())
@@ -284,7 +283,7 @@ namespace KanVest
       const CandleData& candle = filteredDaysCandles[idx];
       
       char dateTimeBuf[64];
-      GetTimeString(dateTimeBuf, filteredDaysCandles[idx].timestamp, stockData.range);
+      GetTimeString(dateTimeBuf, 64, filteredDaysCandles[idx].timestamp, stockData.range);
       
       // Draw tooltip near the cursor
       {
