@@ -136,8 +136,17 @@ namespace KanVest
         ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), static_cast<int>(labelPositions.size()), labelPtrs.data());
       }
 
-      // Plot close line
-      ShowLinePlot(stockData, xs, closes);
+      // Draw Plot
+      switch (s_plotType)
+      {
+        case PlotType::Line:
+          ShowLinePlot(stockData, xs, closes);
+          break;
+        case PlotType::Candle:
+          ShowCandlePlot(stockData, xs, closes, opens, highs, lows);
+        default:
+          break;
+      }
 
       // Reference Line and value
       ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Alpha(Color::Gray, 0.5f));
@@ -206,4 +215,39 @@ namespace KanVest
     ImPlot::PlotLine("", xs.data(), closes.data(), static_cast<int>(xs.size()));
   }
 
+  void Chart::ShowCandlePlot(const StockData &stockData,
+                             const std::vector<double>& xs,
+                             const std::vector<double>& closes,
+                             const std::vector<double>& opens,
+                             const std::vector<double>& highs,
+                             const std::vector<double>& lows)
+  {
+    // Transparent plot line
+    ImVec4 col4 = ImGui::ColorConvertU32ToFloat4(Color::Null);
+    ImPlot::SetNextLineStyle(col4, 2.0f);
+    ImPlot::PlotLine("", xs.data(), closes.data(), static_cast<int>(xs.size()));
+
+    ImDrawList* drawList = ImPlot::GetPlotDrawList();
+    for (size_t i = 0; i < xs.size(); ++i)
+    {
+      ImU32 color = (closes[i] >= opens[i]) ? Color::Cyan : Color::Red;
+      
+      ImVec2 pHigh  = ImPlot::PlotToPixels(ImPlotPoint(xs[i], highs[i]));
+      ImVec2 pLow   = ImPlot::PlotToPixels(ImPlotPoint(xs[i], lows[i]));
+      ImVec2 pOpen  = ImPlot::PlotToPixels(ImPlotPoint(xs[i], opens[i]));
+      ImVec2 pClose = ImPlot::PlotToPixels(ImPlotPoint(xs[i], closes[i]));
+      
+      // Wick
+      drawList->AddLine(pLow, pHigh, IM_COL32(200, 200, 200, 255));
+      
+      float top = std::min(pOpen.y, pClose.y);
+      float bottom = std::max(pOpen.y, pClose.y);
+      float cx = pOpen.x;
+      float width = 4.0f;
+      
+      // Filled body and border
+      drawList->AddRectFilled(ImVec2(cx - width, top), ImVec2(cx + width, bottom), color);
+      drawList->AddRect(ImVec2(cx - width, top), ImVec2(cx + width, bottom), IM_COL32(40, 40, 40, 255));
+    }
+  }
 } // namespace KanVest
