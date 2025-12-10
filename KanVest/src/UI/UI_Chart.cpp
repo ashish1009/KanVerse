@@ -62,23 +62,32 @@ namespace KanVest
     
     // We'll use sequential x indices so weekends/holidays are skipped visually.
     std::vector<double> xs, opens, highs, lows, closes;
+    std::vector<uint64_t> volumes;
+    
     xs.reserve(filteredDaysCandles.size());
     opens.reserve(filteredDaysCandles.size());
     highs.reserve(filteredDaysCandles.size());
     lows.reserve(filteredDaysCandles.size());
     closes.reserve(filteredDaysCandles.size());
-    
+    volumes.reserve(filteredDaysCandles.size());
+
     double ymin = DBL_MAX;
     double ymax = -DBL_MAX;
     
+    uint64_t maxVolume = 0;
     for (size_t i = 0; i < filteredDaysCandles.size(); ++i)
     {
       const auto& candle = filteredDaysCandles[i];
+      
       xs.push_back(static_cast<double>(i)); // sequential index
       opens.push_back(candle.open);
       highs.push_back(candle.high);
       lows.push_back(candle.low);
       closes.push_back(candle.close);
+      volumes.push_back(candle.volume);
+
+      maxVolume = std::max(maxVolume, candle.volume);
+      
       ymin = std::min(ymin, candle.low);
       ymax = std::max(ymax, candle.high);
     }
@@ -128,9 +137,13 @@ namespace KanVest
     {
       // We use AutoFit for X and set Y limits explicitly
       ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
-      
-      // Axis limit setup
       ImPlot::SetupAxisLimits(ImAxis_Y1, ymin - 1.0, ymax + 1.0, ImGuiCond_Always);
+
+      // Setup axis for volume
+      ImPlot::SetupAxis(ImAxis_Y2, "");   // right side
+      ImPlot::SetupAxisLimits(ImAxis_Y2, 0, maxVolume * 1.1, ImGuiCond_Always);
+
+      // Axis limit setup
 
       // Setup X axis ticks with our custom positions and labels (compressed timeline)
       if (!labelPositions.empty())
