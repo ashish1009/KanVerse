@@ -30,6 +30,8 @@ namespace KanVest
                                const std::vector<double>& highs,
                                const std::vector<double>& lows);
 
+    static void ShowTooltip(const StockData& stockData, const std::vector<CandleData>& filteredDaysCandles);
+    
     enum class PlotType {Line, Candle};
     inline static PlotType s_plotType = PlotType::Candle;
   };

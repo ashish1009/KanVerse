@@ -17,6 +17,24 @@ namespace KanVest
   
   using Align = KanVasX::UI::AlignX;
   using Color = KanVasX::Color;
+  
+  static void GetTimeString(char* buf, uint64_t timestamp, const std::string& range)
+  {
+    time_t t = static_cast<time_t>(timestamp);
+    
+    struct tm tm{};
+    localtime_r(&t, &tm);   // Use IST instead of UTC
+        
+    // Date + Time + AM/PM
+    if (range == "1d")
+    {
+      std::strftime(buf, sizeof(buf), "%I:%M %p", &tm);
+    }
+    else
+    {
+      std::strftime(buf, sizeof(buf), "%Y-%m-%d %I:%M %p", &tm);
+    }
+  }
 
   void Chart::Show(const StockData &stockData)
   {
@@ -87,22 +105,8 @@ namespace KanVest
     // Lable string
     for (size_t i = 0; i < n; i += labelStep)
     {
-      time_t t = static_cast<time_t>(filteredDaysCandles[i].timestamp);
-      
-      struct tm tm{};
-      localtime_r(&t, &tm);   // Use IST instead of UTC
-      
       char buf[64];
-      
-      // Date + Time + AM/PM
-      if (stockData.range == "1d")
-      {
-        std::strftime(buf, sizeof(buf), "%I:%M %p", &tm);
-      }
-      else
-      {
-        std::strftime(buf, sizeof(buf), "%Y-%m-%d %I:%M %p", &tm);
-      }
+      GetTimeString(buf, filteredDaysCandles[i].timestamp, stockData.range);
       
       labelStrings.emplace_back(buf);
       labelPositions.push_back(static_cast<double>(i));
@@ -120,7 +124,7 @@ namespace KanVest
     KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::Background);
 
     static const auto ChartFlag =  ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
-    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x - 1.0f, 500.0f), ChartFlag))
+    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, 500.0f), ChartFlag))
     {
       // We use AutoFit for X and set Y limits explicitly
       ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
@@ -147,6 +151,9 @@ namespace KanVest
         default:
           break;
       }
+      
+      // Tooltip data
+      ShowTooltip(stockData, filteredDaysCandles);
 
       // Reference Line and value
       ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Alpha(Color::Gray, 0.5f));
@@ -248,6 +255,37 @@ namespace KanVest
       // Filled body and border
       drawList->AddRectFilled(ImVec2(cx - width, top), ImVec2(cx + width, bottom), color);
       drawList->AddRect(ImVec2(cx - width, top), ImVec2(cx + width, bottom), IM_COL32(40, 40, 40, 255));
+    }
+  }
+  
+  void Chart::ShowTooltip(const StockData& stockData, const std::vector<CandleData>& filteredDaysCandles)
+  {
+    if (ImPlot::IsPlotHovered())
+    {
+      ImPlotPoint mouse = ImPlot::GetPlotMousePos();
+      
+      // Find nearest candle index
+      int idx = (int)std::round(mouse.x);
+      idx = std::clamp(idx, 0, (int)filteredDaysCandles.size() - 1);
+      
+      const CandleData& candle = filteredDaysCandles[idx];
+      
+      char dateTimeBuf[64];
+      GetTimeString(dateTimeBuf, filteredDaysCandles[idx].timestamp, stockData.range);
+      
+      // Draw tooltip near the cursor
+      {
+        KanVasX::ScopedFont formattedText(Font(FixedWidthHeader_12));
+        ImGui::BeginTooltip();
+        ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "%s", dateTimeBuf);
+        ImGui::Separator();
+        ImGui::Text("Open   : %.2f", candle.open);
+        ImGui::Text("High   : %.2f", candle.high);
+        ImGui::Text("Low    : %.2f", candle.low);
+        ImGui::Text("Close  : %.2f", candle.close);
+        ImGui::Text("Volume : %s", UI::Utils::FormatLargeNumber(candle.volume).c_str());
+        ImGui::EndTooltip();
+      }
     }
   }
 } // namespace KanVest

@@ -22,7 +22,7 @@ namespace KanVest::UI
   void Panel::Initialize()
   {
     s_selectedStockSymbol = "Nifty";
-    StockManager::AddRequest(s_selectedStockSymbol, Range::_1D, Interval::_5M);
+    StockManager::AddRequest(s_selectedStockSymbol, Range::_1D, Interval::_2M);
   }
   
   void Panel::SetShadowTextureId(ImTextureID shadowTextureID)

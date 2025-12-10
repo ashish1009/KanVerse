@@ -10,4 +10,5 @@
 namespace KanVest::UI::Utils
 {
   std::string FormatDoubleToString(double value);
+  std::string FormatLargeNumber(double value);
 } // namespace KanVest::UI::Utils
