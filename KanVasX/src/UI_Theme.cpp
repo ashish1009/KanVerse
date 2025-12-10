@@ -207,10 +207,10 @@ namespace KanVasX
     colors[ImGuiCol_DockingEmptyBg]         = ImGui::ColorConvertU32ToFloat4(DockingEmptyBg);
     
     // Plot
-    colors[ImGuiCol_PlotLines]              = ImGui::ColorConvertU32ToFloat4(PlotLines);
-    colors[ImGuiCol_PlotLinesHovered]       = ImGui::ColorConvertU32ToFloat4(PlotLinesHovered);
-    colors[ImGuiCol_PlotHistogram]          = ImGui::ColorConvertU32ToFloat4(PlotHistogram);
-    colors[ImGuiCol_PlotHistogramHovered]   = ImGui::ColorConvertU32ToFloat4(PlotHistogramHovered);
+    colors[ImGuiCol_PlotLines]              = ImGui::ColorConvertU32ToFloat4(Red);
+    colors[ImGuiCol_PlotLinesHovered]       = ImGui::ColorConvertU32ToFloat4(Green);
+    colors[ImGuiCol_PlotHistogram]          = ImGui::ColorConvertU32ToFloat4(Blue);
+    colors[ImGuiCol_PlotHistogramHovered]   = ImGui::ColorConvertU32ToFloat4(Highlight);
     
     // Table
     colors[ImGuiCol_TableHeaderBg]          = ImGui::ColorConvertU32ToFloat4(TableHeaderBg);

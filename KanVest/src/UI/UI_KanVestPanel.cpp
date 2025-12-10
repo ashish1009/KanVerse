@@ -8,6 +8,7 @@
 #include "UI_KanVestPanel.hpp"
 
 #include "UI/UI_Utils.hpp"
+#include "UI/UI_Chart.hpp"
 
 #include "Stock/StockManager.hpp"
 
@@ -20,7 +21,8 @@ namespace KanVest::UI
 
   void Panel::Initialize()
   {
-    StockManager::AddRequest("Nifty", Range::_1D, Interval::_5M);
+    s_selectedStockSymbol = "Nifty";
+    StockManager::AddRequest(s_selectedStockSymbol, Range::_1D, Interval::_5M);
   }
   
   void Panel::SetShadowTextureId(ImTextureID shadowTextureID)
@@ -55,6 +57,12 @@ namespace KanVest::UI
     KanVasX::UI::ShiftCursorX(avalaWidth * 0.4f);
     ShowStockSearchBar(avalaWidth * 0.2f, 8.0f);
     
+    // Get Stock selected data
+    StockData stockData = StockManager::GetLatest(s_selectedStockSymbol);
+    
+    // Show Chart
+    Chart::Show(stockData);
+    
     // Frame Rate
     KanVasX::UI::Text(Font(Regular), Utils::FormatDoubleToString(ImGui::GetIO().Framerate), Align::Right, {0.0f, ImGui::GetContentRegionAvail().y - 18.0f}, Color::Gray);
 
@@ -73,7 +81,8 @@ namespace KanVest::UI
     
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
-      StockManager::AddRequest("Nifty", Range::_1D, Interval::_5M);
+      s_selectedStockSymbol = s_searchedStockString;
+      StockManager::AddRequest(s_selectedStockSymbol, Range::_1D, Interval::_5M);
     }
   }
 } // namespace KanVest::UI

@@ -29,6 +29,7 @@ namespace KanVest::UI
     static void ShowStockSearchBar(float width, float height);
 
     inline static char s_searchedStockString[128] = "";
+    inline static std::string s_selectedStockSymbol = "";
     
     inline static ImTextureID s_shadowTextureID = 0;
     inline static ImTextureID s_reloadIconID = 0;
