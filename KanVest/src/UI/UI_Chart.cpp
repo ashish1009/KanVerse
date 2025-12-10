@@ -9,8 +9,15 @@
 
 #include "Stock/StockUtils.hpp"
 
+#include "UI/UI_Utils.hpp"
+
 namespace KanVest
 {
+#define Font(font) KanVest::UI::Font::Get(KanVest::UI::FontType::font)
+  
+  using Align = KanVasX::UI::AlignX;
+  using Color = KanVasX::Color;
+
   void Chart::Show(const StockData &stockData)
   {
     IK_PERFORMANCE_FUNC("Chart::Show");
@@ -18,7 +25,7 @@ namespace KanVest
     // Check if stock data is valid
     if (!stockData.IsValid())
     {
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_24), "No Chart Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::Error);
+      KanVasX::UI::Text(Font(Header_24), "No Chart Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
     
@@ -28,7 +35,7 @@ namespace KanVest
     // Check if candle history is empty
     if (candleHistory.empty())
     {
-      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_24), "No Candle Data Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, KanVasX::Color::Error);
+      KanVasX::UI::Text(Font(Header_24), "No Candle Data Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
     
@@ -100,15 +107,64 @@ namespace KanVest
     }
 
     // Start plotting
-    KanVasX::ScopedColor ChartBg(ImGuiCol_WindowBg, KanVasX::Color::Background);
-    KanVasX::ScopedColor ChartBorderBg(ImGuiCol_FrameBg, KanVasX::Color::Background);
+    KanVasX::ScopedColor ChartBg(ImGuiCol_WindowBg, Color::Background);
+    KanVasX::ScopedColor ChartBorderBg(ImGuiCol_FrameBg, Color::Background);
     
     static const auto ChartFlag =  ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
     if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x - 1.0f, 500.0f), ChartFlag))
     {
       // We use AutoFit for X and set Y limits explicitly
-      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
+      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines,
+                        ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
       ImPlot::SetupAxisLimits(ImAxis_Y1, ymin - 1.0, ymax + 1.0, ImGuiCond_Always);
+
+      // Setup X axis ticks with our custom positions and labels (compressed timeline)
+      if (!labelPositions.empty())
+      {
+        // ImPlot::SetupAxisTicks accepts arrays of positions and labels.
+        // Provide positions (double*) and labels (const char*[])
+        ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), static_cast<int>(labelPositions.size()), labelPtrs.data());
+      }
+
+      // Plot close line (optional)
+      double priceChange = stockData.livePrice - stockData.prevClose;
+      ImU32 color = priceChange > 0 ? Color::Cyan : Color::Red;
+
+      ImVec4 col4 = ImGui::ColorConvertU32ToFloat4(color);
+      ImPlot::SetNextLineStyle(col4, 2.0f);
+      ImPlot::PlotLine("", xs.data(), closes.data(), static_cast<int>(xs.size()));
+
+      // Reference Line
+      float refValue = stockData.prevClose;
+      
+      // ------------------- Clamp refValue inside Y-axis -------------------
+      double ymin_plot = ymin - 1.0;
+      double ymax_plot = ymax + 1.0;
+      
+      if (refValue < ymin_plot) refValue = static_cast<float>(ymin_plot);
+      if (refValue > ymax_plot) refValue = static_cast<float>(ymax_plot);
+      
+      // Reference line coordinates
+      double x[2] = { xs.front(), xs.back() };
+      double y[2] = { refValue, refValue };
+      
+      ImPlot::PushStyleColor(ImPlotCol_Line, Color::Gray);
+      ImPlot::PlotLine("##ReferenceLine", x, y, 2);
+      ImPlot::PopStyleColor();
+      
+      // Convert plot coordinates to pixel position
+      ImVec2 pixPos = ImPlot::PlotToPixels(xs.front(), refValue);
+      
+      // Apply pixel offset (0 right, +10 down)
+      pixPos.x += 0;
+      pixPos.y += 10;
+      
+      // Draw text manually with no background
+      ImDrawList* dl = ImPlot::GetPlotDrawList();
+      ImU32 txtCol = IM_COL32(255, 255, 255, 255); // white
+      dl->AddText(Font(Header_24), ImGui::GetFontSize(), pixPos,
+                  txtCol, ("Prev Close: " + KanVest::UI::Utils::FormatDoubleToString(refValue)).c_str());
+
 
       ImPlot::EndPlot();
     }
