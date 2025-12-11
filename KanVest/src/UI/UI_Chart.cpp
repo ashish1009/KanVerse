@@ -141,8 +141,8 @@ namespace KanVest
     if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ChartFlag))
     {
       ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
-      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin - 1.0, ymax + 1.0, ImGuiCond_Always);
-      
+      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, ImGuiCond_Always);
+
       if (!labelPositions.empty())
       {
         ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), (int)labelPositions.size(), labelPtrs.data());
@@ -309,7 +309,7 @@ namespace KanVest
     for (size_t i = 0; i < xs.size(); i++)
     {
       // Volume color = candle color
-      ImU32 color = (closes[i] >= opens[i]) ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
+      ImU32 color = (closes[i] >= opens[i]) ? Color::Alpha(UI::Utils::StockProfitColor, 0.5f) : Color::Alpha(UI::Utils::StockLossColor, 0.5f);
       
       // Convert center X to pixels
       ImVec2 pBase   = ImPlot::PlotToPixels(xs[i], volBottom);
