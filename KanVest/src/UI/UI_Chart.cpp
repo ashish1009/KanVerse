@@ -168,7 +168,7 @@ namespace KanVest
       ShowTooltip(stockData, filteredDaysCandles);
 
       // Reference Line and value
-      ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Alpha(Color::Gray, 0.5f));
+      ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Text);
 
       ImPlot::EndPlot();
     }
@@ -213,15 +213,16 @@ namespace KanVest
     // Convert plot coordinates to pixel position
     ImVec2 pixPos = ImPlot::PlotToPixels(xs.front(), refValue);
     
+    // Reference string
+    std::string referenceString = "Prev Close: " + KanVest::UI::Utils::FormatDoubleToString(refValue);
+    
     // Apply pixel offset (0 right, +10 down)
-    pixPos.x += 0;
+    pixPos.x += (ImGui::GetContentRegionAvail().x - 1.5 * ImGui::CalcTextSize(referenceString.c_str()).x);
     pixPos.y += 5;
     
     // Draw text manually with no background
     ImDrawList* dl = ImPlot::GetPlotDrawList();
-    dl->AddText(Font(Header_24), ImGui::GetFontSize(), pixPos,
-                color, ("Prev Close: " + KanVest::UI::Utils::FormatDoubleToString(refValue)).c_str());
-    
+    dl->AddText(Font(Header_24), ImGui::GetFontSize(), pixPos, color, referenceString.c_str());
   }
   
   void Chart::ShowLinePlot(const StockData& stockData, const std::vector<double>& xs, const std::vector<double>& closes)
