@@ -61,7 +61,12 @@ namespace KanVest::UI
     StockData stockData = StockManager::GetLatest(s_selectedStockSymbol);
     
     // Show Chart
-    Chart::Show(stockData);
+    KanVasX::UI::ShiftCursorY(ImGui::GetContentRegionAvail().y * 0.5f);
+    if (ImGui::BeginChild(" Stock - Data - Chart ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y)))
+    {
+      Chart::Show(stockData);
+      ImGui::EndChild();
+    }
     
     // Frame Rate
     KanVasX::UI::Text(Font(Regular), Utils::FormatDoubleToString(ImGui::GetIO().Framerate), Align::Right, {0.0f, ImGui::GetContentRegionAvail().y - 18.0f}, Color::Gray);

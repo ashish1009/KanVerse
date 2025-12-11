@@ -138,7 +138,7 @@ namespace KanVest
     KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::Background);
     
     static const auto ChartFlag = ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
-    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, 500.0f), ChartFlag))
+    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ChartFlag))
     {
       ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
       ImPlot::SetupAxisLimits(ImAxis_Y1, ymin - 1.0, ymax + 1.0, ImGuiCond_Always);
@@ -160,12 +160,8 @@ namespace KanVest
         default:
           break;
       }
-      
-      // -------- VOLUME PLOT (VISIBLE AT BOTTOM) --------
-      ImPlot::SetNextFillStyle(ImVec4(0.3f, 0.6f, 1.0f, 0.35f));
-      ImPlot::PlotBars("Volume", xs.data(), volumeY.data(), (int)xs.size(), 0.45);
-      
-      // -------- TOOLTIP + REFERENCE LINE --------
+
+      ShowVolumes(volumeY, xs);
       ShowTooltip(stockData, filteredDaysCandles);
       ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Text);
       
@@ -227,7 +223,7 @@ namespace KanVest
   void Chart::ShowLinePlot(const StockData& stockData, const std::vector<double>& xs, const std::vector<double>& closes)
   {
     double priceChange = stockData.livePrice - stockData.prevClose;
-    ImU32 color = priceChange > 0 ? Color::Cyan : Color::Red;
+    ImU32 color = priceChange > 0 ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
     
     ImVec4 col4 = ImGui::ColorConvertU32ToFloat4(color);
     ImPlot::SetNextLineStyle(col4, 2.0f);
@@ -249,7 +245,7 @@ namespace KanVest
     ImDrawList* drawList = ImPlot::GetPlotDrawList();
     for (size_t i = 0; i < xs.size(); ++i)
     {
-      ImU32 color = (closes[i] >= opens[i]) ? Color::Cyan : Color::Red;
+      ImU32 color = (closes[i] >= opens[i]) ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
       
       ImVec2 pHigh  = ImPlot::PlotToPixels(ImPlotPoint(xs[i], highs[i]));
       ImVec2 pLow   = ImPlot::PlotToPixels(ImPlotPoint(xs[i], lows[i]));
@@ -287,17 +283,30 @@ namespace KanVest
       
       // Draw tooltip near the cursor
       {
+        ImU32 color = (candle.close >= candle.open) ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
         KanVasX::ScopedFont formattedText(Font(FixedWidthHeader_12));
+
         ImGui::BeginTooltip();
         ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "%s", dateTimeBuf);
         ImGui::Separator();
-        ImGui::Text("Open   : %.2f", candle.open);
-        ImGui::Text("High   : %.2f", candle.high);
-        ImGui::Text("Low    : %.2f", candle.low);
-        ImGui::Text("Close  : %.2f", candle.close);
-        ImGui::Text("Volume : %s", UI::Utils::FormatLargeNumber(candle.volume).c_str());
+
+        {
+          KanVasX::ScopedColor textColor(ImGuiCol_Text, color);
+          ImGui::Text("Open   : %.2f", candle.open);
+          ImGui::Text("High   : %.2f", candle.high);
+          ImGui::Text("Low    : %.2f", candle.low);
+          ImGui::Text("Close  : %.2f", candle.close);
+          ImGui::Text("Volume : %s", UI::Utils::FormatLargeNumber(candle.volume).c_str());
+        }
+
         ImGui::EndTooltip();
       }
     }
+  }
+  
+  void Chart::ShowVolumes(const std::vector<double> &volumeY, const std::vector<double> &xs)
+  {
+    ImPlot::SetNextFillStyle(ImVec4(0.3f, 0.6f, 1.0f, 0.35f));
+    ImPlot::PlotBars("", xs.data(), volumeY.data(), (int)xs.size(), 0.45);
   }
 } // namespace KanVest
