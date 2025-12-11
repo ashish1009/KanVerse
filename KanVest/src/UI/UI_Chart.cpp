@@ -66,9 +66,7 @@ namespace KanVest
     std::vector<CandleData> filteredDaysCandles = Utils::FilterTradingDays(candleHistory);
     
     // We'll use sequential x indices so weekends/holidays are skipped visually.
-    std::vector<double> xs, opens, highs, lows, closes;
-    std::vector<uint64_t> volumes;
-    
+    std::vector<double> xs, opens, highs, lows, closes, volumes;
     xs.reserve(filteredDaysCandles.size());
     opens.reserve(filteredDaysCandles.size());
     highs.reserve(filteredDaysCandles.size());
@@ -78,27 +76,39 @@ namespace KanVest
 
     double ymin = DBL_MAX;
     double ymax = -DBL_MAX;
+    double maxVolume = 0.0;
     
-    uint64_t maxVolume = 0;
     for (size_t i = 0; i < filteredDaysCandles.size(); ++i)
     {
-      const auto& candle = filteredDaysCandles[i];
+      const auto& c = filteredDaysCandles[i];
       
-      xs.push_back(static_cast<double>(i)); // sequential index
-      opens.push_back(candle.open);
-      highs.push_back(candle.high);
-      lows.push_back(candle.low);
-      closes.push_back(candle.close);
-      volumes.push_back(candle.volume);
-
-      maxVolume = std::max(maxVolume, candle.volume);
+      xs.push_back((double)i);
+      opens.push_back(c.open);
+      highs.push_back(c.high);
+      lows.push_back(c.low);
+      closes.push_back(c.close);
+      volumes.push_back((double)c.volume);
       
-      ymin = std::min(ymin, candle.low);
-      ymax = std::max(ymax, candle.high);
+      ymin = std::min(ymin, c.low);
+      ymax = std::max(ymax, c.high);
+      maxVolume = std::max(maxVolume, (double)c.volume);
     }
     
-    // Build human-readable labels locally (e.g., "2025-11-03").
-    // To avoid too many labels, we'll place a label every few points.
+    // Allocate bottom 22% of chart for volume
+    double volBottom = ymin;
+    double volTop    = ymin + (ymax - ymin) * 0.22;
+    
+    // Build scaled volume Y-values
+    std::vector<double> volumeY;
+    volumeY.reserve(volumes.size());
+    for (double v : volumes)
+    {
+      double t = v / maxVolume;                 // normalize 0–1
+      double y = volBottom + t * (volTop - volBottom);
+      volumeY.push_back(y);
+    }
+    
+    // --------- X labels (unchanged) ---------
     std::vector<std::string> labelStrings;
     std::vector<const char*> labelPtrs;
     std::vector<double> labelPositions;
@@ -106,53 +116,39 @@ namespace KanVest
     // Decide label step based on number of points: aim for ~8-12 labels max.
     int targetLabels = 10;
     size_t n = filteredDaysCandles.size();
-    size_t labelStep = 1;
-    if (n > 0)
-    {
-      labelStep = std::max<size_t>(1, (n + targetLabels - 1) / targetLabels);
-    }
+    size_t labelStep = n > 0 ? std::max<size_t>(1, (n + targetLabels - 1) / targetLabels) : 1;
     
-    labelStrings.reserve((n + labelStep - 1) / labelStep);
-    labelPositions.reserve(labelStrings.capacity());
-    labelPtrs.reserve(labelStrings.capacity());
-
-    // Lable string
     for (size_t i = 0; i < n; i += labelStep)
     {
       char buf[64];
       GetTimeString(buf, 64, filteredDaysCandles[i].timestamp, stockData.range);
       
       labelStrings.emplace_back(buf);
-      labelPositions.push_back(static_cast<double>(i));
+      labelPositions.push_back((double)i);
     }
-
-    // Convert label strings to char* for ImPlot
-    for (auto &s : labelStrings)
+    
+    for (auto& s : labelStrings)
     {
       labelPtrs.push_back(s.c_str());
     }
-
+    
     // Start plotting
     KanVasX::ScopedColor ChartBg(ImGuiCol_WindowBg, Color::Background);
     KanVasX::ScopedColor ChartBorderBg(ImGuiCol_FrameBg, Color::Background);
     KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::Background);
-
-    static const auto ChartFlag =  ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
+    
+    static const auto ChartFlag = ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
     if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, 500.0f), ChartFlag))
     {
-      // We use AutoFit for X and set Y limits explicitly
       ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
       ImPlot::SetupAxisLimits(ImAxis_Y1, ymin - 1.0, ymax + 1.0, ImGuiCond_Always);
-
-      // Setup X axis ticks with our custom positions and labels (compressed timeline)
+      
       if (!labelPositions.empty())
       {
-        // ImPlot::SetupAxisTicks accepts arrays of positions and labels.
-        // Provide positions (double*) and labels (const char*[])
-        ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), static_cast<int>(labelPositions.size()), labelPtrs.data());
+        ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), (int)labelPositions.size(), labelPtrs.data());
       }
-
-      // Draw Plot
+      
+      // -------- PRICE PLOT --------
       switch (s_plotType)
       {
         case PlotType::Line:
@@ -160,16 +156,19 @@ namespace KanVest
           break;
         case PlotType::Candle:
           ShowCandlePlot(stockData, xs, closes, opens, highs, lows);
+          break;
         default:
           break;
       }
       
-      // Tooltip data
+      // -------- VOLUME PLOT (VISIBLE AT BOTTOM) --------
+      ImPlot::SetNextFillStyle(ImVec4(0.3f, 0.6f, 1.0f, 0.35f));
+      ImPlot::PlotBars("Volume", xs.data(), volumeY.data(), (int)xs.size(), 0.45);
+      
+      // -------- TOOLTIP + REFERENCE LINE --------
       ShowTooltip(stockData, filteredDaysCandles);
-
-      // Reference Line and value
       ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Text);
-
+      
       ImPlot::EndPlot();
     }
   }
