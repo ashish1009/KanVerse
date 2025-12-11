@@ -31,10 +31,11 @@ namespace KanVest
                                const std::vector<double>& lows);
 
     static void ShowTooltip(const StockData& stockData, const std::vector<CandleData>& filteredDaysCandles);
-
-    static void ShowVolumes(const std::vector<double> &volumeY, const std::vector<double> &xs);
+    static void ShowVolumes(const std::vector<double>& xs, const std::vector<double>& volumeY, const std::vector<double>& opens, const std::vector<double>& closes, double volBottom);
 
     enum class PlotType {Line, Candle};
     inline static PlotType s_plotType = PlotType::Candle;
+    
+    inline static float s_candleWidth = 4.0f;
   };
 } // namespace KanVest

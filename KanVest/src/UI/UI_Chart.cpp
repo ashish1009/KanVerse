@@ -161,7 +161,7 @@ namespace KanVest
           break;
       }
 
-      ShowVolumes(volumeY, xs);
+      ShowVolumes(xs, volumeY, opens, closes, volBottom);
       ShowTooltip(stockData, filteredDaysCandles);
       ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Text);
       
@@ -258,11 +258,10 @@ namespace KanVest
       float top = std::min(pOpen.y, pClose.y);
       float bottom = std::max(pOpen.y, pClose.y);
       float cx = pOpen.x;
-      float width = 4.0f;
       
       // Filled body and border
-      drawList->AddRectFilled(ImVec2(cx - width, top), ImVec2(cx + width, bottom), color);
-      drawList->AddRect(ImVec2(cx - width, top), ImVec2(cx + width, bottom), IM_COL32(40, 40, 40, 255));
+      drawList->AddRectFilled(ImVec2(cx - s_candleWidth, top), ImVec2(cx + s_candleWidth, bottom), color);
+      drawList->AddRect(ImVec2(cx - s_candleWidth, top), ImVec2(cx + s_candleWidth, bottom), IM_COL32(40, 40, 40, 255));
     }
   }
   
@@ -304,9 +303,23 @@ namespace KanVest
     }
   }
   
-  void Chart::ShowVolumes(const std::vector<double> &volumeY, const std::vector<double> &xs)
+  void Chart::ShowVolumes(const std::vector<double>& xs, const std::vector<double>& volumeY, const std::vector<double>& opens, const std::vector<double>& closes, double volBottom)
   {
-    ImPlot::SetNextFillStyle(ImVec4(0.3f, 0.6f, 1.0f, 0.35f));
-    ImPlot::PlotBars("", xs.data(), volumeY.data(), (int)xs.size(), 0.45);
+    ImDrawList* dl = ImPlot::GetPlotDrawList();
+    for (size_t i = 0; i < xs.size(); i++)
+    {
+      // Volume color = candle color
+      ImU32 color = (closes[i] >= opens[i]) ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
+      
+      // Convert center X to pixels
+      ImVec2 pBase   = ImPlot::PlotToPixels(xs[i], volBottom);
+      ImVec2 pVolume = ImPlot::PlotToPixels(xs[i], volumeY[i]);
+      
+      // Rectangle pixel coords
+      ImVec2 a(pBase.x - s_candleWidth, pVolume.y);
+      ImVec2 b(pBase.x + s_candleWidth, pBase.y);
+      
+      dl->AddRectFilled(a, b, color);
+    }
   }
 } // namespace KanVest
