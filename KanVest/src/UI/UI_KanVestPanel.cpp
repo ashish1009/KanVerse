@@ -61,11 +61,14 @@ namespace KanVest::UI
     StockData stockData = StockManager::GetLatest(s_selectedStockSymbol);
     
     // Show Chart
-    KanVasX::UI::ShiftCursorY(ImGui::GetContentRegionAvail().y * 0.5f);
-    if (ImGui::BeginChild(" Stock - Data - Chart ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y)))
     {
-      Chart::Show(stockData);
-      ImGui::EndChild();
+      KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Null);
+      KanVasX::UI::ShiftCursorY(ImGui::GetContentRegionAvail().y * 0.5f);
+      if (ImGui::BeginChild(" Stock - Data - Chart ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y)))
+      {
+        Chart::Show(stockData);
+        ImGui::EndChild();
+      }
     }
     
     // Frame Rate

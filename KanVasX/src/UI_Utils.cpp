@@ -483,4 +483,38 @@ namespace KanVasX
       UI::DrawShadow(shadowImageID, UI::Position::Bottom, radius, alpha);
     }
   }
+  
+  // Property ------------------------------------------------------------------------------------------------------------------------------------------
+  bool UI::DropMenu(const std::string& title, const std::vector<std::string>& options, int32_t* selected)
+  {
+    bool modified = false;
+    const char* current = options[(size_t)*selected].c_str();
+    const std::string id = "##" + title;
+
+    if (ImGui::BeginCombo(id.c_str(), current))
+    {
+      for (size_t i = 0; i < options.size(); i++)
+      {
+        const bool is_selected = (current == options[i]);
+        if (ImGui::Selectable(options[i].c_str(), is_selected))
+        {
+          current = options[i].c_str();
+          *selected = (int32_t)i;
+          modified = true;
+        }
+        if (is_selected)
+        {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+    
+    if (!KanVasX::UI::IsItemDisabled())
+    {
+      KanVasX::UI::DrawItemActivityOutline(2.0f, true, Color::Highlight);
+    }
+    return modified;
+  }
+
 } // namespace KanVasX

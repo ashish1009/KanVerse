@@ -74,6 +74,28 @@ namespace KanVest
     /// This function returns the range as string from enum
     /// - Parameter range: range enum
     static std::string GetRangeString(Range range);
+    
+    /// This function returns the interval as string from enum
+    /// - Parameter interval: interval enum
+    static Interval GetIntervalFromString(const std::string& interval);
+    /// This function returns the range as string from enum
+    /// - Parameter range: range enum
+    static Range GetRangeFromString(const std::string& range);
+
+    /// This function returns the valid ranges
+    static std::vector<std::string> GetValidRanges();
+    /// This function returns the valid Intervals
+    static std::vector<std::string> GetValidIntervals();
+
+    /// This function returns the valid Intervals
+    static std::vector<std::string> GetValidIntervalsStringForRange(Range range);
+    /// This function returns the valid Intervals
+    static std::vector<Interval> GetValidIntervalsForRange(Range range);
+
+    /// This function returns the valid Intervals
+    static std::string GetValidIntervalStringForRange(Range range);
+    /// This function returns the valid Intervals
+    static Interval GetValidIntervalForRange(Range range);
 
   private:
     inline static StockAPIProvider s_stockAPIProvider;

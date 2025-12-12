@@ -223,5 +223,8 @@ namespace KanVasX
     ///   - radius: radius of shadow
     ///   - alpha: Blurr alpha
     static void DrawShadowAllDirection(ImTextureID shadowImageID, int32_t radius = 15.0f, float alpha = 1.0f);
+    
+    // Property ------------------------------------------------------------------------------------------------------------------------------------------
+    static bool DropMenu(const std::string& title, const std::vector<std::string>& options, int32_t* selected);
   };
 } // namespace KanVasX

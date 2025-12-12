@@ -114,5 +114,137 @@ namespace KanVest
     IK_ASSERT(false, "Invalid renage")
     return "";
   }
+  
+  Interval API_Provider::GetIntervalFromString(const std::string& interval)
+  {
+    if (interval == "1m") return Interval::_1M;
+    else if (interval == "2m") return Interval::_2M;
+    else if (interval == "5m") return Interval::_5M;
+    else if (interval == "15m") return Interval::_15M;
+    else if (interval == "30m") return Interval::_30M;
+    else if (interval == "60m") return Interval::_60M;
+    else if (interval == "90m") return Interval::_90M;
+    else if (interval == "1h") return Interval::_1H;
+    else if (interval == "1d") return Interval::_1D;
+    else if (interval == "5d") return Interval::_5D;
+    else if (interval == "1wk") return Interval::_1WK;
+    else if (interval == "1mo") return Interval::_1MO;
+    else if (interval == "3mo") return Interval::_3MO;
+    
+    IK_ASSERT(false, "Invalid interval")
+    return Interval::_1M;
+  }
+  Range API_Provider::GetRangeFromString(const std::string& range)
+  {
+    if (range == "1d") return Range::_1D;
+    else if (range == "5d") return Range::_5D;
+    else if (range == "1mo") return Range::_1MO;
+    else if (range == "6mo") return Range::_6MO;
+    else if (range == "ytd") return Range::_YTD;
+    else if (range == "1y") return Range::_1Y;
+    else if (range == "5y") return Range::_5Y;
+    else if (range == "max") return Range::_MAX;
+
+    IK_ASSERT(false, "Invalid renage")
+    return Range::_1D;
+  }
+
+  std::vector<std::string> API_Provider::GetValidRanges()
+  {
+    return {"1d","5d","1mo","6mo","ytd","1y","5y","max"};
+  }
+  std::vector<std::string> API_Provider::GetValidIntervals()
+  {
+    return {"1m","2m","5m","15m","30m","60m","90m","1h","1d","5d","1wk","1mo","3mo"};
+  }
+  std::vector<std::string> API_Provider::GetValidIntervalsStringForRange(Range range)
+  {
+    switch (range)
+    {
+      case Range::_1D:
+      case Range::_5D:
+        return {"1m","5m","15m","30m","60m"};
+      case Range::_1MO:
+        return {"5m","15m","30m","60m","1d"};
+      case Range::_6MO:
+        return {"1h","1d","1wk"};
+      case Range::_YTD:
+        return {"1h", "1d","1wk","1mo"};
+      case Range::_1Y:
+      case Range::_5Y:
+      case Range::_MAX:
+        return {"1d","1wk","1mo"};
+        
+      default:
+        break;
+    }
+  }
+  
+  std::vector<Interval> API_Provider::GetValidIntervalsForRange(Range range)
+  {
+    switch (range)
+    {
+      case Range::_1D:
+      case Range::_5D:
+        return {Interval::_1M, Interval::_5M, Interval::_15M, Interval::_30M, Interval::_60M};
+      case Range::_1MO:
+        return {Interval::_5M, Interval::_15M, Interval::_30M, Interval::_60M, Interval::_1D};
+      case Range::_6MO:
+        return {Interval::_1H, Interval::_1D, Interval::_1WK};
+      case Range::_YTD:
+        return {Interval::_1H, Interval::_1D, Interval::_1WK, Interval::_1MO};
+      case Range::_1Y:
+      case Range::_5Y:
+      case Range::_MAX:
+        return {Interval::_1D, Interval::_1WK, Interval::_1MO};
+        
+      default:
+        break;
+    }
+  }
+
+  std::string API_Provider::GetValidIntervalStringForRange(Range range)
+  {
+    switch (range)
+    {
+      case Range::_1D:
+        return "2m";
+      case Range::_5D:
+        return "15m";
+      case Range::_1MO:
+        return "60m";
+      case Range::_6MO:
+      case Range::_YTD:
+      case Range::_1Y:
+      case Range::_5Y:
+      case Range::_MAX:
+        return "1d";
+        
+      default:
+        break;
+    }
+  }
+  
+  Interval API_Provider::GetValidIntervalForRange(Range range)
+  {
+    switch (range)
+    {
+      case Range::_1D:
+        return Interval::_2M;
+      case Range::_5D:
+        return Interval::_15M;
+      case Range::_1MO:
+        return Interval::_60M;
+      case Range::_6MO:
+      case Range::_YTD:
+      case Range::_1Y:
+      case Range::_5Y:
+      case Range::_MAX:
+        return Interval::_1D;
+
+      default:
+        break;
+    }
+  }
 
 } // namespace KanVest

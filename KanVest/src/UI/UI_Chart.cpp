@@ -8,6 +8,7 @@
 #include "UI_Chart.hpp"
 
 #include "Stock/StockUtils.hpp"
+#include "Stock/StockManager.hpp"
 
 #include "UI/UI_Utils.hpp"
 
@@ -44,7 +45,15 @@ namespace KanVest
   void Chart::Show(const StockData &stockData)
   {
     IK_PERFORMANCE_FUNC("Chart::Show");
+
+    ShowController(stockData);
+    PLotChart(stockData);
+  }
     
+  void Chart::PLotChart(const StockData &stockData)
+  {
+    IK_PERFORMANCE_FUNC("Chart::PLotChart");
+        
     // Check if stock data is valid
     if (!stockData.IsValid())
     {
@@ -133,7 +142,7 @@ namespace KanVest
     }
     
     // Start plotting
-    KanVasX::ScopedColor ChartBg(ImGuiCol_WindowBg, Color::Background);
+    KanVasX::ScopedColor ChartBg(ImGuiCol_WindowBg, Color::Null);
     KanVasX::ScopedColor ChartBorderBg(ImGuiCol_FrameBg, Color::Background);
     KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::Background);
     
@@ -320,6 +329,43 @@ namespace KanVest
       ImVec2 b(pBase.x + s_candleWidth, pBase.y);
       
       dl->AddRectFilled(a, b, color);
+    }
+  }
+  
+  void Chart::ShowController(const StockData& stockData)
+  {
+    // Plot type selector
+    {
+      KanVasX::ScopedColor FrameBgHovered(ImGuiCol_FrameBg, Color::Background);
+      KanVasX::ScopedColor FrameBg(ImGuiCol_FrameBgHovered, Color::BackgroundLight);
+      
+      KanVasX::ScopedColor Button(ImGuiCol_Button, Color::Background);
+      KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::BackgroundLight);
+      
+      int32_t currentPlotType = (int32_t)s_plotType;
+      static std::vector<std::string> options = {"Line", "Candle"};
+      
+      ImGui::SetNextItemWidth(100.0f);
+      if (KanVasX::UI::DropMenu("ChartType", options, &currentPlotType))
+      {
+        s_plotType = (PlotType)currentPlotType;
+      }
+    }
+
+    ImGui::SameLine();
+    {
+      for (const auto& range : API_Provider::GetValidRanges())
+      {
+        auto buttonColor = range == stockData.range ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+        std::string uniqueLabel = range + "##Range";
+        
+        ImGui::SameLine();
+        if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
+        {
+          const auto& validInterval = API_Provider::GetValidIntervalForRange(API_Provider::GetRangeFromString(range));
+          StockManager::AddRequest(stockData.symbol, API_Provider::GetRangeFromString(range), validInterval);
+        }
+      }
     }
   }
 } // namespace KanVest
