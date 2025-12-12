@@ -97,6 +97,16 @@ namespace KanVest
     /// This function returns the valid Intervals
     static Interval GetValidIntervalForRange(Range range);
 
+    /// This function returns the valid Intervals
+    static std::vector<std::string> GetValidIntervalsStringForRange(const std::string& range);
+    /// This function returns the valid Intervals
+    static std::vector<Interval> GetValidIntervalsForRange(const std::string& range);
+    
+    /// This function returns the valid Intervals
+    static std::string GetValidIntervalStringForRange(const std::string& range);
+    /// This function returns the valid Intervals
+    static Interval GetValidIntervalForRange(const std::string& range);
+
   private:
     inline static StockAPIProvider s_stockAPIProvider;
     inline static APIKeys s_apiKeys;

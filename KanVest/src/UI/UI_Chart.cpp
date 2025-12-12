@@ -334,25 +334,11 @@ namespace KanVest
   
   void Chart::ShowController(const StockData& stockData)
   {
-    // Plot type selector
+    if (!stockData.IsValid())
     {
-      KanVasX::ScopedColor FrameBgHovered(ImGuiCol_FrameBg, Color::Background);
-      KanVasX::ScopedColor FrameBg(ImGuiCol_FrameBgHovered, Color::BackgroundLight);
-      
-      KanVasX::ScopedColor Button(ImGuiCol_Button, Color::Background);
-      KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::BackgroundLight);
-      
-      int32_t currentPlotType = (int32_t)s_plotType;
-      static std::vector<std::string> options = {"Line", "Candle"};
-      
-      ImGui::SetNextItemWidth(100.0f);
-      if (KanVasX::UI::DropMenu("ChartType", options, &currentPlotType))
-      {
-        s_plotType = (PlotType)currentPlotType;
-      }
+      return;
     }
-
-    ImGui::SameLine();
+    
     {
       for (const auto& range : API_Provider::GetValidRanges())
       {
@@ -367,5 +353,44 @@ namespace KanVest
         }
       }
     }
+    ImGui::SameLine();
+    KanVasX::UI::ShiftCursorX(50.0f);
+    
+    // Plot type selector
+    {
+      KanVasX::ScopedColor FrameBgHovered(ImGuiCol_FrameBg, Color::Background);
+      KanVasX::ScopedColor FrameBg(ImGuiCol_FrameBgHovered, Color::BackgroundLight);
+      
+      KanVasX::ScopedColor Button(ImGuiCol_Button, Color::Background);
+      KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::BackgroundLight);
+      
+      // Chart Type
+      int32_t currentPlotType = (int32_t)s_plotType;
+      static std::vector<std::string> options = {"Line", "Candle"};
+      
+      ImGui::SetNextItemWidth(100.0f);
+      if (KanVasX::UI::DropMenu("##ChartType", options, &currentPlotType))
+      {
+        s_plotType = (PlotType)currentPlotType;
+      }
+    }
+    
+    ImGui::SameLine();
+    KanVasX::UI::ShiftCursorX(50.0f);
+    {
+      for (const auto& interval : API_Provider::GetValidIntervalsStringForRange(stockData.range))
+      {
+        auto buttonColor = interval == stockData.dataGranularity ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+        std::string uniqueLabel = interval + "##Range";
+        
+        if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
+        {
+          StockManager::AddRequest(stockData.symbol, API_Provider::GetRangeFromString(stockData.range), API_Provider::GetIntervalFromString(interval));
+        }
+        ImGui::SameLine();
+      }
+      ImGui::NewLine();
+    }
+
   }
 } // namespace KanVest

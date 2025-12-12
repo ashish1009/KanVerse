@@ -489,9 +489,8 @@ namespace KanVasX
   {
     bool modified = false;
     const char* current = options[(size_t)*selected].c_str();
-    const std::string id = "##" + title;
 
-    if (ImGui::BeginCombo(id.c_str(), current))
+    if (ImGui::BeginCombo(title.c_str(), current))
     {
       for (size_t i = 0; i < options.size(); i++)
       {

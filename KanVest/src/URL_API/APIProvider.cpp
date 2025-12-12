@@ -246,5 +246,24 @@ namespace KanVest
         break;
     }
   }
-
+  
+  std::vector<std::string> API_Provider::GetValidIntervalsStringForRange(const std::string& range)
+  {
+    return GetValidIntervalsStringForRange(GetRangeFromString(range));
+  }
+  
+  std::vector<Interval> API_Provider::GetValidIntervalsForRange(const std::string& range)
+  {
+    return GetValidIntervalsForRange(GetRangeFromString(range));
+  }
+  
+  std::string API_Provider::GetValidIntervalStringForRange(const std::string& range)
+  {
+    return GetValidIntervalStringForRange(GetRangeFromString(range));
+  }
+  
+  Interval API_Provider::GetValidIntervalForRange(const std::string& range)
+  {
+    return GetValidIntervalForRange(GetRangeFromString(range));
+  }
 } // namespace KanVest
