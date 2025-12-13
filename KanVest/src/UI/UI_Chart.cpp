@@ -52,43 +52,24 @@ namespace KanVest
     
   void Chart::PLotChart(const StockData &stockData)
   {
-    // Performance instrumentation (likely a scoped timer / profiler macro)
     IK_PERFORMANCE_FUNC("Chart::PLotChart");
-    
-    // ------------------------------------------------------------------
-    // 1. VALIDATION
-    // ------------------------------------------------------------------
-    // If the stock data itself is invalid, there is nothing to plot.
-    // This prevents crashes from empty arrays later.
+        
+    // Check if stock data is valid
     if (!stockData.IsValid())
     {
-      KanVasX::UI::Text(
-                        Font(Header_24),
-                        "No Chart Available !!",
-                        KanVasX::UI::AlignX::Left,
-                        {10.0f, 0.0f},
-                        Color::Error
-                        );
+      KanVasX::UI::Text(Font(Header_24), "No Chart Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
+      return;
+    }
+
+    // ---------- FILTER TRADING DAYS ----------
+    std::vector<CandleData> candles = Utils::FilterTradingDays(stockData.candleHistory);
+    
+    if (candles.empty())
+    {
       return;
     }
     
-    // ------------------------------------------------------------------
-    // 2. FILTER NON-TRADING DAYS
-    // ------------------------------------------------------------------
-    // Removes weekends / holidays so the X-axis spacing matches
-    // real trading days (important for financial charts).
-    std::vector<CandleData> candles =
-    Utils::FilterTradingDays(stockData.candleHistory);
-    
-    // If nothing remains after filtering, exit safely.
-    if (candles.empty())
-      return;
-    
-    // ------------------------------------------------------------------
-    // 3. BUILD PLOTTABLE ARRAYS
-    // ------------------------------------------------------------------
-    // ImPlot works with raw arrays, so we convert candle data
-    // into parallel vectors for price and volume.
+    // ---------- BUILD DATA ----------
     std::vector<double> xs, opens, highs, lows, closes, volumes;
     xs.reserve(candles.size());
     
@@ -96,36 +77,20 @@ namespace KanVest
     
     for (size_t i = 0; i < candles.size(); ++i)
     {
-      // X axis is simply candle index (0..N-1)
       xs.push_back((double)i);
-      
-      // Price components
       opens.push_back(candles[i].open);
       highs.push_back(candles[i].high);
       lows.push_back(candles[i].low);
       closes.push_back(candles[i].close);
-      
-      // Volume
       volumes.push_back((double)candles[i].volume);
-      
-      // Track max volume for normalization later
       maxVolume = std::max(maxVolume, (double)candles[i].volume);
     }
     
-    // ------------------------------------------------------------------
-    // 4. GLOBAL Y-AXIS RANGE (FULL DATASET)
-    // ------------------------------------------------------------------
-    // Used as:
-    //  - Initial Y range
-    //  - Fallback if zoom range is invalid
+    // ---------- GLOBAL Y RANGE ----------
     double globalMin = *std::min_element(lows.begin(), lows.end());
     double globalMax = *std::max_element(highs.begin(), highs.end());
     
-    // ------------------------------------------------------------------
-    // 5. VOLUME SCALING INTO PRICE SPACE
-    // ------------------------------------------------------------------
-    // Volume bars are drawn in the lower ~22% of the price chart
-    // instead of a separate subplot.
+    // ---------- VOLUME SCALING ----------
     double volBottom = globalMin;
     double volTop    = globalMin + (globalMax - globalMin) * 0.22;
     
@@ -134,17 +99,11 @@ namespace KanVest
     
     for (double v : volumes)
     {
-      // Normalize volume [0..1]
       double t = (maxVolume > 0.0) ? (v / maxVolume) : 0.0;
-      
-      // Map volume into price-space vertical range
       volumeY.push_back(volBottom + t * (volTop - volBottom));
     }
     
-    // ------------------------------------------------------------------
-    // 6. X-AXIS LABELS (DATES)
-    // ------------------------------------------------------------------
-    // We generate sparse date labels to avoid overcrowding.
+    // ---------- X AXIS LABELS ----------
     std::vector<std::string> labelStrings;
     std::vector<const char*> labelPtrs;
     std::vector<double> labelPos;
@@ -155,53 +114,34 @@ namespace KanVest
     for (size_t i = 0; i < candles.size(); i += step)
     {
       char buf[64];
-      
-      // Convert timestamp → formatted date string
-      GetTimeString(
-                    buf,
-                    sizeof(buf),
-                    candles[i].timestamp,
-                    stockData.range
-                    );
-      
+      GetTimeString(buf, sizeof(buf), candles[i].timestamp, stockData.range);
       labelStrings.emplace_back(buf);
       labelPos.push_back((double)i);
     }
     
-    // ImPlot needs const char* pointers
     for (auto& s : labelStrings)
+    {
       labelPtrs.push_back(s.c_str());
+    }
     
-    // ------------------------------------------------------------------
-    // 7. ZOOM STATE (PERSISTENT ACROSS FRAMES)
-    // ------------------------------------------------------------------
-    // Stores the current visible X range after user zoom/pan.
+    // ---------- ZOOM STATE ----------
     static double lastXMin = 0.0;
     static double lastXMax = 0.0;
     
-    // ------------------------------------------------------------------
-    // 8. STOCK CHANGE DETECTION
-    // ------------------------------------------------------------------
-    // ImPlot caches axis state by plot ID, so when switching stocks
-    // we must reset zoom state manually.
+    // ---------- STOCK CHANGE DETECTION ----------
     static std::string lastSymbol;
     bool stockChanged = (lastSymbol != stockData.symbol);
     
     if (stockChanged)
     {
-      // Reset zoom memory so new stock auto-fits correctly
       lastXMin = 0.0;
       lastXMax = 0.0;
     }
     
-    // ------------------------------------------------------------------
-    // 9. COMPUTE Y LIMITS BASED ON VISIBLE X RANGE
-    // ------------------------------------------------------------------
-    // Default to full dataset range.
+    // ---------- COMPUTE Y LIMITS ----------
     double yMin = globalMin;
     double yMax = globalMax;
     
-    // If the user has zoomed, recompute Y only for visible candles
     if (lastXMax > lastXMin)
     {
       double localMin = DBL_MAX;
@@ -216,7 +156,6 @@ namespace KanVest
         }
       }
       
-      // Apply padding so price doesn’t touch chart edges
       if (localMin != DBL_MAX && localMax > localMin)
       {
         double pad = (localMax - localMin) * 0.1;
@@ -225,89 +164,49 @@ namespace KanVest
       }
     }
     
-    // ------------------------------------------------------------------
-    // 10. PLOT SETUP
-    // ------------------------------------------------------------------
-    // Visual style flags (TradingView-like minimal UI)
+    // ---------- BEGIN PLOT ----------
     static const ImPlotFlags plotFlags =
     ImPlotFlags_NoFrame |
     ImPlotFlags_NoMenus |
     ImPlotFlags_NoBoxSelect;
     
-    // IMPORTANT:
-    // - Called ONCE per frame
-    // - Resets axes only when stock changes
-    ImPlot::SetNextAxesLimits(
-                              xs.front(),
-                              xs.back(),
-                              yMin,
-                              yMax,
-                              stockChanged ? ImGuiCond_Always : ImGuiCond_Once
-                              );
+    // ✅ ONE SAFE CALL ONLY
+    ImPlot::SetNextAxesLimits(xs.front(), xs.back(), yMin, yMax, stockChanged ? ImGuiCond_Always : ImGuiCond_Once );
     
-    // ------------------------------------------------------------------
-    // 11. BEGIN PLOT
-    // ------------------------------------------------------------------
-    if (ImPlot::BeginPlot(
-                          "##StockPlot",
-                          ImGui::GetContentRegionAvail(),
-                          plotFlags))
+    if (ImPlot::BeginPlot("##StockPlot", ImGui::GetContentRegionAvail(), plotFlags))
     {
-      // Disable autofit so zoom/pan works
-      ImPlot::SetupAxes(
-                        "",
-                        "",
-                        ImPlotAxisFlags_None,
-                        ImPlotAxisFlags_None
-                        );
+      ImPlot::SetupAxes("", "", ImPlotAxisFlags_None, ImPlotAxisFlags_None);
       
-      // Apply custom X-axis date labels
       if (!labelPos.empty())
       {
-        ImPlot::SetupAxisTicks(
-                               ImAxis_X1,
-                               labelPos.data(),
-                               (int)labelPos.size(),
-                               labelPtrs.data()
-                               );
+        ImPlot::SetupAxisTicks(ImAxis_X1, labelPos.data(), (int)labelPos.size(), labelPtrs.data() );
       }
       
-      // --------------------------------------------------------------
-      // 12. STORE CURRENT VIEWPORT (FOR NEXT FRAME)
-      // --------------------------------------------------------------
+      // ---------- STORE CURRENT X RANGE ----------
       ImPlotRect limits = ImPlot::GetPlotLimits();
       lastXMin = limits.X.Min;
       lastXMax = limits.X.Max;
       
-      // --------------------------------------------------------------
-      // 13. DRAW PRICE DATA
-      // --------------------------------------------------------------
+      // ---------- DRAW PRICE ----------
       if (s_plotType == PlotType::Line)
+      {
         ShowLinePlot(stockData, xs, closes);
+      }
       else
+      {
         ShowCandlePlot(stockData, xs, closes, opens, highs, lows);
+      }
       
-      // --------------------------------------------------------------
-      // 14. DRAW VOLUME OVERLAY
-      // --------------------------------------------------------------
+      // ---------- DRAW VOLUME ----------
       ShowVolumes(xs, volumeY, opens, closes, volBottom);
       
-      // --------------------------------------------------------------
-      // 15. EXTRAS (TOOLTIPS, REFERENCE LINE)
-      // --------------------------------------------------------------
+      // ---------- EXTRAS ----------
       ShowTooltip(stockData, candles);
-      ShowReferenceLine(
-                        stockData.prevClose,
-                        yMin,
-                        yMax,
-                        xs,
-                        Color::Text
-                        );
+      ShowReferenceLine( stockData.prevClose, yMin, yMax, xs, Color::Text );
       
       ImPlot::EndPlot();
     }
     
-    // Remember which stock was rendered this frame
     lastSymbol = stockData.symbol;
   }
 
