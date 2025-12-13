@@ -60,80 +60,63 @@ namespace KanVest
       KanVasX::UI::Text(Font(Header_24), "No Chart Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
+
+    // ---------- FILTER TRADING DAYS ----------
+    std::vector<CandleData> candles = Utils::FilterTradingDays(stockData.candleHistory);
     
-    // Get stock's candle history data
-    const auto& candleHistory = stockData.candleHistory;
-    
-    // Check if candle history is empty
-    if (candleHistory.empty())
+    if (candles.empty())
     {
-      KanVasX::UI::Text(Font(Header_24), "No Candle Data Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
     
-    // Keep only trading days (weekdays)
-    std::vector<CandleData> filteredDaysCandles = Utils::FilterTradingDays(candleHistory);
-    
-    // We'll use sequential x indices so weekends/holidays are skipped visually.
+    // ---------- BUILD DATA ----------
     std::vector<double> xs, opens, highs, lows, closes, volumes;
-    xs.reserve(filteredDaysCandles.size());
-    opens.reserve(filteredDaysCandles.size());
-    highs.reserve(filteredDaysCandles.size());
-    lows.reserve(filteredDaysCandles.size());
-    closes.reserve(filteredDaysCandles.size());
-    volumes.reserve(filteredDaysCandles.size());
-
-    double ymin = DBL_MAX;
-    double ymax = -DBL_MAX;
+    xs.reserve(candles.size());
+    
     double maxVolume = 0.0;
     
-    for (size_t i = 0; i < filteredDaysCandles.size(); ++i)
+    for (size_t i = 0; i < candles.size(); ++i)
     {
-      const auto& c = filteredDaysCandles[i];
-      
       xs.push_back((double)i);
-      opens.push_back(c.open);
-      highs.push_back(c.high);
-      lows.push_back(c.low);
-      closes.push_back(c.close);
-      volumes.push_back((double)c.volume);
-      
-      ymin = std::min(ymin, c.low);
-      ymax = std::max(ymax, c.high);
-      maxVolume = std::max(maxVolume, (double)c.volume);
+      opens.push_back(candles[i].open);
+      highs.push_back(candles[i].high);
+      lows.push_back(candles[i].low);
+      closes.push_back(candles[i].close);
+      volumes.push_back((double)candles[i].volume);
+      maxVolume = std::max(maxVolume, (double)candles[i].volume);
     }
     
-    // Allocate bottom 22% of chart for volume
-    double volBottom = ymin;
-    double volTop    = ymin + (ymax - ymin) * 0.22;
+    // ---------- GLOBAL Y RANGE ----------
+    double globalMin = *std::min_element(lows.begin(), lows.end());
+    double globalMax = *std::max_element(highs.begin(), highs.end());
     
-    // Build scaled volume Y-values
+    // ---------- VOLUME SCALING ----------
+    double volBottom = globalMin;
+    double volTop    = globalMin + (globalMax - globalMin) * 0.22;
+    
     std::vector<double> volumeY;
     volumeY.reserve(volumes.size());
+    
     for (double v : volumes)
     {
-      double t = v / maxVolume;                 // normalize 0–1
-      double y = volBottom + t * (volTop - volBottom);
-      volumeY.push_back(y);
+      double t = (maxVolume > 0.0) ? (v / maxVolume) : 0.0;
+      volumeY.push_back(volBottom + t * (volTop - volBottom));
     }
     
-    // --------- X labels (unchanged) ---------
+    // ---------- X AXIS LABELS ----------
     std::vector<std::string> labelStrings;
     std::vector<const char*> labelPtrs;
-    std::vector<double> labelPositions;
-
-    // Decide label step based on number of points: aim for ~8-12 labels max.
-    int targetLabels = 10;
-    size_t n = filteredDaysCandles.size();
-    size_t labelStep = n > 0 ? std::max<size_t>(1, (n + targetLabels - 1) / targetLabels) : 1;
+    std::vector<double> labelPos;
     
-    for (size_t i = 0; i < n; i += labelStep)
+    size_t targetLabels = 10;
+    size_t step = std::max<size_t>(1, candles.size() / targetLabels);
+    
+    for (size_t i = 0; i < candles.size(); i += step)
     {
       char buf[64];
-      GetTimeString(buf, 64, filteredDaysCandles[i].timestamp, stockData.range);
-      
+      GetTimeString(buf, sizeof(buf), candles[i].timestamp, stockData.range);
       labelStrings.emplace_back(buf);
-      labelPositions.push_back((double)i);
+      labelPos.push_back((double)i);
     }
     
     for (auto& s : labelStrings)
@@ -141,43 +124,92 @@ namespace KanVest
       labelPtrs.push_back(s.c_str());
     }
     
-    // Start plotting
-    KanVasX::ScopedColor ChartBg(ImGuiCol_WindowBg, Color::Null);
-    KanVasX::ScopedColor ChartBorderBg(ImGuiCol_FrameBg, Color::Background);
-    KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::Background);
+    // ---------- ZOOM STATE ----------
+    static double lastXMin = 0.0;
+    static double lastXMax = 0.0;
     
-    static const auto ChartFlag = ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
-    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ChartFlag))
+    // ---------- STOCK CHANGE DETECTION ----------
+    static std::string lastSymbol;
+    bool stockChanged = (lastSymbol != stockData.symbol);
+    
+    if (stockChanged)
     {
-      ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
-      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, ImGuiCond_Always);
-
-      if (!labelPositions.empty())
+      lastXMin = 0.0;
+      lastXMax = 0.0;
+    }
+    
+    // ---------- COMPUTE Y LIMITS ----------
+    double yMin = globalMin;
+    double yMax = globalMax;
+    
+    if (lastXMax > lastXMin)
+    {
+      double localMin = DBL_MAX;
+      double localMax = -DBL_MAX;
+      
+      for (size_t i = 0; i < xs.size(); ++i)
       {
-        ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), (int)labelPositions.size(), labelPtrs.data());
+        if (xs[i] >= lastXMin && xs[i] <= lastXMax)
+        {
+          localMin = std::min(localMin, lows[i]);
+          localMax = std::max(localMax, highs[i]);
+        }
       }
       
-      // -------- PRICE PLOT --------
-      switch (s_plotType)
+      if (localMin != DBL_MAX && localMax > localMin)
       {
-        case PlotType::Line:
-          ShowLinePlot(stockData, xs, closes);
-          break;
-        case PlotType::Candle:
-          ShowCandlePlot(stockData, xs, closes, opens, highs, lows);
-          break;
-        default:
-          break;
+        double pad = (localMax - localMin) * 0.1;
+        yMin = localMin - pad;
+        yMax = localMax + pad;
       }
-
+    }
+    
+    // ---------- BEGIN PLOT ----------
+    static const ImPlotFlags plotFlags =
+    ImPlotFlags_NoFrame |
+    ImPlotFlags_NoMenus |
+    ImPlotFlags_NoBoxSelect;
+    
+    // ✅ ONE SAFE CALL ONLY
+    ImPlot::SetNextAxesLimits(xs.front(), xs.back(), yMin, yMax, stockChanged ? ImGuiCond_Always : ImGuiCond_Once );
+    
+    if (ImPlot::BeginPlot("##StockPlot", ImGui::GetContentRegionAvail(), plotFlags))
+    {
+      ImPlot::SetupAxes("", "", ImPlotAxisFlags_None, ImPlotAxisFlags_None);
+      
+      if (!labelPos.empty())
+      {
+        ImPlot::SetupAxisTicks(ImAxis_X1, labelPos.data(), (int)labelPos.size(), labelPtrs.data() );
+      }
+      
+      // ---------- STORE CURRENT X RANGE ----------
+      ImPlotRect limits = ImPlot::GetPlotLimits();
+      lastXMin = limits.X.Min;
+      lastXMax = limits.X.Max;
+      
+      // ---------- DRAW PRICE ----------
+      if (s_plotType == PlotType::Line)
+      {
+        ShowLinePlot(stockData, xs, closes);
+      }
+      else
+      {
+        ShowCandlePlot(stockData, xs, closes, opens, highs, lows);
+      }
+      
+      // ---------- DRAW VOLUME ----------
       ShowVolumes(xs, volumeY, opens, closes, volBottom);
-      ShowTooltip(stockData, filteredDaysCandles);
-      ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Text);
+      
+      // ---------- EXTRAS ----------
+      ShowTooltip(stockData, candles);
+      ShowReferenceLine( stockData.prevClose, yMin, yMax, xs, Color::Text );
       
       ImPlot::EndPlot();
     }
+    
+    lastSymbol = stockData.symbol;
   }
-  
+
   void Chart::DrawDashedHLine(double refValue, double xMin, double xMax, ImU32 color, float thickness, float dashLen, float gapLen)
   {
     // Convert start & end plot coordinates to pixel positions
