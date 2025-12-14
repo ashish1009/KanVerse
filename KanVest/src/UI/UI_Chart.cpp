@@ -457,6 +457,5 @@ namespace KanVest
       }
       ImGui::NewLine();
     }
-
   }
 } // namespace KanVest

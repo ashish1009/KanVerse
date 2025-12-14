@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "Stock/StockManager.hpp"
+
 namespace KanVest::UI
 {
   class Panel
@@ -25,11 +27,14 @@ namespace KanVest::UI
     static void SetCloseEyeTextureId(ImTextureID closeTextureID);
 
   private:
-    /// This function show stock search bar
+    /// This function shows stock search bar
     static void ShowStockSearchBar(float width, float height);
+    /// This function shows stock basic data
+    /// - Parameter stockData: stock data to show
+    static void ShowStockData(const StockData& stockData);
 
-    inline static char s_searchedStockString[128] = "";
-    inline static std::string s_selectedStockSymbol = "";
+    inline static char s_searchedStockString[128] = "Nifty";
+    inline static std::string s_selectedStockSymbol = "Nifty";
     
     inline static ImTextureID s_shadowTextureID = 0;
     inline static ImTextureID s_reloadIconID = 0;

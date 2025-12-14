@@ -60,11 +60,21 @@ namespace KanVest::UI
     // Get Stock selected data
     StockData stockData = StockManager::GetLatest(s_selectedStockSymbol);
     
+    // Stock Basic Information
+    {
+      KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Alpha(Color::BackgroundLight, 0.2f));
+      if (ImGui::BeginChild(" Stock - Chart ", ImVec2(ImGui::GetContentRegionAvail().x * 0.3f, ImGui::GetContentRegionAvail().y * 0.5f)))
+      {
+        ShowStockData(stockData);
+        KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+        ImGui::EndChild();
+      }
+    }
+    
     // Show Chart
     {
-      KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, KanVasX::Color::Null);
-      KanVasX::UI::ShiftCursorY(ImGui::GetContentRegionAvail().y * 0.5f);
-      if (ImGui::BeginChild(" Stock - Data - Chart ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y)))
+      KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Null);
+      if (ImGui::BeginChild(" Stock - Data ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y)))
       {
         Chart::Show(stockData);
         ImGui::EndChild();
@@ -74,7 +84,6 @@ namespace KanVest::UI
     // Frame Rate
     KanVasX::UI::Text(Font(Regular), Utils::FormatDoubleToString(ImGui::GetIO().Framerate), Align::Right, {0.0f, ImGui::GetContentRegionAvail().y - 18.0f}, Color::Gray);
 
-    KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
     ImGui::End();
   }
   
@@ -92,5 +101,35 @@ namespace KanVest::UI
       s_selectedStockSymbol = s_searchedStockString;
       StockManager::AddRequest(s_selectedStockSymbol, Range::_1D, API_Provider::GetValidIntervalForRange(Range::_1D));
     }
+  }
+  
+  void Panel::ShowStockData(const StockData& stockData)
+  {
+    IK_PERFORMANCE_FUNC("Panel::ShowStockData");
+    
+    if (!stockData.IsValid())
+    {
+      KanVasX::UI::Text(Font(Header_24), "No data for stock", Align::Left, {20.0f, 10.0f}, Color::Error);
+      return;
+    }
+    
+    // Name & price
+    std::string name = stockData.shortName;
+    std::string longNameName = stockData.longName != "" ? stockData.longName : stockData.shortName;
+    
+    KanVasX::UI::Text(Font(Header_46), name, Align::Left, {20.0f, 10.0f}, Color::TextBright);
+    KanVasX::UI::Text(Font(Header_26), longNameName, Align::Left, {20.0f, 0.0f}, Color::TextBright);
+    KanVasX::UI::Text(Font(Header_56), KanVest::UI::Utils::FormatDoubleToString(stockData.livePrice), Align::Left, {20.0f, 0.0f}, Color::TextBright);
+
+    // Change
+    std::string change = (stockData.change > 0 ? "+" : "") +
+    KanVest::UI::Utils::FormatDoubleToString(stockData.change) +
+    (stockData.change > 0 ? " ( +" : " ( ") +
+    KanVest::UI::Utils::FormatDoubleToString(stockData.changePercent) + "%)";
+    
+    ImU32 changeColor = stockData.change > 0 ? KanVasX::Color::Cyan : KanVasX::Color::Red;
+    ImGui::SameLine();
+    KanVasX::UI::Text(Font(Header_30), change, Align::Left, {20.0f, 15.0f}, changeColor);
+
   }
 } // namespace KanVest::UI
