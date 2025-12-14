@@ -51,36 +51,93 @@ namespace KanVest::UI
     IK_PERFORMANCE_FUNC("Panel::Show");
     
     ImGui::Begin("Stock Analyzer");
-    
-    // Search Bar
-    float avalaWidth = ImGui::GetContentRegionAvail().x;
-    KanVasX::UI::ShiftCursorX(avalaWidth * 0.4f);
-    ShowStockSearchBar(avalaWidth * 0.2f, 8.0f);
-    
+        
     // Get Stock selected data
     StockData stockData = StockManager::GetLatest(s_selectedStockSymbol);
-    
-    // Stock Basic Information
-    {
-      KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Alpha(Color::BackgroundLight, 0.2f));
-      if (ImGui::BeginChild(" Stock - Chart ", ImVec2(ImGui::GetContentRegionAvail().x * 0.3f, ImGui::GetContentRegionAvail().y * 0.5f)))
-      {
-        ShowStockData(stockData);
-        KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
-        ImGui::EndChild();
-      }
-    }
-    
-    // Show Chart
+
     {
       KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Null);
-      if (ImGui::BeginChild(" Stock - Data ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y)))
+      
+      // Top Half : Stock Data Analyzer --------------------------------------------------------------------------------------------------------
+      ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.5f));
+      {
+        float availableX = ImGui::GetContentRegionAvail().x;
+        
+        // Col 1 :
+        {
+          KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Alpha(Color::BackgroundLight, 0.2f));
+          ImGui::BeginChild(" Stock - Data ", ImVec2(availableX * 0.3f, ImGui::GetContentRegionAvail().y));
+          {
+            ShowStockData(stockData);
+            KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+          }
+          ImGui::EndChild();
+        }
+        ImGui::SameLine();
+        
+        // Col 2 :
+        ImGui::BeginChild(" Stock - Analyzer ", ImVec2(availableX * 0.4f, ImGui::GetContentRegionAvail().y));
+        {
+          ShowStockSearchBar(ImGui::GetContentRegionAvail().x, 8.0f);
+        }
+        ImGui::EndChild();
+        ImGui::SameLine();
+        
+        // Col 3 :
+        {
+          KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Alpha(Color::BackgroundLight, 0.2f));
+          ImGui::BeginChild(" Stock - Other ", ImVec2(availableX * 0.3f, ImGui::GetContentRegionAvail().y));
+          {
+            KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+          }
+          ImGui::EndChild();
+        }
+      } // Stock Data Analyze Scope
+      ImGui::EndChild();
+      
+      // Bottom Half : Chart ----------------------------------------------------------------------------------------------------------------------
+      ImGui::BeginChild(" Stock - Chart ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
       {
         Chart::Show(stockData);
-        ImGui::EndChild();
       }
+      ImGui::EndChild();
     }
-    
+
+//    // Top Half
+//    {
+////
+//      if (ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(availableX, ImGui::GetContentRegionAvail().y * 0.5f)))
+//      {
+//        // Col 1 : Stock Basic Information
+//        {
+//          KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Alpha(Color::BackgroundLight, 0.2f));
+//          if (ImGui::BeginChild(" Stock - Chart ", ImVec2(availableX * 0.3f, ImGui::GetContentRegionAvail().y)))
+//          {
+//            ShowStockData(stockData);
+//            KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+//            ImGui::EndChild();
+//          }
+//        }
+//
+
+//        // Col 2 :
+//        {
+////          KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Alpha(Color::BackgroundLight, 0.2f));
+//          if (ImGui::BeginChild(" Search - Analyzer ", ImVec2(availableX * 0.4f, ImGui::GetContentRegionAvail().y)))
+//          {
+//            // Search Bar
+////            float avalaWidth = ImGui::GetContentRegionAvail().x;
+////            KanVasX::UI::ShiftCursorX(avalaWidth * 0.4f);
+////            ShowStockSearchBar(avalaWidth * 0.2f, 8.0f);
+//
+//            ImGui::EndChild();
+//          }
+//        }
+//
+//        ImGui::EndChild();
+//      }
+//    }
+
     // Frame Rate
     KanVasX::UI::Text(Font(Regular), Utils::FormatDoubleToString(ImGui::GetIO().Framerate), Align::Right, {0.0f, ImGui::GetContentRegionAvail().y - 18.0f}, Color::Gray);
 
