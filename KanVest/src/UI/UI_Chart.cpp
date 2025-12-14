@@ -107,7 +107,16 @@ namespace KanVest
       ymax = std::max(ymax, c.high);
       maxVolume = std::max(maxVolume, (double)c.volume);
     }
-    
+
+    ymin = std::min(ymin, stockData.prevClose);
+    ymax = std::max(ymax, stockData.prevClose);
+
+    // Add padding
+    double yRange = ymax - ymin;
+    double padding = yRange * 0.1; // 5% padding
+    ymin -= padding;
+    ymax += padding;
+  
     double volBottom = ymin;
     double volTop    = ymin + (ymax - ymin) * 0.22;
     
@@ -152,7 +161,7 @@ namespace KanVest
       const double xMin = 0.0;
       const double xMax = (double)xs.size() - 1.0;
       
-      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_AutoFit);
+      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_LockMin | ImPlotAxisFlags_LockMax);
       
       ImGuiCond cond = s_stockChanged ? ImGuiCond_Always : ImGuiCond_Once;
       
