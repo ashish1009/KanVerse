@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B23D2D3C2EEED29300CCF7B2 /* StockAnalyzer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23D2D3B2EEED29300CCF7B2 /* StockAnalyzer.cpp */; };
 		B26336CB2EDF29DC00D46F96 /* UI_Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */; };
 		B26336D32EDF2C6800D46F96 /* StockManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336D22EDF2C6800D46F96 /* StockManager.cpp */; };
 		B26336D62EDF2D2000D46F96 /* UI_KanVestPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336D52EDF2D2000D46F96 /* UI_KanVestPanel.cpp */; };
@@ -38,6 +39,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B23D2D3A2EEED29300CCF7B2 /* StockAnalyzer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockAnalyzer.hpp; sourceTree = "<group>"; };
+		B23D2D3B2EEED29300CCF7B2 /* StockAnalyzer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockAnalyzer.cpp; sourceTree = "<group>"; };
 		B26336C92EDF29DC00D46F96 /* UI_Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Font.hpp; sourceTree = "<group>"; };
 		B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Font.cpp; sourceTree = "<group>"; };
 		B26336CE2EDF2B3900D46F96 /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
@@ -87,6 +90,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B23D2D382EEED21600CCF7B2 /* Analyzer */ = {
+			isa = PBXGroup;
+			children = (
+				B23D2D3A2EEED29300CCF7B2 /* StockAnalyzer.hpp */,
+			);
+			path = Analyzer;
+			sourceTree = "<group>";
+		};
+		B23D2D392EEED22000CCF7B2 /* Analyzer */ = {
+			isa = PBXGroup;
+			children = (
+				B23D2D3B2EEED29300CCF7B2 /* StockAnalyzer.cpp */,
+			);
+			path = Analyzer;
+			sourceTree = "<group>";
+		};
 		B26336C72EDF29CA00D46F96 /* UI */ = {
 			isa = PBXGroup;
 			children = (
@@ -177,6 +196,7 @@
 				B26336C72EDF29CA00D46F96 /* UI */,
 				B26336CC2EDF2A7D00D46F96 /* Stock */,
 				B26336DB2EE04DC500D46F96 /* URL_API */,
+				B23D2D382EEED21600CCF7B2 /* Analyzer */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -189,6 +209,7 @@
 				B26336C82EDF29D000D46F96 /* UI */,
 				B26336CD2EDF2A9E00D46F96 /* Stock */,
 				B26336DA2EE04DBB00D46F96 /* URL_API */,
+				B23D2D392EEED22000CCF7B2 /* Analyzer */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -308,6 +329,7 @@
 			files = (
 				B26336D32EDF2C6800D46F96 /* StockManager.cpp in Sources */,
 				B26336E42EE0559800D46F96 /* StockParser.cpp in Sources */,
+				B23D2D3C2EEED29300CCF7B2 /* StockAnalyzer.cpp in Sources */,
 				B26336EA2EE86BB000D46F96 /* UI_Chart.cpp in Sources */,
 				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
 				B26336D62EDF2D2000D46F96 /* UI_KanVestPanel.cpp in Sources */,

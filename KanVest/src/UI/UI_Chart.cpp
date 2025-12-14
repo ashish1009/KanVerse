@@ -112,11 +112,13 @@ namespace KanVest
     ymax = std::max(ymax, stockData.prevClose);
 
     // Add padding
+#if 0
     double yRange = ymax - ymin;
     double padding = yRange * 0.1; // 5% padding
     ymin -= padding;
     ymax += padding;
-  
+#endif
+    
     double volBottom = ymin;
     double volTop    = ymin + (ymax - ymin) * 0.22;
     
@@ -400,6 +402,7 @@ namespace KanVest
       ImVec2 b(pBase.x + s_candleWidth, pBase.y);
       
       dl->AddRectFilled(a, b, color);
+      dl->AddRect(a, b, IM_COL32(40, 40, 40, 255));
     }
   }
   

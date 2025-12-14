@@ -58,8 +58,8 @@ namespace KanVest::UI
     {
       KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Null);
       
-      // Top Half : Stock Data Analyzer --------------------------------------------------------------------------------------------------------
-      ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.5f));
+      // Top Half : Stock Data Analyzer ----------------------------------------------------------------------------------------------------------
+      ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.55f));
       {
         float availableX = ImGui::GetContentRegionAvail().x;
         
@@ -76,7 +76,7 @@ namespace KanVest::UI
         ImGui::SameLine();
         
         // Col 2 :
-        ImGui::BeginChild(" Stock - Analyzer ", ImVec2(availableX * 0.4f, ImGui::GetContentRegionAvail().y));
+        ImGui::BeginChild(" Stock - Search ", ImVec2(availableX * 0.4f, ImGui::GetContentRegionAvail().y));
         {
           ShowStockSearchBar(ImGui::GetContentRegionAvail().x, 8.0f);
         }
@@ -86,8 +86,9 @@ namespace KanVest::UI
         // Col 3 :
         {
           KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Alpha(Color::BackgroundLight, 0.2f));
-          ImGui::BeginChild(" Stock - Other ", ImVec2(availableX * 0.3f, ImGui::GetContentRegionAvail().y));
+          ImGui::BeginChild(" Stock - Analyzer ", ImVec2(availableX * 0.3f, ImGui::GetContentRegionAvail().y));
           {
+            ShowStockTechnicals(stockData);
             KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
           }
           ImGui::EndChild();
@@ -102,41 +103,6 @@ namespace KanVest::UI
       }
       ImGui::EndChild();
     }
-
-//    // Top Half
-//    {
-////
-//      if (ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(availableX, ImGui::GetContentRegionAvail().y * 0.5f)))
-//      {
-//        // Col 1 : Stock Basic Information
-//        {
-//          KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Alpha(Color::BackgroundLight, 0.2f));
-//          if (ImGui::BeginChild(" Stock - Chart ", ImVec2(availableX * 0.3f, ImGui::GetContentRegionAvail().y)))
-//          {
-//            ShowStockData(stockData);
-//            KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
-//            ImGui::EndChild();
-//          }
-//        }
-//
-
-//        // Col 2 :
-//        {
-////          KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Alpha(Color::BackgroundLight, 0.2f));
-//          if (ImGui::BeginChild(" Search - Analyzer ", ImVec2(availableX * 0.4f, ImGui::GetContentRegionAvail().y)))
-//          {
-//            // Search Bar
-////            float avalaWidth = ImGui::GetContentRegionAvail().x;
-////            KanVasX::UI::ShiftCursorX(avalaWidth * 0.4f);
-////            ShowStockSearchBar(avalaWidth * 0.2f, 8.0f);
-//
-//            ImGui::EndChild();
-//          }
-//        }
-//
-//        ImGui::EndChild();
-//      }
-//    }
 
     // Frame Rate
     KanVasX::UI::Text(Font(Regular), Utils::FormatDoubleToString(ImGui::GetIO().Framerate), Align::Right, {0.0f, ImGui::GetContentRegionAvail().y - 18.0f}, Color::Gray);
@@ -249,5 +215,48 @@ namespace KanVest::UI
     KanVasX::UI::Text(Font(FixedWidthHeader_18), Utils::FormatLargeNumber(stockData.volume) , Align::Left, {0.0f, 0.0f}, Color::Text);
     
     KanVasX::UI::DrawFilledRect(Color::Separator, 1);
+  }
+  
+  void Panel::ShowStockTechnicals(const StockData& stockData)
+  {
+    IK_PERFORMANCE_FUNC("Panel::ShowStockTechnicals");
+    if (!stockData.IsValid())
+    {
+      KanVasX::UI::Text(Font(Header_24), "No data for stock", Align::Left, {20.0f, 10.0f}, Color::Error);
+      return;
+    }
+
+    KanVasX::UI::DrawFilledRect(Color::Alpha(Color::Value(Color::Background, 2.0f), 0.2f), 35.0f);
+    KanVasX::UI::Text(Font(Header_26), "Technicals", Align::Center, {0.0f, 2.0f});
+    
+    enum class TechnicalTab {DMA, EMA, Max};
+    static TechnicalTab tab = TechnicalTab::DMA;
+
+    float availX = ImGui::GetContentRegionAvail().x;
+    float technicalButtonSize = (availX / (uint32_t)TechnicalTab::Max) - 2.0f;
+
+    auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab, const std::string& tooltip)
+    {
+      const auto& buttonColor = tab == checkerTtab ? Color::Value(Color::Background, 1.0f) : Color::BackgroundDark;
+      if (KanVasX::UI::DrawButton(title, Font(Medium), buttonColor, Color::TextBright, false, 5.0f, {technicalButtonSize, 30}))
+      {
+        tab = checkerTtab;
+      }
+      KanVasX::UI::Tooltip(tooltip);
+      KanVasX::UI::DrawItemActivityOutline();
+    };
+
+    KanVasX::UI::ShiftCursor({2.0f, 1.0f});
+    TechnicalButton("DMA", TechnicalTab::DMA, "Daily Moving Average"); ImGui::SameLine();
+    TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average"); ImGui::SameLine();
+
+    if (tab == TechnicalTab::DMA)
+    {
+//      UI_MovingAverage::ShowSMA(StockManager::GetSelectedStockData(), s_shadowTextureID);
+    }
+    else if (tab == TechnicalTab::EMA)
+    {
+//      UI_MovingAverage::ShowEMA(StockManager::GetSelectedStockData(), s_shadowTextureID);
+    }
   }
 } // namespace KanVest::UI
