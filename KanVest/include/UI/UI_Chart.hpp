@@ -30,6 +30,8 @@ namespace KanVest
                                const std::vector<double>& highs,
                                const std::vector<double>& lows);
 
+    static void ShowCrossHair(const std::vector<double>& xs, double ymin, double ymax);
+
     static void DrawDashedHLine(double refValue, double xMin, double xMax, ImU32 color, float thickness = 1.5f, float dashLen = 10.0f, float gapLen = 5.0f);
     static void ShowReferenceLine(float refValue, double yminPlot, double ymaxPlot, const std::vector<double>& xs, const ImU32& color);
 

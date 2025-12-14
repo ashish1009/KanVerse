@@ -149,7 +149,7 @@ namespace KanVest
     static const auto ChartFlag = ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
     if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ChartFlag))
     {
-      ImPlot::SetupAxes("", "", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
+      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
       ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, ImGuiCond_Always);
 
       if (!labelPositions.empty())
@@ -173,7 +173,8 @@ namespace KanVest
       ShowVolumes(xs, volumeY, opens, closes, volBottom);
       ShowTooltip(stockData, filteredDaysCandles);
       ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Text);
-      
+      ShowCrossHair(xs, ymin, ymax);
+
       ImPlot::EndPlot();
     }
   }
@@ -274,6 +275,34 @@ namespace KanVest
     }
   }
   
+  void Chart::ShowCrossHair(const std::vector<double>& xs, double ymin, double ymax)
+  {
+    if (!ImPlot::IsPlotHovered())
+      return;
+    
+    ImDrawList* drawList = ImPlot::GetPlotDrawList();
+    ImPlotPoint mouse = ImPlot::GetPlotMousePos();
+    
+    // Snap X to nearest candle index
+    int idx = (int)std::round(mouse.x);
+    idx = std::clamp(idx, 0, (int)xs.size() - 1);
+    double snapX = xs[idx];
+    
+    // Convert plot coords -> pixels
+    ImVec2 pMin = ImPlot::PlotToPixels(snapX, ymin);
+    ImVec2 pMax = ImPlot::PlotToPixels(snapX, ymax);
+    ImVec2 hMin = ImPlot::PlotToPixels(xs.front(), mouse.y);
+    ImVec2 hMax = ImPlot::PlotToPixels(xs.back(),  mouse.y);
+    
+    ImU32 color = IM_COL32(200, 200, 200, 120);
+    
+    // Vertical line
+    drawList->AddLine(pMin, pMax, color, 1.0f);
+    
+    // Horizontal line
+    drawList->AddLine(hMin, hMax, color, 1.0f);
+  }
+
   void Chart::ShowTooltip(const StockData& stockData, const std::vector<CandleData>& filteredDaysCandles)
   {
     if (ImPlot::IsPlotHovered())
