@@ -56,16 +56,14 @@ namespace KanVest
     
     if (!stockData.IsValid())
     {
-      KanVasX::UI::Text(Font(Header_24), "No Chart Available !!",
-                        KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
+      KanVasX::UI::Text(Font(Header_24), "No Chart Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
     
     const auto& candleHistory = stockData.candleHistory;
     if (candleHistory.empty())
     {
-      KanVasX::UI::Text(Font(Header_24), "No Candle Data Available !!",
-                        KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
+      KanVasX::UI::Text(Font(Header_24), "No Candle Data Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
     
@@ -128,7 +126,9 @@ namespace KanVest
     }
     
     for (auto& s : labelStrings)
+    {
       labelPtrs.push_back(s.c_str());
+    }
     
     KanVasX::ScopedColor ChartBg(ImGuiCol_WindowBg, Color::Null);
     KanVasX::ScopedColor ChartBorderBg(ImGuiCol_FrameBg, Color::Background);
@@ -137,10 +137,7 @@ namespace KanVest
     static const auto ChartFlag =
     ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
     
-    if (ImPlot::BeginPlot("##StockPlot",
-                          ImVec2(ImGui::GetContentRegionAvail().x,
-                                 ImGui::GetContentRegionAvail().y),
-                          ChartFlag))
+    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ChartFlag))
     {
       const double xMin = 0.0;
       const double xMax = (double)xs.size() - 1.0;
@@ -157,12 +154,11 @@ namespace KanVest
       
       if (!labelPositions.empty())
       {
-        ImPlot::SetupAxisTicks(
-                               ImAxis_X1,
-                               labelPositions.data(),
-                               (int)labelPositions.size(),
-                               labelPtrs.data());
+        ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), (int)labelPositions.size(), labelPtrs.data());
       }
+
+      // Compute candle width
+      ComputeCandleWidth(xs);
       
       // -------- PRICE --------
       switch (s_plotType)
@@ -179,15 +175,28 @@ namespace KanVest
       
       ShowVolumes(xs, volumeY, opens, closes, volBottom);
       ShowTooltip(stockData, filteredDaysCandles);
-      ShowReferenceLine(stockData.prevClose,
-                        ymin - 1.0, ymax + 1.0, xs, Color::Text);
+      ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Text);
       ShowCrossHair(xs, ymin, ymax);
       
       ImPlot::EndPlot();
     }
   }
-
   
+  void Chart::ComputeCandleWidth(const std::vector<double>& xs)
+  {
+    ImPlotRect limits = ImPlot::GetPlotLimits();
+    ImVec2 plotSize = ImPlot::GetPlotSize();
+    
+    double xRange = limits.X.Max - limits.X.Min;
+    float pixelsPerX = plotSize.x / (float)xRange;
+    
+    double dx = (xs.size() > 1) ? (xs[1] - xs[0]) : 1.0;
+    s_candleWidth = (float)(dx * pixelsPerX) * 0.5f;
+    
+    // Optional clamp
+    s_candleWidth = ImClamp(s_candleWidth, 1.0f, 50.0f);
+  }
+
   void Chart::DrawDashedHLine(double refValue, double xMin, double xMax, ImU32 color, float thickness, float dashLen, float gapLen)
   {
     // Convert start & end plot coordinates to pixel positions
