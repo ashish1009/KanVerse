@@ -364,14 +364,19 @@ namespace KanVest
         ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "%s", dateTimeBuf);
         ImGui::Separator();
 
+        auto showOCHL = [color](const std::string& value)
         {
           KanVasX::ScopedColor textColor(ImGuiCol_Text, color);
-          ImGui::Text("Open   : %.2f", candle.open);
-          ImGui::Text("High   : %.2f", candle.high);
-          ImGui::Text("Low    : %.2f", candle.low);
-          ImGui::Text("Close  : %.2f", candle.close);
-          ImGui::Text("Volume : %s", UI::Utils::FormatLargeNumber(candle.volume).c_str());
-        }
+          ImGui::SameLine(); ImGui::Text("%s", value.c_str());
+        };
+        
+        ImGui::Text("Open   : "); showOCHL(UI::Utils::FormatDoubleToString(candle.open));
+        ImGui::Text("Close  : "); showOCHL(UI::Utils::FormatDoubleToString(candle.close));
+        ImGui::Text("High   : "); showOCHL(UI::Utils::FormatDoubleToString(candle.high));
+        ImGui::Text("Low    : "); showOCHL(UI::Utils::FormatDoubleToString(candle.low));
+        
+        ImGui::Separator();
+        ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "Volume : %s", UI::Utils::FormatLargeNumber(candle.volume).c_str());
 
         ImGui::EndTooltip();
       }
