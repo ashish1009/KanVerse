@@ -44,5 +44,6 @@ namespace KanVest
     inline static PlotType s_plotType = PlotType::Candle;
     
     inline static float s_candleWidth = 4.0f;
+    inline static bool s_stockChanged = true;
   };
 } // namespace KanVest

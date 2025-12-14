@@ -49,7 +49,7 @@ namespace KanVest
     ShowController(stockData);
     PLotChart(stockData);
   }
-    
+
   void Chart::PLotChart(const StockData &stockData)
   {
     IK_PERFORMANCE_FUNC("Chart::PLotChart");
@@ -67,8 +67,18 @@ namespace KanVest
       return;
     }
     
-    std::vector<CandleData> filteredDaysCandles =
-    Utils::FilterTradingDays(candleHistory);
+    static std::string s_lastSymbol;
+    static std::string s_lastRange;
+    static std::string s_lastInterval;
+    s_stockChanged = (s_lastSymbol != stockData.symbol) or (s_lastRange != stockData.range) or (s_lastInterval != stockData.dataGranularity);
+    if (s_stockChanged)
+    {
+      s_lastSymbol = stockData.symbol;
+      s_lastRange = stockData.range;
+      s_lastInterval = stockData.dataGranularity;
+    }
+    
+    std::vector<CandleData> filteredDaysCandles = Utils::FilterTradingDays(candleHistory);
     
     std::vector<double> xs, opens, highs, lows, closes, volumes;
     xs.reserve(filteredDaysCandles.size());
@@ -144,11 +154,11 @@ namespace KanVest
       
       ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_AutoFit);
       
-      // ✅ Initial default view (ONCE)
-      ImPlot::SetupAxisLimits(ImAxis_X1, xMin, xMax, ImGuiCond_Once);
-      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, ImGuiCond_Once);
+      ImGuiCond cond = s_stockChanged ? ImGuiCond_Always : ImGuiCond_Once;
       
-      // 🔒 HARD zoom-out / pan limits (NO CRASH)
+      ImPlot::SetupAxisLimits(ImAxis_X1, xMin, xMax, cond);
+      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, cond);
+
       ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, xMin, xMax);
       ImPlot::SetupAxisLimitsConstraints(ImAxis_Y1, ymin, ymax);
       

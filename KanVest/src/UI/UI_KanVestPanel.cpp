@@ -90,7 +90,7 @@ namespace KanVest::UI
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
       s_selectedStockSymbol = s_searchedStockString;
-      StockManager::AddRequest(s_selectedStockSymbol, Range::_1D, Interval::_5M);
+      StockManager::AddRequest(s_selectedStockSymbol, Range::_1D, API_Provider::GetValidIntervalForRange(Range::_1D));
     }
   }
 } // namespace KanVest::UI
