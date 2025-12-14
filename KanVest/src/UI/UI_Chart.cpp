@@ -53,28 +53,25 @@ namespace KanVest
   void Chart::PLotChart(const StockData &stockData)
   {
     IK_PERFORMANCE_FUNC("Chart::PLotChart");
-        
-    // Check if stock data is valid
+    
     if (!stockData.IsValid())
     {
-      KanVasX::UI::Text(Font(Header_24), "No Chart Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
+      KanVasX::UI::Text(Font(Header_24), "No Chart Available !!",
+                        KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
     
-    // Get stock's candle history data
     const auto& candleHistory = stockData.candleHistory;
-    
-    // Check if candle history is empty
     if (candleHistory.empty())
     {
-      KanVasX::UI::Text(Font(Header_24), "No Candle Data Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
+      KanVasX::UI::Text(Font(Header_24), "No Candle Data Available !!",
+                        KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
     
-    // Keep only trading days (weekdays)
-    std::vector<CandleData> filteredDaysCandles = Utils::FilterTradingDays(candleHistory);
+    std::vector<CandleData> filteredDaysCandles =
+    Utils::FilterTradingDays(candleHistory);
     
-    // We'll use sequential x indices so weekends/holidays are skipped visually.
     std::vector<double> xs, opens, highs, lows, closes, volumes;
     xs.reserve(filteredDaysCandles.size());
     opens.reserve(filteredDaysCandles.size());
@@ -82,7 +79,7 @@ namespace KanVest
     lows.reserve(filteredDaysCandles.size());
     closes.reserve(filteredDaysCandles.size());
     volumes.reserve(filteredDaysCandles.size());
-
+    
     double ymin = DBL_MAX;
     double ymax = -DBL_MAX;
     double maxVolume = 0.0;
@@ -103,61 +100,71 @@ namespace KanVest
       maxVolume = std::max(maxVolume, (double)c.volume);
     }
     
-    // Allocate bottom 22% of chart for volume
     double volBottom = ymin;
     double volTop    = ymin + (ymax - ymin) * 0.22;
     
-    // Build scaled volume Y-values
     std::vector<double> volumeY;
     volumeY.reserve(volumes.size());
     for (double v : volumes)
     {
-      double t = v / maxVolume;                 // normalize 0–1
-      double y = volBottom + t * (volTop - volBottom);
-      volumeY.push_back(y);
+      double t = v / maxVolume;
+      volumeY.push_back(volBottom + t * (volTop - volBottom));
     }
     
-    // --------- X labels (unchanged) ---------
     std::vector<std::string> labelStrings;
     std::vector<const char*> labelPtrs;
     std::vector<double> labelPositions;
-
-    // Decide label step based on number of points: aim for ~8-12 labels max.
-    int targetLabels = 10;
-    size_t n = filteredDaysCandles.size();
-    size_t labelStep = n > 0 ? std::max<size_t>(1, (n + targetLabels - 1) / targetLabels) : 1;
+    
+    const int targetLabels = 10;
+    const size_t n = filteredDaysCandles.size();
+    const size_t labelStep = std::max<size_t>(1, (n + targetLabels - 1) / targetLabels);
     
     for (size_t i = 0; i < n; i += labelStep)
     {
       char buf[64];
       GetTimeString(buf, 64, filteredDaysCandles[i].timestamp, stockData.range);
-      
       labelStrings.emplace_back(buf);
       labelPositions.push_back((double)i);
     }
     
     for (auto& s : labelStrings)
-    {
       labelPtrs.push_back(s.c_str());
-    }
     
-    // Start plotting
     KanVasX::ScopedColor ChartBg(ImGuiCol_WindowBg, Color::Null);
     KanVasX::ScopedColor ChartBorderBg(ImGuiCol_FrameBg, Color::Background);
     KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::Background);
     
-    static const auto ChartFlag = ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
-    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ChartFlag))
+    static const auto ChartFlag =
+    ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
+    
+    if (ImPlot::BeginPlot("##StockPlot",
+                          ImVec2(ImGui::GetContentRegionAvail().x,
+                                 ImGui::GetContentRegionAvail().y),
+                          ChartFlag))
     {
-      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoGridLines);
-      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, ImGuiCond_Always);
-
+      const double xMin = 0.0;
+      const double xMax = (double)xs.size() - 1.0;
+      
+      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_AutoFit);
+      
+      // ✅ Initial default view (ONCE)
+      ImPlot::SetupAxisLimits(ImAxis_X1, xMin, xMax, ImGuiCond_Once);
+      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, ImGuiCond_Once);
+      
+      // 🔒 HARD zoom-out / pan limits (NO CRASH)
+      ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, xMin, xMax);
+      ImPlot::SetupAxisLimitsConstraints(ImAxis_Y1, ymin, ymax);
+      
       if (!labelPositions.empty())
       {
-        ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), (int)labelPositions.size(), labelPtrs.data());
+        ImPlot::SetupAxisTicks(
+                               ImAxis_X1,
+                               labelPositions.data(),
+                               (int)labelPositions.size(),
+                               labelPtrs.data());
       }
       
-      // -------- PRICE PLOT --------
+      // -------- PRICE --------
       switch (s_plotType)
       {
         case PlotType::Line:
@@ -169,15 +176,17 @@ namespace KanVest
         default:
           break;
       }
-
+      
       ShowVolumes(xs, volumeY, opens, closes, volBottom);
       ShowTooltip(stockData, filteredDaysCandles);
-      ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Text);
+      ShowReferenceLine(stockData.prevClose,
+                        ymin - 1.0, ymax + 1.0, xs, Color::Text);
       ShowCrossHair(xs, ymin, ymax);
-
+      
       ImPlot::EndPlot();
     }
   }
+
   
   void Chart::DrawDashedHLine(double refValue, double xMin, double xMax, ImU32 color, float thickness, float dashLen, float gapLen)
   {
