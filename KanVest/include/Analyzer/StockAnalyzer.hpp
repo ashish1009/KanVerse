@@ -9,9 +9,11 @@
 
 #include "Stock/StockData.hpp"
 
+#include "Analyzer/Indicators/MovingAverage.hpp"
+
 namespace KanVest
 {
-  struct Recommendation
+  struct StockReport
   {
   };
 
@@ -20,6 +22,13 @@ namespace KanVest
   public:
     /// This function analyze stock from data
     /// - Parameter stockData: stock data
-    static Recommendation AnalzeStock(const StockData& stockData);
+    static StockReport AnalzeStock(const StockData& stockData);
+    
+    static const std::map<int, double>& GetDMA();
+    static const std::map<int, double>& GetEMA();
+
+  private:
+    inline static StockReport s_stockReport;
+    inline static MAResult s_maResults;
   };
 } // namespace KanVest

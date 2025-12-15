@@ -9,9 +9,20 @@
 
 namespace KanVest
 {
-  Recommendation Analyzer::AnalzeStock(const StockData& stockData)
+  StockReport Analyzer::AnalzeStock(const StockData& stockData)
   {
-    Recommendation result;
-    return result;
+    // Technical data
+    s_maResults = MovingAverage::Compute(stockData);
+    
+    return s_stockReport;
+  }
+  
+  const std::map<int, double>& Analyzer::GetDMA()
+  {
+    return s_maResults.dmaValues;
+  }
+  const std::map<int, double>& Analyzer::GetEMA()
+  {
+    return s_maResults.emaValues;
   }
 } // namespace KanVest

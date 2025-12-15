@@ -1,0 +1,31 @@
+//
+//  MovingAverage.hpp
+//  KanVest
+//
+//  Created by Ashish . on 15/12/25.
+//
+
+#pragma once
+
+#include "Stock/StockData.hpp"
+
+namespace KanVest
+{
+  struct MAResult
+  {
+    std::map<int, double> dmaValues;
+    std::map<int, double> emaValues;
+  };
+  
+  class MovingAverage
+  {
+  public:
+    static MAResult Compute(const StockData& data);
+    
+  private:
+    static std::vector<double> ComputeDMA(const std::vector<double>& closes, int period);
+    static std::vector<double> ComputeEMA(const std::vector<double>& closes, int period);
+    
+    friend class MACD;
+  };
+} // namespace KanVest

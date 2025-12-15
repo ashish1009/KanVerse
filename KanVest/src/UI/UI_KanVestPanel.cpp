@@ -14,6 +14,8 @@
 
 #include "Stock/StockManager.hpp"
 
+#include "Analyzer/StockAnalyzer.hpp"
+
 namespace KanVest::UI
 {
 #define Font(font) KanVest::UI::Font::Get(KanVest::UI::FontType::font)
@@ -56,7 +58,13 @@ namespace KanVest::UI
         
     // Get Stock selected data
     StockData stockData = StockManager::GetLatest(s_selectedStockSymbol);
-
+    
+    // Analyze stock
+    if (stockData.IsValid())
+    {
+      const auto& stockReport = Analyzer::AnalzeStock(stockData);
+    }
+    
     {
       KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Null);
       

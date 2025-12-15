@@ -9,6 +9,8 @@
 
 #include "UI/UI_Utils.hpp"
 
+#include "Analyzer/StockAnalyzer.hpp"
+
 namespace KanVest
 {
 #define Font(font) KanVest::UI::Font::Get(KanVest::UI::FontType::font)
@@ -23,6 +25,9 @@ namespace KanVest
       KanVasX::UI::Text(Font(Header_24), "No data for stock", Align::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
+    const auto& dmaData = Analyzer::GetDMA();
+    ShowMovingAverageData(stockData, dmaData, " SMA", shadowTexture);
+
   }
   void UI_MovingAverage::ShowEMA(const StockData& stockData, ImTextureID shadowTexture)
   {
@@ -31,9 +36,15 @@ namespace KanVest
       KanVasX::UI::Text(Font(Header_24), "No data for stock", Align::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
+    const auto& emaData = Analyzer::GetEMA();
+    ShowMovingAverageData(stockData, emaData, " EMA", shadowTexture);
   }
   
   void UI_MovingAverage::ShowMovingAverageData(const StockData& stockData, const std::map<int, double>& maMap, const std::string& maString, ImTextureID shadowTexture)
   {
+    for (const auto& [period, ma] : maMap)
+    {
+      ImGui::Text("%d, %f", period, ma);
+    }
   }
 } // namespace KanVest
