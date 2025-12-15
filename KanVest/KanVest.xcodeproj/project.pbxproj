@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B23D2D3C2EEED29300CCF7B2 /* StockAnalyzer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23D2D3B2EEED29300CCF7B2 /* StockAnalyzer.cpp */; };
+		B23D2D3F2EEED66900CCF7B2 /* UI_MovingAverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23D2D3E2EEED66900CCF7B2 /* UI_MovingAverage.cpp */; };
 		B26336CB2EDF29DC00D46F96 /* UI_Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */; };
 		B26336D32EDF2C6800D46F96 /* StockManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336D22EDF2C6800D46F96 /* StockManager.cpp */; };
 		B26336D62EDF2D2000D46F96 /* UI_KanVestPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336D52EDF2D2000D46F96 /* UI_KanVestPanel.cpp */; };
@@ -41,6 +42,8 @@
 /* Begin PBXFileReference section */
 		B23D2D3A2EEED29300CCF7B2 /* StockAnalyzer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockAnalyzer.hpp; sourceTree = "<group>"; };
 		B23D2D3B2EEED29300CCF7B2 /* StockAnalyzer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockAnalyzer.cpp; sourceTree = "<group>"; };
+		B23D2D3D2EEED66900CCF7B2 /* UI_MovingAverage.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_MovingAverage.hpp; sourceTree = "<group>"; };
+		B23D2D3E2EEED66900CCF7B2 /* UI_MovingAverage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_MovingAverage.cpp; sourceTree = "<group>"; };
 		B26336C92EDF29DC00D46F96 /* UI_Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Font.hpp; sourceTree = "<group>"; };
 		B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Font.cpp; sourceTree = "<group>"; };
 		B26336CE2EDF2B3900D46F96 /* StockData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockData.hpp; sourceTree = "<group>"; };
@@ -113,6 +116,7 @@
 				B26336E52EE83CE300D46F96 /* UI_Utils.hpp */,
 				B26336D42EDF2D2000D46F96 /* UI_KanVestPanel.hpp */,
 				B26336E82EE86BB000D46F96 /* UI_Chart.hpp */,
+				B23D2D3D2EEED66900CCF7B2 /* UI_MovingAverage.hpp */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -124,6 +128,7 @@
 				B26336E62EE83CE300D46F96 /* UI_Utils.cpp */,
 				B26336D52EDF2D2000D46F96 /* UI_KanVestPanel.cpp */,
 				B26336E92EE86BB000D46F96 /* UI_Chart.cpp */,
+				B23D2D3E2EEED66900CCF7B2 /* UI_MovingAverage.cpp */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -335,6 +340,7 @@
 				B26336D62EDF2D2000D46F96 /* UI_KanVestPanel.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B26336DE2EE04DDF00D46F96 /* APIProvider.cpp in Sources */,
+				B23D2D3F2EEED66900CCF7B2 /* UI_MovingAverage.cpp in Sources */,
 				B26336E12EE0519900D46F96 /* StockAPI.cpp in Sources */,
 				B26336D92EDF304500D46F96 /* StockUtils.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,

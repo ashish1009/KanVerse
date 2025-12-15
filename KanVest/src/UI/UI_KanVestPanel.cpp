@@ -10,6 +10,8 @@
 #include "UI/UI_Utils.hpp"
 #include "UI/UI_Chart.hpp"
 
+#include "UI/UI_MovingAverage.hpp"
+
 #include "Stock/StockManager.hpp"
 
 namespace KanVest::UI
@@ -252,11 +254,11 @@ namespace KanVest::UI
 
     if (tab == TechnicalTab::DMA)
     {
-//      UI_MovingAverage::ShowSMA(StockManager::GetSelectedStockData(), s_shadowTextureID);
+      UI_MovingAverage::ShowDMA(stockData, s_shadowTextureID);
     }
     else if (tab == TechnicalTab::EMA)
     {
-//      UI_MovingAverage::ShowEMA(StockManager::GetSelectedStockData(), s_shadowTextureID);
+      UI_MovingAverage::ShowEMA(stockData, s_shadowTextureID);
     }
   }
 } // namespace KanVest::UI
