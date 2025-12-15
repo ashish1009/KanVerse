@@ -19,25 +19,23 @@ namespace KanVest
   using Align = KanVasX::UI::AlignX;
   using Color = KanVasX::Color;
   
+  static float s_candleWidth = 4.0f;
+  static bool  s_stockChanged = false;
+
   static void GetTimeString(char* buf, size_t bufSize, uint64_t timestamp, const std::string& range)
   {
     if (bufSize == 0) return;
     
     time_t t = static_cast<time_t>(timestamp);
     struct tm tm{};
-    localtime_r(&t, &tm);   // Use IST instead of UTC
+    localtime_r(&t, &tm);
     
     size_t written = 0;
     if (range == "1d")
-    {
       written = std::strftime(buf, bufSize, "%I:%M %p", &tm);
-    }
     else
-    {
       written = std::strftime(buf, bufSize, "%Y-%m-%d %I:%M %p", &tm);
-    }
     
-    // Ensure null-termination in case strftime fails
     if (written == 0)
       buf[0] = '\0';
   }
@@ -55,42 +53,36 @@ namespace KanVest
     IK_PERFORMANCE_FUNC("Chart::PLotChart");
     
     if (!stockData.IsValid())
-    {
-      KanVasX::UI::Text(Font(Header_24), "No Chart Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
       return;
-    }
     
     const auto& candleHistory = stockData.candleHistory;
     if (candleHistory.empty())
-    {
-      KanVasX::UI::Text(Font(Header_24), "No Candle Data Available !!", KanVasX::UI::AlignX::Left, {10.0f, 0.0f}, Color::Error);
       return;
-    }
     
     static std::string s_lastSymbol;
     static std::string s_lastRange;
     static std::string s_lastInterval;
-    s_stockChanged = (s_lastSymbol != stockData.symbol) or (s_lastRange != stockData.range) or (s_lastInterval != stockData.dataGranularity);
+    
+    s_stockChanged =
+    s_lastSymbol   != stockData.symbol ||
+    s_lastRange    != stockData.range ||
+    s_lastInterval != stockData.dataGranularity;
+    
     if (s_stockChanged)
     {
-      s_lastSymbol = stockData.symbol;
-      s_lastRange = stockData.range;
+      s_lastSymbol   = stockData.symbol;
+      s_lastRange    = stockData.range;
       s_lastInterval = stockData.dataGranularity;
     }
     
-    std::vector<CandleData> filteredDaysCandles = Utils::FilterTradingDays(candleHistory);
+    std::vector<CandleData> filteredDaysCandles =
+    Utils::FilterTradingDays(candleHistory);
     
     std::vector<double> xs, opens, highs, lows, closes, volumes;
-    xs.reserve(filteredDaysCandles.size());
-    opens.reserve(filteredDaysCandles.size());
-    highs.reserve(filteredDaysCandles.size());
-    lows.reserve(filteredDaysCandles.size());
-    closes.reserve(filteredDaysCandles.size());
-    volumes.reserve(filteredDaysCandles.size());
     
     double ymin = DBL_MAX;
     double ymax = -DBL_MAX;
-    double maxVolume = 0.0;
+    double maxVolume = 1.0;
     
     for (size_t i = 0; i < filteredDaysCandles.size(); ++i)
     {
@@ -107,29 +99,18 @@ namespace KanVest
       ymax = std::max(ymax, c.high);
       maxVolume = std::max(maxVolume, (double)c.volume);
     }
-
+    
     ymin = std::min(ymin, stockData.prevClose);
     ymax = std::max(ymax, stockData.prevClose);
-
-    // Add padding
-#if 0
-    double yRange = ymax - ymin;
-    double padding = yRange * 0.1; // 5% padding
-    ymin -= padding;
-    ymax += padding;
-#endif
     
     double volBottom = ymin;
-    double volTop    = ymin + (ymax - ymin) * 0.22;
+    double volTop = ymin + (ymax - ymin) * 0.22;
     
     std::vector<double> volumeY;
-    volumeY.reserve(volumes.size());
     for (double v : volumes)
-    {
-      double t = v / maxVolume;
-      volumeY.push_back(volBottom + t * (volTop - volBottom));
-    }
+      volumeY.push_back(volBottom + (v / maxVolume) * (volTop - volBottom));
     
+    /* ---------------- X AXIS LABELS (UNCHANGED) ---------------- */
     std::vector<std::string> labelStrings;
     std::vector<const char*> labelPtrs;
     std::vector<double> labelPositions;
@@ -147,41 +128,44 @@ namespace KanVest
     }
     
     for (auto& s : labelStrings)
-    {
       labelPtrs.push_back(s.c_str());
-    }
-    
-    KanVasX::ScopedColor ChartBg(ImGuiCol_WindowBg, Color::Null);
-    KanVasX::ScopedColor ChartBorderBg(ImGuiCol_FrameBg, Color::Background);
-    KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::Background);
     
     static const auto ChartFlag =
     ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
     
-    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ChartFlag))
+    if (ImPlot::BeginPlot(
+                          "##StockPlot",
+                          ImVec2(ImGui::GetContentRegionAvail().x,
+                                 ImGui::GetContentRegionAvail().y),
+                          ChartFlag))
     {
       const double xMin = 0.0;
       const double xMax = (double)xs.size() - 1.0;
       
-      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_LockMin | ImPlotAxisFlags_LockMax);
+      ImPlot::SetupAxes("", "",
+                        ImPlotAxisFlags_NoGridLines,
+                        ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_LockMin | ImPlotAxisFlags_LockMax);
       
       ImGuiCond cond = s_stockChanged ? ImGuiCond_Always : ImGuiCond_Once;
       
       ImPlot::SetupAxisLimits(ImAxis_X1, xMin, xMax, cond);
       ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, cond);
-
+      
       ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, xMin, xMax);
       ImPlot::SetupAxisLimitsConstraints(ImAxis_Y1, ymin, ymax);
       
       if (!labelPositions.empty())
       {
-        ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), (int)labelPositions.size(), labelPtrs.data());
+        ImPlot::SetupAxisTicks(
+                               ImAxis_X1,
+                               labelPositions.data(),
+                               (int)labelPositions.size(),
+                               labelPtrs.data());
       }
-
-      // Compute candle width
+      
+      /* ---------------- FIX #1 : SAFE CANDLE WIDTH ---------------- */
       ComputeCandleWidth(xs);
       
-      // -------- PRICE --------
       switch (s_plotType)
       {
         case PlotType::Line:
@@ -196,27 +180,34 @@ namespace KanVest
       
       ShowVolumes(xs, volumeY, opens, closes, volBottom);
       ShowTooltip(stockData, filteredDaysCandles);
-      ShowReferenceLine(stockData.prevClose, ymin - 1.0, ymax + 1.0, xs, Color::Text);
+      ShowReferenceLine(stockData.prevClose, ymin, ymax, xs, Color::Text);
       ShowCrossHair(xs, ymin, ymax);
       
       ImPlot::EndPlot();
     }
   }
-  
+
   void Chart::ComputeCandleWidth(const std::vector<double>& xs)
   {
-    ImPlotRect limits = ImPlot::GetPlotLimits();
-    ImVec2 plotSize = ImPlot::GetPlotSize();
+    if (xs.size() < 2)
+    {
+      s_candleWidth = 4.0f;
+      return;
+    }
     
-    double xRange = limits.X.Max - limits.X.Min;
-    float pixelsPerX = plotSize.x / (float)xRange;
+    // Measure actual pixel spacing between two adjacent candles
+    ImVec2 p0 = ImPlot::PlotToPixels(xs[0], 0.0);
+    ImVec2 p1 = ImPlot::PlotToPixels(xs[1], 0.0);
     
-    double dx = (xs.size() > 1) ? (xs[1] - xs[0]) : 1.0;
-    s_candleWidth = (float)(dx * pixelsPerX) * 0.5f;
+    float pixelSpacing = fabsf(p1.x - p0.x);
     
-    // Optional clamp
-    s_candleWidth = ImClamp(s_candleWidth, 1.0f, 50.0f);
+    // Candle width = fraction of spacing
+    s_candleWidth = pixelSpacing * 0.35f;
+    
+    // Hard safety clamp
+    s_candleWidth = ImClamp(s_candleWidth, 1.0f, 20.0f);
   }
+
 
   void Chart::DrawDashedHLine(double refValue, double xMin, double xMax, ImU32 color, float thickness, float dashLen, float gapLen)
   {
@@ -279,41 +270,55 @@ namespace KanVest
     ImPlot::PlotLine("", xs.data(), closes.data(), static_cast<int>(xs.size()));
   }
 
-  void Chart::ShowCandlePlot(const StockData &stockData,
+  void Chart::ShowCandlePlot(const StockData&,
                              const std::vector<double>& xs,
                              const std::vector<double>& closes,
                              const std::vector<double>& opens,
                              const std::vector<double>& highs,
                              const std::vector<double>& lows)
   {
-    // Transparent plot line
     ImVec4 col4 = ImGui::ColorConvertU32ToFloat4(Color::Null);
     ImPlot::SetNextLineStyle(col4, 2.0f);
-    ImPlot::PlotLine("", xs.data(), closes.data(), static_cast<int>(xs.size()));
-
-    ImDrawList* drawList = ImPlot::GetPlotDrawList();
+    ImPlot::PlotLine("", xs.data(), closes.data(), (int)xs.size());
+    
+    ImDrawList* dl = ImPlot::GetPlotDrawList();
+    
+    ImPlotRect plot = ImPlot::GetPlotLimits();
+    ImVec2 plotMin = ImPlot::PlotToPixels(plot.Min());
+    ImVec2 plotMax = ImPlot::PlotToPixels(plot.Max());
+    
     for (size_t i = 0; i < xs.size(); ++i)
     {
-      ImU32 color = (closes[i] >= opens[i]) ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
+      ImU32 color = (closes[i] >= opens[i])
+      ? UI::Utils::StockProfitColor
+      : UI::Utils::StockLossColor;
       
-      ImVec2 pHigh  = ImPlot::PlotToPixels(ImPlotPoint(xs[i], highs[i]));
-      ImVec2 pLow   = ImPlot::PlotToPixels(ImPlotPoint(xs[i], lows[i]));
-      ImVec2 pOpen  = ImPlot::PlotToPixels(ImPlotPoint(xs[i], opens[i]));
-      ImVec2 pClose = ImPlot::PlotToPixels(ImPlotPoint(xs[i], closes[i]));
+      ImVec2 pHigh  = ImPlot::PlotToPixels(xs[i], highs[i]);
+      ImVec2 pLow   = ImPlot::PlotToPixels(xs[i], lows[i]);
+      ImVec2 pOpen  = ImPlot::PlotToPixels(xs[i], opens[i]);
+      ImVec2 pClose = ImPlot::PlotToPixels(xs[i], closes[i]);
       
-      // Wick
-      drawList->AddLine(pLow, pHigh, IM_COL32(200, 200, 200, 255));
+      dl->AddLine(pLow, pHigh, IM_COL32(200,200,200,255));
+      
+      float left  = pOpen.x - s_candleWidth;
+      float right = pOpen.x + s_candleWidth;
+      
+      if (right < plotMin.x || left > plotMax.x)
+        continue;
+      
+      left  = std::max(left,  plotMin.x);
+      right = std::min(right, plotMax.x);
       
       float top = std::min(pOpen.y, pClose.y);
-      float bottom = std::max(pOpen.y, pClose.y);
-      float cx = pOpen.x;
+      float bot = std::max(pOpen.y, pClose.y);
       
-      // Filled body and border
-      drawList->AddRectFilled(ImVec2(cx - s_candleWidth, top), ImVec2(cx + s_candleWidth, bottom), color);
-      drawList->AddRect(ImVec2(cx - s_candleWidth, top), ImVec2(cx + s_candleWidth, bottom), IM_COL32(40, 40, 40, 255));
+      dl->AddRectFilled(ImVec2(left, top),
+                        ImVec2(right, bot), color);
+      dl->AddRect(ImVec2(left, top),
+                  ImVec2(right, bot), IM_COL32(40,40,40,255));
     }
   }
-  
+
   void Chart::ShowCrossHair(const std::vector<double>& xs, double ymin, double ymax)
   {
     if (!ImPlot::IsPlotHovered())
