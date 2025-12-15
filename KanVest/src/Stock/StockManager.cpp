@@ -30,67 +30,92 @@ namespace KanVest
     }
   }
 
-  void StockManager::AddRequest(const std::string& symbol, Range range, Interval interval)
+  void StockManager::AddStockDataRequest(const std::string& symbol, Range range, Interval interval)
   {
     std::scoped_lock lock(s_mutex);
-    s_requests[symbol] = { symbol, range, interval, StockData(symbol), std::chrono::steady_clock::now() };
+    s_stockDataRequests[symbol] = { symbol, range, interval, StockData(symbol), std::chrono::steady_clock::now() };
+  }
+  void StockManager::AddStockAnalyzerRequest(const std::string& symbol, Range range, Interval interval)
+  {
+    std::scoped_lock lock(s_mutex);
+    s_stockAnalyzerRequests[symbol] = { symbol, range, interval, StockData(symbol), std::chrono::steady_clock::now() };
   }
 
-  StockData StockManager::GetLatest(const std::string &symbol)
+  StockData StockManager::GetLatestStockData(const std::string &symbol)
   {
     std::scoped_lock lock(s_mutex);
 
     // Return Empty Stock if no cache is present
-    if (s_requests.count(symbol) == 0)
+    if (s_stockDataRequests.count(symbol) == 0)
     {
       static StockData EmptyStockData;
       return EmptyStockData;
     }
 
     // Return data from cache
-    return s_requests[symbol].cachedData;
+    return s_stockDataRequests[symbol].cachedData;
   }
-  
+
+  StockData StockManager::GetLatestStockAnalyzerData(const std::string &symbol)
+  {
+    std::scoped_lock lock(s_mutex);
+    
+    // Return Empty Stock if no cache is present
+    if (s_stockAnalyzerRequests.count(symbol) == 0)
+    {
+      static StockData EmptyStockData;
+      return EmptyStockData;
+    }
+    
+    // Return data from cache
+    return s_stockAnalyzerRequests[symbol].cachedData;
+  }
+
   void StockManager::WorkerLoop()
   {
     while (s_running)
     {
-      std::vector<std::tuple<std::string, Range, Interval>> jobs;
-      
-      {
-        // Copy work out quickly
-        std::scoped_lock lock(s_mutex);
-        for (auto& [symbol, req] : s_requests)
+      auto UpdateStockData = [](std::unordered_map<std::string, StockRequest>& data) {
+        std::vector<std::tuple<std::string, Range, Interval>> jobs;
+        
         {
-          jobs.emplace_back(symbol, req.range, req.interval);
-        }
-      }
-      
-      // Store futures to avoid [[nodiscard]] warning ---
-      std::vector<std::future<void>> futures;
-      futures.reserve(jobs.size());
-      
-      // Launch one async fetch per symbol
-      for (auto& [symbol, range, interval] : jobs)
-      {
-        futures.emplace_back(std::async(std::launch::async, [symbol, range, interval]()
-                                        {
-          StockData newData = Fetch(symbol, range, interval);
-          
-          // Update cached data
+          // Copy work out quickly
+          std::scoped_lock lock(s_mutex);
+          for (auto& [symbol, req] : data)
           {
-            std::scoped_lock lock(s_mutex);
-            if (auto it = s_requests.find(symbol); it != s_requests.end())
-            {
-              it->second.cachedData = newData;
-            }
+            jobs.emplace_back(symbol, req.range, req.interval);
           }
-        }));
-      }
+        }
+        
+        // Store futures to avoid [[nodiscard]] warning ---
+        std::vector<std::future<void>> futures;
+        futures.reserve(jobs.size());
+        
+        // Launch one async fetch per symbol
+        for (auto& [symbol, range, interval] : jobs)
+        {
+          futures.emplace_back(std::async(std::launch::async, [symbol, range, interval, &data]()
+                                          {
+            StockData newData = Fetch(symbol, range, interval);
+            
+            // Update cached data
+            {
+              std::scoped_lock lock(s_mutex);
+              if (auto it = data.find(symbol); it != data.end())
+              {
+                it->second.cachedData = newData;
+              }
+            }
+          }));
+        }
+        
+        // Futures go out of scope → destructor waits or is fire-and-forget
+        // (std::launch::async ensures the task runs)
+        std::this_thread::sleep_for(std::chrono::milliseconds(s_updateDelayMs.load()));
+      };
       
-      // Futures go out of scope → destructor waits or is fire-and-forget
-      // (std::launch::async ensures the task runs)
-      std::this_thread::sleep_for(std::chrono::milliseconds(s_updateDelayMs.load()));
+      UpdateStockData(s_stockDataRequests);
+      UpdateStockData(s_stockAnalyzerRequests);
     }
   }
 

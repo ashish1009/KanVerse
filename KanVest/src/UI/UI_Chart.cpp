@@ -19,9 +19,6 @@ namespace KanVest
   using Align = KanVasX::UI::AlignX;
   using Color = KanVasX::Color;
   
-  static float s_candleWidth = 4.0f;
-  static bool  s_stockChanged = false;
-
   static void GetTimeString(char* buf, size_t bufSize, uint64_t timestamp, const std::string& range)
   {
     if (bufSize == 0) return;
@@ -428,7 +425,7 @@ namespace KanVest
         if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
         {
           const auto& validInterval = API_Provider::GetValidIntervalForRange(API_Provider::GetRangeFromString(range));
-          StockManager::AddRequest(stockData.symbol, API_Provider::GetRangeFromString(range), validInterval);
+          StockManager::AddStockDataRequest(stockData.symbol, API_Provider::GetRangeFromString(range), validInterval);
         }
       }
     }
@@ -464,7 +461,7 @@ namespace KanVest
         
         if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
         {
-          StockManager::AddRequest(stockData.symbol, API_Provider::GetRangeFromString(stockData.range), API_Provider::GetIntervalFromString(interval));
+          StockManager::AddStockDataRequest(stockData.symbol, API_Provider::GetRangeFromString(stockData.range), API_Provider::GetIntervalFromString(interval));
         }
         ImGui::SameLine();
       }

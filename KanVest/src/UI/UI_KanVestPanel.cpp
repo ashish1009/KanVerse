@@ -26,7 +26,8 @@ namespace KanVest::UI
   void Panel::Initialize()
   {
     s_selectedStockSymbol = "Nifty";
-    StockManager::AddRequest(s_selectedStockSymbol, Range::_1D, Interval::_2M);
+    StockManager::AddStockDataRequest(s_selectedStockSymbol, Range::_1D, Interval::_2M);
+    StockManager::AddStockAnalyzerRequest(s_selectedStockSymbol, Range::_1Y, Interval::_1D);
   }
   
   void Panel::SetShadowTextureId(ImTextureID shadowTextureID)
@@ -55,19 +56,26 @@ namespace KanVest::UI
     IK_PERFORMANCE_FUNC("Panel::Show");
     
     ImGui::Begin("Stock Analyzer");
-        
-    // Get Stock selected data
-    StockData stockData = StockManager::GetLatest(s_selectedStockSymbol);
-    
-    // Analyze stock
-    if (stockData.IsValid())
+
+    // Stock Analyzer 
     {
-      const auto& stockReport = Analyzer::AnalzeStock(stockData);
+      // Get Stock selected data
+      StockData stockAnalyzeData = StockManager::GetLatestStockAnalyzerData(s_selectedStockSymbol);
+      
+      // Analyze stock
+      if (stockAnalyzeData.IsValid())
+      {
+        const auto& stockReport = Analyzer::AnalzeStock(stockAnalyzeData);
+      }
     }
     
+    // Stock Data UI
     {
       KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Null);
-      
+    
+      // Get Stock selected data
+      StockData stockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
+
       // Top Half : Stock Data Analyzer ----------------------------------------------------------------------------------------------------------
       ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.55f));
       {
@@ -132,7 +140,8 @@ namespace KanVest::UI
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
       s_selectedStockSymbol = s_searchedStockString;
-      StockManager::AddRequest(s_selectedStockSymbol, Range::_1D, API_Provider::GetValidIntervalForRange(Range::_1D));
+      StockManager::AddStockDataRequest(s_selectedStockSymbol, Range::_1D, API_Provider::GetValidIntervalForRange(Range::_1D));
+      StockManager::AddStockAnalyzerRequest(s_selectedStockSymbol, Range::_1Y, Interval::_1D);
     }
   }
   
