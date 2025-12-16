@@ -405,6 +405,12 @@ namespace KanVest
       return;
     }
     
+    KanVasX::ScopedColor FrameBgHovered(ImGuiCol_FrameBg, Color::Background);
+    KanVasX::ScopedColor FrameBg(ImGuiCol_FrameBgHovered, Color::BackgroundLight);
+    
+    KanVasX::ScopedColor Button(ImGuiCol_Button, Color::Background);
+    KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::BackgroundLight);
+    
     // Range controller
     {
       for (const auto& range : API_Provider::GetValidRanges())
@@ -425,13 +431,6 @@ namespace KanVest
     
     // Plot type selector
     {
-      KanVasX::ScopedColor FrameBgHovered(ImGuiCol_FrameBg, Color::Background);
-      KanVasX::ScopedColor FrameBg(ImGuiCol_FrameBgHovered, Color::BackgroundLight);
-      
-      KanVasX::ScopedColor Button(ImGuiCol_Button, Color::Background);
-      KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::BackgroundLight);
-      
-      // Chart Type
       int32_t currentPlotType = (int32_t)s_plotType;
       static std::vector<std::string> options = {"Line", "Candle"};
       
@@ -447,6 +446,47 @@ namespace KanVest
     KanVasX::UI::ShiftCursorX(10.0f);
     {
       ImGui::Checkbox("Show DMA", &s_showDMA);
+      
+      if (s_showDMA)
+      {
+        ImGui::SameLine();
+
+        static int32_t currentDMAPeriod = 0;
+        static std::vector<std::string> possibleDMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200"};
+        
+        ImGui::SetNextItemWidth(100.0f);
+        if (KanVasX::UI::DropMenu("##DMAPeriod", possibleDMAPeriods, &currentDMAPeriod))
+        {
+          s_DMAPeriod = std::stoi(possibleDMAPeriods[currentDMAPeriod]);
+        }
+        
+        ImGui::SameLine();
+        ImGui::PushID("DMAColor");
+        
+        KanVasX::UI::ShiftCursorY(3.0f);
+        ImGui::ColorButton(
+                           "##DMAColorBtn",
+                           ImVec4(s_DMAColor.r, s_DMAColor.g, s_DMAColor.b, s_DMAColor.a),
+                           ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop,
+                           ImVec2(18, 18) // small square
+                           );
+        
+        if (ImGui::IsItemClicked())
+          ImGui::OpenPopup("DMAColorPicker");
+        
+        if (ImGui::BeginPopup("DMAColorPicker"))
+        {
+          ImGui::ColorPicker4(
+                              "##DMAColorPicker",
+                              glm::value_ptr(s_DMAColor),
+                              ImGuiColorEditFlags_NoSidePreview |
+                              ImGuiColorEditFlags_NoSmallPreview
+                              );
+          ImGui::EndPopup();
+        }
+        
+        ImGui::PopID();
+      }
     }
     
     // Interval Controller
@@ -471,14 +511,9 @@ namespace KanVest
   void Chart::ShowDMA(const StockData &stockData, const std::vector<double> &xs)
   {
     const auto& dmaMap = Analyzer::GetDMAValues();
-    if (auto itr = dmaMap.find(5); itr != dmaMap.end())
+    if (auto itr = dmaMap.find(s_DMAPeriod); itr != dmaMap.end())
     {
-      const std::vector<double> dmaValues = dmaMap.at(5);
-      
-      double priceChange = stockData.livePrice - stockData.prevClose;
-      ImU32 color = priceChange > 0 ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
-      
-      ImVec4 col4 = ImGui::ColorConvertU32ToFloat4(color);
+      ImVec4 col4 = {s_DMAColor.r, s_DMAColor.g, s_DMAColor.b, s_DMAColor.a};
       ImPlot::SetNextLineStyle(col4, 2.0f);
       ImPlot::PlotLine("", xs.data(), itr->second.data(), static_cast<int>(xs.size()));
     }

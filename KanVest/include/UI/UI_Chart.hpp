@@ -57,5 +57,7 @@ namespace KanVest
     
     // Technicals
     inline static bool s_showDMA = false;
+    inline static int s_DMAPeriod = 5;
+    inline static glm::vec4 s_DMAColor = {0.8, 0.4, 0.1, 1.0};
   };
 } // namespace KanVest
