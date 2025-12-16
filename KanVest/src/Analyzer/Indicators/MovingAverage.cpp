@@ -38,10 +38,10 @@ namespace KanVest
     
     for (int p : periods)
     {
-      auto sma = ComputeDMA(dailyCloses, p);
+      auto dma = ComputeDMA(dailyCloses, p);
       auto ema = ComputeEMA(dailyCloses, p);
       
-      result.dmaValues[p] = sma.back();
+      result.dmaValues[p] = dma.back();
       result.emaValues[p] = ema.back();
     }
     
@@ -50,9 +50,9 @@ namespace KanVest
   
   std::vector<double> MovingAverage::ComputeDMA(const std::vector<double>& closes, int period)
   {
-    std::vector<double> sma(closes.size(), 0.0);
+    std::vector<double> dma(closes.size(), 0.0);
     if (closes.size() < static_cast<size_t>(period))
-      return sma;
+      return dma;
     
     double sum = 0.0;
     for (size_t i = 0; i < closes.size(); ++i)
@@ -61,10 +61,10 @@ namespace KanVest
       if (i >= static_cast<size_t>(period))
         sum -= closes[i - period];
       if (i >= static_cast<size_t>(period - 1))
-        sma[i] = sum / period;
+        dma[i] = sum / period;
     }
     
-    return sma;
+    return dma;
   }
   std::vector<double> MovingAverage::ComputeEMA(const std::vector<double>& closes, int period)
   {

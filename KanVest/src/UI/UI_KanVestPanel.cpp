@@ -57,7 +57,7 @@ namespace KanVest::UI
     
     ImGui::Begin("Stock Analyzer");
 
-    // Stock Analyzer 
+    // Stock Analyzer
     {
       // Get Stock selected data
       StockData stockAnalyzeData = StockManager::GetLatestStockAnalyzerData(s_selectedStockSymbol);
@@ -252,12 +252,12 @@ namespace KanVest::UI
     static TechnicalTab tab = TechnicalTab::DMA;
 
     float availX = ImGui::GetContentRegionAvail().x;
-    float technicalButtonSize = (availX / (uint32_t)TechnicalTab::Max) - 2.0f;
+    float technicalButtonSize = (availX / (uint32_t)TechnicalTab::Max) - 12.0f;
 
     auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab, const std::string& tooltip)
     {
       const auto& buttonColor = tab == checkerTtab ? Color::Value(Color::Background, 1.0f) : Color::BackgroundDark;
-      if (KanVasX::UI::DrawButton(title, Font(Medium), buttonColor, Color::TextBright, false, 5.0f, {technicalButtonSize, 30}))
+      if (KanVasX::UI::DrawButton(title, Font(Medium), buttonColor, Color::TextBright, false, 10.0f, {technicalButtonSize, 30}))
       {
         tab = checkerTtab;
       }
@@ -265,9 +265,9 @@ namespace KanVest::UI
       KanVasX::UI::DrawItemActivityOutline();
     };
 
-    KanVasX::UI::ShiftCursor({2.0f, 1.0f});
+    KanVasX::UI::ShiftCursor({2.0f, 5.0f});
     TechnicalButton("DMA", TechnicalTab::DMA, "Daily Moving Average"); ImGui::SameLine();
-    TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average"); ImGui::SameLine();
+    TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average");
 
     if (tab == TechnicalTab::DMA)
     {
