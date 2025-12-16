@@ -35,11 +35,6 @@ namespace KanVest
     std::scoped_lock lock(s_mutex);
     s_stockDataRequests[symbol] = { symbol, range, interval, StockData(symbol), std::chrono::steady_clock::now() };
   }
-  void StockManager::AddStockAnalyzerRequest(const std::string& symbol, Range range, Interval interval)
-  {
-    std::scoped_lock lock(s_mutex);
-    s_stockAnalyzerRequests[symbol] = { symbol, range, interval, StockData(symbol), std::chrono::steady_clock::now() };
-  }
 
   StockData StockManager::GetLatestStockData(const std::string &symbol)
   {
@@ -54,21 +49,6 @@ namespace KanVest
 
     // Return data from cache
     return s_stockDataRequests[symbol].cachedData;
-  }
-
-  StockData StockManager::GetLatestStockAnalyzerData(const std::string &symbol)
-  {
-    std::scoped_lock lock(s_mutex);
-    
-    // Return Empty Stock if no cache is present
-    if (s_stockAnalyzerRequests.count(symbol) == 0)
-    {
-      static StockData EmptyStockData;
-      return EmptyStockData;
-    }
-    
-    // Return data from cache
-    return s_stockAnalyzerRequests[symbol].cachedData;
   }
 
   void StockManager::WorkerLoop()
@@ -115,7 +95,6 @@ namespace KanVest
       };
       
       UpdateStockData(s_stockDataRequests);
-      UpdateStockData(s_stockAnalyzerRequests);
     }
   }
 

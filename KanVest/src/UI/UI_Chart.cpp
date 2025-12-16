@@ -50,21 +50,15 @@ namespace KanVest
     IK_PERFORMANCE_FUNC("Chart::PLotChart");
     
     if (!stockData.IsValid())
+    {
+      KanVasX::UI::Text(Font(Header_24), "No Chart available for stock", Align::Left, {20.0f, 10.0f}, Color::Error);
       return;
+    }
     
     const auto& candleHistory = stockData.candleHistory;
-    if (candleHistory.empty())
-      return;
     
-    static std::string s_lastSymbol;
-    static std::string s_lastRange;
-    static std::string s_lastInterval;
-    
-    s_stockChanged =
-    s_lastSymbol   != stockData.symbol ||
-    s_lastRange    != stockData.range ||
-    s_lastInterval != stockData.dataGranularity;
-    
+    // Update if stock is changed
+    s_stockChanged = s_lastSymbol != stockData.symbol || s_lastRange != stockData.range || s_lastInterval != stockData.dataGranularity;
     if (s_stockChanged)
     {
       s_lastSymbol   = stockData.symbol;
@@ -72,9 +66,7 @@ namespace KanVest
       s_lastInterval = stockData.dataGranularity;
     }
     
-    std::vector<CandleData> filteredDaysCandles =
-    Utils::FilterTradingDays(candleHistory);
-    
+    std::vector<CandleData> filteredDaysCandles = Utils::FilterTradingDays(candleHistory);
     std::vector<double> xs, opens, highs, lows, closes, volumes;
     
     double ymin = DBL_MAX;
@@ -105,9 +97,10 @@ namespace KanVest
     
     std::vector<double> volumeY;
     for (double v : volumes)
+    {
       volumeY.push_back(volBottom + (v / maxVolume) * (volTop - volBottom));
+    }
     
-    /* ---------------- X AXIS LABELS (UNCHANGED) ---------------- */
     std::vector<std::string> labelStrings;
     std::vector<const char*> labelPtrs;
     std::vector<double> labelPositions;
@@ -125,23 +118,17 @@ namespace KanVest
     }
     
     for (auto& s : labelStrings)
+    {
       labelPtrs.push_back(s.c_str());
+    }
     
-    static const auto ChartFlag =
-    ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
-    
-    if (ImPlot::BeginPlot(
-                          "##StockPlot",
-                          ImVec2(ImGui::GetContentRegionAvail().x,
-                                 ImGui::GetContentRegionAvail().y),
-                          ChartFlag))
+    static const auto ChartFlag = ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
+    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ChartFlag))
     {
       const double xMin = 0.0;
       const double xMax = (double)xs.size() - 1.0;
       
-      ImPlot::SetupAxes("", "",
-                        ImPlotAxisFlags_NoGridLines,
-                        ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_LockMin | ImPlotAxisFlags_LockMax);
+      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_LockMin | ImPlotAxisFlags_LockMax);
       
       ImGuiCond cond = s_stockChanged ? ImGuiCond_Always : ImGuiCond_Once;
       
@@ -153,14 +140,10 @@ namespace KanVest
       
       if (!labelPositions.empty())
       {
-        ImPlot::SetupAxisTicks(
-                               ImAxis_X1,
-                               labelPositions.data(),
-                               (int)labelPositions.size(),
-                               labelPtrs.data());
+        ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), (int)labelPositions.size(), labelPtrs.data());
       }
       
-      /* ---------------- FIX #1 : SAFE CANDLE WIDTH ---------------- */
+      // Compute candle width based on zoom size
       ComputeCandleWidth(xs);
       
       switch (s_plotType)

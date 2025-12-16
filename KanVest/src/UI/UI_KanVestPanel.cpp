@@ -27,7 +27,6 @@ namespace KanVest::UI
   {
     s_selectedStockSymbol = "Nifty";
     StockManager::AddStockDataRequest(s_selectedStockSymbol, Range::_1D, Interval::_2M);
-    StockManager::AddStockAnalyzerRequest(s_selectedStockSymbol, Range::_1Y, Interval::_1D);
   }
   
   void Panel::SetShadowTextureId(ImTextureID shadowTextureID)
@@ -57,15 +56,15 @@ namespace KanVest::UI
     
     ImGui::Begin("Stock Analyzer");
 
+    // Get Stock selected data
+    StockData stockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
+
     // Stock Analyzer
     {
-      // Get Stock selected data
-      StockData stockAnalyzeData = StockManager::GetLatestStockAnalyzerData(s_selectedStockSymbol);
-      
       // Analyze stock
-      if (stockAnalyzeData.IsValid())
+      if (stockData.IsValid())
       {
-        const auto& stockReport = Analyzer::AnalzeStock(stockAnalyzeData);
+        const auto& stockReport = Analyzer::AnalzeStock(stockData);
       }
     }
     
@@ -73,9 +72,6 @@ namespace KanVest::UI
     {
       KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Null);
     
-      // Get Stock selected data
-      StockData stockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
-
       // Top Half : Stock Data Analyzer ----------------------------------------------------------------------------------------------------------
       ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.55f));
       {
@@ -141,7 +137,6 @@ namespace KanVest::UI
     {
       s_selectedStockSymbol = s_searchedStockString;
       StockManager::AddStockDataRequest(s_selectedStockSymbol, Range::_1D, API_Provider::GetValidIntervalForRange(Range::_1D));
-      StockManager::AddStockAnalyzerRequest(s_selectedStockSymbol, Range::_1Y, Interval::_1D);
     }
   }
   
@@ -245,14 +240,11 @@ namespace KanVest::UI
       return;
     }
 
-    KanVasX::UI::DrawFilledRect(Color::Alpha(Color::Value(Color::Background, 2.0f), 0.2f), 35.0f);
-    KanVasX::UI::Text(Font(Header_26), "Technicals", Align::Center, {0.0f, 2.0f});
-    
     enum class TechnicalTab {DMA, EMA, Max};
     static TechnicalTab tab = TechnicalTab::DMA;
 
     float availX = ImGui::GetContentRegionAvail().x;
-    float technicalButtonSize = (availX / (uint32_t)TechnicalTab::Max) - 12.0f;
+    float technicalButtonSize = (availX / (uint32_t)TechnicalTab::Max) - 10.0f;
 
     auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab, const std::string& tooltip)
     {

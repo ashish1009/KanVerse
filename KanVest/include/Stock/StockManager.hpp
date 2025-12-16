@@ -37,21 +37,11 @@ namespace KanVest
     ///   - range: range of stock fetch
     ///   - interval: interval of stock fetch
     static void AddStockDataRequest(const std::string& symbol, Range range, Interval interval);
-    /// This function adds the request for stock
-    /// - Parameters:
-    ///   - symbol: stock symbpl
-    ///   - range: range of stock fetch
-    ///   - interval: interval of stock fetch
-    static void AddStockAnalyzerRequest(const std::string& symbol, Range range, Interval interval);
     
     /// This function returns the stock data for symbol
     /// - Parameters:
     ///   - symbol: stock symbpl
     [[nodiscard("Stock Data can not be discarded")]] static StockData GetLatestStockData(const std::string& symbol);
-    /// This function returns the stock data for symbol
-    /// - Parameters:
-    ///   - symbol: stock symbpl
-    [[nodiscard("Stock Data can not be discarded")]] static StockData GetLatestStockAnalyzerData(const std::string& symbol);
 
   private:
     /// This is worker loop
@@ -68,7 +58,6 @@ namespace KanVest
     static std::string FetchStockFallbackData(const std::string& symbol, Range range, Interval interval, const APIKeys& keys);
     
     inline static std::unordered_map<std::string, StockRequest> s_stockDataRequests;
-    inline static std::unordered_map<std::string, StockRequest> s_stockAnalyzerRequests;
     inline static std::mutex s_mutex;
     inline static std::atomic<bool> s_running = false;
     inline static std::thread s_worker;

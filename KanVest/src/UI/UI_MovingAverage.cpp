@@ -74,7 +74,7 @@ namespace KanVest
       
       float fraction = (float)bullish / (float)total;
       KanVasX::UI::ShiftCursorX(10.0f);
-      ImGui::ProgressBar(fraction, ImVec2(ImGui::GetContentRegionAvail().x - 20.0f, 0), " ");
+      ImGui::ProgressBar(fraction, ImVec2(ImGui::GetContentRegionAvail().x - 10.0f, 0), " ");
     }
     
     auto ShowSma = [stockData](int period, double ma) {
@@ -89,7 +89,7 @@ namespace KanVest
       }
     };
 
-    ImVec2 maChildSize = {(ImGui::GetContentRegionAvail().x * 0.4f), 140.0f};
+    ImVec2 maChildSize = {(ImGui::GetContentRegionAvail().x * 0.485f), 140.0f};
 
     int idx = 0;
     bool allChildEnded = true;
