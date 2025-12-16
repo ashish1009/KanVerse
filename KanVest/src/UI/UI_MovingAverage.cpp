@@ -25,8 +25,8 @@ namespace KanVest
       KanVasX::UI::Text(Font(Header_24), "No data for stock", Align::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
-    const auto& dmaData = Analyzer::GetDMA();
-    ShowMovingAverageData(stockData, dmaData, " SMA", shadowTexture);
+    const auto& dmaValues = Analyzer::GetDMAValues();
+    ShowMovingAverageData(stockData, dmaValues, " SMA", shadowTexture);
 
   }
   void UI_MovingAverage::ShowEMA(const StockData& stockData, ImTextureID shadowTexture)
@@ -36,20 +36,20 @@ namespace KanVest
       KanVasX::UI::Text(Font(Header_24), "No data for stock", Align::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
-    const auto& emaData = Analyzer::GetEMA();
-    ShowMovingAverageData(stockData, emaData, " EMA", shadowTexture);
+    const auto& emaValues = Analyzer::GetEMAValues();
+    ShowMovingAverageData(stockData, emaValues, " EMA", shadowTexture);
   }
   
-  void UI_MovingAverage::ShowMovingAverageData(const StockData& stockData, const std::map<int, double>& maMap, const std::string& maString, ImTextureID shadowTexture)
+  void UI_MovingAverage::ShowMovingAverageData(const StockData& stockData, const std::map<int, std::vector<double>>& maMap, const std::string& maString, ImTextureID shadowTexture)
   {
     int bullish = 0;
     int bearish = 0;
 
-    for (const auto& [period, ma] : maMap)
+    for (const auto& [period, maValues] : maMap)
     {
-      if (ma > stockData.livePrice)
+      if (maValues.back() > stockData.livePrice)
         bearish ++;
-      else if (ma < stockData.livePrice and ma != 0)
+      else if (maValues.back() < stockData.livePrice and maValues.back() != 0)
         bullish++;
     }
     int total = bullish + bearish;
@@ -118,7 +118,7 @@ namespace KanVest
 
     KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::BackgroundLight);
 
-    for (const auto& [period, ma] : maMap)
+    for (const auto& [period, maValues] : maMap)
     {
       if (idx % 4 == 0)
       {
@@ -127,7 +127,7 @@ namespace KanVest
         allChildEnded = false;
       }
       
-      ShowSma(period, ma);
+      ShowSma(period, maValues.back());
       
       if (idx % 4 == 3)
       {

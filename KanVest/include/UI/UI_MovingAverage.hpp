@@ -18,6 +18,6 @@ namespace KanVest
     static void ShowEMA(const StockData& stockData, ImTextureID shadowTexture = 0);
     
   private:
-    static void ShowMovingAverageData(const StockData& stockData, const std::map<int, double>& maMap, const std::string& maString, ImTextureID shadowTexture);
+    static void ShowMovingAverageData(const StockData& stockData, const std::map<int, std::vector<double>>& maMap, const std::string& maString, ImTextureID shadowTexture);
   };
 } // namespace KanVest

@@ -17,11 +17,11 @@ namespace KanVest
     return s_stockReport;
   }
   
-  const std::map<int, double>& Analyzer::GetDMA()
+  const std::map<int, std::vector<double>>& Analyzer::GetDMAValues()
   {
     return s_maResults.dmaValues;
   }
-  const std::map<int, double>& Analyzer::GetEMA()
+  const std::map<int, std::vector<double>>& Analyzer::GetEMAValues()
   {
     return s_maResults.emaValues;
   }

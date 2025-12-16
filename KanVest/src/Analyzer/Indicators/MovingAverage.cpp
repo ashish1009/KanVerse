@@ -45,8 +45,8 @@ namespace KanVest
       auto dma = ComputeDMA(closesCandle, p);
       auto ema = ComputeEMA(closesCandle, p);
       
-      result.dmaValues[p] = dma.back();
-      result.emaValues[p] = ema.back();
+      result.dmaValues[p] = dma;
+      result.emaValues[p] = ema;
     }
     
     return result;

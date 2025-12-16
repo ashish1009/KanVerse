@@ -13,8 +13,8 @@ namespace KanVest
 {
   struct MAResult
   {
-    std::map<int, double> dmaValues;
-    std::map<int, double> emaValues;
+    std::map<int, std::vector<double>> dmaValues;
+    std::map<int, std::vector<double>> emaValues;
   };
   
   class MovingAverage

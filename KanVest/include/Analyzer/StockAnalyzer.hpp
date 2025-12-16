@@ -24,8 +24,8 @@ namespace KanVest
     /// - Parameter stockData: stock data
     static StockReport AnalzeStock(const StockData& stockData);
     
-    static const std::map<int, double>& GetDMA();
-    static const std::map<int, double>& GetEMA();
+    static const std::map<int, std::vector<double>>& GetDMAValues();
+    static const std::map<int, std::vector<double>>& GetEMAValues();
 
   private:
     inline static StockReport s_stockReport;
