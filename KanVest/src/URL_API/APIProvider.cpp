@@ -163,7 +163,7 @@ namespace KanVest
     {
       case Range::_1D:
       case Range::_5D:
-        return {"1m","5m","15m","30m","60m"};
+        return {"1m", "2m", "5m","15m","30m","60m"};
       case Range::_1MO:
         return {"5m","15m","30m","60m","1d"};
       case Range::_6MO:
@@ -186,7 +186,7 @@ namespace KanVest
     {
       case Range::_1D:
       case Range::_5D:
-        return {Interval::_1M, Interval::_5M, Interval::_15M, Interval::_30M, Interval::_60M};
+        return {Interval::_1M, Interval::_2M, Interval::_5M, Interval::_15M, Interval::_30M, Interval::_60M};
       case Range::_1MO:
         return {Interval::_5M, Interval::_15M, Interval::_30M, Interval::_60M, Interval::_1D};
       case Range::_6MO:

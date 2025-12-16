@@ -27,9 +27,13 @@ namespace KanVest
       return result;
     }
     
-    // FIX: convert ANY raw history (1W,1D,1h..)-> daily
-    auto dailyCloses = Indicator::Utils::BuildDailyCloses(data);
-    if (dailyCloses.size() < 5)
+    // convert ANY raw history (1W,1D,1h..)-> daily
+#if UseDailyCandle
+    auto closesCandle = Indicator::Utils::BuildDailyCloses(data);
+#else
+    auto closesCandle = Indicator::Utils::GetCandleCloses(data);
+#endif
+    if (closesCandle.size() < 5)
     {
       return result;
     }
@@ -38,8 +42,8 @@ namespace KanVest
     
     for (int p : periods)
     {
-      auto dma = ComputeDMA(dailyCloses, p);
-      auto ema = ComputeEMA(dailyCloses, p);
+      auto dma = ComputeDMA(closesCandle, p);
+      auto ema = ComputeEMA(closesCandle, p);
       
       result.dmaValues[p] = dma.back();
       result.emaValues[p] = ema.back();

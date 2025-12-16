@@ -40,4 +40,17 @@ namespace KanVest::Indicator::Utils
     
     return daily;
   }
+  std::vector<double> GetCandleCloses(const StockData& data)
+  {
+    if (!data.IsValid())
+      return {};
+
+    std::vector<double> closes;
+
+    for (const auto& p : data.candleHistory)
+    {
+      closes.emplace_back(p.close);
+    }
+    return closes;
+  }
 } // namespace KanVest::Indicator::Utils

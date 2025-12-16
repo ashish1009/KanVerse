@@ -77,10 +77,32 @@ namespace KanVest
       ImGui::ProgressBar(fraction, ImVec2(ImGui::GetContentRegionAvail().x - 10.0f, 0), " ");
     }
     
-    auto ShowSma = [stockData](int period, double ma) {
+    auto ShowSma = [stockData](int period, double ma)
+    {
       if (ma > 0)
       {
-        std::string datString = std::to_string(period) + "d";
+        auto GetPeriodString = [](int period, const std::string& interval) -> std::string
+        {
+          if (period <= 0 || interval.empty())
+            return {};
+          
+          // Split numeric part and unit part
+          size_t i = 0;
+          while (i < interval.size() && std::isdigit(interval[i]))
+            ++i;
+          
+          if (i == 0 || i == interval.size())
+            return {}; // invalid interval like "m" or "10"
+          
+          int base = std::stoi(interval.substr(0, i));
+          std::string unit = interval.substr(i); // m, h, d, wk, mo, etc.
+          
+          int total = base * period;
+          
+          return std::to_string(total) + unit;
+        };
+                
+        std::string datString = GetPeriodString(period, stockData.dataGranularity);
         KanVasX::UI::Text(Font(Regular), datString, Align::Left, {20.0f, 5.0f}, Color::White);
         ImGui::SameLine();
         

@@ -440,7 +440,7 @@ namespace KanVest
       for (const auto& interval : API_Provider::GetValidIntervalsStringForRange(stockData.range))
       {
         auto buttonColor = interval == stockData.dataGranularity ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
-        std::string uniqueLabel = interval + "##Range";
+        std::string uniqueLabel = interval + "##Interval";
         
         if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
         {
