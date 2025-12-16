@@ -94,9 +94,9 @@ namespace KanVest::UI
         ImGui::SameLine();
         
         // Col 2 :
-        ImGui::BeginChild(" Stock - Search ", ImVec2(availableX * 0.4f, ImGui::GetContentRegionAvail().y));
+        ImGui::BeginChild(" Stock - Search ", ImVec2(availableX * 0.39f, ImGui::GetContentRegionAvail().y));
         {
-          ShowStockSearchBar(ImGui::GetContentRegionAvail().x, 8.0f);
+          ShowStockSearchBar(ImGui::GetContentRegionAvail().x - 5.0f, 8.0f);
         }
         ImGui::EndChild();
         ImGui::SameLine();
