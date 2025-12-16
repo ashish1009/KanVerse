@@ -65,7 +65,7 @@ namespace KanVest
       KanVasX::UI::Text(Font(Regular), maSummary, Align::Left, {10.0f, 0.0f}, UI::Utils::StockLossColor);
     }
     
-    std::string maSummary = "If current price is greater than SMA, trend is bullish";
+    std::string maSummary = "If current price is greater than Moving Average, trend is bullish";
     KanVasX::UI::Text(Font(Regular), maSummary, Align::Left, {10.0f, 0.0f}, Color::White);
 
     {
@@ -111,16 +111,16 @@ namespace KanVest
       }
     };
 
-    ImVec2 maChildSize = {(ImGui::GetContentRegionAvail().x * 0.485f), 140.0f};
+    static int numChild = 3;
+    ImVec2 maChildSize = {(ImGui::GetContentRegionAvail().x / numChild), 110};
 
     int idx = 0;
     bool allChildEnded = true;
 
     KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::BackgroundLight);
-
     for (const auto& [period, maValues] : maMap)
     {
-      if (idx % 4 == 0)
+      if (idx % numChild == 0)
       {
         ImGui::BeginChild(std::to_string(period).c_str(), maChildSize, true);
         KanVasX::UI::ShiftCursorY(5.0f);
@@ -129,14 +129,16 @@ namespace KanVest
       
       ShowSma(period, maValues.back());
       
-      if (idx % 4 == 3)
+      if (idx % numChild == numChild - 1)
       {
         if (shadowTexture)
         {
           KanVasX::UI::DrawShadowAllDirection(shadowTexture);
         }
         ImGui::EndChild();
+        
         ImGui::SameLine();
+        KanVasX::UI::ShiftCursorX(-10.0f);
         allChildEnded = true;
       }
       idx++;
