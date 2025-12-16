@@ -39,16 +39,23 @@ namespace KanVest
     static void ShowTooltip(const StockData& stockData, const std::vector<CandleData>& filteredDaysCandles);
     
     static void ShowController(const StockData& stockData);
-    
+
+    static void ShowDMA(const StockData& stockData, const std::vector<double>& xs);
+
+    // Plot Type
     enum class PlotType {Line, Candle};
     inline static PlotType s_plotType = PlotType::Candle;
     
+    // Candle Data
     inline static float s_candleWidth = 4.0f;
     
     // Stock change cache
     inline static bool s_stockChanged = true;
     inline static std::string s_lastSymbol;
     inline static std::string s_lastRange;
-    inline static std::string s_lastInterval;    
+    inline static std::string s_lastInterval;
+    
+    // Technicals
+    inline static bool s_showDMA = false;
   };
 } // namespace KanVest

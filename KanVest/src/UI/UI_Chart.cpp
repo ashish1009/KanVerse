@@ -10,6 +10,8 @@
 #include "Stock/StockUtils.hpp"
 #include "Stock/StockManager.hpp"
 
+#include "Analyzer/StockAnalyzer.hpp"
+
 #include "UI/UI_Utils.hpp"
 
 namespace KanVest
@@ -162,6 +164,11 @@ namespace KanVest
       ShowTooltip(stockData, filteredDaysCandles);
       ShowReferenceLine(stockData.prevClose, ymin, ymax, xs, Color::Text);
       ShowCrossHair(xs, ymin, ymax);
+      
+      if (s_showDMA)
+      {
+        ShowDMA(stockData, xs);
+      }
       
       ImPlot::EndPlot();
     }
@@ -398,6 +405,7 @@ namespace KanVest
       return;
     }
     
+    // Range controller
     {
       for (const auto& range : API_Provider::GetValidRanges())
       {
@@ -433,7 +441,15 @@ namespace KanVest
         s_plotType = (PlotType)currentPlotType;
       }
     }
+
+    // Technicals
+    ImGui::SameLine();
+    KanVasX::UI::ShiftCursorX(10.0f);
+    {
+      ImGui::Checkbox("Show DMA", &s_showDMA);
+    }
     
+    // Interval Controller
     ImGui::SameLine();
     KanVasX::UI::ShiftCursorX(50.0f);
     {
@@ -449,6 +465,22 @@ namespace KanVest
         ImGui::SameLine();
       }
       ImGui::NewLine();
+    }
+  }
+  
+  void Chart::ShowDMA(const StockData &stockData, const std::vector<double> &xs)
+  {
+    const auto& dmaMap = Analyzer::GetDMAValues();
+    if (auto itr = dmaMap.find(5); itr != dmaMap.end())
+    {
+      const std::vector<double> dmaValues = dmaMap.at(5);
+      
+      double priceChange = stockData.livePrice - stockData.prevClose;
+      ImU32 color = priceChange > 0 ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
+      
+      ImVec4 col4 = ImGui::ColorConvertU32ToFloat4(color);
+      ImPlot::SetNextLineStyle(col4, 2.0f);
+      ImPlot::PlotLine("", xs.data(), itr->second.data(), static_cast<int>(xs.size()));
     }
   }
 } // namespace KanVest
