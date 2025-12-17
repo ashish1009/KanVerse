@@ -14,6 +14,8 @@ namespace KanVest
   class Chart
   {
   public:
+    enum class Indicators {None, DMA, EMA};
+
     /// This function shows the stock chart
     /// - Parameter stockData: stockData
     static void Show(const StockData& stockData);
@@ -40,7 +42,7 @@ namespace KanVest
     
     static void ShowController(const StockData& stockData);
 
-    static void ShowDMA(const StockData& stockData, const std::vector<double>& xs);
+    static void ShowMovingAverage(const std::map<int, std::vector<double>>&, const StockData& stockData, const std::vector<double>& xs);
 
     // Plot Type
     enum class PlotType {Line, Candle};
@@ -56,8 +58,9 @@ namespace KanVest
     inline static std::string s_lastInterval;
     
     // Technicals
-    inline static bool s_showDMA = false;
-    inline static int s_DMAPeriod = 5;
-    inline static glm::vec4 s_DMAColor = {0.8, 0.4, 0.1, 1.0};
+    inline static Indicators s_currentIndicator = Indicators::None;
+    
+    inline static int s_MovingAveragePeriod = 5;
+    inline static glm::vec4 s_MovingAverageColor = {0.8, 0.4, 0.1, 1.0};
   };
 } // namespace KanVest

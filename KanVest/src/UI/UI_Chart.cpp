@@ -165,9 +165,17 @@ namespace KanVest
       ShowReferenceLine(stockData.prevClose, ymin, ymax, xs, Color::Text);
       ShowCrossHair(xs, ymin, ymax);
       
-      if (s_showDMA)
+      switch (s_currentIndicator)
       {
-        ShowDMA(stockData, xs);
+        case Indicators::DMA:
+          ShowMovingAverage(Analyzer::GetDMAValues(), stockData, xs);
+          break;
+        case Indicators::EMA:
+          ShowMovingAverage(Analyzer::GetEMAValues(), stockData, xs);
+          break;
+          
+        default:
+          break;
       }
       
       ImPlot::EndPlot();
@@ -427,7 +435,7 @@ namespace KanVest
       }
     }
     ImGui::SameLine();
-    KanVasX::UI::ShiftCursorX(50.0f);
+    KanVasX::UI::ShiftCursorX(10.0f);
     
     // Plot type selector
     {
@@ -445,55 +453,66 @@ namespace KanVest
     ImGui::SameLine();
     KanVasX::UI::ShiftCursorX(10.0f);
     {
-      ImGui::Checkbox("Show DMA", &s_showDMA);
+      int32_t currentIndicator = (int32_t)s_currentIndicator;
+      static std::vector<std::string> options = {"No Indicator", "DMA", "EMA"};
       
-      if (s_showDMA)
+      ImGui::SetNextItemWidth(100.0f);
+      if (KanVasX::UI::DropMenu("##Indicator", options, &currentIndicator))
       {
-        ImGui::SameLine();
+        s_currentIndicator = (Indicators)currentIndicator;
+      }
+      
+      switch (s_currentIndicator)
+      {
+        case Indicators::DMA :
+        case Indicators::EMA :
+        {
+          static int32_t currentDMAPeriod = 0;
+          static std::vector<std::string> possibleDMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200"};
 
-        static int32_t currentDMAPeriod = 0;
-        static std::vector<std::string> possibleDMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200"};
-        
-        ImGui::SetNextItemWidth(100.0f);
-        if (KanVasX::UI::DropMenu("##DMAPeriod", possibleDMAPeriods, &currentDMAPeriod))
-        {
-          s_DMAPeriod = std::stoi(possibleDMAPeriods[currentDMAPeriod]);
+          ImGui::SameLine();
+          ImGui::SetNextItemWidth(50.0f);
+
+          if (KanVasX::UI::DropMenu("##DMAPeriod", possibleDMAPeriods, &currentDMAPeriod))
+          {
+            s_MovingAveragePeriod = std::stoi(possibleDMAPeriods[currentDMAPeriod]);
+          }
+          
+          ImGui::SameLine();
+          ImGui::PushID("DMAColor");
+  
+          KanVasX::UI::ShiftCursorY(3.0f);
+          ImVec4 col4 = {s_MovingAverageColor.r, s_MovingAverageColor.g, s_MovingAverageColor.b, s_MovingAverageColor.a};
+          ImGui::ColorButton("##DMAColorBtn", col4, ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(18, 18));
+  
+          if (ImGui::IsItemClicked())
+          {
+            ImGui::OpenPopup("DMAColorPicker");
+          }
+  
+          if (ImGui::BeginPopup("DMAColorPicker"))
+          {
+            ImGui::ColorPicker4("##DMAColorPicker", glm::value_ptr(s_MovingAverageColor), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview );
+            ImGui::EndPopup();
+          }
+  
+          ImGui::PopID();
+
+          break;
         }
-        
-        ImGui::SameLine();
-        ImGui::PushID("DMAColor");
-        
-        KanVasX::UI::ShiftCursorY(3.0f);
-        ImGui::ColorButton(
-                           "##DMAColorBtn",
-                           ImVec4(s_DMAColor.r, s_DMAColor.g, s_DMAColor.b, s_DMAColor.a),
-                           ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop,
-                           ImVec2(18, 18) // small square
-                           );
-        
-        if (ImGui::IsItemClicked())
-          ImGui::OpenPopup("DMAColorPicker");
-        
-        if (ImGui::BeginPopup("DMAColorPicker"))
-        {
-          ImGui::ColorPicker4(
-                              "##DMAColorPicker",
-                              glm::value_ptr(s_DMAColor),
-                              ImGuiColorEditFlags_NoSidePreview |
-                              ImGuiColorEditFlags_NoSmallPreview
-                              );
-          ImGui::EndPopup();
-        }
-        
-        ImGui::PopID();
+
+        default:
+          break;
       }
     }
     
     // Interval Controller
     ImGui::SameLine();
-    KanVasX::UI::ShiftCursorX(50.0f);
+    float availX = ImGui::GetContentRegionAvail().x;
+    const auto& possibleIntervals = API_Provider::GetValidIntervalsStringForRange(stockData.range);
+    KanVasX::UI::ShiftCursorX(availX - possibleIntervals.size() * 40.0f);
     {
-      for (const auto& interval : API_Provider::GetValidIntervalsStringForRange(stockData.range))
+      for (const auto& interval : possibleIntervals)
       {
         auto buttonColor = interval == stockData.dataGranularity ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
         std::string uniqueLabel = interval + "##Interval";
@@ -508,12 +527,11 @@ namespace KanVest
     }
   }
   
-  void Chart::ShowDMA(const StockData &stockData, const std::vector<double> &xs)
+  void Chart::ShowMovingAverage(const std::map<int, std::vector<double>>& movingAverageData, const StockData &stockData, const std::vector<double> &xs)
   {
-    const auto& dmaMap = Analyzer::GetDMAValues();
-    if (auto itr = dmaMap.find(s_DMAPeriod); itr != dmaMap.end())
+    if (auto itr = movingAverageData.find(s_MovingAveragePeriod); itr != movingAverageData.end())
     {
-      ImVec4 col4 = {s_DMAColor.r, s_DMAColor.g, s_DMAColor.b, s_DMAColor.a};
+      ImVec4 col4 = {s_MovingAverageColor.r, s_MovingAverageColor.g, s_MovingAverageColor.b, s_MovingAverageColor.a};
       ImPlot::SetNextLineStyle(col4, 2.0f);
       ImPlot::PlotLine("", xs.data(), itr->second.data(), static_cast<int>(xs.size()));
     }

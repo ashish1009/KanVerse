@@ -135,8 +135,19 @@ namespace KanVest::UI
     
     if (ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
+      const auto& prevStockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
+      
+      Range prevRange = Range::_1D;
+      Interval prevInterval = API_Provider::GetValidIntervalForRange(Range::_1D);
+      
+      if (prevStockData.IsValid())
+      {
+        prevRange = API_Provider::GetRangeFromString(prevStockData.range);
+        prevInterval = API_Provider::GetIntervalFromString(prevStockData.dataGranularity);
+      }
+      
       s_selectedStockSymbol = s_searchedStockString;
-      StockManager::AddStockDataRequest(s_selectedStockSymbol, Range::_1D, API_Provider::GetValidIntervalForRange(Range::_1D));
+      StockManager::AddStockDataRequest(s_selectedStockSymbol, prevRange, prevInterval);
     }
   }
   
