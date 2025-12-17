@@ -15,6 +15,7 @@ namespace KanVest
 {
   struct StockReport
   {
+    double score = 50.0;
   };
 
   class Analyzer
