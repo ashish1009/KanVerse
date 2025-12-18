@@ -58,6 +58,9 @@ namespace KanVest::UI
 
     // Get Stock selected data
     StockData stockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
+    
+    // Analyze Stock;
+    Analyzer::AnalzeStock(stockData);
 
     // Stock Data UI
     {
@@ -264,9 +267,11 @@ namespace KanVest::UI
     TechnicalButton("DMA", TechnicalTab::DMA, "Daily Moving Average"); ImGui::SameLine();
     TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average");
 
+    const auto& stockReport = Analyzer::GetReport();
     if (tab == TechnicalTab::DMA)
     {
       UI_MovingAverage::ShowDMA(stockData, s_shadowTextureID);
+      KanVasX::UI::Text(Font(Regular), stockReport.summary.at(TechnicalIndicators::DMA), Align::Left);
     }
     else if (tab == TechnicalTab::EMA)
     {
@@ -282,7 +287,7 @@ namespace KanVest::UI
     }
     
     // Get analyzer report
-    const auto& stockReport = Analyzer::AnalzeStock(stockData);
+    const auto& stockReport = Analyzer::GetReport();
     
     // Show Score
     float score = static_cast<float>(stockReport.score);

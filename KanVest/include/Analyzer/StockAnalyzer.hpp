@@ -13,9 +13,12 @@
 
 namespace KanVest
 {
+  enum class TechnicalIndicators {DMA, EMA};
+  
   struct StockReport
   {
     double score = 50.0;
+    std::unordered_map<TechnicalIndicators, std::string> summary;
   };
 
   class Analyzer
@@ -23,7 +26,9 @@ namespace KanVest
   public:
     /// This function analyze stock from data
     /// - Parameter stockData: stock data
-    static StockReport AnalzeStock(const StockData& stockData);
+    static void AnalzeStock(const StockData& stockData);
+    
+    static const StockReport& GetReport();
     
     static const std::map<int, std::vector<double>>& GetDMAValues();
     static const std::map<int, std::vector<double>>& GetEMAValues();

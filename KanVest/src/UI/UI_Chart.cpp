@@ -468,7 +468,7 @@ namespace KanVest
         case Indicators::EMA :
         {
           static int32_t currentDMAPeriod = 0;
-          static std::vector<std::string> possibleDMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200"};
+          static std::vector<std::string> possibleDMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200", "300"};
 
           ImGui::SameLine();
           ImGui::SetNextItemWidth(50.0f);
