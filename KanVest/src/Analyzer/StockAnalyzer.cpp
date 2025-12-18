@@ -37,74 +37,86 @@ namespace KanVest
                           double weight = 12.0
                           )
   {
-    ScoreResult result {0.0f, ""};
+    ScoreResult result { 0.0f, "" };
     
     if (dmaValuesMap.empty())
     {
-      result.explanation = "No SMA data available.";
+      result.explanation = "Insufficient trend data to evaluate the stock.";
       return result;
     }
     
     double weightedScore = 0.0;
     double totalWeight = 0.0;
-    std::ostringstream oss;
     
-    oss << "SMA (DMA) Trend Analysis\n";
-    oss << "Price: " << price << "\n\n";
+    int aboveShort = 0, aboveMedium = 0, aboveLong = 0;
+    
+    std::ostringstream oss;
     
     for (const auto& [period, values] : dmaValuesMap)
     {
       if (values.size() < 2 || !MA_WEIGHTS.count(period))
         continue;
       
-      double sma = values.back();
+      double dma = values.back();
       double prev = values[values.size() - 2];
       double w = MA_WEIGHTS.at(period);
       totalWeight += w;
       
-      oss << "SMA(" << period << ") = " << sma;
-      
-      // --- Price vs SMA ---
-      if (!Near(price, sma))
+      // Price position
+      if (!Near(price, dma))
       {
-        weightedScore += (price > sma ? w : -w);
-        oss << (price > sma ? " → Price ABOVE → Bullish" : " → Price BELOW → Bearish");
-      }
-      else
-      {
-        oss << " → Near SMA → Neutral";
+        weightedScore += (price > dma ? w : -w);
       }
       
-      // --- Slope confirmation ---
-      double slope = (sma - prev) / prev;
-      if (slope > 0.0004)
-      {
-        weightedScore += 0.5 * w;
-        oss << " | Rising SMA";
-      }
-      else if (slope < -0.0004)
-      {
-        weightedScore -= 0.5 * w;
-        oss << " | Falling SMA";
-      }
+      // Slope
+      double slope = (dma - prev) / prev;
+      if (slope > 0.0004)      weightedScore += 0.5 * w;
+      else if (slope < -0.0004) weightedScore -= 0.5 * w;
       
-      oss << "\n";
+      // Trend buckets for explanation
+      if (price > dma)
+      {
+        if (period <= 10) aboveShort++;
+        else if (period <= 50) aboveMedium++;
+        else aboveLong++;
+      }
     }
     
-    double normalized = (totalWeight > 0.0)
-    ? weightedScore / totalWeight
-    : 0.0;
-    
+    double normalized = (totalWeight > 0.0) ? weightedScore / totalWeight : 0.0;
     result.score = static_cast<float>(normalized * weight);
     
-    oss << "\nWeighted Score: " << weightedScore
-    << "\nNormalized (-1 to +1): " << normalized
-    << "\nFinal SMA Score: " << result.score << "\n\n";
+    // ------------------------------
+    // Human-style explanation
+    // ------------------------------
+    oss << "Trend Overview:\n";
     
-    oss << "Interpretation:\n"
-    << "• SMA reflects medium-to-long-term trend strength.\n"
-    << "• Rising SMA + price above = strong institutional trend.\n"
-    << "• Flat SMA or price near SMA = indecision.\n";
+    if (aboveLong >= 2)
+      oss << "The stock is trading above its long-term averages, indicating a strong overall trend.\n";
+    else
+      oss << "The stock is struggling to stay above long-term averages, suggesting weaker structure.\n";
+    
+    oss << "\nShort-Term View:\n";
+    if (aboveShort >= 1)
+      oss << "Recent price action remains positive, showing short-term buying interest.\n";
+    else
+      oss << "Short-term momentum is weak, indicating hesitation from buyers.\n";
+    
+    oss << "\nMedium-Term View:\n";
+    if (aboveMedium >= 2)
+      oss << "The price is well supported in the medium term, suggesting the move is not just short-lived.\n";
+    else
+      oss << "The medium-term trend lacks confirmation and may need stabilization.\n";
+    
+    oss << "\nRisk & Support Insight:\n";
+    oss << "Key support levels are likely near medium-term averages. A pullback toward these levels would be healthier than chasing highs.\n";
+    
+    oss << "\nActionable Insight:\n";
+    if (result.score > 6)
+      oss << "The trend favors holding or gradual accumulation on dips.\n";
+    else if (result.score > 2)
+      oss << "The stock is suitable for holding, but fresh entries should be cautious.\n";
+    else
+      oss << "Trend strength is limited. It may be better to wait for clearer confirmation.\n";
     
     result.explanation = oss.str();
     return result;
@@ -116,20 +128,21 @@ namespace KanVest
                           double weight = 12.0
                           )
   {
-    ScoreResult result {0.0f, ""};
+    ScoreResult result { 0.0f, "" };
     
     if (emaValuesMap.empty())
     {
-      result.explanation = "No EMA data available.";
+      result.explanation = "Insufficient momentum data to evaluate the stock.";
       return result;
     }
     
     double weightedScore = 0.0;
     double totalWeight = 0.0;
-    std::ostringstream oss;
     
-    oss << "EMA Momentum Analysis\n";
-    oss << "Price: " << price << "\n\n";
+    int strongMomentum = 0;
+    int weakMomentum = 0;
+    
+    std::ostringstream oss;
     
     for (const auto& [period, values] : emaValuesMap)
     {
@@ -141,53 +154,55 @@ namespace KanVest
       double w = MA_WEIGHTS.at(period);
       totalWeight += w;
       
-      oss << "EMA(" << period << ") = " << ema;
-      
-      // --- Price vs EMA ---
       if (!Near(price, ema))
       {
         weightedScore += (price > ema ? w : -w);
-        oss << (price > ema ? " → Price ABOVE → Bullish" : " → Price BELOW → Bearish");
-      }
-      else
-      {
-        oss << " → Near EMA → Neutral";
       }
       
-      // --- Momentum (slope) ---
       double slope = (ema - prev) / prev;
       if (slope > 0.0006)
       {
         weightedScore += 0.8 * w;
-        oss << " | Strong Momentum";
+        strongMomentum++;
       }
       else if (slope < -0.0006)
       {
         weightedScore -= 0.8 * w;
-        oss << " | Weak Momentum";
+        weakMomentum++;
       }
-      
-      oss << "\n";
     }
     
-    double normalized = (totalWeight > 0.0)
-    ? weightedScore / totalWeight
-    : 0.0;
-    
+    double normalized = (totalWeight > 0.0) ? weightedScore / totalWeight : 0.0;
     result.score = static_cast<float>(normalized * weight);
     
-    oss << "\nWeighted Score: " << weightedScore
-    << "\nNormalized (-1 to +1): " << normalized
-    << "\nFinal EMA Score: " << result.score << "\n\n";
+    // ------------------------------
+    // Human-style explanation
+    // ------------------------------
+    oss << "Momentum Overview:\n";
     
-    oss << "Interpretation:\n"
-    << "• EMA reacts faster to recent price changes.\n"
-    << "• Rising EMA confirms momentum.\n"
-    << "• Flat EMA suggests consolidation.\n";
+    if (strongMomentum > weakMomentum)
+      oss << "Momentum is currently in favor of buyers, indicating continued interest at current levels.\n";
+    else
+      oss << "Momentum appears mixed, suggesting reduced follow-through from buyers.\n";
+    
+    oss << "\nShort-Term Behavior:\n";
+    oss << "EMA trends suggest how quickly the stock reacts to recent price changes.\n";
+    
+    oss << "\nRisk Insight:\n";
+    oss << "If momentum slows while price remains elevated, short-term pullbacks are possible.\n";
+    
+    oss << "\nActionable Insight:\n";
+    if (result.score > 6)
+      oss << "Momentum supports staying invested or adding cautiously on pullbacks.\n";
+    else if (result.score > 2)
+      oss << "Momentum is neutral. Holding existing positions is safer than new entries.\n";
+    else
+      oss << "Momentum is weak. Waiting for stronger confirmation may reduce risk.\n";
     
     result.explanation = oss.str();
     return result;
   }
+
 
   void Analyzer::AnalzeStock(const StockData& stockData)
   {
