@@ -94,8 +94,14 @@ namespace KanVest
     ymin = std::min(ymin, stockData.prevClose);
     ymax = std::max(ymax, stockData.prevClose);
     
-    double volBottom = ymin;
-    double volTop = ymin + (ymax - ymin) * 0.22;
+    static double visibleXMin = 0.0f;
+    static double visibleXMax = 0.0f;
+    
+    static double visibleYMin = 0.0f;
+    static double visibleYMax = 0.0f;
+
+    double volBottom = visibleYMin;
+    double volTop = visibleYMin + (visibleYMax - visibleYMin) * 0.22;
     
     std::vector<double> volumeY;
     for (double v : volumes)
@@ -130,7 +136,7 @@ namespace KanVest
       const double xMin = 0.0;
       const double xMax = (double)xs.size() - 1.0;
       
-      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_LockMin | ImPlotAxisFlags_LockMax);
+      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoGridLines);
       
       ImGuiCond cond = s_stockChanged ? ImGuiCond_Always : ImGuiCond_Once;
       
@@ -144,6 +150,15 @@ namespace KanVest
       {
         ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), (int)labelPositions.size(), labelPtrs.data());
       }
+
+      // AFTER axis setup
+      ImPlotRect limits = ImPlot::GetPlotLimits();
+      
+      visibleXMin = limits.X.Min;
+      visibleXMax = limits.X.Max;
+      
+      visibleYMin = limits.Y.Min;
+      visibleYMax = limits.Y.Max;
       
       // Compute candle width based on zoom size
       ComputeCandleWidth(xs);
