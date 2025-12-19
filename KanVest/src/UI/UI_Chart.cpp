@@ -93,10 +93,8 @@ namespace KanVest
     
     ymin = std::min(ymin, stockData.prevClose);
     ymax = std::max(ymax, stockData.prevClose);
-    
-    static double visibleXMin = 0.0f;
-    static double visibleXMax = 0.0f;
-    
+
+    // Range for volume bar
     static double visibleYMin = 0.0f;
     static double visibleYMax = 0.0f;
 
@@ -151,15 +149,6 @@ namespace KanVest
         ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), (int)labelPositions.size(), labelPtrs.data());
       }
 
-      // AFTER axis setup
-      ImPlotRect limits = ImPlot::GetPlotLimits();
-      
-      visibleXMin = limits.X.Min;
-      visibleXMax = limits.X.Max;
-      
-      visibleYMin = limits.Y.Min;
-      visibleYMax = limits.Y.Max;
-      
       // Compute candle width based on zoom size
       ComputeCandleWidth(xs);
       
@@ -175,7 +164,14 @@ namespace KanVest
           break;
       }
       
-      ShowVolumes(xs, volumeY, opens, closes, volBottom);
+      // Show volume bars
+      {
+        ImPlotRect limits = ImPlot::GetPlotLimits();
+        visibleYMin = limits.Y.Min;
+        visibleYMax = limits.Y.Max;
+        ShowVolumes(xs, volumeY, opens, closes, volBottom);
+      }
+      
       ShowTooltip(stockData, filteredDaysCandles);
       ShowReferenceLine(stockData.prevClose, ymin, ymax, xs, Color::Text);
       ShowCrossHair(xs, ymin, ymax);
