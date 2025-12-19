@@ -26,7 +26,7 @@ namespace KanVest::UI
   void Panel::Initialize()
   {
     s_selectedStockSymbol = "Nifty";
-    StockManager::AddStockDataRequest(s_selectedStockSymbol, Range::_1D, Interval::_2M);
+    StockManager::AddStockDataRequest(s_selectedStockSymbol, Range::_1Y, Interval::_1D);
   }
   
   void Panel::SetShadowTextureId(ImTextureID shadowTextureID)
@@ -271,11 +271,12 @@ namespace KanVest::UI
     if (tab == TechnicalTab::DMA)
     {
       UI_MovingAverage::ShowDMA(stockData, s_shadowTextureID);
-      KanVasX::UI::Text(Font(Regular), stockReport.summary.at(TechnicalIndicators::DMA), Align::Left);
+//      KanVasX::UI::Text(Font(Regular), stockReport.summary.at(TechnicalIndicators::DMA), Align::Left);
     }
     else if (tab == TechnicalTab::EMA)
     {
       UI_MovingAverage::ShowEMA(stockData, s_shadowTextureID);
+//      KanVasX::UI::Text(Font(Regular), stockReport.summary.at(TechnicalIndicators::EMA), Align::Left);
     }
   }
   
