@@ -63,10 +63,12 @@ namespace KanVest
     // Technicals
     inline static bool s_showDMA = true;
     inline static int s_DMAPeriod = 5;
+    inline static int s_DMAPeriodIdx = 0;
     inline static glm::vec4 s_DMAColor = {0.8, 0.4, 0.1, 1.0};
     
     inline static bool s_showEMA = true;
     inline static int s_EMAPeriod = 5;
+    inline static int s_EMAPeriodIdx = 0;
     inline static glm::vec4 s_EMAColor = {0.8, 0.3, 0.7, 1.0};
   };
 } // namespace KanVest

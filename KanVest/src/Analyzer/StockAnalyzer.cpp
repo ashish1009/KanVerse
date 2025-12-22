@@ -17,9 +17,9 @@ namespace KanVest
 
   static const std::map<int, double> MA_WEIGHTS =
   {
-    {5,0.35},{10,0.55}, // Short
-    {20,0.85},{30,1.00},{50,1.25}, // Medium
-    {100,1.15},{150,0.90},{200,1.40},{250, 1.8} // Long
+    {5,0.35},{10,0.55},              // Short
+    {20,0.85},{30,1.00},{50,1.25},   // Medium
+    {100,1.15},{150,0.90},{200,1.40} // Long
   };
   
   inline double NormalizeScore(int raw, int count)

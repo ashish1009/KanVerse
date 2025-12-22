@@ -571,38 +571,59 @@ namespace KanVest
     ImGui::SetCursorScreenPos(buttonPos);
 
     // Rectangle
-    KanVasX::UI::DrawFilledRect(Color::BackgroundLight, 25, 0.05);
-
-    // Cross Button
-    KanVasX::UI::ShiftCursor({2.0f, 2.0f});
-    if (KanVasX::UI::DrawButton("X", Font(Bold), Color::BackgroundLight, Color::DarkRed, false, 0.0f, {20.0f, 20.0f}))
     {
-      if (title == "DMA")       s_showDMA = false;
-      else if (title == "EMA")  s_showEMA = false;
+      KanVasX::UI::DrawFilledRect(Color::BackgroundLight, 25, 0.1);
+    }
+    
+    // Cross Button
+    {
+      KanVasX::UI::ShiftCursor({2.0f, 2.0f});
+      if (KanVasX::UI::DrawButton("X", Font(Bold), Color::BackgroundLight, Color::DarkRed, false, 0.0f, {20.0f, 20.0f}))
+      {
+        if (title == "DMA")       s_showDMA = false;
+        else if (title == "EMA")  s_showEMA = false;
+      }
     }
     
     // Title
-    ImGui::SameLine();
-    KanVasX::UI::Text(Font(FixedWidthHeader_12), title, Align::Left, {0.0f, 4.0f});
-
-    // Color
-    ImGui::SameLine();
-    KanVasX::UI::ShiftCursorY(4.0f);
-
-    // Small colored button
-    ImVec4 col = { color.r, color.g, color.b, color.a };
-    if (ImGui::ColorButton("##MAColor", col, ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(14, 14)))
     {
-      ImGui::OpenPopup("MA_Color_Popup");
+      ImGui::SameLine();
+      KanVasX::UI::Text(Font(FixedWidthHeader_12), title, Align::Left, {0.0f, 4.0f});
     }
     
-    // Popup color picker
-    if (ImGui::BeginPopup("MA_Color_Popup"))
+    // Color
     {
-      ImGui::ColorPicker4("MA Color", &s_DMAColor.r, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
-      ImGui::EndPopup();
+      ImGui::SameLine();
+      KanVasX::UI::ShiftCursorY(4.0f);
+      
+      ImVec4 col = { color.r, color.g, color.b, color.a };
+      if (ImGui::ColorButton("##MAColor", col, ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(14, 14)))
+      {
+        ImGui::OpenPopup("MA_Color_Popup");
+      }
+      
+      if (ImGui::BeginPopup("MA_Color_Popup"))
+      {
+        ImGui::ColorPicker4("MA Color", &s_DMAColor.r, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+        ImGui::EndPopup();
+      }
     }
-        
+    
+    // Period
+    {
+      static std::vector<std::string> possibleMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200"};
+
+      ImGui::SameLine();
+      ImGui::SetNextItemWidth(50.0f);
+
+      std::string periodID = "##DMAPeriod" + title;
+      if (KanVasX::UI::DropMenu(periodID.c_str(), possibleMAPeriods, title == "DMA" ? &s_DMAPeriodIdx : &s_EMAPeriodIdx))
+      {
+        if (title == "DMA")       s_DMAPeriod = std::stoi(possibleMAPeriods[s_DMAPeriodIdx]);
+        else if (title == "EMA")  s_EMAPeriod = std::stoi(possibleMAPeriods[s_DMAPeriodIdx]);
+      }
+    }
+    
     ImGui::PopID();
   }
 
