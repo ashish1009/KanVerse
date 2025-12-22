@@ -267,7 +267,7 @@ namespace KanVest::UI
     TechnicalButton("DMA", TechnicalTab::DMA, "Daily Moving Average"); ImGui::SameLine();
     TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average");
 
-    const auto& stockReport = Analyzer::GetReport();
+//    const auto& stockReport = Analyzer::GetReport();
     if (tab == TechnicalTab::DMA)
     {
       UI_MovingAverage::ShowDMA(stockData, s_shadowTextureID);
