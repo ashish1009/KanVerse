@@ -29,6 +29,8 @@ namespace KanVest
 
     static void ComputeCandleWidth(const std::vector<double>& xs);
     
+    static void ShowController(const StockData& stockData);
+
     // Stock change cache
     inline static bool s_stockChanged = true;
     inline static std::string s_lastSymbol;
@@ -54,9 +56,7 @@ namespace KanVest
 //    static void ShowReferenceLine(float refValue, double yminPlot, double ymaxPlot, const std::vector<double>& xs, const ImU32& color);
 //    
 //    static void ShowTooltip(const StockData& stockData, const std::vector<CandleData>& filteredDaysCandles);
-//    
-//    static void ShowController(const StockData& stockData);
-//    
+//
 //    static void ShowDMA(const StockData& stockData, const std::vector<double>& xs);
 //    static void ShowMAControler(const std::string& title, const glm::vec4& color,float XOffset,float YOffset);
 //

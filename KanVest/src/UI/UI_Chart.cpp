@@ -42,6 +42,8 @@ namespace KanVest
   void Chart::Show(const StockData &stockData)
   {
     IK_PERFORMANCE_FUNC("Chart::Show");
+
+    ShowController(stockData);
     PLotChart(stockData);
   }
   
@@ -296,11 +298,149 @@ namespace KanVest
       dl->AddRect(a, b, IM_COL32(40, 40, 40, 255));
     }
   }
+  
+  void Chart::ShowController(const StockData& stockData)
+  {
+    if (!stockData.IsValid())
+    {
+      return;
+    }
+    
+    // Range controller
+    {
+      for (const auto& range : API_Provider::GetValidRanges())
+      {
+        auto buttonColor = range == stockData.range ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+        std::string uniqueLabel = range + "##Range";
 
+        ImGui::SameLine();
+        if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
+        {
+          const auto& validInterval = API_Provider::GetValidIntervalForRange(API_Provider::GetRangeFromString(range));
+          StockManager::AddStockDataRequest(stockData.symbol, API_Provider::GetRangeFromString(range), validInterval);
+        }
+      }
+    }
+    
+    ImGui::SameLine();
+    KanVasX::UI::ShiftCursorX(10.0f);
+
+    // Plot type selector
+    {
+      int32_t currentPlotType = (int32_t)s_plotType;
+      static std::vector<std::string> options = {"Line", "Candle"};
+
+      ImGui::SetNextItemWidth(100.0f);
+      if (KanVasX::UI::DropMenu("##ChartType", options, &currentPlotType))
+      {
+        s_plotType = (PlotType)currentPlotType;
+      }
+    }
+
+    // Interval Controller
+    ImGui::SameLine();
+    float availX = ImGui::GetContentRegionAvail().x;
+    const auto& possibleIntervals = API_Provider::GetValidIntervalsStringForRange(stockData.range);
+    KanVasX::UI::ShiftCursorX(availX - possibleIntervals.size() * 40.0f);
+    {
+      for (const auto& interval : possibleIntervals)
+      {
+        auto buttonColor = interval == stockData.dataGranularity ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+        std::string uniqueLabel = interval + "##Interval";
+
+        if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
+        {
+          StockManager::AddStockDataRequest(stockData.symbol, API_Provider::GetRangeFromString(stockData.range), API_Provider::GetIntervalFromString(interval));
+        }
+        ImGui::SameLine();
+      }
+      ImGui::NewLine();
+    }
+  }
 } // namespace KanVest
 
+//    KanVasX::ScopedColor FrameBgHovered(ImGuiCol_FrameBg, Color::Background);
+//    KanVasX::ScopedColor FrameBg(ImGuiCol_FrameBgHovered, Color::BackgroundLight);
+//
+//    KanVasX::ScopedColor Button(ImGuiCol_Button, Color::Background);
+//    KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::BackgroundLight);
 //
 //
+//    // Technicals
+//    ImGui::SameLine();
+//    KanVasX::UI::ShiftCursorX(10.0f);
+//    {
+//      static int32_t currentIndicator = 0;
+//      static std::vector<std::string> options = {"Indicator", "DMA", "EMA"};
+//
+//      ImGui::SetNextItemWidth(100.0f);
+//      if (KanVasX::UI::DropMenu("##Indicator", options, &currentIndicator))
+//      {
+//        switch ((Indicators)currentIndicator)
+//        {
+//          case Indicators::DMA:
+//          {
+//            s_showDMA = true;
+//            currentIndicator = 0;
+//            break;
+//          }
+//          case Indicators::EMA:
+//          {
+//            s_showEMA = true;
+//            currentIndicator = 0;
+//            break;
+//          }
+//
+//          default:
+//            break;
+//        }
+//      }
+//
+////      switch (s_currentIndicator)
+////      {
+////        case Indicators::DMA :
+////        case Indicators::EMA :
+////        {
+////          static int32_t currentDMAPeriod = 0;
+////          static std::vector<std::string> possibleDMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200", "300"};
+////
+////          ImGui::SameLine();
+////          ImGui::SetNextItemWidth(50.0f);
+////
+////          if (KanVasX::UI::DropMenu("##DMAPeriod", possibleDMAPeriods, &currentDMAPeriod))
+////          {
+////            s_MovingAveragePeriod = std::stoi(possibleDMAPeriods[currentDMAPeriod]);
+////          }
+////
+////          ImGui::SameLine();
+////          ImGui::PushID("DMAColor");
+////
+////          KanVasX::UI::ShiftCursorY(3.0f);
+////          ImVec4 col4 = {s_MovingAverageColor.r, s_MovingAverageColor.g, s_MovingAverageColor.b, s_MovingAverageColor.a};
+////          ImGui::ColorButton("##DMAColorBtn", col4, ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(18, 18));
+////
+////          if (ImGui::IsItemClicked())
+////          {
+////            ImGui::OpenPopup("DMAColorPicker");
+////          }
+////
+////          if (ImGui::BeginPopup("DMAColorPicker"))
+////          {
+////            ImGui::ColorPicker4("##DMAColorPicker", glm::value_ptr(s_MovingAverageColor), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview );
+////            ImGui::EndPopup();
+////          }
+////
+////          ImGui::PopID();
+////
+////          break;
+////        }
+////
+////        default:
+////          break;
+////      }
+//    } // Technicals Scope
+//  }
+
 //  void Chart::DrawDashedHLine(double refValue, double xMin, double xMax, ImU32 color, float thickness, float dashLen, float gapLen)
 //  {
 //    // Convert start & end plot coordinates to pixel positions
@@ -423,144 +563,7 @@ namespace KanVest
 //    }
 //  }
 //
-//  void Chart::ShowController(const StockData& stockData)
-//  {
-//    if (!stockData.IsValid())
-//    {
-//      return;
-//    }
-//    
-//    KanVasX::ScopedColor FrameBgHovered(ImGuiCol_FrameBg, Color::Background);
-//    KanVasX::ScopedColor FrameBg(ImGuiCol_FrameBgHovered, Color::BackgroundLight);
-//    
-//    KanVasX::ScopedColor Button(ImGuiCol_Button, Color::Background);
-//    KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::BackgroundLight);
-//    
-//    // Range controller
-//    {
-//      for (const auto& range : API_Provider::GetValidRanges())
-//      {
-//        auto buttonColor = range == stockData.range ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
-//        std::string uniqueLabel = range + "##Range";
-//        
-//        ImGui::SameLine();
-//        if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
-//        {
-//          const auto& validInterval = API_Provider::GetValidIntervalForRange(API_Provider::GetRangeFromString(range));
-//          StockManager::AddStockDataRequest(stockData.symbol, API_Provider::GetRangeFromString(range), validInterval);
-//        }
-//      }
-//    }
-//    ImGui::SameLine();
-//    KanVasX::UI::ShiftCursorX(10.0f);
-//    
-//    // Plot type selector
-//    {
-//      int32_t currentPlotType = (int32_t)s_plotType;
-//      static std::vector<std::string> options = {"Line", "Candle"};
-//      
-//      ImGui::SetNextItemWidth(100.0f);
-//      if (KanVasX::UI::DropMenu("##ChartType", options, &currentPlotType))
-//      {
-//        s_plotType = (PlotType)currentPlotType;
-//      }
-//    }
-//
-//    // Technicals
-//    ImGui::SameLine();
-//    KanVasX::UI::ShiftCursorX(10.0f);
-//    {
-//      static int32_t currentIndicator = 0;
-//      static std::vector<std::string> options = {"Indicator", "DMA", "EMA"};
-//      
-//      ImGui::SetNextItemWidth(100.0f);
-//      if (KanVasX::UI::DropMenu("##Indicator", options, &currentIndicator))
-//      {
-//        switch ((Indicators)currentIndicator)
-//        {
-//          case Indicators::DMA:
-//          {
-//            s_showDMA = true;
-//            currentIndicator = 0;
-//            break;
-//          }
-//          case Indicators::EMA:
-//          {
-//            s_showEMA = true;
-//            currentIndicator = 0;
-//            break;
-//          }
-//
-//          default:
-//            break;
-//        }
-//      }
-//      
-////      switch (s_currentIndicator)
-////      {
-////        case Indicators::DMA :
-////        case Indicators::EMA :
-////        {
-////          static int32_t currentDMAPeriod = 0;
-////          static std::vector<std::string> possibleDMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200", "300"};
-////
-////          ImGui::SameLine();
-////          ImGui::SetNextItemWidth(50.0f);
-////
-////          if (KanVasX::UI::DropMenu("##DMAPeriod", possibleDMAPeriods, &currentDMAPeriod))
-////          {
-////            s_MovingAveragePeriod = std::stoi(possibleDMAPeriods[currentDMAPeriod]);
-////          }
-////          
-////          ImGui::SameLine();
-////          ImGui::PushID("DMAColor");
-////  
-////          KanVasX::UI::ShiftCursorY(3.0f);
-////          ImVec4 col4 = {s_MovingAverageColor.r, s_MovingAverageColor.g, s_MovingAverageColor.b, s_MovingAverageColor.a};
-////          ImGui::ColorButton("##DMAColorBtn", col4, ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(18, 18));
-////  
-////          if (ImGui::IsItemClicked())
-////          {
-////            ImGui::OpenPopup("DMAColorPicker");
-////          }
-////  
-////          if (ImGui::BeginPopup("DMAColorPicker"))
-////          {
-////            ImGui::ColorPicker4("##DMAColorPicker", glm::value_ptr(s_MovingAverageColor), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview );
-////            ImGui::EndPopup();
-////          }
-////  
-////          ImGui::PopID();
-////
-////          break;
-////        }
-////
-////        default:
-////          break;
-////      }
-//    } // Technicals Scope
-//    
-//    // Interval Controller
-//    ImGui::SameLine();
-//    float availX = ImGui::GetContentRegionAvail().x;
-//    const auto& possibleIntervals = API_Provider::GetValidIntervalsStringForRange(stockData.range);
-//    KanVasX::UI::ShiftCursorX(availX - possibleIntervals.size() * 40.0f);
-//    {
-//      for (const auto& interval : possibleIntervals)
-//      {
-//        auto buttonColor = interval == stockData.dataGranularity ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
-//        std::string uniqueLabel = interval + "##Interval";
-//        
-//        if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
-//        {
-//          StockManager::AddStockDataRequest(stockData.symbol, API_Provider::GetRangeFromString(stockData.range), API_Provider::GetIntervalFromString(interval));
-//        }
-//        ImGui::SameLine();
-//      }
-//      ImGui::NewLine();
-//    }
-//  }
-//  
+
 //  void Chart::ShowMAControler(const std::string& title, const glm::vec4& color, float XOffset,float YOffset)
 //  {
 //    ImGui::PushID(title.c_str());
