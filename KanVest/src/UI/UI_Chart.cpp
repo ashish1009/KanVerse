@@ -181,9 +181,9 @@ namespace KanVest
         ShowVolumes(xs, volumeY, opens, closes, volBottom);
       }
 
-//      ShowTooltip(stockData, filteredDaysCandles);
-//      ShowReferenceLine(stockData.prevClose, ymin, ymax, xs, Color::Text);
-//      ShowCrossHair(xs, ymin, ymax);
+      ShowTooltip(stockData, filteredDaysCandles);
+      ShowReferenceLine(stockData.prevClose, ymin, ymax, xs, Color::Text);
+      ShowCrossHair(xs, ymin, ymax);
 
 //      // Technicals
 //      if (s_showDMA)
@@ -357,6 +357,128 @@ namespace KanVest
       ImGui::NewLine();
     }
   }
+  
+  void Chart::DrawDashedHLine(double refValue, double xMin, double xMax, ImU32 color, float thickness, float dashLen, float gapLen)
+  {
+    // Convert start & end plot coordinates to pixel positions
+    ImVec2 p1 = ImPlot::PlotToPixels(xMin, refValue);
+    ImVec2 p2 = ImPlot::PlotToPixels(xMax, refValue);
+
+    ImDrawList* dl = ImPlot::GetPlotDrawList();
+    float x = p1.x;
+
+    while (x < p2.x)
+    {
+      float xEnd = x + dashLen;
+      if (xEnd > p2.x)
+      {
+        xEnd = p2.x;
+      }
+
+      dl->AddLine(ImVec2(x, p1.y), ImVec2(xEnd, p1.y), color, thickness);
+      x += dashLen + gapLen;
+    }
+  }
+
+  void Chart::ShowReferenceLine(float refValue, double yminPlot, double ymaxPlot, const std::vector<double>& xs, const ImU32& color)
+  {
+    if (refValue < yminPlot)
+    {
+      refValue = static_cast<float>(yminPlot);
+    }
+    if (refValue > ymaxPlot)
+    {
+      refValue = static_cast<float>(ymaxPlot);
+    }
+
+    // Dashed line
+    DrawDashedHLine(refValue, xs.front(), xs.back(), color, 1.5f, 5.0f, 5.0f);
+
+    // Convert plot coordinates to pixel position
+    ImVec2 pixPos = ImPlot::PlotToPixels(xs.front(), refValue);
+
+    // Reference string
+    std::string referenceString = "Prev Close: " + KanVest::UI::Utils::FormatDoubleToString(refValue);
+
+    // Apply pixel offset (0 right, +10 down)
+    pixPos.x += (ImGui::GetContentRegionAvail().x - 1.5 * ImGui::CalcTextSize(referenceString.c_str()).x);
+    pixPos.y += 5;
+
+    // Draw text manually with no background
+    ImDrawList* dl = ImPlot::GetPlotDrawList();
+    dl->AddText(Font(Header_24), ImGui::GetFontSize(), pixPos, color, referenceString.c_str());
+  }
+
+  void Chart::ShowCrossHair(const std::vector<double>& xs, double ymin, double ymax)
+  {
+    if (!ImPlot::IsPlotHovered())
+      return;
+
+    ImDrawList* drawList = ImPlot::GetPlotDrawList();
+    ImPlotPoint mouse = ImPlot::GetPlotMousePos();
+
+    // Snap X to nearest candle index
+    int idx = (int)std::round(mouse.x);
+    idx = std::clamp(idx, 0, (int)xs.size() - 1);
+    double snapX = xs[idx];
+
+    // Convert plot coords -> pixels
+    ImVec2 pMin = ImPlot::PlotToPixels(snapX, ymin);
+    ImVec2 pMax = ImPlot::PlotToPixels(snapX, ymax);
+    ImVec2 hMin = ImPlot::PlotToPixels(xs.front(), mouse.y);
+    ImVec2 hMax = ImPlot::PlotToPixels(xs.back(),  mouse.y);
+
+    ImU32 color = IM_COL32(200, 200, 200, 120);
+
+    // Vertical line
+    drawList->AddLine(pMin, pMax, color, 1.0f);
+
+    // Horizontal line
+    drawList->AddLine(hMin, hMax, color, 1.0f);
+  }
+
+  void Chart::ShowTooltip(const StockData& stockData, const std::vector<CandleData>& filteredDaysCandles)
+  {
+    if (ImPlot::IsPlotHovered())
+    {
+      ImPlotPoint mouse = ImPlot::GetPlotMousePos();
+
+      // Find nearest candle index
+      int idx = (int)std::round(mouse.x);
+      idx = std::clamp(idx, 0, (int)filteredDaysCandles.size() - 1);
+
+      const CandleData& candle = filteredDaysCandles[idx];
+
+      char dateTimeBuf[64];
+      GetTimeString(dateTimeBuf, 64, filteredDaysCandles[idx].timestamp, stockData.range);
+
+      // Draw tooltip near the cursor
+      {
+        ImU32 color = (candle.close >= candle.open) ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
+        KanVasX::ScopedFont formattedText(Font(FixedWidthHeader_12));
+
+        ImGui::BeginTooltip();
+        ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "%s", dateTimeBuf);
+        ImGui::Separator();
+
+        auto showOCHL = [color](const std::string& value)
+        {
+          KanVasX::ScopedColor textColor(ImGuiCol_Text, color);
+          ImGui::SameLine(); ImGui::Text("%s", value.c_str());
+        };
+
+        ImGui::Text("Open   : "); showOCHL(UI::Utils::FormatDoubleToString(candle.open));
+        ImGui::Text("Close  : "); showOCHL(UI::Utils::FormatDoubleToString(candle.close));
+        ImGui::Text("High   : "); showOCHL(UI::Utils::FormatDoubleToString(candle.high));
+        ImGui::Text("Low    : "); showOCHL(UI::Utils::FormatDoubleToString(candle.low));
+
+        ImGui::Separator();
+        ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "Volume : %s", UI::Utils::FormatLargeNumber(candle.volume).c_str());
+
+        ImGui::EndTooltip();
+      }
+    }
+  }
 } // namespace KanVest
 
 //    KanVasX::ScopedColor FrameBgHovered(ImGuiCol_FrameBg, Color::Background);
@@ -440,129 +562,6 @@ namespace KanVest
 ////      }
 //    } // Technicals Scope
 //  }
-
-//  void Chart::DrawDashedHLine(double refValue, double xMin, double xMax, ImU32 color, float thickness, float dashLen, float gapLen)
-//  {
-//    // Convert start & end plot coordinates to pixel positions
-//    ImVec2 p1 = ImPlot::PlotToPixels(xMin, refValue);
-//    ImVec2 p2 = ImPlot::PlotToPixels(xMax, refValue);
-//    
-//    ImDrawList* dl = ImPlot::GetPlotDrawList();
-//    float x = p1.x;
-//    
-//    while (x < p2.x)
-//    {
-//      float xEnd = x + dashLen;
-//      if (xEnd > p2.x)
-//      {
-//        xEnd = p2.x;
-//      }
-//      
-//      dl->AddLine(ImVec2(x, p1.y), ImVec2(xEnd, p1.y), color, thickness);
-//      x += dashLen + gapLen;
-//    }
-//  }
-//  
-//  void Chart::ShowReferenceLine(float refValue, double yminPlot, double ymaxPlot, const std::vector<double>& xs, const ImU32& color)
-//  {
-//    if (refValue < yminPlot)
-//    {
-//      refValue = static_cast<float>(yminPlot);
-//    }
-//    if (refValue > ymaxPlot)
-//    {
-//      refValue = static_cast<float>(ymaxPlot);
-//    }
-//    
-//    // Dashed line
-//    DrawDashedHLine(refValue, xs.front(), xs.back(), color, 1.5f, 5.0f, 5.0f);
-//    
-//    // Convert plot coordinates to pixel position
-//    ImVec2 pixPos = ImPlot::PlotToPixels(xs.front(), refValue);
-//    
-//    // Reference string
-//    std::string referenceString = "Prev Close: " + KanVest::UI::Utils::FormatDoubleToString(refValue);
-//    
-//    // Apply pixel offset (0 right, +10 down)
-//    pixPos.x += (ImGui::GetContentRegionAvail().x - 1.5 * ImGui::CalcTextSize(referenceString.c_str()).x);
-//    pixPos.y += 5;
-//    
-//    // Draw text manually with no background
-//    ImDrawList* dl = ImPlot::GetPlotDrawList();
-//    dl->AddText(Font(Header_24), ImGui::GetFontSize(), pixPos, color, referenceString.c_str());
-//  }
-//
-//  void Chart::ShowCrossHair(const std::vector<double>& xs, double ymin, double ymax)
-//  {
-//    if (!ImPlot::IsPlotHovered())
-//      return;
-//    
-//    ImDrawList* drawList = ImPlot::GetPlotDrawList();
-//    ImPlotPoint mouse = ImPlot::GetPlotMousePos();
-//    
-//    // Snap X to nearest candle index
-//    int idx = (int)std::round(mouse.x);
-//    idx = std::clamp(idx, 0, (int)xs.size() - 1);
-//    double snapX = xs[idx];
-//    
-//    // Convert plot coords -> pixels
-//    ImVec2 pMin = ImPlot::PlotToPixels(snapX, ymin);
-//    ImVec2 pMax = ImPlot::PlotToPixels(snapX, ymax);
-//    ImVec2 hMin = ImPlot::PlotToPixels(xs.front(), mouse.y);
-//    ImVec2 hMax = ImPlot::PlotToPixels(xs.back(),  mouse.y);
-//    
-//    ImU32 color = IM_COL32(200, 200, 200, 120);
-//    
-//    // Vertical line
-//    drawList->AddLine(pMin, pMax, color, 1.0f);
-//    
-//    // Horizontal line
-//    drawList->AddLine(hMin, hMax, color, 1.0f);
-//  }
-//
-//  void Chart::ShowTooltip(const StockData& stockData, const std::vector<CandleData>& filteredDaysCandles)
-//  {
-//    if (ImPlot::IsPlotHovered())
-//    {
-//      ImPlotPoint mouse = ImPlot::GetPlotMousePos();
-//      
-//      // Find nearest candle index
-//      int idx = (int)std::round(mouse.x);
-//      idx = std::clamp(idx, 0, (int)filteredDaysCandles.size() - 1);
-//      
-//      const CandleData& candle = filteredDaysCandles[idx];
-//      
-//      char dateTimeBuf[64];
-//      GetTimeString(dateTimeBuf, 64, filteredDaysCandles[idx].timestamp, stockData.range);
-//      
-//      // Draw tooltip near the cursor
-//      {
-//        ImU32 color = (candle.close >= candle.open) ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
-//        KanVasX::ScopedFont formattedText(Font(FixedWidthHeader_12));
-//
-//        ImGui::BeginTooltip();
-//        ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "%s", dateTimeBuf);
-//        ImGui::Separator();
-//
-//        auto showOCHL = [color](const std::string& value)
-//        {
-//          KanVasX::ScopedColor textColor(ImGuiCol_Text, color);
-//          ImGui::SameLine(); ImGui::Text("%s", value.c_str());
-//        };
-//        
-//        ImGui::Text("Open   : "); showOCHL(UI::Utils::FormatDoubleToString(candle.open));
-//        ImGui::Text("Close  : "); showOCHL(UI::Utils::FormatDoubleToString(candle.close));
-//        ImGui::Text("High   : "); showOCHL(UI::Utils::FormatDoubleToString(candle.high));
-//        ImGui::Text("Low    : "); showOCHL(UI::Utils::FormatDoubleToString(candle.low));
-//        
-//        ImGui::Separator();
-//        ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "Volume : %s", UI::Utils::FormatLargeNumber(candle.volume).c_str());
-//
-//        ImGui::EndTooltip();
-//      }
-//    }
-//  }
-//
 
 //  void Chart::ShowMAControler(const std::string& title, const glm::vec4& color, float XOffset,float YOffset)
 //  {
