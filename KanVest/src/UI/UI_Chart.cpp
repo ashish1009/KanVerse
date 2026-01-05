@@ -21,144 +21,75 @@ namespace KanVest
   using Align = KanVasX::UI::AlignX;
   using Color = KanVasX::Color;
   
-  static void GetTimeString(char* buf, size_t bufSize, uint64_t timestamp, const std::string& range)
-  {
-    if (bufSize == 0) return;
-
-    time_t t = static_cast<time_t>(timestamp);
-    struct tm tm{};
-    localtime_r(&t, &tm);
-
-    size_t written = 0;
-    if (range == "1d")
-      written = std::strftime(buf, bufSize, "%I:%M %p", &tm);
-    else
-      written = std::strftime(buf, bufSize, "%Y-%m-%d %I:%M %p", &tm);
-
-    if (written == 0)
-      buf[0] = '\0';
-  }
-
   void Chart::Show(const StockData &stockData)
   {
     IK_PERFORMANCE_FUNC("Chart::Show");
-    
-    PLotChart(stockData);
-    ShowController(stockData);
-  }
-  
-  void Chart::PLotChart(const StockData &stockData)
-  {
-    IK_PERFORMANCE_FUNC("Chart::PLotChart");
-    
-    if (!stockData.IsValid())
-    {
-      KanVasX::UI::Text(Font(Header_24), "No Chart available for stock", Align::Left, {20.0f, 10.0f}, Color::Error);
-      return;
-    }
   }
 
-  void Chart::ShowController(const StockData& stockData)
-  {
-    if (!stockData.IsValid())
-    {
-      return;
-    }
-    
-    // Update if stock is changed
-    s_stockChanged = s_lastSymbol != stockData.symbol || s_lastRange != stockData.range || s_lastInterval != stockData.dataGranularity;
-    if (s_stockChanged)
-    {
-      s_lastSymbol   = stockData.symbol;
-      s_lastRange    = stockData.range;
-      s_lastInterval = stockData.dataGranularity;
-    }
-    
-    // Y Range
-    double ymin = DBL_MAX;
-    double ymax = -DBL_MAX;
-    
-    // Get the candle data for plot
-    const auto& candleHistory = stockData.candleHistory;
-    std::vector<CandleData> filteredDaysCandles = Utils::FilterTradingDays(candleHistory);
-    
-    // Plots Axises
-    std::vector<double> xs, opens, highs, lows, closes, volumes;
-    
-    // Store data for plot
-    for (size_t i = 0; i < filteredDaysCandles.size(); ++i)
-    {
-      const auto& c = filteredDaysCandles[i];
-
-      xs.push_back((double)i);
-      opens.push_back(c.open);
-      highs.push_back(c.high);
-      lows.push_back(c.low);
-      closes.push_back(c.close);
-      volumes.push_back((double)c.volume);
-
-      ymin = std::min(ymin, c.low);
-      ymax = std::max(ymax, c.high);
-    }
-
-    // Offset to show prev close inside chart in case of gap opening
-    ymin = std::min(ymin, stockData.prevClose);
-    ymax = std::max(ymax, stockData.prevClose);
-
-    // Label string
-    std::vector<std::string> labelStrings;
-    std::vector<const char*> labelPtrs;
-    std::vector<double> labelPositions;
-
-    const int targetLabels = 10;
-    const size_t n = filteredDaysCandles.size();
-    const size_t labelStep = std::max<size_t>(1, (n + targetLabels - 1) / targetLabels);
-
-    for (size_t i = 0; i < n; i += labelStep)
-    {
-      char buf[64];
-      GetTimeString(buf, 64, filteredDaysCandles[i].timestamp, stockData.range);
-      labelStrings.emplace_back(buf);
-      labelPositions.push_back((double)i);
-    }
-
-    for (auto& s : labelStrings)
-    {
-      labelPtrs.push_back(s.c_str());
-    }
-
-    static const auto ChartFlag = ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
-    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ChartFlag))
-    {
-      const double xMin = 0.0;
-      const double xMax = (double)xs.size() - 1.0;
-      ImGuiCond cond = s_stockChanged ? ImGuiCond_Always : ImGuiCond_Once;
-
-      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoGridLines);
-
-      ImPlot::SetupAxisLimits(ImAxis_X1, xMin, xMax, cond);
-      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, cond);
-
-      ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, xMin, xMax);
-      ImPlot::SetupAxisLimitsConstraints(ImAxis_Y1, ymin, ymax);
-
-      if (!labelPositions.empty())
-      {
-        ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), (int)labelPositions.size(), labelPtrs.data());
-      }
-
-      ImPlot::EndPlot();
-    }
-  }
-    
+//  static void GetTimeString(char* buf, size_t bufSize, uint64_t timestamp, const std::string& range)
+//  {
+//    if (bufSize == 0) return;
+//    
+//    time_t t = static_cast<time_t>(timestamp);
+//    struct tm tm{};
+//    localtime_r(&t, &tm);
+//    
+//    size_t written = 0;
+//    if (range == "1d")
+//      written = std::strftime(buf, bufSize, "%I:%M %p", &tm);
+//    else
+//      written = std::strftime(buf, bufSize, "%Y-%m-%d %I:%M %p", &tm);
+//    
+//    if (written == 0)
+//      buf[0] = '\0';
+//  }
+//
 //  void Chart::PLotChart(const StockData &stockData)
 //  {
+//    IK_PERFORMANCE_FUNC("Chart::PLotChart");
+//    
+//    if (!stockData.IsValid())
+//    {
+//      KanVasX::UI::Text(Font(Header_24), "No Chart available for stock", Align::Left, {20.0f, 10.0f}, Color::Error);
+//      return;
+//    }
+//    
+//    const auto& candleHistory = stockData.candleHistory;
+//    
+//    // Update if stock is changed
+//    s_stockChanged = s_lastSymbol != stockData.symbol || s_lastRange != stockData.range || s_lastInterval != stockData.dataGranularity;
+//    if (s_stockChanged)
+//    {
+//      s_lastSymbol   = stockData.symbol;
+//      s_lastRange    = stockData.range;
+//      s_lastInterval = stockData.dataGranularity;
+//    }
+//    
+//    std::vector<CandleData> filteredDaysCandles = Utils::FilterTradingDays(candleHistory);
+//    std::vector<double> xs, opens, highs, lows, closes, volumes;
+//    
+//    double ymin = DBL_MAX;
+//    double ymax = -DBL_MAX;
 //    double maxVolume = 1.0;
-//
+//    
 //    for (size_t i = 0; i < filteredDaysCandles.size(); ++i)
 //    {
+//      const auto& c = filteredDaysCandles[i];
+//      
+//      xs.push_back((double)i);
+//      opens.push_back(c.open);
+//      highs.push_back(c.high);
+//      lows.push_back(c.low);
+//      closes.push_back(c.close);
+//      volumes.push_back((double)c.volume);
+//      
+//      ymin = std::min(ymin, c.low);
+//      ymax = std::max(ymax, c.high);
 //      maxVolume = std::max(maxVolume, (double)c.volume);
 //    }
+//    
+//    ymin = std::min(ymin, stockData.prevClose);
+//    ymax = std::max(ymax, stockData.prevClose);
 //
 //    // Range for volume bar
 //    static double visibleYMin = 0.0f;
@@ -166,19 +97,58 @@ namespace KanVest
 //
 //    double volBottom = visibleYMin;
 //    double volTop = visibleYMin + (visibleYMax - visibleYMin) * 0.22;
-//
+//    
 //    std::vector<double> volumeY;
 //    for (double v : volumes)
 //    {
 //      volumeY.push_back(volBottom + (v / maxVolume) * (volTop - volBottom));
 //    }
-//
+//    
+//    std::vector<std::string> labelStrings;
+//    std::vector<const char*> labelPtrs;
+//    std::vector<double> labelPositions;
+//    
+//    const int targetLabels = 10;
+//    const size_t n = filteredDaysCandles.size();
+//    const size_t labelStep = std::max<size_t>(1, (n + targetLabels - 1) / targetLabels);
+//    
+//    for (size_t i = 0; i < n; i += labelStep)
+//    {
+//      char buf[64];
+//      GetTimeString(buf, 64, filteredDaysCandles[i].timestamp, stockData.range);
+//      labelStrings.emplace_back(buf);
+//      labelPositions.push_back((double)i);
+//    }
+//    
+//    for (auto& s : labelStrings)
+//    {
+//      labelPtrs.push_back(s.c_str());
+//    }
+//    
 //    static const auto ChartFlag = ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
 //    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ChartFlag))
 //    {
+//      const double xMin = 0.0;
+//      const double xMax = (double)xs.size() - 1.0;
+//      
+//      ImPlot::SetupAxes("", "", ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoGridLines);
+//      
+//      ImGuiCond cond = s_stockChanged ? ImGuiCond_Always : ImGuiCond_Once;
+//      
+//      ImPlot::SetupAxisLimits(ImAxis_X1, xMin, xMax, cond);
+//      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, cond);
+//      
+//      ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, xMin, xMax);
+//      ImPlot::SetupAxisLimitsConstraints(ImAxis_Y1, ymin, ymax);
+//      
+//      if (!labelPositions.empty())
+//      {
+//        ImPlot::SetupAxisTicks(ImAxis_X1, labelPositions.data(), (int)labelPositions.size(), labelPtrs.data());
+//      }
+//
 //      // Compute candle width based on zoom size
 //      ComputeCandleWidth(xs);
-//
+//      
 //      switch (s_plotType)
 //      {
 //        case PlotType::Line:
@@ -190,7 +160,7 @@ namespace KanVest
 //        default:
 //          break;
 //      }
-//
+//      
 //      // Show volume bars
 //      {
 //        ImPlotRect limits = ImPlot::GetPlotLimits();
@@ -198,11 +168,11 @@ namespace KanVest
 //        visibleYMax = limits.Y.Max;
 //        ShowVolumes(xs, volumeY, opens, closes, volBottom);
 //      }
-//
+//      
 //      ShowTooltip(stockData, filteredDaysCandles);
 //      ShowReferenceLine(stockData.prevClose, ymin, ymax, xs, Color::Text);
 //      ShowCrossHair(xs, ymin, ymax);
-//
+//      
 //      // Technicals
 ////      if (s_showDMA)
 ////      {
@@ -215,7 +185,7 @@ namespace KanVest
 ////        ShowMAControler("EMA", s_EMAColor, 20.0f, yShift);
 ////        ShowEMA(stockData, xs);
 ////      }
-////
+////      
 //      ImPlot::EndPlot();
 //    }
 //  }
