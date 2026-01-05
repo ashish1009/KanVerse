@@ -17,6 +17,16 @@ namespace KanVest
     /// This function shows the stock chart
     /// - Parameter stockData: stockData
     static void Show(const StockData& stockData);
+    
+  private:
+    static void ShowController(const StockData& stockData);
+    static void PLotChart(const StockData& stockData);
+    
+    // Stock change cache
+    inline static bool s_stockChanged = true;
+    inline static std::string s_lastSymbol;
+    inline static std::string s_lastRange;
+    inline static std::string s_lastInterval;
   };
 } // namespace KanVest
 
@@ -24,13 +34,7 @@ namespace KanVest
 //  {
 //  public:
 //    enum class Indicators {None, DMA, EMA};
-//
-//    /// This function shows the stock chart
-//    /// - Parameter stockData: stockData
-//    static void Show(const StockData& stockData);
-//
 //  private:
-//    static void PLotChart(const StockData& stockData);
 //    static void ShowVolumes(const std::vector<double>& xs, const std::vector<double>& volumeY, const std::vector<double>& opens, const std::vector<double>& closes, double volBottom);
 //
 //    static void ShowLinePlot(const StockData& stockData, const std::vector<double>& xs, const std::vector<double>& closes);
@@ -48,8 +52,6 @@ namespace KanVest
 //    static void ShowReferenceLine(float refValue, double yminPlot, double ymaxPlot, const std::vector<double>& xs, const ImU32& color);
 //
 //    static void ShowTooltip(const StockData& stockData, const std::vector<CandleData>& filteredDaysCandles);
-//
-//    static void ShowController(const StockData& stockData);
 //
 //    static void ShowDMA(const StockData& stockData, const std::vector<double>& xs);
 //    static void ShowMAControler(const std::string& title, const glm::vec4& color,float XOffset,float YOffset);
