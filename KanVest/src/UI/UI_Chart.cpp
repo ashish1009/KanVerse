@@ -572,7 +572,7 @@ namespace KanVest
 
     // Rectangle
     {
-      KanVasX::UI::DrawFilledRect(Color::BackgroundLight, 25, 0.1);
+      KanVasX::UI::DrawFilledRect(Color::BackgroundLight, 28, 0.1);
     }
     
     // Cross Button
@@ -620,7 +620,7 @@ namespace KanVest
       if (KanVasX::UI::DropMenu(periodID.c_str(), possibleMAPeriods, title == "DMA" ? &s_DMAPeriodIdx : &s_EMAPeriodIdx))
       {
         if (title == "DMA")       s_DMAPeriod = std::stoi(possibleMAPeriods[s_DMAPeriodIdx]);
-        else if (title == "EMA")  s_EMAPeriod = std::stoi(possibleMAPeriods[s_DMAPeriodIdx]);
+        else if (title == "EMA")  s_EMAPeriod = std::stoi(possibleMAPeriods[s_EMAPeriodIdx]);
       }
     }
     
