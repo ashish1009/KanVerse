@@ -181,14 +181,29 @@ namespace KanVest
         ShowVolumes(xs, volumeY, opens, closes, volBottom);
       }
 
+      // Helpers
       ShowTooltip(stockData, filteredDaysCandles);
       ShowReferenceLine(stockData.prevClose, ymin, ymax, xs, Color::Text);
       ShowCrossHair(xs, ymin, ymax);
 
+      // Show technicals
+      const auto& cursorPos = ImPlot::GetPlotPos();
+      ImGui::SetCursorScreenPos({cursorPos.x + 10.0f, cursorPos.y + 10.0f});
+      
+      for (auto& [period, data] : s_DMA_UI_Data)
+      {
+        if (data.show)
+        {
+          ShowMAControler("DMA", data);
+          ShowMA(data, Analyzer::GetDMAValues(), xs);
+          ImGui::SameLine();
+        }
+      }
+            
 //      // Technicals
 //      if (s_showDMA)
 //      {
-//        ShowMAControler("DMA", s_DMAColor, 20.0f, 10.0f);
+//
 //        ShowDMA(stockData, xs);
 //      }
 //      if (s_showEMA)
@@ -248,9 +263,7 @@ namespace KanVest
 
     for (size_t i = 0; i < xs.size(); ++i)
     {
-      ImU32 color = (closes[i] >= opens[i])
-      ? UI::Utils::StockProfitColor
-      : UI::Utils::StockLossColor;
+      ImU32 color = (closes[i] >= opens[i]) ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
 
       ImVec2 pHigh  = ImPlot::PlotToPixels(xs[i], highs[i]);
       ImVec2 pLow   = ImPlot::PlotToPixels(xs[i], lows[i]);
@@ -271,10 +284,8 @@ namespace KanVest
       float top = std::min(pOpen.y, pClose.y);
       float bot = std::max(pOpen.y, pClose.y);
 
-      dl->AddRectFilled(ImVec2(left, top),
-                        ImVec2(right, bot), color);
-      dl->AddRect(ImVec2(left, top),
-                  ImVec2(right, bot), IM_COL32(40,40,40,255));
+      dl->AddRectFilled(ImVec2(left, top), ImVec2(right, bot), color);
+      dl->AddRect(ImVec2(left, top), ImVec2(right, bot), IM_COL32(40,40,40,255));
     }
   }
   
@@ -305,7 +316,7 @@ namespace KanVest
     {
       return;
     }
-    
+
     // Range controller
     {
       for (const auto& range : API_Provider::GetValidRanges())
@@ -320,13 +331,13 @@ namespace KanVest
           StockManager::AddStockDataRequest(stockData.symbol, API_Provider::GetRangeFromString(range), validInterval);
         }
       }
-    }
+    } // Range scope
     
-    ImGui::SameLine();
-    KanVasX::UI::ShiftCursorX(10.0f);
-
     // Plot type selector
     {
+      ImGui::SameLine();
+      KanVasX::UI::ShiftCursorX(10.0f);
+
       int32_t currentPlotType = (int32_t)s_plotType;
       static std::vector<std::string> options = {"Line", "Candle"};
 
@@ -335,27 +346,114 @@ namespace KanVest
       {
         s_plotType = (PlotType)currentPlotType;
       }
-    }
+    } // Plot type scope
 
-    // Interval Controller
-    ImGui::SameLine();
-    float availX = ImGui::GetContentRegionAvail().x;
-    const auto& possibleIntervals = API_Provider::GetValidIntervalsStringForRange(stockData.range);
-    KanVasX::UI::ShiftCursorX(availX - possibleIntervals.size() * 40.0f);
+    // Technicals
     {
-      for (const auto& interval : possibleIntervals)
-      {
-        auto buttonColor = interval == stockData.dataGranularity ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
-        std::string uniqueLabel = interval + "##Interval";
+      enum class Indicators {None, DMA, EMA};
+      
+      ImGui::SameLine();
+      KanVasX::UI::ShiftCursorX(10.0f);
+  
+      int32_t currentIndicator = 0; // No need to set the drop menu since we support multiple Indicators
+      static std::vector<std::string> options = {"Indicator", "DMA", "EMA"};
 
-        if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
+      // Get Moving average which are available
+      auto GetMovingAveragePeriodIdx = [](const std::unordered_map<int /* Period */, Indicator_UI_Data>& movingAverageUIData)
+      {
+        // Return detault first period
+        if (movingAverageUIData.empty())
         {
-          StockManager::AddStockDataRequest(stockData.symbol, API_Provider::GetRangeFromString(stockData.range), API_Provider::GetIntervalFromString(interval));
+          return 0;
         }
-        ImGui::SameLine();
+        
+        // Return next available period
+        int idx = 0;
+        for (auto period : ValidPeriods)
+        {
+          auto UI_Data_Itr = movingAverageUIData.find(period);
+          if (UI_Data_Itr == movingAverageUIData.end())
+          {
+            return idx;
+          }
+          else
+          {
+            if (UI_Data_Itr->second.show == false)
+            {
+              return idx;
+            }
+          }
+          idx++;
+        }
+        
+        // Invalid period : All periods exists
+        return -1;
+      };
+      
+      ImGui::SetNextItemWidth(100.0f);
+      if (KanVasX::UI::DropMenu("##Indicator", options, &currentIndicator))
+      {
+        auto Fill_MA_UI_Data = [GetMovingAveragePeriodIdx](std::unordered_map<int /* Period */, Indicator_UI_Data>& MA_UI_Data)
+        {
+          int periodIdx = GetMovingAveragePeriodIdx(MA_UI_Data);
+          if (periodIdx == -1)
+          {
+            return;
+          }
+          int period = ValidPeriods.at(periodIdx);
+          Indicator_UI_Data& UI_Data = MA_UI_Data[period];
+          
+          UI_Data.show = true;
+          UI_Data.periodIdx = periodIdx;
+          UI_Data.period = period;
+          UI_Data.color = {
+            0.25f + 0.75f * fmod(period * 0.37f, 1.0f),
+            0.25f + 0.75f * fmod(period * 0.61f, 1.0f),
+            0.25f + 0.75f * fmod(period * 0.83f, 1.0f),
+            1.0f
+          };
+        };
+        
+        switch ((Indicators)currentIndicator)
+        {
+          case Indicators::DMA:
+          {
+            Fill_MA_UI_Data(s_DMA_UI_Data);
+            break;
+          }
+          case Indicators::EMA:
+          {
+            Fill_MA_UI_Data(s_EMA_UI_Data);
+            break;
+          }
+
+          default:
+            break;
+        }
       }
-      ImGui::NewLine();
-    }
+    } // Technical Scope
+    
+    // Interval Controller
+    {
+      ImGui::SameLine();
+      float availX = ImGui::GetContentRegionAvail().x;
+      const auto& possibleIntervals = API_Provider::GetValidIntervalsStringForRange(stockData.range);
+      KanVasX::UI::ShiftCursorX(availX - possibleIntervals.size() * 40.0f);
+      {
+        for (const auto& interval : possibleIntervals)
+        {
+          auto buttonColor = interval == stockData.dataGranularity ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+          std::string uniqueLabel = interval + "##Interval";
+          
+          if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
+          {
+            StockManager::AddStockDataRequest(stockData.symbol, API_Provider::GetRangeFromString(stockData.range), API_Provider::GetIntervalFromString(interval));
+          }
+          ImGui::SameLine();
+        }
+        ImGui::NewLine();
+      }
+    } // Interval Scope
   }
   
   void Chart::DrawDashedHLine(double refValue, double xMin, double xMax, ImU32 color, float thickness, float dashLen, float gapLen)
@@ -479,180 +577,73 @@ namespace KanVest
       }
     }
   }
-} // namespace KanVest
+  
+  void Chart::ShowMAControler(const std::string& title, Indicator_UI_Data& data)
+  {
+    std::string id = title + " " + std::to_string(data.period);
+    ImGui::PushID(id.c_str());
+    
+    // Rectangle
+    {
+      KanVasX::UI::DrawFilledRect(Color::BackgroundLight, 25.0f, 0.082);
+    }
+  
+    // Cross Button
+    {
+      if (KanVasX::UI::DrawButton("X", Font(Bold), Color::BackgroundLight, Color::DarkRed, false, 0.0f, {25.0f, 25.0f}))
+      {
+        data.show = false;
+      }
+    }
 
-//    KanVasX::ScopedColor FrameBgHovered(ImGuiCol_FrameBg, Color::Background);
-//    KanVasX::ScopedColor FrameBg(ImGuiCol_FrameBgHovered, Color::BackgroundLight);
-//
-//    KanVasX::ScopedColor Button(ImGuiCol_Button, Color::Background);
-//    KanVasX::ScopedColor ButtonHovered(ImGuiCol_ButtonHovered, Color::BackgroundLight);
-//
-//
-//    // Technicals
-//    ImGui::SameLine();
-//    KanVasX::UI::ShiftCursorX(10.0f);
-//    {
-//      static int32_t currentIndicator = 0;
-//      static std::vector<std::string> options = {"Indicator", "DMA", "EMA"};
-//
-//      ImGui::SetNextItemWidth(100.0f);
-//      if (KanVasX::UI::DropMenu("##Indicator", options, &currentIndicator))
-//      {
-//        switch ((Indicators)currentIndicator)
-//        {
-//          case Indicators::DMA:
-//          {
-//            s_showDMA = true;
-//            currentIndicator = 0;
-//            break;
-//          }
-//          case Indicators::EMA:
-//          {
-//            s_showEMA = true;
-//            currentIndicator = 0;
-//            break;
-//          }
-//
-//          default:
-//            break;
-//        }
-//      }
-//
-////      switch (s_currentIndicator)
-////      {
-////        case Indicators::DMA :
-////        case Indicators::EMA :
-////        {
-////          static int32_t currentDMAPeriod = 0;
-////          static std::vector<std::string> possibleDMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200", "300"};
-////
-////          ImGui::SameLine();
-////          ImGui::SetNextItemWidth(50.0f);
-////
-////          if (KanVasX::UI::DropMenu("##DMAPeriod", possibleDMAPeriods, &currentDMAPeriod))
-////          {
-////            s_MovingAveragePeriod = std::stoi(possibleDMAPeriods[currentDMAPeriod]);
-////          }
-////
-////          ImGui::SameLine();
-////          ImGui::PushID("DMAColor");
-////
-////          KanVasX::UI::ShiftCursorY(3.0f);
-////          ImVec4 col4 = {s_MovingAverageColor.r, s_MovingAverageColor.g, s_MovingAverageColor.b, s_MovingAverageColor.a};
-////          ImGui::ColorButton("##DMAColorBtn", col4, ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(18, 18));
-////
-////          if (ImGui::IsItemClicked())
-////          {
-////            ImGui::OpenPopup("DMAColorPicker");
-////          }
-////
-////          if (ImGui::BeginPopup("DMAColorPicker"))
-////          {
-////            ImGui::ColorPicker4("##DMAColorPicker", glm::value_ptr(s_MovingAverageColor), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview );
-////            ImGui::EndPopup();
-////          }
-////
-////          ImGui::PopID();
-////
-////          break;
-////        }
-////
-////        default:
-////          break;
-////      }
-//    } // Technicals Scope
-//  }
+    // Title
+    {
+      ImGui::SameLine();
+      KanVasX::UI::Text(Font(FixedWidthHeader_12), title, Align::Left, {0.0f, 4.0f});
+    }
+    
+    // Period
+    {
+      static std::vector<std::string> possibleMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200"};
 
-//  void Chart::ShowMAControler(const std::string& title, const glm::vec4& color, float XOffset,float YOffset)
-//  {
-//    ImGui::PushID(title.c_str());
-//    
-//    ImVec2 plotPos  = ImPlot::GetPlotPos();
-//    
-//    // Position button inside plot (top-right corner)
-//    ImVec2 buttonPos =
-//    {
-//      plotPos.x + XOffset,
-//      plotPos.y + YOffset
-//    };
-//
-//    ImGui::SetCursorScreenPos(buttonPos);
-//
-//    // Rectangle
-//    {
-//      KanVasX::UI::DrawFilledRect(Color::BackgroundLight, 28, 0.1);
-//    }
-//    
-//    // Cross Button
-//    {
-//      KanVasX::UI::ShiftCursor({2.0f, 2.0f});
-//      if (KanVasX::UI::DrawButton("X", Font(Bold), Color::BackgroundLight, Color::DarkRed, false, 0.0f, {20.0f, 20.0f}))
-//      {
-//        if (title == "DMA")       s_showDMA = false;
-//        else if (title == "EMA")  s_showEMA = false;
-//      }
-//    }
-//    
-//    // Title
-//    {
-//      ImGui::SameLine();
-//      KanVasX::UI::Text(Font(FixedWidthHeader_12), title, Align::Left, {0.0f, 4.0f});
-//    }
-//    
-//    // Color
-//    {
-//      ImGui::SameLine();
-//      KanVasX::UI::ShiftCursorY(4.0f);
-//      
-//      ImVec4 col = { color.r, color.g, color.b, color.a };
-//      if (ImGui::ColorButton("##MAColor", col, ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(14, 14)))
-//      {
-//        ImGui::OpenPopup("MA_Color_Popup");
-//      }
-//      
-//      if (ImGui::BeginPopup("MA_Color_Popup"))
-//      {
-//        ImGui::ColorPicker4("MA Color", &s_DMAColor.r, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
-//        ImGui::EndPopup();
-//      }
-//    }
-//    
-//    // Period
-//    {
-//      static std::vector<std::string> possibleMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200"};
-//
-//      ImGui::SameLine();
-//      ImGui::SetNextItemWidth(50.0f);
-//
-//      std::string periodID = "##DMAPeriod" + title;
-//      if (KanVasX::UI::DropMenu(periodID.c_str(), possibleMAPeriods, title == "DMA" ? &s_DMAPeriodIdx : &s_EMAPeriodIdx))
-//      {
+      ImGui::SameLine();
+      ImGui::SetNextItemWidth(50.0f);
+
+      std::string periodID = "##DMAPeriod" + title;
+      if (KanVasX::UI::DropMenu(periodID.c_str(), possibleMAPeriods, &data.periodIdx))
+      {
 //        if (title == "DMA")       s_DMAPeriod = std::stoi(possibleMAPeriods[s_DMAPeriodIdx]);
 //        else if (title == "EMA")  s_EMAPeriod = std::stoi(possibleMAPeriods[s_EMAPeriodIdx]);
-//      }
-//    }
-//    
-//    ImGui::PopID();
-//  }
-//
-//  void Chart::ShowDMA(const StockData &stockData, const std::vector<double> &xs)
-//  {
-//    const auto& DMA_Data = Analyzer::GetDMAValues();
-//    if (auto itr = DMA_Data.find(s_DMAPeriod); itr != DMA_Data.end())
-//    {
-//      ImVec4 col4 = {s_DMAColor.r, s_DMAColor.g, s_DMAColor.b, s_DMAColor.a};
-//      ImPlot::SetNextLineStyle(col4, 2.0f);
-//      ImPlot::PlotLine("", xs.data(), itr->second.data(), static_cast<int>(xs.size()));
-//    }
-//  }
-//  void Chart::ShowEMA(const StockData &stockData, const std::vector<double> &xs)
-//  {
-//    const auto& EMA_Data = Analyzer::GetEMAValues();
-//    if (auto itr = EMA_Data.find(s_EMAPeriod); itr != EMA_Data.end())
-//    {
-//      ImVec4 col4 = {s_EMAColor.r, s_EMAColor.g, s_EMAColor.b, s_EMAColor.a};
-//      ImPlot::SetNextLineStyle(col4, 2.0f);
-//      ImPlot::PlotLine("", xs.data(), itr->second.data(), static_cast<int>(xs.size()));
-//    }
-//  }
-//} // namespace KanVest
+      }
+    }
+  
+    // Color
+    {
+      ImGui::SameLine();
+      KanVasX::UI::ShiftCursorY(4.0f);
+
+      ImVec4 col = { data.color.r, data.color.g, data.color.b, data.color.a };
+      if (ImGui::ColorButton("##MAColor", col, ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(14, 14)))
+      {
+        ImGui::OpenPopup("MA_Color_Popup");
+      }
+
+      if (ImGui::BeginPopup("MA_Color_Popup"))
+      {
+        ImGui::ColorPicker4("MA Color", &data.color.r, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+        ImGui::EndPopup();
+      }
+    }
+    ImGui::PopID();
+  }
+  
+  void Chart::ShowMA(const Indicator_UI_Data& MA_UI_Data, const std::map<int, std::vector<double>>& MA_Data, const std::vector<double> &xs)
+  {
+    if (auto itr = MA_Data.find(MA_UI_Data.period); itr != MA_Data.end())
+    {
+      ImVec4 col4 = {MA_UI_Data.color.r, MA_UI_Data.color.g, MA_UI_Data.color.b, MA_UI_Data.color.a};
+      ImPlot::SetNextLineStyle(col4, 2.0f);
+      ImPlot::PlotLine("", xs.data(), itr->second.data(), static_cast<int>(xs.size()));
+    }
+  }
+} // namespace KanVest

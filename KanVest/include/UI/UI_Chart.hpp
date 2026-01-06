@@ -19,6 +19,14 @@ namespace KanVest
     static void Show(const StockData& stockData);
     
   private:
+    struct Indicator_UI_Data
+    {
+      bool show = true;
+      int period = 5;
+      int periodIdx = 0;
+      glm::vec4 color = {0.8, 0.4, 0.1, 1.0};
+    };
+
     static void PLotChart(const StockData& stockData);
     
     static void ShowVolumes(const std::vector<double>& xs, const std::vector<double>& volumeY, const std::vector<double>& opens, const std::vector<double>& closes, double volBottom);
@@ -38,6 +46,10 @@ namespace KanVest
 
     static void ShowTooltip(const StockData& stockData, const std::vector<CandleData>& filteredDaysCandles);
 
+    static void ShowMAControler(const std::string& title, Indicator_UI_Data& data);
+    
+    static void ShowMA(const Indicator_UI_Data& MA_UI_Data, const std::map<int, std::vector<double>>& MA_Data, const std::vector<double> &xs);
+
     // Stock change cache
     inline static bool s_stockChanged = true;
     inline static std::string s_lastSymbol;
@@ -50,28 +62,8 @@ namespace KanVest
 
     // Candle Data
     inline static float s_candleWidth = 4.0f;
+        
+    inline static std::unordered_map<int /* Period */, Indicator_UI_Data> s_DMA_UI_Data;
+    inline static std::unordered_map<int /* Period */, Indicator_UI_Data> s_EMA_UI_Data;
   };
 } // namespace KanVest
-
-//    enum class Indicators {None, DMA, EMA};
-//
-//  private:
-//
-//
-//    static void ShowDMA(const StockData& stockData, const std::vector<double>& xs);
-//    static void ShowMAControler(const std::string& title, const glm::vec4& color,float XOffset,float YOffset);
-//
-//    static void ShowEMA(const StockData& stockData, const std::vector<double>& xs);
-//    
-//    // Technicals
-//    inline static bool s_showDMA = true;
-//    inline static int s_DMAPeriod = 5;
-//    inline static int s_DMAPeriodIdx = 0;
-//    inline static glm::vec4 s_DMAColor = {0.8, 0.4, 0.1, 1.0};
-//    
-//    inline static bool s_showEMA = true;
-//    inline static int s_EMAPeriod = 5;
-//    inline static int s_EMAPeriodIdx = 0;
-//    inline static glm::vec4 s_EMAColor = {0.8, 0.3, 0.7, 1.0};
-//  };
-//} // namespace KanVest

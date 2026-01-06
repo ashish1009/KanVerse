@@ -11,6 +11,8 @@
 
 namespace KanVest
 {
+  static const std::vector<int> ValidPeriods = {5, 10, 20, 30, 50, 100, 150, 200};
+  
   struct MAResult
   {
     std::map<int, std::vector<double>> dmaValues;

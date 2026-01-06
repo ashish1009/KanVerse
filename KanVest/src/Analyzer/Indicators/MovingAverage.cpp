@@ -15,7 +15,7 @@ namespace KanVest
   {
     if (chartRange == "1mo") return {5, 10, 20};
     if (chartRange == "3mo") return {5, 10, 20, 30, 50};
-    return {5, 10, 20, 30, 50, 100, 150, 200};
+    return ValidPeriods;
   }
   
   MAResult MovingAverage::Compute(const StockData& data)
