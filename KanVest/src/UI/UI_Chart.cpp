@@ -187,32 +187,28 @@ namespace KanVest
       ShowCrossHair(xs, ymin, ymax);
 
       // Show technicals
-      const auto& cursorPos = ImPlot::GetPlotPos();
-      ImGui::SetCursorScreenPos({cursorPos.x + 10.0f, cursorPos.y + 10.0f});
-      
-      for (auto& [period, data] : s_DMA_UI_Data)
+      auto ShowTechnical = [xs](const std::string& title, const std::map<int, std::vector<double>>& MA_Data, std::unordered_map<int /* Period */, Indicator_UI_Data>& MA_UI_data)
       {
-        if (data.show)
+        for (auto& [period, data] : MA_UI_data)
         {
-          ShowMAControler("DMA", data);
-          ShowMA(data, Analyzer::GetDMAValues(), xs);
-          ImGui::SameLine();
+          if (data.show)
+          {
+            ShowMAControler(title, data);
+            ShowMA(data, MA_Data, xs);
+            ImGui::SameLine();
+          }
         }
-      }
-            
-//      // Technicals
-//      if (s_showDMA)
-//      {
-//
-//        ShowDMA(stockData, xs);
-//      }
-//      if (s_showEMA)
-//      {
-//        float yShift = s_showDMA ? 40.0f : 10.0f;
-//        ShowMAControler("EMA", s_EMAColor, 20.0f, yShift);
-//        ShowEMA(stockData, xs);
-//      }
+      };
+      
+      const auto& cursorPos = ImPlot::GetPlotPos();
 
+      ImGui::SetCursorScreenPos({cursorPos.x + 10.0f, cursorPos.y + 10.0f});
+      ShowTechnical("DMA", Analyzer::GetDMAValues(), s_DMA_UI_Data);
+      ImGui::NewLine();
+
+      ImGui::SetCursorScreenPos({cursorPos.x + 10.0f, cursorPos.y + 40.0f});
+      ShowTechnical("EMA", Analyzer::GetEMAValues(), s_EMA_UI_Data);
+      
       ImPlot::EndPlot();
     }
   }
@@ -393,7 +389,7 @@ namespace KanVest
       ImGui::SetNextItemWidth(100.0f);
       if (KanVasX::UI::DropMenu("##Indicator", options, &currentIndicator))
       {
-        auto Fill_MA_UI_Data = [GetMovingAveragePeriodIdx](std::unordered_map<int /* Period */, Indicator_UI_Data>& MA_UI_Data)
+        auto Fill_MA_UI_Data = [GetMovingAveragePeriodIdx](std::unordered_map<int /* Period */, Indicator_UI_Data>& MA_UI_Data, bool isDMA)
         {
           int periodIdx = GetMovingAveragePeriodIdx(MA_UI_Data);
           if (periodIdx == -1)
@@ -406,10 +402,12 @@ namespace KanVest
           UI_Data.show = true;
           UI_Data.periodIdx = periodIdx;
           UI_Data.period = period;
+          
+          float typeOffset = isDMA * 0.37f;   // isDMA = 0 (EMA), 1 (DMA)
           UI_Data.color = {
-            0.25f + 0.75f * fmod(period * 0.37f, 1.0f),
-            0.25f + 0.75f * fmod(period * 0.61f, 1.0f),
-            0.25f + 0.75f * fmod(period * 0.83f, 1.0f),
+            0.25f + 0.75f * fmod(period * 0.37f + typeOffset, 1.0f),
+            0.25f + 0.75f * fmod(period * 0.61f + typeOffset, 1.0f),
+            0.25f + 0.75f * fmod(period * 0.83f + typeOffset, 1.0f),
             1.0f
           };
         };
@@ -418,12 +416,12 @@ namespace KanVest
         {
           case Indicators::DMA:
           {
-            Fill_MA_UI_Data(s_DMA_UI_Data);
+            Fill_MA_UI_Data(s_DMA_UI_Data, true);
             break;
           }
           case Indicators::EMA:
           {
-            Fill_MA_UI_Data(s_EMA_UI_Data);
+            Fill_MA_UI_Data(s_EMA_UI_Data, false);
             break;
           }
 
