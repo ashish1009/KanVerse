@@ -11,6 +11,8 @@
 
 #include "URL_API/API_Provider.hpp"
 
+#include "Stock/StockManager.hpp"
+
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
@@ -145,12 +147,15 @@ namespace KanVest
     
     // Intialize KanVest Data
     API_Provider::Initialize(StockAPIProvider::Yahoo);
+    StockManager::Initialize(10 /* Milisecond */);
   }
   
   void RendererLayer::OnDetach() noexcept
   {
     IK_PROFILE();
     IK_LOG_WARN("RendererLayer", "Detaching '{0}' Layer from application", GetName());
+    
+    StockManager::Shutdown();
   }
   
   void RendererLayer::OnUpdate(const KanViz::TimeStep& ts)
