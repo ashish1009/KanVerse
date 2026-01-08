@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B24895832F0FCF0A00649B5F /* UI_KanVestPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24895822F0FCEC500649B5F /* UI_KanVestPanel.cpp */; };
+		B248958E2F0FF51400649B5F /* API_Provider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B248958D2F0FF51400649B5F /* API_Provider.cpp */; };
 		B26336CB2EDF29DC00D46F96 /* UI_Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
@@ -34,6 +35,8 @@
 		B24895812F0FCEC500649B5F /* UI_KanVestPanel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_KanVestPanel.hpp; sourceTree = "<group>"; };
 		B24895822F0FCEC500649B5F /* UI_KanVestPanel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_KanVestPanel.cpp; sourceTree = "<group>"; };
 		B24895872F0FF21300649B5F /* StockMetadata.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockMetadata.hpp; sourceTree = "<group>"; };
+		B248958C2F0FF51400649B5F /* API_Provider.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = API_Provider.hpp; sourceTree = "<group>"; };
+		B248958D2F0FF51400649B5F /* API_Provider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = API_Provider.cpp; sourceTree = "<group>"; };
 		B26336C92EDF29DC00D46F96 /* UI_Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Font.hpp; sourceTree = "<group>"; };
 		B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Font.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -79,6 +82,22 @@
 			children = (
 			);
 			path = Stock;
+			sourceTree = "<group>";
+		};
+		B248958A2F0FF4F200649B5F /* URL_API */ = {
+			isa = PBXGroup;
+			children = (
+				B248958D2F0FF51400649B5F /* API_Provider.cpp */,
+			);
+			path = URL_API;
+			sourceTree = "<group>";
+		};
+		B248958B2F0FF50000649B5F /* URL_API */ = {
+			isa = PBXGroup;
+			children = (
+				B248958C2F0FF51400649B5F /* API_Provider.hpp */,
+			);
+			path = URL_API;
 			sourceTree = "<group>";
 		};
 		B26336C72EDF29CA00D46F96 /* UI */ = {
@@ -127,6 +146,7 @@
 				B289EDF02EB2559500937D0B /* Editor */,
 				B26336C72EDF29CA00D46F96 /* UI */,
 				B24895852F0FCF6100649B5F /* Stock */,
+				B248958B2F0FF50000649B5F /* URL_API */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -138,6 +158,7 @@
 				B289EDEF2EB2558E00937D0B /* Editor */,
 				B26336C82EDF29D000D46F96 /* UI */,
 				B24895862F0FCF6700649B5F /* Stock */,
+				B248958A2F0FF4F200649B5F /* URL_API */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -259,6 +280,7 @@
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B289EDEC2EB234D400937D0B /* RendererLayer.cpp in Sources */,
 				B26336CB2EDF29DC00D46F96 /* UI_Font.cpp in Sources */,
+				B248958E2F0FF51400649B5F /* API_Provider.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
 				B24895832F0FCF0A00649B5F /* UI_KanVestPanel.cpp in Sources */,
 			);
