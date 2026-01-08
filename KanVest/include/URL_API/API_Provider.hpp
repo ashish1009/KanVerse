@@ -51,13 +51,27 @@ namespace KanVest
     /// This function initializes the API Provide for URL
     /// - Parameter apiProvider: API provider type
     static void Initialize(StockAPIProvider apiProvider);
-    
-  private:
-    /// This function returns the API Keys
-    static APIKeys GetAPIKeys();
-    
+
     /// This function returns the URL based on API provider
     static std::string GetURL();
+    
+    /// This function returns the interval as string from enum
+    /// - Parameter interval: interval enum
+    static std::string GetIntervalStringFromEnum(Interval interval);
+    /// This function returns the range as string from enum
+    /// - Parameter range: range enum
+    static std::string GetRangeStringFromEnum(Range range);
+    
+    /// This function returns the interval as string from enum
+    /// - Parameter interval: interval enum
+    static Interval GetIntervalEnumFromString(const std::string& interval);
+    /// This function returns the range as string from enum
+    /// - Parameter range: range enum
+    static Range GetRangeEnumFromString(const std::string& range);
+
+  private:
+    /// This function returns the API Keys
+    static APIKeys GetAPIKeys();    
     
     /// This function retruns double data from patterns
     /// - Parameter key: key string

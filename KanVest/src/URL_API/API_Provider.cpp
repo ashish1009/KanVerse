@@ -72,4 +72,81 @@ namespace KanVest
   {
     return "\"" + key + "\"\\s*:\\s*\\[([^\\]]+)\\]";
   }
+  
+  std::string API_Provider::GetIntervalStringFromEnum(Interval interval)
+  {
+    switch (interval)
+    {
+      case Interval::_1M: return "1m";
+      case Interval::_2M: return "2m";
+      case Interval::_5M: return "5m";
+      case Interval::_15M: return "15m";
+      case Interval::_30M: return "30m";
+      case Interval::_60M: return "60m";
+      case Interval::_90M: return "90m";
+      case Interval::_1H: return "1h";
+      case Interval::_1D: return "1d";
+      case Interval::_5D: return "5d";
+      case Interval::_1WK: return "1wk";
+      case Interval::_1MO: return "1mo";
+      case Interval::_3MO: return "3mo";
+      default:
+        break;
+    }
+    IK_ASSERT(false, "Invalid interval")
+    return "";
+  }
+  std::string API_Provider::GetRangeStringFromEnum(Range range)
+  {
+    switch (range)
+    {
+      case Range::_1D: return "1d";
+      case Range::_5D: return "5d";
+      case Range::_1MO: return "1mo";
+      case Range::_6MO: return "6mo";
+      case Range::_YTD: return "ytd";
+      case Range::_1Y: return "1y";
+      case Range::_5Y: return "5y";
+      case Range::_MAX: return "max";
+      default:
+        break;
+    }
+    IK_ASSERT(false, "Invalid renage")
+    return "";
+  }
+  
+  Interval API_Provider::GetIntervalEnumFromString(const std::string& interval)
+  {
+    if (interval == "1m") return Interval::_1M;
+    else if (interval == "2m") return Interval::_2M;
+    else if (interval == "5m") return Interval::_5M;
+    else if (interval == "15m") return Interval::_15M;
+    else if (interval == "30m") return Interval::_30M;
+    else if (interval == "60m") return Interval::_60M;
+    else if (interval == "90m") return Interval::_90M;
+    else if (interval == "1h") return Interval::_1H;
+    else if (interval == "1d") return Interval::_1D;
+    else if (interval == "5d") return Interval::_5D;
+    else if (interval == "1wk") return Interval::_1WK;
+    else if (interval == "1mo") return Interval::_1MO;
+    else if (interval == "3mo") return Interval::_3MO;
+    
+    IK_ASSERT(false, "Invalid interval")
+    return Interval::_1M;
+  }
+  
+  Range API_Provider::GetRangeEnumFromString(const std::string& range)
+  {
+    if (range == "1d") return Range::_1D;
+    else if (range == "5d") return Range::_5D;
+    else if (range == "1mo") return Range::_1MO;
+    else if (range == "6mo") return Range::_6MO;
+    else if (range == "ytd") return Range::_YTD;
+    else if (range == "1y") return Range::_1Y;
+    else if (range == "5y") return Range::_5Y;
+    else if (range == "max") return Range::_MAX;
+    
+    IK_ASSERT(false, "Invalid renage")
+    return Range::_1D;
+  }
 } // namespace KanVest
