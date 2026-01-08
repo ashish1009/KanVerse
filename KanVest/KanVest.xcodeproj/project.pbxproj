@@ -33,6 +33,7 @@
 /* Begin PBXFileReference section */
 		B24895812F0FCEC500649B5F /* UI_KanVestPanel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_KanVestPanel.hpp; sourceTree = "<group>"; };
 		B24895822F0FCEC500649B5F /* UI_KanVestPanel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_KanVestPanel.cpp; sourceTree = "<group>"; };
+		B24895872F0FF21300649B5F /* StockMetadata.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockMetadata.hpp; sourceTree = "<group>"; };
 		B26336C92EDF29DC00D46F96 /* UI_Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Font.hpp; sourceTree = "<group>"; };
 		B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Font.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -65,6 +66,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B24895852F0FCF6100649B5F /* Stock */ = {
+			isa = PBXGroup;
+			children = (
+				B24895872F0FF21300649B5F /* StockMetadata.hpp */,
+			);
+			path = Stock;
+			sourceTree = "<group>";
+		};
+		B24895862F0FCF6700649B5F /* Stock */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Stock;
+			sourceTree = "<group>";
+		};
 		B26336C72EDF29CA00D46F96 /* UI */ = {
 			isa = PBXGroup;
 			children = (
@@ -110,6 +126,7 @@
 				B289EDEE2EB2558400937D0B /* Application */,
 				B289EDF02EB2559500937D0B /* Editor */,
 				B26336C72EDF29CA00D46F96 /* UI */,
+				B24895852F0FCF6100649B5F /* Stock */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -120,6 +137,7 @@
 				B289EDED2EB2558200937D0B /* Application */,
 				B289EDEF2EB2558E00937D0B /* Editor */,
 				B26336C82EDF29D000D46F96 /* UI */,
+				B24895862F0FCF6700649B5F /* Stock */,
 			);
 			path = src;
 			sourceTree = "<group>";

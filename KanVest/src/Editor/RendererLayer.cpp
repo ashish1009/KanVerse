@@ -27,7 +27,7 @@ namespace KanVest
     return {type, KanViz::UI::ImGuiFont{ KanVestResourcePath(path), size }};
   }
   
-  static FontMap GenerateRange(UI::FontType baseFont, const std::string& font, uint32_t minLim, uint32_t maxLim, uint32_t step = 2)
+  static FontMap GenerateFontsForRange(UI::FontType baseFont, const std::string& font, uint32_t minLim, uint32_t maxLim, uint32_t step = 2)
   {
     FontMap fonts;
     
@@ -91,7 +91,7 @@ namespace KanVest
     IK_PROFILE();
     IK_LOG_INFO("RendererLayer", "Attaching '{0}' Layer to application", GetName());
     
-    // Set the Imgui theme ----------------------------------------------------------------------
+    // Set the Imgui theme
     FontMap fonts = {
       // ───────────── OpenSans (Base UI) ─────────────
       Make(UI::FontType::Regular,         "Fonts/Opensans/Regular.ttf",         18),
@@ -125,11 +125,11 @@ namespace KanVest
     };
     
     // Append generated Noto headers
-    FontMap notoHeaders = GenerateRange(UI::FontType::Header_02, "Fonts/Noto_Sans/static/NotoSans-Regular.ttf", 2, 60);
+    FontMap notoHeaders = GenerateFontsForRange(UI::FontType::Header_02, "Fonts/Noto_Sans/static/NotoSans-Regular.ttf", 2, 60);
     fonts.insert(notoHeaders.begin(), notoHeaders.end());
 
     // Append generated fixed headers
-    FontMap fixedHeaders = GenerateRange(UI::FontType::FixedWidthHeader_12, "Fonts/HfMonorita/Regular.ttf", 12, 40);
+    FontMap fixedHeaders = GenerateFontsForRange(UI::FontType::FixedWidthHeader_12, "Fonts/HfMonorita/Regular.ttf", 12, 40);
     fonts.insert(fixedHeaders.begin(), fixedHeaders.end());
 
     KanVest::UI::Font::Load(fonts);
