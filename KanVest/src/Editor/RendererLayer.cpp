@@ -7,10 +7,6 @@
 
 #include "RendererLayer.hpp"
 
-#include "UI/UI_KanVestPanel.hpp"
-
-#include "Stock/StockManager.hpp"
-
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
@@ -152,23 +148,12 @@ namespace KanVest
     KanVasX::Widget::Initialize();
     KanVasX::Widget::SetSearchIcon(KanVasX::UI::GetTextureID(m_searchIcon->GetRendererID()));
     KanVasX::Widget::SetSettingIcon(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
-
-    KanVest::UI::Panel::Initialize();
-    KanVest::UI::Panel::SetShadowTextureId(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
-    KanVest::UI::Panel::SetReloadTextureId(KanVasX::UI::GetTextureID(m_reloadIcon->GetRendererID()));
-    KanVest::UI::Panel::SetSettingTextureId(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
-    KanVest::UI::Panel::SetOpenEyeTextureId(KanVasX::UI::GetTextureID(m_openEyeIcon->GetRendererID()));
-    KanVest::UI::Panel::SetCloseEyeTextureId(KanVasX::UI::GetTextureID(m_closeEyeIcon->GetRendererID()));
-
-    StockManager::Initialize();
   }
   
   void RendererLayer::OnDetach() noexcept
   {
     IK_PROFILE();
     IK_LOG_WARN("RendererLayer", "Detaching '{0}' Layer from application", GetName());
-    
-    StockManager::Shutdown();
   }
   
   void RendererLayer::OnUpdate(const KanViz::TimeStep& ts)
@@ -180,14 +165,11 @@ namespace KanVest
   {
     UI_StartMainWindowDocking();
     
-    KanVest::UI::Panel::Show();
-    
     UI_EndMainWindowDocking();
   }
   
   void RendererLayer::OnEvent(KanViz::Event& event)
   {
-    
   }
   
   void RendererLayer::UI_StartMainWindowDocking()
@@ -232,12 +214,12 @@ namespace KanVest
     }
     
     // Render the title if original title bar is hidden
-//    const auto& applicationSpec = KanViz::Application::Get().GetSpecification().windowSpec;
-//    if (applicationSpec.hideTitleBar)
-//    {
-//      float titlebarHeight = UI_DrawTitlebar();
-//      KanVasX::UI::SetCursorPosY(titlebarHeight + ImGui::GetCurrentWindow()->WindowPadding.y);
-//    }
+    const auto& applicationSpec = KanViz::Application::Get().GetSpecification().windowSpec;
+    if (applicationSpec.hideTitleBar)
+    {
+      float titlebarHeight = UI_DrawTitlebar();
+      KanVasX::UI::SetCursorPosY(titlebarHeight + ImGui::GetCurrentWindow()->WindowPadding.y);
+    }
     
     // Dockspace
     float minWinSizeX = style.WindowMinSize.x;
