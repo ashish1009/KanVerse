@@ -69,10 +69,6 @@ namespace KanVest
     /// - Parameter range: range enum
     static Range GetRangeEnumFromString(const std::string& range);
 
-  private:
-    /// This function returns the API Keys
-    static APIKeys GetAPIKeys();    
-    
     /// This function retruns double data from patterns
     /// - Parameter key: key string
     static std::string GetValueParserPattern(const std::string& key);
@@ -82,7 +78,11 @@ namespace KanVest
     /// This function retruns array data from patterns
     /// - Parameter key: key string
     static std::string GetArrayParserPattern(const std::string& key);
-    
+
+  private:
+    /// This function returns the API Keys
+    static APIKeys GetAPIKeys();    
+        
   private:
     inline static StockAPIProvider s_stockAPIProvider;
     inline static APIKeys s_apiKeys;
