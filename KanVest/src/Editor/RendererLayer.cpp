@@ -17,6 +17,28 @@ namespace KanVest
   // Kreate Texture
 #define CreateTexture(path) KanViz::TextureFactory::Create(KanVestResourcePath(path))
     
+  using FontMap = std::unordered_map<UI::FontType, KanViz::UI::ImGuiFont>;
+
+  inline std::pair<UI::FontType, KanViz::UI::ImGuiFont>
+  Make(UI::FontType type, const std::string& path, uint32_t size)
+  {
+    return {type, KanViz::UI::ImGuiFont{ KanVestResourcePath(path), size }};
+  }
+  
+  static FontMap GenerateRange(UI::FontType baseFont, const std::string& font, uint32_t minLim, uint32_t maxLim, uint32_t step = 2)
+  {
+    FontMap fonts;
+    
+    uint32_t index = 0;
+    for (uint32_t size = minLim; size <= maxLim; size += step)
+    {
+      fonts.emplace(static_cast<UI::FontType>(static_cast<uint32_t>(baseFont) + index), KanViz::UI::ImGuiFont{KanVestResourcePath(font), size});
+      ++index;
+    }
+    
+    return fonts;
+  }
+
   RendererLayer* RendererLayer::s_instance = nullptr;
   RendererLayer& RendererLayer::Get()
   {
@@ -68,79 +90,47 @@ namespace KanVest
     IK_LOG_INFO("RendererLayer", "Attaching '{0}' Layer to application", GetName());
     
     // Set the Imgui theme ----------------------------------------------------------------------
-    KanVest::UI::Font::Load({
-      {UI::FontType::Regular,                 {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         18}},
-      {UI::FontType::Light,                   {KanVestResourcePath("Fonts/Opensans/Light.ttf"),           18}},
-      {UI::FontType::Italic,                  {KanVestResourcePath("Fonts/Opensans/Italic.ttf"),          18}},
-      {UI::FontType::LightItalic,             {KanVestResourcePath("Fonts/Opensans/LightItalic.ttf"),     18}},
-      {UI::FontType::SemiBold,                {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        18}},
-      {UI::FontType::Bold,                    {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            18}},
-      {UI::FontType::SemiBoldItalic,          {KanVestResourcePath("Fonts/Opensans/SemiBoldItalic.ttf"),  18}},
-      {UI::FontType::BoldItalic,              {KanVestResourcePath("Fonts/Opensans/BoldItalic.ttf"),      18}},
-      {UI::FontType::ExtraBold,               {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       18}},
-      {UI::FontType::ExtraBoldItalic,         {KanVestResourcePath("Fonts/Opensans/ExtraBoldItalic.ttf"), 18}},
+    FontMap fonts = {
+      // ───────────── OpenSans (Base UI) ─────────────
+      Make(UI::FontType::Regular,         "Fonts/Opensans/Regular.ttf",         18),
+      Make(UI::FontType::Light,           "Fonts/Opensans/Light.ttf",           18),
+      Make(UI::FontType::Italic,          "Fonts/Opensans/Italic.ttf",          18),
+      Make(UI::FontType::LightItalic,     "Fonts/Opensans/LightItalic.ttf",     18),
+      Make(UI::FontType::SemiBold,        "Fonts/Opensans/SemiBold.ttf",        18),
+      Make(UI::FontType::Bold,            "Fonts/Opensans/Bold.ttf",            18),
+      Make(UI::FontType::SemiBoldItalic,  "Fonts/Opensans/SemiBoldItalic.ttf",  18),
+      Make(UI::FontType::BoldItalic,      "Fonts/Opensans/BoldItalic.ttf",      18),
+      Make(UI::FontType::ExtraBold,       "Fonts/Opensans/ExtraBold.ttf",       18),
+      Make(UI::FontType::ExtraBoldItalic, "Fonts/Opensans/ExtraBoldItalic.ttf", 18),
       
-      {UI::FontType::FixedWidthRegular,       {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       10}},
-      {UI::FontType::FixedWidthLight,         {KanVestResourcePath("Fonts/HfMonorita/Light.ttf"),         10}},
-      {UI::FontType::FixedWidthMedium,        {KanVestResourcePath("Fonts/HfMonorita/Medium.ttf"),        10}},
-      {UI::FontType::FixedWidthBold,          {KanVestResourcePath("Fonts/HfMonorita/Bold.ttf"),          10}},
+      // ───────────── Fixed Width (Code / Debug) ─────────────
+      Make(UI::FontType::FixedWidthRegular, "Fonts/HfMonorita/Regular.ttf", 10),
+      Make(UI::FontType::FixedWidthLight,   "Fonts/HfMonorita/Light.ttf",   10),
+      Make(UI::FontType::FixedWidthMedium,  "Fonts/HfMonorita/Medium.ttf",  10),
+      Make(UI::FontType::FixedWidthBold,    "Fonts/HfMonorita/Bold.ttf",    10),
       
-      {UI::FontType::Small,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         16}},
-      {UI::FontType::Medium,                  {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         20}},
-      {UI::FontType::Large,                   {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         22}},
-      {UI::FontType::ExtraLarge,              {KanVestResourcePath("Fonts/Opensans/Regular.ttf"),         24}},
-      {UI::FontType::SemiHeader,              {KanVestResourcePath("Fonts/Opensans/SemiBold.ttf"),        28}},
-      {UI::FontType::Header,                  {KanVestResourcePath("Fonts/Opensans/Bold.ttf"),            32}},
-      {UI::FontType::LargeHeader,             {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       40}},
-      {UI::FontType::HugeHeader,              {KanVestResourcePath("Fonts/Opensans/ExtraBold.ttf"),       50}},
+      // ───────────── Size Variants ─────────────
+      Make(UI::FontType::Small,      "Fonts/Opensans/Regular.ttf", 16),
+      Make(UI::FontType::Medium,     "Fonts/Opensans/Regular.ttf", 20),
+      Make(UI::FontType::Large,      "Fonts/Opensans/Regular.ttf", 22),
+      Make(UI::FontType::ExtraLarge, "Fonts/Opensans/Regular.ttf", 24),
       
-      {UI::FontType::FixedWidthHeader_12,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       12}},
-      {UI::FontType::FixedWidthHeader_14,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       14}},
-      {UI::FontType::FixedWidthHeader_16,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       16}},
-      {UI::FontType::FixedWidthHeader_18,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       18}},
-      {UI::FontType::FixedWidthHeader_20,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       20}},
-      {UI::FontType::FixedWidthHeader_22,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       22}},
-      {UI::FontType::FixedWidthHeader_24,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       24}},
-      {UI::FontType::FixedWidthHeader_26,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       26}},
-      {UI::FontType::FixedWidthHeader_28,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       28}},
-      {UI::FontType::FixedWidthHeader_30,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       30}},
-      {UI::FontType::FixedWidthHeader_32,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       32}},
-      {UI::FontType::FixedWidthHeader_34,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       34}},
-      {UI::FontType::FixedWidthHeader_36,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       36}},
-      {UI::FontType::FixedWidthHeader_38,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       38}},
-      {UI::FontType::FixedWidthHeader_40,     {KanVestResourcePath("Fonts/HfMonorita/Regular.ttf"),       40}},
+      // ───────────── Headers (OpenSans) ─────────────
+      Make(UI::FontType::SemiHeader,  "Fonts/Opensans/SemiBold.ttf",  28),
+      Make(UI::FontType::Header,      "Fonts/Opensans/Bold.ttf",      32),
+      Make(UI::FontType::LargeHeader, "Fonts/Opensans/ExtraBold.ttf", 40),
+      Make(UI::FontType::HugeHeader,  "Fonts/Opensans/ExtraBold.ttf", 50),
+    };
+    
+    // Append generated Noto headers
+    FontMap notoHeaders = GenerateRange(UI::FontType::Header_02, "Fonts/Noto_Sans/static/NotoSans-Regular.ttf", 2, 60);
+    fonts.insert(notoHeaders.begin(), notoHeaders.end());
 
-      {UI::FontType::Header_02,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         2}},
-      {UI::FontType::Header_04,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         4}},
-      {UI::FontType::Header_06,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         6}},
-      {UI::FontType::Header_08,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         8}},
-      {UI::FontType::Header_10,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         10}},
-      {UI::FontType::Header_12,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         12}},
-      {UI::FontType::Header_14,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         14}},
-      {UI::FontType::Header_16,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         16}},
-      {UI::FontType::Header_18,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         18}},
-      {UI::FontType::Header_20,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         20}},
-      {UI::FontType::Header_22,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         22}},
-      {UI::FontType::Header_24,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         24}},
-      {UI::FontType::Header_26,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         26}},
-      {UI::FontType::Header_28,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         28}},
-      {UI::FontType::Header_30,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         30}},
-      {UI::FontType::Header_32,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         32}},
-      {UI::FontType::Header_34,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         34}},
-      {UI::FontType::Header_36,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         36}},
-      {UI::FontType::Header_38,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         38}},
-      {UI::FontType::Header_40,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         40}},
-      {UI::FontType::Header_42,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         42}},
-      {UI::FontType::Header_44,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         44}},
-      {UI::FontType::Header_46,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         46}},
-      {UI::FontType::Header_48,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         48}},
-      {UI::FontType::Header_50,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         50}},
-      {UI::FontType::Header_52,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         52}},
-      {UI::FontType::Header_54,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         54}},
-      {UI::FontType::Header_56,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         56}},
-      {UI::FontType::Header_58,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         58}},
-      {UI::FontType::Header_60,               {KanVestResourcePath("Fonts/Noto_Sans/static/NotoSans-Regular.ttf"),         60}},
-    });
+    // Append generated fixed headers
+    FontMap fixedHeaders = GenerateRange(UI::FontType::FixedWidthHeader_12, "Fonts/HfMonorita/Regular.ttf", 12, 40);
+    fonts.insert(fixedHeaders.begin(), fixedHeaders.end());
+
+    KanVest::UI::Font::Load(fonts);
     
     KanVasX::Color::Initialize();
     KanVasX::Panel::Initialize(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));

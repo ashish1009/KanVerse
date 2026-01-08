@@ -14,7 +14,8 @@ namespace KanVest::UI
   {
     Regular, Light, Italic, LightItalic, SemiBold, Bold, SemiBoldItalic, BoldItalic, ExtraBold, ExtraBoldItalic,
     FixedWidthRegular, FixedWidthLight, FixedWidthMedium, FixedWidthBold,
-    Small, Medium, Large, ExtraLarge, Header, SemiHeader, LargeHeader, HugeHeader,
+    Small, Medium, Large, ExtraLarge,
+    Header, SemiHeader, LargeHeader, HugeHeader,
     
     FixedWidthHeader_12, FixedWidthHeader_14, FixedWidthHeader_16, FixedWidthHeader_18, FixedWidthHeader_20,
     FixedWidthHeader_22, FixedWidthHeader_24, FixedWidthHeader_26, FixedWidthHeader_28, FixedWidthHeader_30,
