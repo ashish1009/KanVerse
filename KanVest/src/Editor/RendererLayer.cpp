@@ -7,6 +7,8 @@
 
 #include "RendererLayer.hpp"
 
+#include "UI/UI_KanVestPanel.hpp"
+
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
@@ -155,6 +157,8 @@ namespace KanVest
   {
     UI_StartMainWindowDocking();
     
+    KanVest::UI::Panel::Show();
+
     UI_EndMainWindowDocking();
   }
   
@@ -204,12 +208,12 @@ namespace KanVest
     }
     
     // Render the title if original title bar is hidden
-    const auto& applicationSpec = KanViz::Application::Get().GetSpecification().windowSpec;
-    if (applicationSpec.hideTitleBar)
-    {
-      float titlebarHeight = UI_DrawTitlebar();
-      KanVasX::UI::SetCursorPosY(titlebarHeight + ImGui::GetCurrentWindow()->WindowPadding.y);
-    }
+//    const auto& applicationSpec = KanViz::Application::Get().GetSpecification().windowSpec;
+//    if (applicationSpec.hideTitleBar)
+//    {
+//      float titlebarHeight = UI_DrawTitlebar();
+//      KanVasX::UI::SetCursorPosY(titlebarHeight + ImGui::GetCurrentWindow()->WindowPadding.y);
+//    }
     
     // Dockspace
     float minWinSizeX = style.WindowMinSize.x;
@@ -291,7 +295,7 @@ namespace KanVest
     
     // Title bar rectangle --------------------------------------------------------------
     KanVasX::UI::SetCursorPos(windowPadding);
-    KanVasX::UI::DrawFilledRect(KanVasX::Color::TitleBar, titleBarHeight);
+    KanVasX::UI::DrawFilledRect(KanVasX::Color::Background, titleBarHeight);
     
     // Draw KanVest Logo ----------------------------------------------------------------
     ImGui::SetItemAllowOverlap();
