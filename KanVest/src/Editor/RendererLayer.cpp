@@ -9,6 +9,8 @@
 
 #include "UI/UI_KanVestPanel.hpp"
 
+#include "URL_API/API_Provider.hpp"
+
 namespace KanVest
 {
   static const std::filesystem::path KanVestResourcePath = "../../../KanVest/Resources";
@@ -127,11 +129,11 @@ namespace KanVest
     // Append generated Noto headers
     FontMap notoHeaders = GenerateFontsForRange(UI::FontType::Header_02, "Fonts/Noto_Sans/static/NotoSans-Regular.ttf", 2, 60);
     fonts.insert(notoHeaders.begin(), notoHeaders.end());
-
+    
     // Append generated fixed headers
     FontMap fixedHeaders = GenerateFontsForRange(UI::FontType::FixedWidthHeader_12, "Fonts/HfMonorita/Regular.ttf", 12, 40);
     fonts.insert(fixedHeaders.begin(), fixedHeaders.end());
-
+    
     KanVest::UI::Font::Load(fonts);
     
     KanVasX::Color::Initialize();
@@ -140,6 +142,9 @@ namespace KanVest
     KanVasX::Widget::Initialize();
     KanVasX::Widget::SetSearchIcon(KanVasX::UI::GetTextureID(m_searchIcon->GetRendererID()));
     KanVasX::Widget::SetSettingIcon(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
+    
+    // Intialize KanVest Data
+    API_Provider::Initialize(StockAPIProvider::Yahoo);
   }
   
   void RendererLayer::OnDetach() noexcept

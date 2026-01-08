@@ -47,11 +47,12 @@ namespace KanVest
   /// This class stores the server URL from where data need to be extracted
   class API_Provider
   {
-  private:
+  public:
     /// This function initializes the API Provide for URL
     /// - Parameter apiProvider: API provider type
     static void Initialize(StockAPIProvider apiProvider);
     
+  private:
     /// This function returns the API Keys
     static APIKeys GetAPIKeys();
     
