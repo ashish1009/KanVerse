@@ -55,6 +55,9 @@ namespace KanVest
     /// This function returns the URL based on API provider
     static std::string GetURL();
     
+    /// This function returns the API Keys
+    static APIKeys GetAPIKeys();
+
     /// This function returns the interval as string from enum
     /// - Parameter interval: interval enum
     static std::string GetIntervalStringFromEnum(Interval interval);
@@ -83,11 +86,7 @@ namespace KanVest
     static std::string GetOptimalIntervalStringForRange(Range range);
     /// This function returns the valid Intervals
     static Interval GetOptimalIntervalForRange(Range range);
-
-  private:
-    /// This function returns the API Keys
-    static APIKeys GetAPIKeys();    
-        
+    
   private:
     inline static StockAPIProvider s_stockAPIProvider;
     inline static APIKeys s_apiKeys;

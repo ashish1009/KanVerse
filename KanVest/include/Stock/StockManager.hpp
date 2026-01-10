@@ -49,6 +49,17 @@ namespace KanVest
     /// This is worker loop
     static void WorkerLoop();
 
+    /// This function fetch data for stock as fallback, search for .BS if not available in .NS
+    /// This function fetch data for stock as fallback, search for .BS if not available in .NS
+    [[nodiscard("Stock Data can not be discarded")]] static StockData Fetch(const std::string& symbol, Range range, Interval interval);
+    /// This function fetch data from URL
+    /// - Parameters:
+    ///   - symbol: stock symbol
+    ///   - range: range
+    ///   - interval: interval
+    ///   - keys: keys
+    static std::string FetchStockFallbackData(const std::string& symbol, Range range, Interval interval, const APIKeys& keys);
+
     inline static std::unordered_map<std::string, StockRequest> s_stockDataRequests;
 
     inline static std::mutex s_mutex;
