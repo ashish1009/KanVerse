@@ -19,6 +19,8 @@ namespace KanVest
     s_worker = std::thread(WorkerLoop);
     
     s_updateDelayMs = milliseconds;
+    
+    AddStockDataRequest("Nifty", Range::_1Y, Interval::_1D);
   }
   
   void StockManager::Shutdown()

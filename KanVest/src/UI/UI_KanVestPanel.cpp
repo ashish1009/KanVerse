@@ -46,9 +46,16 @@ namespace KanVest::UI
       }
 
       // Add new symbol in stock data extracter
-      StockManager::AddStockDataRequest(s_selectedStockSymbol, range, interval);
-
       s_selectedStockSymbol = s_searchedStockString;
+      StockManager::AddStockDataRequest(s_selectedStockSymbol, range, interval);
+    }
+    
+    // Get Stock Data
+    StockData stockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
+    if (stockData.IsValid())
+    {
+      ImGui::Text("Name %s", stockData.longName.c_str());
+      ImGui::Text("Price r%f", stockData.livePrice);
     }
 
     ImGui::End();
