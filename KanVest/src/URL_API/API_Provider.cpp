@@ -149,4 +149,48 @@ namespace KanVest
     IK_ASSERT(false, "Invalid renage")
     return Range::_1D;
   }
+  
+  std::string API_Provider::GetOptimalIntervalStringForRange(Range range)
+  {
+    switch (range)
+    {
+      case Range::_1D:
+        return "2m";
+      case Range::_5D:
+        return "15m";
+      case Range::_1MO:
+        return "60m";
+      case Range::_6MO:
+      case Range::_YTD:
+      case Range::_1Y:
+      case Range::_5Y:
+      case Range::_MAX:
+        return "1d";
+        
+      default:
+        break;
+    }
+  }
+  
+  Interval API_Provider::GetOptimalIntervalForRange(Range range)
+  {
+    switch (range)
+    {
+      case Range::_1D:
+        return Interval::_2M;
+      case Range::_5D:
+        return Interval::_15M;
+      case Range::_1MO:
+        return Interval::_60M;
+      case Range::_6MO:
+      case Range::_YTD:
+      case Range::_1Y:
+      case Range::_5Y:
+      case Range::_MAX:
+        return Interval::_1D;
+        
+      default:
+        break;
+    }
+  }
 } // namespace KanVest

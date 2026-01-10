@@ -40,6 +40,11 @@ namespace KanVest
     ///   - interval: interval of stock fetch
     static void AddStockDataRequest(const std::string& symbol, Range range, Interval interval);
 
+    /// This function returns the stock data for symbol
+    /// - Parameters:
+    ///   - symbol: stock symbpl
+    [[nodiscard("Stock Data can not be discarded")]] static StockData GetLatestStockData(const std::string& symbol);
+
   private:
     /// This is worker loop
     static void WorkerLoop();

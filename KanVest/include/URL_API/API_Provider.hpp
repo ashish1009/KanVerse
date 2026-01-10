@@ -79,6 +79,11 @@ namespace KanVest
     /// - Parameter key: key string
     static std::string GetArrayParserPattern(const std::string& key);
 
+    /// This function returns the valid Intervals
+    static std::string GetOptimalIntervalStringForRange(Range range);
+    /// This function returns the valid Intervals
+    static Interval GetOptimalIntervalForRange(Range range);
+
   private:
     /// This function returns the API Keys
     static APIKeys GetAPIKeys();    
