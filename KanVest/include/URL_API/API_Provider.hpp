@@ -87,6 +87,9 @@ namespace KanVest
     /// This function returns the valid Intervals
     static Interval GetOptimalIntervalForRange(Range range);
     
+    /// This function returns the valid ranges
+    static std::vector<std::string> GetValidRangesString();
+    
   private:
     inline static StockAPIProvider s_stockAPIProvider;
     inline static APIKeys s_apiKeys;

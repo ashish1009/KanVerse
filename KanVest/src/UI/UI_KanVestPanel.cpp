@@ -24,16 +24,23 @@ namespace KanVest::UI
     
     ImGui::Begin("Stock Analyzer");
     
+    // Update selected stock data
     UpdateSelectedStock();
+    
+    // Show search bar
     ShowStockSearchBar(8.0f, ImGui::GetContentRegionAvail().x);
         
     // Get Stock Data
     StockData stockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
-    if (stockData.IsValid())
+    if (!stockData.IsValid())
     {
-      Chart::Show(stockData);
+      ImGui::End();
+      return;
     }
-
+    
+    // Show chart UI
+    Chart::Show(stockData);
+    
     ImGui::End();
   }
   

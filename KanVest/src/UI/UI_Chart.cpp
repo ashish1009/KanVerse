@@ -17,5 +17,36 @@ namespace KanVest
   void Chart::Show(const StockData &stockData)
   {
     IK_PERFORMANCE_FUNC("Chart::Show");
+    
+    if (!stockData.IsValid())
+    {
+      return;
+    }
+    
+    ShowController(stockData);
+  }
+  
+  void Chart::ShowController(const StockData& stockData)
+  {
+    if (!stockData.IsValid())
+    {
+      return;
+    }
+    
+    // Range controller
+    {
+      for (const auto& range : API_Provider::GetValidRangesString())
+      {
+        auto buttonColor = range == stockData.range ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+        std::string uniqueLabel = range + "##Range";
+        
+        if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
+        {
+
+        }
+        ImGui::SameLine();
+      }
+    } // Range scope
+
   }
 } // namespace KanVest

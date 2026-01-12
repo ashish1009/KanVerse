@@ -193,4 +193,9 @@ namespace KanVest
         break;
     }
   }
+  
+  std::vector<std::string> API_Provider::GetValidRangesString()
+  {
+    return {"1d","5d","1mo","6mo","ytd","1y","5y","max"};
+  }
 } // namespace KanVest

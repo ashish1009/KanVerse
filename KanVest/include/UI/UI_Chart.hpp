@@ -17,5 +17,8 @@ namespace KanVest
     /// This function shows the stock chart
     /// - Parameter stockData: stockData
     static void Show(const StockData& stockData);
+    
+  private:
+    static void ShowController(const StockData& stockData);
   };
 } // namespace KanVest
