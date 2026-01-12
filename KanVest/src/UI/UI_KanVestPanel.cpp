@@ -7,6 +7,8 @@
 
 #include "UI_KanVestPanel.hpp"
 
+#include "UI/UI_Chart.hpp"
+
 #include "Stock/StockManager.hpp"
 
 namespace KanVest::UI
@@ -22,42 +24,50 @@ namespace KanVest::UI
     
     ImGui::Begin("Stock Analyzer");
     
-    // Search bar
-    if (KanVasX::Widget::Search(s_searchedStockString, 128, 8.0f, ImGui::GetContentRegionAvail().x, "Enter Symbol ...", Font(Large), 40.0f))
+    UpdateSelectedStock();
+    ShowStockSearchBar(8.0f, ImGui::GetContentRegionAvail().x);
+        
+    // Get Stock Data
+    StockData stockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
+    if (stockData.IsValid())
     {
-      KanViz::Utils::String::ToUpper(s_searchedStockString);
+      Chart::Show(stockData);
     }
-    
+
+    ImGui::End();
+  }
+  
+  void Panel::UpdateSelectedStock()
+  {
     // Update stock if new data entered
     if (s_selectedStockSymbol != s_searchedStockString and ImGui::IsKeyPressed(ImGuiKey_Enter))
     {
       // Get previous symbol stock data
       const auto& prevStockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
-
+      
       // Get default range and interval
       Range range = Range::_1D;
       Interval interval = API_Provider::GetOptimalIntervalForRange(Range::_1D);
-
+      
       // Update range with previous range if data present
       if (prevStockData.IsValid())
       {
         range = API_Provider::GetRangeEnumFromString(prevStockData.range);
         interval = API_Provider::GetIntervalEnumFromString(prevStockData.dataGranularity);
       }
-
+      
       // Add new symbol in stock data extracter
       s_selectedStockSymbol = s_searchedStockString;
       StockManager::AddStockDataRequest(s_selectedStockSymbol, range, interval);
     }
-    
-    // Get Stock Data
-    StockData stockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
-    if (stockData.IsValid())
+  }
+  
+  void Panel::ShowStockSearchBar(float width, float height)
+  {
+    // Search bar
+    if (KanVasX::Widget::Search(s_searchedStockString, 128, 8.0f, ImGui::GetContentRegionAvail().x, "Enter Symbol ...", Font(Large), 40.0f))
     {
-      ImGui::Text("Name %s", stockData.longName.c_str());
-      ImGui::Text("Price r%f", stockData.livePrice);
+      KanViz::Utils::String::ToUpper(s_searchedStockString);
     }
-
-    ImGui::End();
   }
 } // namespace KanVest::UI

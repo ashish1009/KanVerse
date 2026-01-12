@@ -13,6 +13,7 @@
 		B24895942F0FF96900649B5F /* StockParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24895932F0FF96900649B5F /* StockParser.cpp */; };
 		B24895972F0FF9C800649B5F /* StockManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24895962F0FF9C800649B5F /* StockManager.cpp */; };
 		B248959A2F1231C600649B5F /* StockUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24895992F1231C600649B5F /* StockUtils.cpp */; };
+		B248959D2F15043000649B5F /* UI_Chart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B248959C2F15043000649B5F /* UI_Chart.cpp */; };
 		B26336CB2EDF29DC00D46F96 /* UI_Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
@@ -49,6 +50,8 @@
 		B24895962F0FF9C800649B5F /* StockManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockManager.cpp; sourceTree = "<group>"; };
 		B24895982F1231C600649B5F /* StockUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StockUtils.hpp; sourceTree = "<group>"; };
 		B24895992F1231C600649B5F /* StockUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StockUtils.cpp; sourceTree = "<group>"; };
+		B248959B2F15043000649B5F /* UI_Chart.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Chart.hpp; sourceTree = "<group>"; };
+		B248959C2F15043000649B5F /* UI_Chart.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Chart.cpp; sourceTree = "<group>"; };
 		B26336C92EDF29DC00D46F96 /* UI_Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Font.hpp; sourceTree = "<group>"; };
 		B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Font.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -125,6 +128,7 @@
 			children = (
 				B26336C92EDF29DC00D46F96 /* UI_Font.hpp */,
 				B24895812F0FCEC500649B5F /* UI_KanVestPanel.hpp */,
+				B248959B2F15043000649B5F /* UI_Chart.hpp */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -134,6 +138,7 @@
 			children = (
 				B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */,
 				B24895822F0FCEC500649B5F /* UI_KanVestPanel.cpp */,
+				B248959C2F15043000649B5F /* UI_Chart.cpp */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -296,6 +301,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B248959D2F15043000649B5F /* UI_Chart.cpp in Sources */,
 				B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */,
 				B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */,
 				B24895942F0FF96900649B5F /* StockParser.cpp in Sources */,

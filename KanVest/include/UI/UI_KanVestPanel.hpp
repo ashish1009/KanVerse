@@ -16,6 +16,12 @@ namespace KanVest::UI
     static void Show();
     
   private:
+    /// This function updates the selected stock data
+    static void UpdateSelectedStock();
+    
+    /// This function shows stock search bar
+    static void ShowStockSearchBar(float width, float height);
+
     inline static char s_searchedStockString[128] = "Nifty";
     inline static std::string s_selectedStockSymbol = "Nifty";
   };
