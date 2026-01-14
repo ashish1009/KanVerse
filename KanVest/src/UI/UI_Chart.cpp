@@ -218,7 +218,7 @@ namespace KanVest
       ImGuiCond cond = s_stockChanged ? ImGuiCond_Always : ImGuiCond_Once;
       
       ImPlot::SetupAxisLimits(ImAxis_X1, xMin, xMax, cond);
-      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, cond);
+      ImPlot::SetupAxisLimits(ImAxis_Y1, ymin, ymax, ImGuiCond_Always);
       
       ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, xMin, xMax);
       ImPlot::SetupAxisLimitsConstraints(ImAxis_Y1, ymin, ymax);
@@ -281,5 +281,41 @@ namespace KanVest
   void Chart::ShowCandlePlot(const StockData&, const std::vector<double>& xs, const std::vector<double>& closes, const std::vector<double>& opens,
                              const std::vector<double>& highs, const std::vector<double>& lows)
   {
+    ImVec4 col4 = ImGui::ColorConvertU32ToFloat4(Color::Null);
+    ImPlot::SetNextLineStyle(col4, 2.0f);
+    ImPlot::PlotLine("", xs.data(), closes.data(), (int)xs.size());
+    
+    ImDrawList* dl = ImPlot::GetPlotDrawList();
+
+    ImPlotRect plot = ImPlot::GetPlotLimits();
+    ImVec2 plotMin = ImPlot::PlotToPixels(plot.Min());
+    ImVec2 plotMax = ImPlot::PlotToPixels(plot.Max());
+
+    for (size_t i = 0; i < xs.size(); ++i)
+    {
+      ImU32 color = (closes[i] >= opens[i]) ? UI::Utils::StockProfitColor : UI::Utils::StockLossColor;
+      
+      ImVec2 pHigh  = ImPlot::PlotToPixels(xs[i], highs[i]);
+      ImVec2 pLow   = ImPlot::PlotToPixels(xs[i], lows[i]);
+      ImVec2 pOpen  = ImPlot::PlotToPixels(xs[i], opens[i]);
+      ImVec2 pClose = ImPlot::PlotToPixels(xs[i], closes[i]);
+      
+      dl->AddLine(pLow, pHigh, IM_COL32(200,200,200,255));
+      
+      float left  = pOpen.x - s_candleWidth;
+      float right = pOpen.x + s_candleWidth;
+      
+      if (right < plotMin.x || left > plotMax.x)
+        continue;
+      
+      left  = std::max(left,  plotMin.x);
+      right = std::min(right, plotMax.x);
+      
+      float top = std::min(pOpen.y, pClose.y);
+      float bot = std::max(pOpen.y, pClose.y);
+      
+      dl->AddRectFilled(ImVec2(left, top), ImVec2(right, bot), color);
+      dl->AddRect(ImVec2(left, top), ImVec2(right, bot), IM_COL32(40,40,40,255));
+    }
   }
 } // namespace KanVest
