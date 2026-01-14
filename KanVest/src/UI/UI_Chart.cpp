@@ -33,20 +33,49 @@ namespace KanVest
       return;
     }
     
+    // Button Setting
+    static constexpr ImVec2 buttonSize = {50, 30};
+    static constexpr float buttonRounding = 10.0f;
+    
     // Range controller
+    for (const auto& range : API_Provider::GetValidRangesString())
     {
-      for (const auto& range : API_Provider::GetValidRangesString())
-      {
-        auto buttonColor = range == stockData.range ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
-        std::string uniqueLabel = range + "##Range";
-        
-        if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor))
-        {
+      auto buttonColor = range == stockData.range ? KanVasX::Color::Button : KanVasX::Color::BackgroundDark;
+      auto textColor = range == stockData.range ? KanVasX::Color::Text : KanVasX::Color::TextMuted;
 
-        }
-        ImGui::SameLine();
+      std::string uniqueLabel = range + "##Range";
+      if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor, textColor, false, buttonRounding, buttonSize))
+      {
+        Range currentRange = API_Provider::GetRangeEnumFromString(range);
+        Interval optimalInterval = API_Provider::GetOptimalIntervalForRange(currentRange);
+        
+        StockManager::AddStockDataRequest(stockData.symbol, currentRange, optimalInterval);
       }
-    } // Range scope
+      ImGui::SameLine();
+    }
+
+    // Interval Controller
+    ImGui::SameLine();
+
+    const auto& possibleIntervals = API_Provider::GetValidIntervalsStringForRangeString(stockData.range);
+    KanVasX::UI::ShiftCursorX(ImGui::GetContentRegionAvail().x - possibleIntervals.size() * 60.0f);
+
+    for (const auto& interval : possibleIntervals)
+    {
+      auto buttonColor = interval == stockData.dataGranularity ? KanVasX::Color::BackgroundLight : KanVasX::Color::BackgroundDark;
+      auto textColor = interval == stockData.dataGranularity ? KanVasX::Color::Text : KanVasX::Color::TextMuted;
+
+      std::string uniqueLabel = interval + "##Interval";
+      if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor, textColor, false, buttonRounding, buttonSize))
+      {
+        Range currentRange = API_Provider::GetRangeEnumFromString(stockData.range);
+        Interval currentInterval = API_Provider::GetIntervalEnumFromString(interval);
+
+        StockManager::AddStockDataRequest(stockData.symbol, currentRange, currentInterval);
+      }
+      ImGui::SameLine();
+    }
+    ImGui::NewLine();
 
   }
 } // namespace KanVest

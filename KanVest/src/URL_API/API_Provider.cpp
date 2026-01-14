@@ -185,10 +185,11 @@ namespace KanVest
       case Range::_6MO:
       case Range::_YTD:
       case Range::_1Y:
+        return Interval::_1D;
       case Range::_5Y:
       case Range::_MAX:
-        return Interval::_1D;
-        
+        return Interval::_1MO;
+
       default:
         break;
     }
@@ -197,5 +198,59 @@ namespace KanVest
   std::vector<std::string> API_Provider::GetValidRangesString()
   {
     return {"1d","5d","1mo","6mo","ytd","1y","5y","max"};
+  }
+  
+  std::vector<std::string> API_Provider::GetValidIntervalsStringForRange(Range range)
+  {
+    switch (range)
+    {
+      case Range::_1D:
+      case Range::_5D:
+        return {"1m", "2m", "5m","15m","30m","60m"};
+      case Range::_1MO:
+        return {"5m","15m","30m","60m","1d"};
+      case Range::_6MO:
+        return {"1h","1d","1wk"};
+      case Range::_YTD:
+        return {"1h", "1d","1wk","1mo"};
+      case Range::_1Y:
+      case Range::_5Y:
+      case Range::_MAX:
+        return {"1d","1wk","1mo"};
+        
+      default:
+        break;
+    }
+  }
+  
+  std::vector<Interval> API_Provider::GetValidIntervalsForRange(Range range)
+  {
+    switch (range)
+    {
+      case Range::_1D:
+      case Range::_5D:
+        return {Interval::_1M, Interval::_2M, Interval::_5M, Interval::_15M, Interval::_30M, Interval::_60M};
+      case Range::_1MO:
+        return {Interval::_5M, Interval::_15M, Interval::_30M, Interval::_60M, Interval::_1D};
+      case Range::_6MO:
+        return {Interval::_1H, Interval::_1D, Interval::_1WK};
+      case Range::_YTD:
+        return {Interval::_1H, Interval::_1D, Interval::_1WK, Interval::_1MO};
+      case Range::_1Y:
+      case Range::_5Y:
+      case Range::_MAX:
+        return {Interval::_1D, Interval::_1WK, Interval::_1MO};
+        
+      default:
+        break;
+    }
+  }
+  std::vector<std::string> API_Provider::GetValidIntervalsStringForRangeString(const std::string& range)
+  {
+    return GetValidIntervalsStringForRange(GetRangeEnumFromString(range));
+  }
+  std::vector<Interval> API_Provider::GetValidIntervalsForRangeString(const std::string& range)
+  {
+    return GetValidIntervalsForRange(GetRangeEnumFromString(range));
   }
 } // namespace KanVest
