@@ -79,6 +79,8 @@ namespace KanVest
     }
     
     // Plot type selector -------------------------------------------------------------------
+    KanVasX::ScopedColor FrameColor(ImGuiCol_FrameBg, Color::BackgroundDark);
+    
     ImGui::SameLine();
     KanVasX::UI::ShiftCursor({20.0f, 5.0f});
     
@@ -208,7 +210,7 @@ namespace KanVest
 
     // Plot chart
     static const auto ChartFlag = ImPlotFlags_NoFrame | ImPlotFlags_NoMenus;
-    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.5f), ChartFlag))
+    if (ImPlot::BeginPlot("##StockPlot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ChartFlag))
     {
       const double xMin = 0.0;
       const double xMax = (double)xs.size() - 1.0;
