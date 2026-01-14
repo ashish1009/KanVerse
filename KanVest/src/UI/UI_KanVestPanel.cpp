@@ -11,6 +11,8 @@
 
 #include "Stock/StockManager.hpp"
 
+#include "Analyzer/StockAnalyzer.hpp"
+
 namespace KanVest::UI
 {
 #define Font(font) KanVest::UI::Font::Get(KanVest::UI::FontType::font)
@@ -30,6 +32,10 @@ namespace KanVest::UI
     // Get Stock Data
     StockData stockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
     
+    // Analyze Stock;
+    Analyzer::AnalzeStock(stockData);
+
+    // Show Stock Data
     ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.45f));
     {
       // Show search bar
@@ -37,6 +43,7 @@ namespace KanVest::UI
     }
     ImGui::EndChild();
             
+    // Show Chart
     ImGui::BeginChild(" Chart", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
     {
       // Show chart UI
