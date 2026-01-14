@@ -28,15 +28,10 @@ namespace KanVest::UI
     UpdateSelectedStock();
     
     // Show search bar
-    ShowStockSearchBar(8.0f, ImGui::GetContentRegionAvail().x);
+    ShowStockSearchBar(ImGui::GetContentRegionAvail().x - 5.0f /* Padding */ , 8.0f);
         
     // Get Stock Data
     StockData stockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
-    if (!stockData.IsValid())
-    {
-      ImGui::End();
-      return;
-    }
     
     // Show chart UI
     Chart::Show(stockData);
@@ -72,7 +67,7 @@ namespace KanVest::UI
   void Panel::ShowStockSearchBar(float width, float height)
   {
     // Search bar
-    if (KanVasX::Widget::Search(s_searchedStockString, 128, 8.0f, ImGui::GetContentRegionAvail().x, "Enter Symbol ...", Font(Large), 40.0f))
+    if (KanVasX::Widget::Search(s_searchedStockString, 128, height, width, "Enter Symbol ...", Font(Large), 40.0f))
     {
       KanViz::Utils::String::ToUpper(s_searchedStockString);
     }
