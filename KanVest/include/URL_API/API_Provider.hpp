@@ -16,7 +16,7 @@ namespace KanVest
   
   enum class Interval
   {
-    _1M, _2M, _5M, _15M, _30M, _60M, _90M, _1H, _1D, _5D, _1WK, _1MO, _3MO
+    _1M, _2M, _5M, _15M, _30M, _1H, _90M, _1D, _5D, _1WK, _1MO, _3MO
   };
   
   enum class StockAPIProvider

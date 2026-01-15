@@ -55,7 +55,7 @@ namespace KanVest::UI
     }
 
     // Show Stock Data
-    ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.45f));
+    ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.35f));
     {
       float availableX = ImGui::GetContentRegionAvail().x;
 
@@ -63,6 +63,7 @@ namespace KanVest::UI
       {
         ImGui::BeginChild(" Stock - Data ", ImVec2(availableX * 0.3f, ImGui::GetContentRegionAvail().y));
         {
+          ShowStockSearchBar(ImGui::GetContentRegionAvail().x - 5.0f /* Padding */ , 8.0f);
           ShowStockData(stockData);
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
@@ -75,7 +76,6 @@ namespace KanVest::UI
         KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Null);
         ImGui::BeginChild(" Stock - Search ", ImVec2(availableX * 0.39f, ImGui::GetContentRegionAvail().y));
         {
-          ShowStockSearchBar(ImGui::GetContentRegionAvail().x - 4.0f /* Padding */ , 8.0f);
         }
         ImGui::EndChild();
       }

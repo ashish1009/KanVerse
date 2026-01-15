@@ -82,9 +82,8 @@ namespace KanVest
       case Interval::_5M: return "5m";
       case Interval::_15M: return "15m";
       case Interval::_30M: return "30m";
-      case Interval::_60M: return "60m";
-      case Interval::_90M: return "90m";
       case Interval::_1H: return "1h";
+      case Interval::_90M: return "90m";
       case Interval::_1D: return "1d";
       case Interval::_5D: return "5d";
       case Interval::_1WK: return "1wk";
@@ -122,7 +121,6 @@ namespace KanVest
     else if (interval == "5m") return Interval::_5M;
     else if (interval == "15m") return Interval::_15M;
     else if (interval == "30m") return Interval::_30M;
-    else if (interval == "60m") return Interval::_60M;
     else if (interval == "90m") return Interval::_90M;
     else if (interval == "1h") return Interval::_1H;
     else if (interval == "1d") return Interval::_1D;
@@ -159,7 +157,7 @@ namespace KanVest
       case Range::_5D:
         return "15m";
       case Range::_1MO:
-        return "60m";
+        return "1h";
       case Range::_6MO:
       case Range::_YTD:
       case Range::_1Y:
@@ -181,7 +179,7 @@ namespace KanVest
       case Range::_5D:
         return Interval::_15M;
       case Range::_1MO:
-        return Interval::_60M;
+        return Interval::_1H;
       case Range::_6MO:
       case Range::_YTD:
       case Range::_1Y:
@@ -206,9 +204,9 @@ namespace KanVest
     {
       case Range::_1D:
       case Range::_5D:
-        return {"1m", "2m", "5m","15m","30m","60m"};
+        return {"1m", "2m", "5m","15m","30m","1h"};
       case Range::_1MO:
-        return {"5m","15m","30m","60m","1d"};
+        return {"5m","15m","30m","1h","1d"};
       case Range::_6MO:
         return {"1h","1d","1wk"};
       case Range::_YTD:
@@ -229,9 +227,9 @@ namespace KanVest
     {
       case Range::_1D:
       case Range::_5D:
-        return {Interval::_1M, Interval::_2M, Interval::_5M, Interval::_15M, Interval::_30M, Interval::_60M};
+        return {Interval::_1M, Interval::_2M, Interval::_5M, Interval::_15M, Interval::_30M, Interval::_1H};
       case Range::_1MO:
-        return {Interval::_5M, Interval::_15M, Interval::_30M, Interval::_60M, Interval::_1D};
+        return {Interval::_5M, Interval::_15M, Interval::_30M, Interval::_1H, Interval::_1D};
       case Range::_6MO:
         return {Interval::_1H, Interval::_1D, Interval::_1WK};
       case Range::_YTD:
