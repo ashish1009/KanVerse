@@ -158,6 +158,14 @@ namespace KanVasX
     ///   - offset: offset position
     ///   - rounding: rounding factor
     static void DrawFilledRect(const ImU32& color, float height, float widthFactor = 1.0f, const glm::vec2& offset = {0, 0}, float rounding = Settings::FrameRounding);
+    /// This function draw filled rectangle
+    /// - Parameters:
+    ///   - color: color of rectangle
+    ///   - height: height of rectangle
+    ///   - widthFactor: factor of width to window width (0.5 means half width of current cursor till width)
+    ///   - offset: offset position
+    ///   - rounding: rounding factor
+    static void DrawFilledRect(const ImU32& color, const glm::vec2& size, const glm::vec2& offset = {0, 0}, float rounding = Settings::FrameRounding);
     /// This function draw the Activity outline
     /// - Parameters:
     ///   - rounding: Outline rounding
@@ -225,6 +233,6 @@ namespace KanVasX
     static void DrawShadowAllDirection(ImTextureID shadowImageID, int32_t radius = 15.0f, float alpha = 1.0f);
     
     // Property ------------------------------------------------------------------------------------------------------------------------------------------
-    static bool DropMenu(const std::string& title, const std::vector<std::string>& options, int32_t* selected, float rounding);
+    static bool DropMenu(const std::string& title, const std::vector<std::string>& options, int32_t* selected, float rounding = 0.0f);
   };
 } // namespace KanVasX

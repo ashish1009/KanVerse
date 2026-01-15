@@ -266,7 +266,24 @@ namespace KanVasX
     auto* drawList = ImGui::GetWindowDrawList();
     drawList->AddRectFilled(titlebarMin, titlebarMax, color, rounding);
   }
-  
+
+  void UI::DrawFilledRect(const ImU32& color, const glm::vec2& size, const glm::vec2& offset, float rounding)
+  {
+    const ImVec2 titlebarMin =
+    {
+      ImGui::GetCursorScreenPos().x + offset.x,
+      ImGui::GetCursorScreenPos().y + offset.y
+    };
+    const ImVec2 titlebarMax =
+    {
+      ImGui::GetCursorScreenPos().x + offset.x + size.x,
+      ImGui::GetCursorScreenPos().y + offset.y + size.y
+    };
+    
+    auto* drawList = ImGui::GetWindowDrawList();
+    drawList->AddRectFilled(titlebarMin, titlebarMax, color, rounding);
+  }
+
   // Image -----------------------------------------------------------------------------------------------------------------------------------------
   void UI::Image(ImTextureID textureId, const ImVec2& size, const ImU32& tintCol, const ImU32& borderCol, const ImVec2& uv0, const ImVec2& uv1)
   {
