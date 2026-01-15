@@ -7,12 +7,13 @@
 
 #include "UI_KanVestPanel.hpp"
 
-#include "UI/UI_Utils.hpp"
-#include "UI/UI_Chart.hpp"
-
 #include "Stock/StockManager.hpp"
 
 #include "Analyzer/StockAnalyzer.hpp"
+
+#include "UI/UI_Utils.hpp"
+#include "UI/UI_Chart.hpp"
+#include "UI/UI_MovingAverage.hpp"
 
 namespace KanVest::UI
 {
@@ -72,6 +73,7 @@ namespace KanVest::UI
       {
         ImGui::BeginChild(" Stock - Analyzer ", ImVec2(availableX * 0.3f, ImGui::GetContentRegionAvail().y));
         {
+          ShowStockTechnicals(stockData);
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
@@ -99,8 +101,8 @@ namespace KanVest::UI
       const auto& prevStockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
       
       // Get default range and interval
-      Range range = Range::_1D;
-      Interval interval = API_Provider::GetOptimalIntervalForRange(Range::_1D);
+      Range range = Range::_1Y;
+      Interval interval = API_Provider::GetOptimalIntervalForRange(range);
       
       // Update range with previous range if data present
       if (prevStockData.IsValid())
@@ -126,8 +128,6 @@ namespace KanVest::UI
   
   void Panel::ShowStockData(const StockData& stockData)
   {
-    IK_PERFORMANCE_FUNC("Panel::ShowStockData");
-    
     if (!stockData.IsValid())
     {
       std::string ErrorMessage = "No data available for symbol " + stockData.symbol;
@@ -214,5 +214,45 @@ namespace KanVest::UI
     KanVasX::UI::Text(Font(FixedWidthHeader_18), Utils::FormatLargeNumber(stockData.volume) , Align::Left, {0.0f, 0.0f}, Color::Text);
     
     KanVasX::UI::DrawFilledRect(Color::Separator, 1);
+  }
+  
+  void Panel::ShowStockTechnicals(const StockData& stockData)
+  {
+    if (!stockData.IsValid())
+    {
+      std::string ErrorMessage = "No data available for symbol " + stockData.symbol;
+      KanVasX::UI::Text(Font(Header_24), ErrorMessage, Align::Left, {20.0f, 10.0f}, Color::Error);
+      return;
+    }
+    
+    enum class TechnicalTab {DMA, EMA, Max};
+    static TechnicalTab tab = TechnicalTab::DMA;
+
+    float availX = ImGui::GetContentRegionAvail().x;
+    float technicalButtonSize = (availX / (uint32_t)TechnicalTab::Max) - 10.0f;
+    
+    auto TechnicalButton = [technicalButtonSize](const std::string& title, TechnicalTab checkerTtab, const std::string& tooltip)
+    {
+      const auto& buttonColor = tab == checkerTtab ? Color::Button : Color::Background;
+      if (KanVasX::UI::DrawButton(title, Font(Medium), buttonColor, Color::TextBright, false, 10.0f, {technicalButtonSize, 30}))
+      {
+        tab = checkerTtab;
+      }
+      KanVasX::UI::Tooltip(tooltip);
+      KanVasX::UI::DrawItemActivityOutline();
+    };
+    
+    KanVasX::UI::ShiftCursor({2.0f, 5.0f});
+    TechnicalButton("DMA", TechnicalTab::DMA, "Daily Moving Average"); ImGui::SameLine();
+    TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average");
+    
+    if (tab == TechnicalTab::DMA)
+    {
+      UI_MovingAverage::ShowDMA(stockData, s_shadowTextureID);
+    }
+    else if (tab == TechnicalTab::EMA)
+    {
+//      UI_MovingAverage::ShowEMA(stockData, s_shadowTextureID);
+    }
   }
 } // namespace KanVest::UI

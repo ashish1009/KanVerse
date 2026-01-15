@@ -14,10 +14,17 @@ namespace KanVest
     // Reset report data
     s_stockReport.score = 50.0f;
     s_stockReport.summary.clear();
+    
+    // Technical data
+    s_maResults = MovingAverage::Compute(stockData);
   }
   
   const StockReport& Analyzer::GetReport()
   {
     return s_stockReport;
+  }
+  const std::map<int, std::vector<double>>& Analyzer::GetDMAValues()
+  {
+    return s_maResults.dmaValues;
   }
 } // namespace KanVest

@@ -9,6 +9,8 @@
 
 #include "Stock/StockMetadata.hpp"
 
+#include "Analyzer/Indicators/MovingAverage.hpp"
+
 namespace KanVest
 {
   enum class TechnicalIndicators {DMA};
@@ -27,8 +29,10 @@ namespace KanVest
     static void AnalzeStock(const StockData& stockData);
 
     static const StockReport& GetReport();
+    static const std::map<int, std::vector<double>>& GetDMAValues();
 
   private:
     inline static StockReport s_stockReport;
+    inline static MAResult s_maResults;
   };
 } // namespace KanVest
