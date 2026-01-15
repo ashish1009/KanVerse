@@ -19,7 +19,12 @@ namespace KanVest::UI
   
   using Align = KanVasX::UI::AlignX;
   using Color = KanVasX::Color;
-  
+
+  void Panel::SetShadowTextureId(ImTextureID shadowTextureID)
+  {
+    s_shadowTextureID = shadowTextureID;
+  }
+
   void Panel::Show()
   {
     IK_PERFORMANCE_FUNC("Panel::Show");
@@ -38,8 +43,37 @@ namespace KanVest::UI
     // Show Stock Data
     ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.45f));
     {
-      // Show search bar
-      ShowStockSearchBar(ImGui::GetContentRegionAvail().x - 4.0f /* Padding */ , 8.0f);
+      float availableX = ImGui::GetContentRegionAvail().x;
+
+      // Col 1 :
+      {
+        ImGui::BeginChild(" Stock - Data ", ImVec2(availableX * 0.3f, ImGui::GetContentRegionAvail().y));
+        {
+          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+        }
+        ImGui::EndChild();
+      }
+      ImGui::SameLine();
+      
+      // Col 2 :
+      {
+        KanVasX::ScopedColor childBgColor(ImGuiCol_ChildBg, Color::Null);
+        ImGui::BeginChild(" Stock - Search ", ImVec2(availableX * 0.39f, ImGui::GetContentRegionAvail().y));
+        {
+          ShowStockSearchBar(ImGui::GetContentRegionAvail().x - 4.0f /* Padding */ , 8.0f);
+        }
+        ImGui::EndChild();
+      }
+      ImGui::SameLine();
+      
+      // Col 3 :
+      {
+        ImGui::BeginChild(" Stock - Analyzer ", ImVec2(availableX * 0.3f, ImGui::GetContentRegionAvail().y));
+        {
+          KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
+        }
+        ImGui::EndChild();
+      }
     }
     ImGui::EndChild();
             

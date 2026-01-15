@@ -15,6 +15,9 @@ namespace KanVest::UI
     /// This is primary stock UI panel
     static void Show();
     
+    // Sets the texutre icon IDs
+    static void SetShadowTextureId(ImTextureID shadowTextureID);
+
   private:
     /// This function updates the selected stock data
     static void UpdateSelectedStock();
@@ -24,5 +27,7 @@ namespace KanVest::UI
 
     inline static char s_searchedStockString[128] = "Nifty";
     inline static std::string s_selectedStockSymbol = "Nifty";
+    
+    inline static ImTextureID s_shadowTextureID = 0;
   };
 } // namespace KanVest::UI

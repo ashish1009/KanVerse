@@ -146,6 +146,8 @@ namespace KanVest
     KanVasX::Widget::SetSettingIcon(KanVasX::UI::GetTextureID(m_settingIcon->GetRendererID()));
     
     // Intialize KanVest Data
+    KanVest::UI::Panel::SetShadowTextureId(KanVasX::UI::GetTextureID(m_shadowTexture->GetRendererID()));
+    
     API_Provider::Initialize(StockAPIProvider::Yahoo);
     StockManager::Initialize(10 /* Milisecond */);
   }
