@@ -34,9 +34,17 @@ namespace KanVest::UI
     /// - Parameter stockData: stock data to show
     static void ShowStockTechnicals(const StockData& stockData);
 
+    // Stock search data
     inline static char s_searchedStockString[128] = "Nifty";
     inline static std::string s_selectedStockSymbol = "Nifty";
-    
+
+    // Stock change cache
+    inline static bool s_stockChanged = true;
+    inline static std::string s_lastSymbol;
+    inline static std::string s_lastRange;
+    inline static std::string s_lastInterval;
+
+    // Texture data
     inline static ImTextureID s_shadowTextureID = 0;
   };
 } // namespace KanVest::UI

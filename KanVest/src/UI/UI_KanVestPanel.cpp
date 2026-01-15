@@ -39,8 +39,20 @@ namespace KanVest::UI
     // Get Stock Data
     StockData stockData = StockManager::GetLatestStockData(s_selectedStockSymbol);
     
-    // Analyze Stock;
-    Analyzer::AnalzeStock(stockData);
+    // Update if stock is changed
+    s_stockChanged = s_lastSymbol != stockData.symbol || s_lastRange != stockData.range || s_lastInterval != stockData.dataGranularity;
+    if (s_stockChanged)
+    {
+      s_lastSymbol   = stockData.symbol;
+      s_lastRange    = stockData.range;
+      s_lastInterval = stockData.dataGranularity;
+    }
+
+    // Analyze Stock
+    if (s_stockChanged)
+    {
+      Analyzer::AnalzeStock(stockData);
+    }
 
     // Show Stock Data
     ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.45f));
