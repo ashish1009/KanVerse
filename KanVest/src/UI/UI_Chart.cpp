@@ -109,105 +109,72 @@ namespace KanVest
     ImGui::SetNextItemWidth(100.0f);
     if (KanVasX::UI::DropMenu("##Indicator", indicatorOptions, &currentIndicator, frameRounding))
     {
+      // Get Moving average which are available
+      auto GetMovingAveragePeriodIdx = [](const std::unordered_map<int /* Period */, MovingAverage_UI_Data>& MA_UI_Data)
+      {
+        // Return detault first period
+        if (MA_UI_Data.empty())
+        {
+          return 0;
+        }
+        
+        // Return next available period
+        int idx = 0;
+        for (auto period : ValidMovingAveragePeriods)
+        {
+          auto UI_Data_Itr = MA_UI_Data.find(period);
+          if (UI_Data_Itr == MA_UI_Data.end())
+          {
+            return idx;
+          }
+          else
+          {
+            if (UI_Data_Itr->second.show == false)
+            {
+              return idx;
+            }
+          }
+          idx++;
+        }
+        
+        // Invalid period : All periods exists
+        return -1;
+      };
+      
+      auto Fill_MA_UI_Data = [GetMovingAveragePeriodIdx](bool isDMA)
+      {
+        std::unordered_map<int /* Period */, MovingAverage_UI_Data>& MA_UI_Data = isDMA ? s_DMA_UI_Data : s_EMA_UI_Data;
+        int periodIdx = GetMovingAveragePeriodIdx(MA_UI_Data);
+        if (periodIdx == -1)
+        {
+          return;
+        }
+        int period = ValidMovingAveragePeriods.at(periodIdx);
+        MovingAverage_UI_Data& UI_Data = MA_UI_Data[period];
+        
+        UI_Data.show = true;
+        UI_Data.periodIdx = periodIdx;
+        UI_Data.period = period;
+        
+        float typeOffset = isDMA * 0.37f;   // isDMA = 0 (EMA), 1 (DMA)
+        UI_Data.color = {
+          0.25f + 0.75f * fmod(period * 0.37f + typeOffset, 1.0f),
+          0.25f + 0.75f * fmod(period * 0.61f + typeOffset, 1.0f),
+          0.25f + 0.75f * fmod(period * 0.83f + typeOffset, 1.0f),
+          1.0f
+        };
+      };
+
       s_selectedIndicator = (Indicator)currentIndicator;
       switch ((Indicator)currentIndicator)
       {
-        case Indicator::DMA:
-        case Indicator::EMA:
-          openPopup = true;
-          break;
+        case Indicator::DMA: Fill_MA_UI_Data(true);  break;
+        case Indicator::EMA: Fill_MA_UI_Data(false); break;
         default:
           break;
       }
     }
     
-    // If the flag is set, open popup
-    if (openPopup)
-    {
-      ImGui::OpenPopup("Indicator Options");
-      openPopup = false;  // reset flag
-    }
-    
-    // Draw the popup
-    if (ImGui::BeginPopup("Indicator Options"))
-    {
-      KanVasX::UI::Text(Font(Header_20), s_selectedIndicator == Indicator::DMA ? "Moving Average" : "Moving Average Exponential", Align::Center);
-      ImGui::Separator();
-      
-      // Period ------------------------
-      static std::vector<std::string> possibleMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200"};
-      static int periodIdx = 0;
-
-      KanVasX::UI::Text(Font(Bold), "Period", Align::Left);
-      ImGui::SameLine();
-      
-      ImGui::SetNextItemWidth(100.0f);
-      if (KanVasX::UI::DropMenu("##Period", possibleMAPeriods, &periodIdx, frameRounding))
-      {
-        
-      }
-      
-      // Color ------------------------
-      static glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
-      
-      KanVasX::UI::Text(Font(Bold), "Color ", Align::Left);
-      ImGui::SameLine();
-
-      ImVec4 col = { color.r, color.g, color.b, color.a };
-      KanVasX::UI::ShiftCursor({5.0f, 5.0f});
-      if (ImGui::ColorButton("##MAColor", col, ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(14, 14)))
-      {
-        ImGui::OpenPopup("MA_Color_Popup");
-      }
-      
-      if (ImGui::BeginPopup("MA_Color_Popup"))
-      {
-        ImGui::ColorPicker4("MA Color", &color.r, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
-        ImGui::EndPopup();
-      }
-      
-      if (periodIdx < 0 or periodIdx >= ValidMovingAveragePeriods.size())
-      {
-        ImGui::EndPopup();
-        return;
-      }
-            
-      ImGui::Separator();
-
-      auto ResetPopup = []()
-      {
-        // Reset color and periof
-        color = {1.0f, 1.0f, 1.0f, 1.0f};
-        periodIdx = 0;
-        
-        ImGui::CloseCurrentPopup();
-      };
-      
-      // Add buttons or other controls
-      if (ImGui::Button("Apply"))
-      {
-        // TODO: Handle other data if needed later for now this popup is for moving average only which have just 2
-        std::unordered_map<int /* Period */, MovingAverage_UI_Data>& MA_UI_Data = s_selectedIndicator == Indicator::DMA ? s_DMA_UI_Data : s_EMA_UI_Data;
-        int period = ValidMovingAveragePeriods.at(periodIdx);
-        
-        // Update UI Data
-        MovingAverage_UI_Data& UI_Data = MA_UI_Data[period];
-        UI_Data.show = true;
-        UI_Data.periodIdx = periodIdx;
-        UI_Data.period = period;
-        UI_Data.color = color;
-
-        ResetPopup();
-      }
-      
-      ImGui::SameLine();
-      if (ImGui::Button("Cancel"))
-      {
-        ResetPopup();      }
-      
-      ImGui::EndPopup();
-    }
-
     // Interval Controller -------------------------------------------------------------------
     ImGui::SameLine();
 
@@ -643,7 +610,7 @@ namespace KanVest
 
     // Cross Button
     {
-      if (KanVasX::UI::DrawButton("X", Font(Bold), Color::BackgroundLight, Color::DarkRed, false, 0.0f, {25.0f, 25.0f}))
+      if (KanVasX::UI::DrawButton("X", Font(Bold), Color::BackgroundLight, Color::DarkRed, false, 10.0f, {25.0f, 25.0f}))
       {
         data.show = false;
       }
