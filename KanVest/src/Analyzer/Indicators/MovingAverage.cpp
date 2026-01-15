@@ -42,8 +42,8 @@ namespace KanVest
     
     for (int p : periods)
     {
-      auto dma = ComputeDMA(closesCandle, p);
-      result.dmaValues[p] = dma;
+      result.dmaValues[p] = ComputeDMA(closesCandle, p);;
+      result.emaValues[p] = ComputeEMA(closesCandle, p);;
     }
     
     return result;
