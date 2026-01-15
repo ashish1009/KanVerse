@@ -42,7 +42,8 @@ namespace KanVest
     
     if (!stockData.IsValid())
     {
-      KanVasX::UI::Text(Font(Header_24), "No Chart available for stock", Align::Left, {20.0f, 10.0f}, Color::Error);
+      std::string ErrorMessage = "No Chart available for symbol " + stockData.symbol;
+      KanVasX::UI::Text(Font(Header_24), ErrorMessage, Align::Left, {20.0f, 10.0f}, Color::Error);
       return;
     }
     
@@ -124,6 +125,17 @@ namespace KanVest
     {
       return;
     }
+
+    // Get candle data
+    const auto& candleHistory = stockData.candleHistory;
+    
+    // Check valid history
+    if (!candleHistory.size())
+    {
+      std::string ErrorMessage = "No Candle available for symbol " + stockData.symbol + " Range : " + stockData.range + " Interval : " + stockData.dataGranularity;
+      KanVasX::UI::Text(Font(Header_24), ErrorMessage, Align::Left, {20.0f, 10.0f}, Color::Error);
+      return;
+    }
     
     // Scoped button color
     KanVasX::ScopedColor ButtonColor(ImGuiCol_Button, Color::Null);
@@ -138,8 +150,6 @@ namespace KanVest
       s_lastInterval = stockData.dataGranularity;
     }
 
-    // Get candle data
-    const auto& candleHistory = stockData.candleHistory;
     std::vector<CandleData> filteredDaysCandles = Utils::FilterTradingDays(candleHistory);
 
     // Axis data vector

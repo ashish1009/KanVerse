@@ -53,6 +53,6 @@ namespace KanVest
     // --- Historical Candles ---
     std::vector <CandleData> candleHistory;
 
-    bool IsValid() const { return !symbol.empty() && !candleHistory.empty(); }
+    bool IsValid() const { return !shortName.empty(); }
   };
 } // namespace KanVest

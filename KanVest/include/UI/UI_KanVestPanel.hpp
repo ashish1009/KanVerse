@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "Stock/StockMetadata.hpp"
+
 namespace KanVest::UI
 {
   class Panel
@@ -24,6 +26,10 @@ namespace KanVest::UI
     
     /// This function shows stock search bar
     static void ShowStockSearchBar(float width, float height);
+
+    /// This function shows stock basic data
+    /// - Parameter stockData: stock data to show
+    static void ShowStockData(const StockData& stockData);
 
     inline static char s_searchedStockString[128] = "Nifty";
     inline static std::string s_selectedStockSymbol = "Nifty";
