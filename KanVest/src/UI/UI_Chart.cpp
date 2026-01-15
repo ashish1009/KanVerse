@@ -11,6 +11,7 @@
 
 #include "Stock/StockUtils.hpp"
 
+#include "Analyzer/StockAnalyzer.hpp"
 #include "Analyzer/Indicators/MovingAverage.hpp"
 
 namespace KanVest
@@ -379,6 +380,29 @@ namespace KanVest
       ShowReferenceLine(stockData.prevClose, ymin, ymax, xs, Color::Text);
       ShowCrossHair(xs, ymin, ymax);
 
+      // Show technicals
+      auto ShowTechnical = [xs](const std::string& title, const std::map<int, std::vector<double>>& MA_Data, std::unordered_map<int /* Period */, MovingAverage_UI_Data>& MA_UI_data)
+      {
+        for (auto& [period, data] : MA_UI_data)
+        {
+          if (data.show)
+          {
+//            ShowMAControler(title, data);
+            ShowMAPlot(data, MA_Data, xs);
+            ImGui::SameLine();
+          }
+        }
+      };
+      
+      const auto& cursorPos = ImPlot::GetPlotPos();
+      
+      ImGui::SetCursorScreenPos({cursorPos.x + 10.0f, cursorPos.y + 10.0f});
+      ShowTechnical("DMA", Analyzer::GetDMAValues(), s_DMA_UI_Data);
+      ImGui::NewLine();
+      
+      ImGui::SetCursorScreenPos({cursorPos.x + 10.0f, cursorPos.y + 40.0f});
+      ShowTechnical("EMA", Analyzer::GetEMAValues(), s_EMA_UI_Data);
+
       ImPlot::EndPlot();
     }
   }
@@ -596,4 +620,15 @@ namespace KanVest
       }
     }
   }
+  
+  void Chart::ShowMAPlot(const MovingAverage_UI_Data& MA_UI_Data, const std::map<int, std::vector<double>>& MA_Data, const std::vector<double> &xs)
+  {
+    if (auto itr = MA_Data.find(MA_UI_Data.period); itr != MA_Data.end())
+    {
+      ImVec4 col4 = {MA_UI_Data.color.r, MA_UI_Data.color.g, MA_UI_Data.color.b, MA_UI_Data.color.a};
+      ImPlot::SetNextLineStyle(col4, 2.0f);
+      ImPlot::PlotLine("", xs.data(), itr->second.data(), static_cast<int>(xs.size()));
+    }
+  }
+
 } // namespace KanVest

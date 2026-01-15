@@ -47,6 +47,8 @@ namespace KanVest
     
     static void ShowTooltip(const StockData& stockData, const std::vector<CandleData>& filteredDaysCandles);
 
+    static void ShowMAPlot(const MovingAverage_UI_Data& MA_UI_Data, const std::map<int, std::vector<double>>& MA_Data, const std::vector<double> &xs);
+
     // Stock change cache
     inline static bool s_stockChanged = true;
     inline static std::string s_lastSymbol;

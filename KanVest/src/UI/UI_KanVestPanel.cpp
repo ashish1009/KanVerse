@@ -264,7 +264,7 @@ namespace KanVest::UI
     }
     else if (tab == TechnicalTab::EMA)
     {
-//      UI_MovingAverage::ShowEMA(stockData, s_shadowTextureID);
+      UI_MovingAverage::ShowEMA(stockData, s_shadowTextureID);
     }
   }
 } // namespace KanVest::UI
