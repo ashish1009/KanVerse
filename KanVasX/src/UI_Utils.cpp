@@ -485,8 +485,9 @@ namespace KanVasX
   }
   
   // Property ------------------------------------------------------------------------------------------------------------------------------------------
-  bool UI::DropMenu(const std::string& title, const std::vector<std::string>& options, int32_t* selected)
+  bool UI::DropMenu(const std::string& title, const std::vector<std::string>& options, int32_t* selected, float rounding)
   {
+    KanVasX::ScopedStyle FrameRounding(ImGuiStyleVar_FrameRounding, rounding);
     bool modified = false;
     const char* current = options[(size_t)*selected].c_str();
 
@@ -511,7 +512,7 @@ namespace KanVasX
     
     if (!KanVasX::UI::IsItemDisabled())
     {
-      KanVasX::UI::DrawItemActivityOutline(2.0f, true, Color::Highlight);
+      KanVasX::UI::DrawItemActivityOutline(rounding, true, Color::Highlight);
     }
     return modified;
   }

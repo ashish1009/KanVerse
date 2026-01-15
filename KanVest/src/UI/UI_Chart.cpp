@@ -60,8 +60,10 @@ namespace KanVest
     
     // Button Setting
     static constexpr ImVec2 buttonSize = {50, 30};
-    static constexpr float buttonRounding = 10.0f;
+    static constexpr float frameRounding = 10.0f;
     
+    KanVasX::ScopedColor FrameColor(ImGuiCol_FrameBg, Color::BackgroundDark);
+
     // Range controller -------------------------------------------------------------------
     for (const auto& range : API_Provider::GetValidRangesString())
     {
@@ -69,7 +71,7 @@ namespace KanVest
       auto textColor = range == stockData.range ? KanVasX::Color::Text : KanVasX::Color::TextMuted;
 
       std::string uniqueLabel = range + "##Range";
-      if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor, textColor, false, buttonRounding, buttonSize))
+      if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor, textColor, false, frameRounding, buttonSize))
       {
         Range currentRange = API_Provider::GetRangeEnumFromString(range);
         Interval optimalInterval = API_Provider::GetOptimalIntervalForRange(currentRange);
@@ -80,18 +82,31 @@ namespace KanVest
     }
     
     // Plot type selector -------------------------------------------------------------------
-    KanVasX::ScopedColor FrameColor(ImGuiCol_FrameBg, Color::BackgroundDark);
-    
     ImGui::SameLine();
     KanVasX::UI::ShiftCursor({20.0f, 5.0f});
     
     int32_t currentPlotType = (int32_t)s_plotType;
-    static std::vector<std::string> options = {"Line", "Candle"};
+    static std::vector<std::string> plotTypeOtions = {"Line", "Candle"};
     
     ImGui::SetNextItemWidth(100.0f);
-    if (KanVasX::UI::DropMenu("##ChartType", options, &currentPlotType))
+    if (KanVasX::UI::DropMenu("##ChartType", plotTypeOtions, &currentPlotType, frameRounding))
     {
       s_plotType = (PlotType)currentPlotType;
+    }
+    
+    // Technicals ----------------------------------------------------------------------------
+    enum class Indicators {None, DMA, EMA};
+
+    ImGui::SameLine();
+    KanVasX::UI::ShiftCursor({20.0f, 5.0f});
+
+    int32_t currentIndicator = 0; // No need to set the drop menu since we support multiple Indicators
+    static std::vector<std::string> indicatorOptions = {"Indicator", "DMA", "EMA"};
+
+    ImGui::SetNextItemWidth(100.0f);
+    if (KanVasX::UI::DropMenu("##Indicator", indicatorOptions, &currentIndicator, frameRounding))
+    {
+      
     }
 
     // Interval Controller -------------------------------------------------------------------
@@ -106,7 +121,7 @@ namespace KanVest
       auto textColor = interval == stockData.dataGranularity ? KanVasX::Color::Text : KanVasX::Color::TextMuted;
 
       std::string uniqueLabel = interval + "##Interval";
-      if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor, textColor, false, buttonRounding, buttonSize))
+      if (KanVasX::UI::DrawButton(uniqueLabel, nullptr, buttonColor, textColor, false, frameRounding, buttonSize))
       {
         Range currentRange = API_Provider::GetRangeEnumFromString(stockData.range);
         Interval currentInterval = API_Provider::GetIntervalEnumFromString(interval);
@@ -471,10 +486,10 @@ namespace KanVest
           ImGui::SameLine(); ImGui::Text("%s", value.c_str());
         };
         
-        ImGui::Text("Open   : "); showOCHL(UI::Utils::FormatDoubleToString(candle.open));
-        ImGui::Text("Close  : "); showOCHL(UI::Utils::FormatDoubleToString(candle.close));
-        ImGui::Text("High   : "); showOCHL(UI::Utils::FormatDoubleToString(candle.high));
-        ImGui::Text("Low    : "); showOCHL(UI::Utils::FormatDoubleToString(candle.low));
+        ImGui::Text("Open  :"); showOCHL(UI::Utils::FormatDoubleToString(candle.open));
+        ImGui::Text("Close :"); showOCHL(UI::Utils::FormatDoubleToString(candle.close));
+        ImGui::Text("High  :"); showOCHL(UI::Utils::FormatDoubleToString(candle.high));
+        ImGui::Text("Low   :"); showOCHL(UI::Utils::FormatDoubleToString(candle.low));
         
         ImGui::Separator();
         ImGui::TextColored(ImVec4(1, 0.8f, 0, 1), "Volume : %s", UI::Utils::FormatLargeNumber(candle.volume).c_str());

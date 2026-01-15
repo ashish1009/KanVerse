@@ -26,7 +26,7 @@ namespace KanVest
       return;
     }
     const auto& dmaValues = Analyzer::GetDMAValues();
-    ShowMovingAverageData(stockData, dmaValues, " SMA", shadowTexture);    
+    ShowMovingAverageData(stockData, dmaValues, " SMA", shadowTexture);
   }
   
   void UI_MovingAverage::ShowMovingAverageData(const StockData& stockData, const std::map<int, std::vector<double>>& maMap, const std::string& maString, ImTextureID shadowTexture)
@@ -122,7 +122,7 @@ namespace KanVest
       {
         if (shadowTexture)
         {
-          KanVasX::UI::DrawShadowAllDirection(shadowTexture);
+          KanVasX::UI::DrawShadowAllDirection(shadowTexture, 10.0f);
         }
         ImGui::EndChild();
         
@@ -138,7 +138,7 @@ namespace KanVest
     {
       if (shadowTexture)
       {
-        KanVasX::UI::DrawShadowAllDirection(shadowTexture);
+        KanVasX::UI::DrawShadowAllDirection(shadowTexture, 10.0f);
       }
       ImGui::EndChild();
     }
