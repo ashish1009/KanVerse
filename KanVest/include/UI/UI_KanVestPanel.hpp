@@ -30,6 +30,10 @@ namespace KanVest::UI
     /// This function shows stock basic data
     /// - Parameter stockData: stock data to show
     static void ShowStockData(const StockData& stockData);
+    /// This function shows stock analyzer data
+    /// - Parameter stockData: stock data to show
+    static void ShowStockAnalyzer(const StockData& stockData);
+
     /// This function shows stock basic data
     /// - Parameter stockData: stock data to show
     static void ShowStockTechnicals(const StockData& stockData);

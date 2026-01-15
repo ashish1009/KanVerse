@@ -65,6 +65,8 @@ namespace KanVest::UI
         {
           ShowStockSearchBar(ImGui::GetContentRegionAvail().x - 5.0f /* Padding */ , 8.0f);
           ShowStockData(stockData);
+          ShowStockAnalyzer(stockData);
+
           KanVasX::UI::DrawShadowAllDirection(s_shadowTextureID);
         }
         ImGui::EndChild();
@@ -265,6 +267,55 @@ namespace KanVest::UI
     else if (tab == TechnicalTab::EMA)
     {
       UI_MovingAverage::ShowEMA(stockData, s_shadowTextureID);
+    }
+  }
+  
+  void Panel::ShowStockAnalyzer(const StockData& stockData)
+  {
+    if (!stockData.IsValid())
+    {
+      return;
+    }
+    
+    // Get analyzer report
+    const auto& stockReport = Analyzer::GetReport();
+    
+    // Show Score
+    float score = static_cast<float>(stockReport.score);
+    
+    // Determine color based on score
+    ImU32 scoreColor;
+    std::string scoreString = "Technically Neutral";
+    
+    if (score < 10)      { scoreString = "Technically Strong Bearish";      scoreColor = KanVasX::Color::Red; }
+    else if (score < 25) { scoreString = "Technically Bearish";             scoreColor = KanVasX::Color::Orange; }
+    else if (score < 40) { scoreString = "Technically Moderate Bearish";    scoreColor = KanVasX::Color::Orange; }
+    else if (score < 60) { scoreString = "Technically Neutral";             scoreColor = KanVasX::Color::Yellow; }
+    else if (score < 75) { scoreString = "Technically Moderate Bullish";    scoreColor = KanVasX::Color::Green; }
+    else if (score < 90) { scoreString = "Technically Bullish";             scoreColor = KanVasX::Color::Green; }
+    else                 { scoreString = "Technically Strong Bullish";      scoreColor = KanVasX::Color::Green; }
+    
+    // Scoped color
+    {
+      KanVasX::ScopedStyle headerPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2{1.0f, 1.0f});
+      KanVasX::ScopedColor plotColor(ImGuiCol_PlotHistogram, scoreColor);
+      // Convert score 0-100 to fraction 0.0-1.0
+      
+      // Print Score
+      KanVasX::UI::ShiftCursorX(10.0f);
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Header_32), Utils::FormatDoubleToString(score), KanVasX::UI::AlignX::Left, {10.0f, 0}, scoreColor);
+      
+      // Print /100
+      static const std::string totalScoreString = "/100";
+      ImGui::SameLine();
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Medium), totalScoreString, KanVasX::UI::AlignX::Left, {0, 10.0f}, KanVasX::Color::White);
+      
+      ImGui::SameLine();
+      KanVasX::UI::Text(KanVest::UI::Font::Get(KanVest::UI::FontType::Large), scoreString, KanVasX::UI::AlignX::Right, {-20.0f, 5.0f}, scoreColor);
+      
+      float fraction = score / 100.0f;
+      KanVasX::UI::ShiftCursorX(20.0f);
+      ImGui::ProgressBar(fraction, ImVec2(ImGui::GetContentRegionAvail().x - 20.0f, 0), "");
     }
   }
 } // namespace KanVest::UI
