@@ -23,12 +23,22 @@ namespace KanVest
   {
     return s_stockReport;
   }
-  const std::map<int, std::vector<double>>& Analyzer::GetDMAValues()
+  const std::map<int, std::vector<double>>& Analyzer::GetDMAValues(MAPriceSource priceSource)
   {
-    return s_maResults.dmaValues;
+    static std::map<int, std::vector<double>> EmptyMA;
+    if (auto itr = s_maResults.find(priceSource); itr != s_maResults.end())
+    {
+      return itr->second.dmaValues;
+    }
+    return EmptyMA;
   }
-  const std::map<int, std::vector<double>>& Analyzer::GetEMAValues()
+  const std::map<int, std::vector<double>>& Analyzer::GetEMAValues(MAPriceSource priceSource)
   {
-    return s_maResults.emaValues;
+    static std::map<int, std::vector<double>> EmptyMA;
+    if (auto itr = s_maResults.find(priceSource); itr != s_maResults.end())
+    {
+      return itr->second.emaValues;
+    }
+    return EmptyMA;
   }
 } // namespace KanVest

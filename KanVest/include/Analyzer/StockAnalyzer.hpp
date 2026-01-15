@@ -30,11 +30,11 @@ namespace KanVest
 
     static const StockReport& GetReport();
     
-    static const std::map<int, std::vector<double>>& GetDMAValues();
-    static const std::map<int, std::vector<double>>& GetEMAValues();
+    static const std::map<int, std::vector<double>>& GetDMAValues(MAPriceSource priceSource);
+    static const std::map<int, std::vector<double>>& GetEMAValues(MAPriceSource priceSource);
 
   private:
     inline static StockReport s_stockReport;
-    inline static MAResult s_maResults;
+    inline static std::unordered_map<MAPriceSource, MAResult> s_maResults;
   };
 } // namespace KanVest
