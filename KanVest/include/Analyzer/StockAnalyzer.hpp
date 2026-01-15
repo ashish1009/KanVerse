@@ -13,12 +13,12 @@
 
 namespace KanVest
 {
-  enum class TechnicalIndicators {DMA};
+  enum class TechnicalIndicators {DMA, EMA};
 
   struct StockReport
   {
     double score = 50.0;
-    std::unordered_map<TechnicalIndicators, std::string> summary;
+    std::unordered_map<TechnicalIndicators, std::vector<std::pair<ImU32, std::string>>> summary;
   };
 
   class Analyzer
@@ -30,11 +30,11 @@ namespace KanVest
 
     static const StockReport& GetReport();
     
-    static const std::map<int, std::vector<double>>& GetDMAValues(MAPriceSource priceSource);
-    static const std::map<int, std::vector<double>>& GetEMAValues(MAPriceSource priceSource);
+    static const std::map<int, std::vector<double>>& GetDMAValues();
+    static const std::map<int, std::vector<double>>& GetEMAValues();
 
   private:
     inline static StockReport s_stockReport;
-    inline static std::unordered_map<MAPriceSource, MAResult> s_maResults;
+    inline static MAResult s_maResults;
   };
 } // namespace KanVest

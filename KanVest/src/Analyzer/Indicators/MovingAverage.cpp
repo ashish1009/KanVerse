@@ -18,9 +18,9 @@ namespace KanVest
     return ValidMovingAveragePeriods;
   }
   
-  std::unordered_map<MAPriceSource, MAResult> MovingAverage::Compute(const StockData& data)
+  MAResult MovingAverage::Compute(const StockData& data)
   {
-    std::unordered_map<MAPriceSource, MAResult> result;
+    MAResult result;
     
     if (!data.IsValid())
     {
@@ -40,18 +40,15 @@ namespace KanVest
     
     auto periods = GetActivePeriods(data.range);
     
-    for (int32_t i = 0; i < (int32_t)MAPriceSource::Limit; i++)
+    for (int p : periods)
     {
-      for (int p : periods)
-      {
-        result[(MAPriceSource)i].dmaValues[p] = ComputeDMA(closesCandle, p, (MAPriceSource)i);
-        result[(MAPriceSource)i].emaValues[p] = ComputeEMA(closesCandle, p, (MAPriceSource)i);
-      }
+      result.dmaValues[p] = ComputeDMA(closesCandle, p);
+      result.emaValues[p] = ComputeEMA(closesCandle, p);
     }
     return result;
   }
 
-  std::vector<double> MovingAverage::ComputeDMA(const std::vector<double>& closes, int period, MAPriceSource priceSource)
+  std::vector<double> MovingAverage::ComputeDMA(const std::vector<double>& closes, int period)
   {
     std::vector<double> dma(closes.size(), 0.0);
     if (closes.size() < static_cast<size_t>(period))
@@ -70,7 +67,7 @@ namespace KanVest
     return dma;
   }
   
-  std::vector<double> MovingAverage::ComputeEMA(const std::vector<double>& closes, int period, MAPriceSource priceSource)
+  std::vector<double> MovingAverage::ComputeEMA(const std::vector<double>& closes, int period)
   {
     std::vector<double> ema(closes.size(), 0.0);
     if (closes.empty()) return ema;

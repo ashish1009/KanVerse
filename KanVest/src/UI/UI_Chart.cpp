@@ -364,11 +364,11 @@ namespace KanVest
       const auto& cursorPos = ImPlot::GetPlotPos();
       
       ImGui::SetCursorScreenPos({cursorPos.x + 10.0f, cursorPos.y + 10.0f});
-      ShowTechnical("DMA", Analyzer::GetDMAValues(MAPriceSource::Close), s_DMA_UI_Data);
+      ShowTechnical("DMA", Analyzer::GetDMAValues(), s_DMA_UI_Data);
       ImGui::NewLine();
       
       ImGui::SetCursorScreenPos({cursorPos.x + 10.0f, cursorPos.y + 40.0f});
-      ShowTechnical("EMA", Analyzer::GetEMAValues(MAPriceSource::Close), s_EMA_UI_Data);
+      ShowTechnical("EMA", Analyzer::GetEMAValues(), s_EMA_UI_Data);
 
       ImPlot::EndPlot();
     }

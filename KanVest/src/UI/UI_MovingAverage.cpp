@@ -25,8 +25,14 @@ namespace KanVest
       KanVasX::UI::Text(Font(Header_24), "No data for stock", Align::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
-    const auto& dmaValues = Analyzer::GetDMAValues(MAPriceSource::Close);
+    const auto& dmaValues = Analyzer::GetDMAValues();
     ShowMovingAverageData(stockData, dmaValues, " SMA", shadowTexture);
+    
+    const auto& analyzerResult = Analyzer::GetReport();
+    for (const auto& [color, summary] : analyzerResult.summary.at(TechnicalIndicators::DMA))
+    {
+      KanVasX::UI::Text(Font(Regular), summary, Align::Left, {0, 0}, color);
+    }
   }
   void UI_MovingAverage::ShowEMA(const StockData& stockData, ImTextureID shadowTexture)
   {
@@ -35,8 +41,14 @@ namespace KanVest
       KanVasX::UI::Text(Font(Header_24), "No data for stock", Align::Left, {10.0f, 0.0f}, Color::Error);
       return;
     }
-    const auto& emaValues = Analyzer::GetEMAValues(MAPriceSource::Close);
+    const auto& emaValues = Analyzer::GetEMAValues();
     ShowMovingAverageData(stockData, emaValues, " EMA", shadowTexture);
+
+    const auto& analyzerResult = Analyzer::GetReport();
+    for (const auto& [color, summary] : analyzerResult.summary.at(TechnicalIndicators::EMA))
+    {
+      KanVasX::UI::Text(Font(Regular), summary, Align::Left, {0, 0}, color);
+    }
   }
 
   void UI_MovingAverage::ShowMovingAverageData(const StockData& stockData, const std::map<int, std::vector<double>>& maMap, const std::string& maString, ImTextureID shadowTexture)
