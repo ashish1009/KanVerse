@@ -11,6 +11,8 @@
 
 #include "Stock/StockUtils.hpp"
 
+#include "Analyzer/Indicators/MovingAverage.hpp"
+
 namespace KanVest
 {
 #define Font(font) KanVest::UI::Font::Get(KanVest::UI::FontType::font)
@@ -95,18 +97,114 @@ namespace KanVest
     }
     
     // Technicals ----------------------------------------------------------------------------
-    enum class Indicators {None, DMA, EMA};
-
     ImGui::SameLine();
     KanVasX::UI::ShiftCursor({20.0f, 5.0f});
 
     int32_t currentIndicator = 0; // No need to set the drop menu since we support multiple Indicators
-    static std::vector<std::string> indicatorOptions = {"Indicator", "DMA", "EMA"};
+    static std::vector<std::string> indicatorOptions = {"Indicator", "Moving Average", "Moving Average Exponential"};
+
+    static bool openPopup = false;
 
     ImGui::SetNextItemWidth(100.0f);
     if (KanVasX::UI::DropMenu("##Indicator", indicatorOptions, &currentIndicator, frameRounding))
     {
+      s_selectedIndicator = (Indicator)currentIndicator;
+      switch ((Indicator)currentIndicator)
+      {
+        case Indicator::DMA:
+        case Indicator::EMA:
+          openPopup = true;
+          break;
+        default:
+          break;
+      }
+    }
+    
+    // If the flag is set, open popup
+    if (openPopup)
+    {
+      ImGui::OpenPopup("Indicator Options");
+      openPopup = false;  // reset flag
+    }
+    
+    // Draw the popup
+    if (ImGui::BeginPopup("Indicator Options"))
+    {
+      KanVasX::UI::Text(Font(Header_20), s_selectedIndicator == Indicator::DMA ? "Moving Average" : "Moving Average Exponential", Align::Center);
+      ImGui::Separator();
       
+      // Period ------------------------
+      static std::vector<std::string> possibleMAPeriods = {"5", "10", "20", "30", "50", "100", "150", "200"};
+      static int periodIdx = 0;
+
+      KanVasX::UI::Text(Font(Bold), "Period", Align::Left);
+      ImGui::SameLine();
+      
+      ImGui::SetNextItemWidth(100.0f);
+      if (KanVasX::UI::DropMenu("##Period", possibleMAPeriods, &periodIdx, frameRounding))
+      {
+        
+      }
+      
+      // Color ------------------------
+      static glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
+      
+      KanVasX::UI::Text(Font(Bold), "Color ", Align::Left);
+      ImGui::SameLine();
+
+      ImVec4 col = { color.r, color.g, color.b, color.a };
+      KanVasX::UI::ShiftCursor({5.0f, 5.0f});
+      if (ImGui::ColorButton("##MAColor", col, ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(14, 14)))
+      {
+        ImGui::OpenPopup("MA_Color_Popup");
+      }
+      
+      if (ImGui::BeginPopup("MA_Color_Popup"))
+      {
+        ImGui::ColorPicker4("MA Color", &color.r, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+        ImGui::EndPopup();
+      }
+      
+      if (periodIdx < 0 or periodIdx >= ValidMovingAveragePeriods.size())
+      {
+        ImGui::EndPopup();
+        return;
+      }
+            
+      ImGui::Separator();
+
+      auto ResetPopup = []()
+      {
+        // Reset color and periof
+        color = {1.0f, 1.0f, 1.0f, 1.0f};
+        periodIdx = 0;
+        
+        ImGui::CloseCurrentPopup();
+      };
+      
+      // Add buttons or other controls
+      if (ImGui::Button("Apply"))
+      {
+        // TODO: Handle other data if needed later for now this popup is for moving average only which have just 2
+        std::unordered_map<int /* Period */, MovingAverage_UI_Data>& MA_UI_Data = s_selectedIndicator == Indicator::DMA ? s_DMA_UI_Data : s_EMA_UI_Data;
+        int period = ValidMovingAveragePeriods.at(periodIdx);
+        
+        // Update UI Data
+        MovingAverage_UI_Data& UI_Data = MA_UI_Data[period];
+        UI_Data.show = true;
+        UI_Data.periodIdx = periodIdx;
+        UI_Data.period = period;
+        UI_Data.color = color;
+
+        ResetPopup();
+      }
+      
+      ImGui::SameLine();
+      if (ImGui::Button("Cancel"))
+      {
+        ResetPopup();      }
+      
+      ImGui::EndPopup();
     }
 
     // Interval Controller -------------------------------------------------------------------

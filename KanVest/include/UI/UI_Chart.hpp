@@ -19,6 +19,14 @@ namespace KanVest
     static void Show(const StockData& stockData);
     
   private:
+    struct MovingAverage_UI_Data
+    {
+      bool show = true;
+      int period = 5;
+      int periodIdx = 0;
+      glm::vec4 color = {0.8, 0.4, 0.1, 1.0};
+    };
+
     static void ShowController(const StockData& stockData);
     
     static void PLotChart(const StockData& stockData);
@@ -51,5 +59,11 @@ namespace KanVest
     
     // Candle Data
     inline static float s_candleWidth = 4.0f;
+    
+    // Indicator UI Data
+    enum class Indicator {None, DMA, EMA};
+    inline static Indicator s_selectedIndicator = Indicator::None;
+    inline static std::unordered_map<int /* Period */, MovingAverage_UI_Data> s_DMA_UI_Data;
+    inline static std::unordered_map<int /* Period */, MovingAverage_UI_Data> s_EMA_UI_Data;
   };
 } // namespace KanVest

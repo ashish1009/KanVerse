@@ -27,4 +27,8 @@ namespace KanVest
   {
     return s_maResults.dmaValues;
   }
+  const std::map<int, std::vector<double>>& Analyzer::GetEMAValues()
+  {
+    return s_maResults.emaValues;
+  }
 } // namespace KanVest

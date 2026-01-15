@@ -15,7 +15,7 @@ namespace KanVest
   {
     if (chartRange == "1mo") return {5, 10, 20};
     if (chartRange == "3mo") return {5, 10, 20, 30, 50};
-    return ValidPeriods;
+    return ValidMovingAveragePeriods;
   }
   
   MAResult MovingAverage::Compute(const StockData& data)
@@ -66,5 +66,19 @@ namespace KanVest
     }
     
     return dma;
+  }
+  
+  std::vector<double> MovingAverage::ComputeEMA(const std::vector<double>& closes, int period)
+  {
+    std::vector<double> ema(closes.size(), 0.0);
+    if (closes.empty()) return ema;
+    
+    double mult = 2.0 / (period + 1.0);
+    ema[0] = closes[0];
+    
+    for (size_t i = 1; i < closes.size(); ++i)
+      ema[i] = (closes[i] - ema[i - 1]) * mult + ema[i - 1];
+    
+    return ema;
   }
 } // namespace KanVest
