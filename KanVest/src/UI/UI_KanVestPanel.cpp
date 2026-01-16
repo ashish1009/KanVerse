@@ -56,7 +56,7 @@ namespace KanVest::UI
     }
 
     // Show Stock Data
-    ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.35f));
+    ImGui::BeginChild(" Stock - Data - Analyzer ", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.4f));
     {
       float availableX = ImGui::GetContentRegionAvail().x;
 

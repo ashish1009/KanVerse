@@ -182,10 +182,12 @@ namespace KanVest
       }
       
       // Setup axes BEFORE plotting
-      ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_NoTickLabels);
+      ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_Lock);
       ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_Lock);
+
       ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 100, ImGuiCond_Always);
-      
+      ImPlot::SetupAxisLimits(ImAxis_X1, 0, (double)(n - 1), ImGuiCond_Always);
+
       // ---- Plot RSI ----
       ImPlot::PushStyleColor(ImPlotCol_Line, RSI_UI_Data.color);
       ImPlot::PlotLine("RSI", x.data(), y.data(), (int)n);
@@ -213,6 +215,12 @@ namespace KanVest
       ImPlot::PopStyleVar();
       
       ImPlot::EndPlot();
+    }
+    
+    const auto& analyzerResult = Analyzer::GetReport();
+    for (const auto& [color, summary] : analyzerResult.summary.at(TechnicalIndicators::RSI))
+    {
+      KanVasX::UI::Text(Font(Regular), summary, Align::Left, {0, 0}, color);
     }
   }
 } // namespace KanVest

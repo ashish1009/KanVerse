@@ -14,7 +14,7 @@
 
 namespace KanVest
 {
-  enum class TechnicalIndicators {DMA, EMA};
+  enum class TechnicalIndicators {DMA, EMA, RSI};
 
   struct StockReport
   {

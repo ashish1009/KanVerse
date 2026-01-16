@@ -178,6 +178,137 @@ namespace KanVest
 
     return result;
   }
+  
+  ScoreResult ComputeRSIScore(const RSISeries& rsi, double scoreScale = 12.0)
+  {
+    ScoreResult result { 0.0f, {} };
+    
+    // ----------------------------
+    // Validation
+    // ----------------------------
+    if (rsi.series.size() < 2 || std::isnan(rsi.last))
+    {
+      result.explanation.push_back({
+        KanVasX::Color::Red,
+        "Insufficient RSI data to evaluate momentum."
+      });
+      return result;
+    }
+    
+    const double current = rsi.last;
+    const double prev    = rsi.series[rsi.series.size() - 2];
+    
+    double weightedScore = 0.0;
+    double totalWeight   = 1.0;
+    
+    // ----------------------------
+    // RSI Level Scoring
+    // ----------------------------
+    if (current < 30.0)
+    {
+      weightedScore += 1.0;
+    }
+    else if (current < 45.0)
+    {
+      weightedScore -= 0.3;
+    }
+    else if (current <= 55.0)
+    {
+      weightedScore += 0.0;
+    }
+    else if (current <= 70.0)
+    {
+      weightedScore += 0.7;
+    }
+    else
+    {
+      weightedScore -= 0.8;
+    }
+    
+    // ----------------------------
+    // RSI Momentum (Slope)
+    // ----------------------------
+    const double slope = current - prev;
+    const double slopeThreshold = 0.4;
+    
+    if (slope > slopeThreshold)
+      weightedScore += 0.5;
+    else if (slope < -slopeThreshold)
+      weightedScore -= 0.5;
+    
+    // ----------------------------
+    // Normalize & Scale
+    // ----------------------------
+    double normalized = weightedScore / totalWeight;
+    result.score = static_cast<float>(normalized * scoreScale);
+    
+    // ----------------------------
+    // Explanation
+    // ----------------------------
+    ImU32 color = KanVasX::Color::White;
+    std::string explanation;
+    
+    explanation = "RSI Condition: ";
+    if (current < 30.0)
+    {
+      color = UI::Utils::StockProfitColor;
+      explanation += "RSI is in oversold territory, often associated with rebound potential.\n";
+    }
+    else if (current > 70.0)
+    {
+      color = UI::Utils::StockLossColor;
+      explanation += "RSI is overbought, increasing the risk of short-term pullback.\n";
+    }
+    else if (current >= 55.0)
+    {
+      color = UI::Utils::StockProfitColor;
+      explanation += "RSI is in a bullish range, supporting upward momentum.\n";
+    }
+    else
+    {
+      color = UI::Utils::StockModerateColor;
+      explanation += "RSI is neutral, offering limited directional edge.\n";
+    }
+    result.explanation.push_back({ color, explanation });
+    
+    explanation = "RSI Momentum: ";
+    if (slope > slopeThreshold)
+    {
+      color = UI::Utils::StockProfitColor;
+      explanation += "RSI is rising, confirming strengthening momentum.\n";
+    }
+    else if (slope < -slopeThreshold)
+    {
+      color = UI::Utils::StockLossColor;
+      explanation += "RSI is declining, signaling fading momentum.\n";
+    }
+    else
+    {
+      color = UI::Utils::StockModerateColor;
+      explanation += "RSI momentum is flat, suggesting consolidation.\n";
+    }
+    result.explanation.push_back({ color, explanation });
+    
+    explanation = "Actionable Insight: ";
+    if (result.score > 6.0f)
+    {
+      color = UI::Utils::StockProfitColor;
+      explanation += "Momentum conditions are favorable. Trend-following setups are supported.\n";
+    }
+    else if (result.score > 2.0f)
+    {
+      color = UI::Utils::StockModerateColor;
+      explanation += "Momentum is mixed. Entries should prioritize confirmation.\n";
+    }
+    else
+    {
+      color = UI::Utils::StockLossColor;
+      explanation += "Momentum signal is weak or stretched. Caution is advised.\n";
+    }
+    result.explanation.push_back({ color, explanation });
+    
+    return result;
+  }
 
   void Analyzer::AnalzeStock(const StockData& stockData)
   {
@@ -197,6 +328,7 @@ namespace KanVest
     
     UpdateSummaryData(TechnicalIndicators::DMA, ComputeMAScore(TechnicalIndicators::DMA, stockData.livePrice, s_maResults.dmaValues));
     UpdateSummaryData(TechnicalIndicators::EMA, ComputeMAScore(TechnicalIndicators::EMA, stockData.livePrice, s_maResults.emaValues));
+    UpdateSummaryData(TechnicalIndicators::RSI, ComputeRSIScore(s_rsiSeries));
   }
   
   const StockReport& Analyzer::GetReport()
