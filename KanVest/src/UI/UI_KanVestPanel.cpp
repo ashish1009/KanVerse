@@ -14,6 +14,7 @@
 #include "UI/UI_Utils.hpp"
 #include "UI/UI_Chart.hpp"
 #include "UI/UI_MovingAverage.hpp"
+#include "UI/UI_Momentum.hpp"
 
 namespace KanVest::UI
 {
@@ -239,7 +240,7 @@ namespace KanVest::UI
       return;
     }
     
-    enum class TechnicalTab {DMA, EMA, Max};
+    enum class TechnicalTab {DMA, EMA, RSI, Max};
     static TechnicalTab tab = TechnicalTab::DMA;
 
     float availX = ImGui::GetContentRegionAvail().x;
@@ -258,8 +259,9 @@ namespace KanVest::UI
     
     KanVasX::UI::ShiftCursor({2.0f, 5.0f});
     TechnicalButton("DMA", TechnicalTab::DMA, "Daily Moving Average"); ImGui::SameLine();
-    TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average");
-    
+    TechnicalButton("EMA", TechnicalTab::EMA, "Exponantial Moving Average"); ImGui::SameLine();
+    TechnicalButton("RSI", TechnicalTab::RSI, "Relative Strength Indicator");
+
     if (tab == TechnicalTab::DMA)
     {
       UI_MovingAverage::ShowDMA(stockData, s_shadowTextureID);
@@ -267,6 +269,10 @@ namespace KanVest::UI
     else if (tab == TechnicalTab::EMA)
     {
       UI_MovingAverage::ShowEMA(stockData, s_shadowTextureID);
+    }
+    else if (tab == TechnicalTab::RSI)
+    {
+      UI_Momentum::ShowRSI(stockData);
     }
   }
   

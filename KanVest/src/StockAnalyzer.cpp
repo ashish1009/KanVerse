@@ -187,6 +187,7 @@ namespace KanVest
     
     // Technical data
     s_maResults = MovingAverage::Compute(stockData);
+    s_rsiSeries = RSI::Compute(stockData);
     
     // Score
     auto UpdateSummaryData = [](TechnicalIndicators tag, const ScoreResult& result) {
@@ -209,5 +210,9 @@ namespace KanVest
   const std::map<int, std::vector<double>>& Analyzer::GetEMAValues()
   {
     return s_maResults.emaValues;
+  }
+  const RSISeries& Analyzer::GetRSI()
+  {
+    return s_rsiSeries;
   }
 } // namespace KanVest

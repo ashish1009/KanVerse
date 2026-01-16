@@ -10,6 +10,7 @@
 #include "Stock/StockMetadata.hpp"
 
 #include "Analyzer/Indicators/MovingAverage.hpp"
+#include "Analyzer/Indicators/Momentum.hpp"
 
 namespace KanVest
 {
@@ -33,8 +34,12 @@ namespace KanVest
     static const std::map<int, std::vector<double>>& GetDMAValues();
     static const std::map<int, std::vector<double>>& GetEMAValues();
 
+    static const RSISeries& GetRSI();
+
   private:
     inline static StockReport s_stockReport;
+
     inline static MAResult s_maResults;
+    inline static RSISeries s_rsiSeries;
   };
 } // namespace KanVest

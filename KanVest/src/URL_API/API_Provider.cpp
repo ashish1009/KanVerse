@@ -213,8 +213,9 @@ namespace KanVest
         return {"1h", "1d","1wk","1mo"};
       case Range::_1Y:
       case Range::_5Y:
-      case Range::_MAX:
         return {"1d","1wk","1mo"};
+      case Range::_MAX:
+        return {"1mo"};
         
       default:
         break;
@@ -236,8 +237,9 @@ namespace KanVest
         return {Interval::_1H, Interval::_1D, Interval::_1WK, Interval::_1MO};
       case Range::_1Y:
       case Range::_5Y:
-      case Range::_MAX:
         return {Interval::_1D, Interval::_1WK, Interval::_1MO};
+      case Range::_MAX:
+        return {Interval::_1MO};
         
       default:
         break;

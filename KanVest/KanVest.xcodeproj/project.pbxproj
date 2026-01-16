@@ -20,6 +20,8 @@
 		B24895AD2F17EFBE00649B5F /* IndicatorUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24895AC2F17EFBE00649B5F /* IndicatorUtils.cpp */; };
 		B24895B02F18AF2600649B5F /* UI_MovingAverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24895AF2F18AF2600649B5F /* UI_MovingAverage.cpp */; };
 		B26336CB2EDF29DC00D46F96 /* UI_Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */; };
+		B28150682F1935AB0014A2B2 /* UI_Momentum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B28150672F1935AB0014A2B2 /* UI_Momentum.cpp */; };
+		B281506E2F1941240014A2B2 /* Momentum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B28150652F1935970014A2B2 /* Momentum.cpp */; };
 		B289E6302EB0E04E00937D0B /* EntryPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */; };
 		B289E66F2EB0E50400937D0B /* libKanViz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B289E66E2EB0E50400937D0B /* libKanViz.a */; };
 		B289E6CE2EB1A3C600937D0B /* ApplicationFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B289E6CD2EB1A3C600937D0B /* ApplicationFactory.cpp */; };
@@ -69,6 +71,10 @@
 		B24895AF2F18AF2600649B5F /* UI_MovingAverage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_MovingAverage.cpp; sourceTree = "<group>"; };
 		B26336C92EDF29DC00D46F96 /* UI_Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Font.hpp; sourceTree = "<group>"; };
 		B26336CA2EDF29DC00D46F96 /* UI_Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Font.cpp; sourceTree = "<group>"; };
+		B28150642F1935970014A2B2 /* Momentum.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Momentum.hpp; sourceTree = "<group>"; };
+		B28150652F1935970014A2B2 /* Momentum.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Momentum.cpp; sourceTree = "<group>"; };
+		B28150662F1935AB0014A2B2 /* UI_Momentum.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UI_Momentum.hpp; sourceTree = "<group>"; };
+		B28150672F1935AB0014A2B2 /* UI_Momentum.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UI_Momentum.cpp; sourceTree = "<group>"; };
 		B289E6222EB0E01600937D0B /* KanVest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B289E62F2EB0E04E00937D0B /* EntryPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntryPoint.cpp; sourceTree = "<group>"; };
 		B289E6312EB0E05C00937D0B /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -160,6 +166,7 @@
 			children = (
 				B24895AB2F17EFBE00649B5F /* IndicatorUtils.hpp */,
 				B24895A82F17EF9700649B5F /* MovingAverage.hpp */,
+				B28150642F1935970014A2B2 /* Momentum.hpp */,
 			);
 			path = Indicators;
 			sourceTree = "<group>";
@@ -169,6 +176,7 @@
 			children = (
 				B24895AC2F17EFBE00649B5F /* IndicatorUtils.cpp */,
 				B24895A92F17EF9700649B5F /* MovingAverage.cpp */,
+				B28150652F1935970014A2B2 /* Momentum.cpp */,
 			);
 			path = Indicators;
 			sourceTree = "<group>";
@@ -181,6 +189,7 @@
 				B248959B2F15043000649B5F /* UI_Chart.hpp */,
 				B248959E2F17E13200649B5F /* UI_Utils.hpp */,
 				B24895AE2F18AF2600649B5F /* UI_MovingAverage.hpp */,
+				B28150662F1935AB0014A2B2 /* UI_Momentum.hpp */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -193,6 +202,7 @@
 				B248959C2F15043000649B5F /* UI_Chart.cpp */,
 				B248959F2F17E13200649B5F /* UI_Utils.cpp */,
 				B24895AF2F18AF2600649B5F /* UI_MovingAverage.cpp */,
+				B28150672F1935AB0014A2B2 /* UI_Momentum.cpp */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -327,7 +337,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastUpgradeCheck = 1640;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					B289E6212EB0E01600937D0B = {
 						CreatedOnToolsVersion = 16.4;
@@ -370,7 +380,9 @@
 				B26336CB2EDF29DC00D46F96 /* UI_Font.cpp in Sources */,
 				B248958E2F0FF51400649B5F /* API_Provider.cpp in Sources */,
 				B289EDE92EB2341100937D0B /* KanVestApp.cpp in Sources */,
+				B281506E2F1941240014A2B2 /* Momentum.cpp in Sources */,
 				B24895A02F17E13200649B5F /* UI_Utils.cpp in Sources */,
+				B28150682F1935AB0014A2B2 /* UI_Momentum.cpp in Sources */,
 				B24895972F0FF9C800649B5F /* StockManager.cpp in Sources */,
 				B24895832F0FCF0A00649B5F /* UI_KanVestPanel.cpp in Sources */,
 				B24895AA2F17EF9700649B5F /* MovingAverage.cpp in Sources */,
@@ -415,6 +427,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 78KTXZ99TW;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -440,6 +453,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 			};
 			name = Debug;
 		};
@@ -477,6 +491,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 78KTXZ99TW;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -495,6 +510,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 			};
 			name = Release;
 		};
@@ -503,6 +519,7 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++23";
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 78KTXZ99TW;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu23;
@@ -529,6 +546,7 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++23";
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 78KTXZ99TW;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu23;
