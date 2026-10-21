@@ -1,0 +1,15 @@
+/*!
+ * @file PrefixHeader.pch
+ * @brief KanVerse_App prefix header for precompiled files
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+
+#pragma once
+
+// To remove documentation warning
+#pragma clang diagnostic ignored "-Wdocumentation"
+#pragma clang diagnostic ignored "-Wformat-security"
+
+// C++ Files
+#include <iostream>

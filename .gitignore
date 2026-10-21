@@ -1,0 +1,61 @@
+# ==============================================================================
+# Xcode & Apple Build Artifacts
+# ==============================================================================
+build/
+DerivedData/
+*.moved-aside
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# ==============================================================================
+# User-Specific Xcode Settings (Never commit personal IDE state)
+# ==============================================================================
+*.xcuserstate
+project.xcworkspace/xcuserdata/
+*.xcuserdatad
+*.xcscmblueprint
+
+# Keep shared schemes and shared workspace data intact
+!default.mode1v3
+!default.mode2v3
+!default.pbxuser
+!default.perspectivev3
+!xcuserdata
+
+# ==============================================================================
+# Compiled Binaries & Libraries
+# ==============================================================================
+*.o
+*.obj
+*.a
+*.dylib
+*.framework
+*.app
+
+# ==============================================================================
+# Metal Shading Language Cache & Intermediate Products
+# ==============================================================================
+*.air
+*.metallib
+
+# ==============================================================================
+# macOS System Junk
+# ==============================================================================
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# ==============================================================================
+# Package Managers & Dependencies (Keep metal-cpp local/untracked if vendorized)
+# ==============================================================================
+# Uncomment if metal-cpp is downloaded directly into the repo as a third-party archive:
+# vendor/metal-cpp/
+.packages/
+.build/
