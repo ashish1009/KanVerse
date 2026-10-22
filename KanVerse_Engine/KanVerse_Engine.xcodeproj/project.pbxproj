@@ -884,10 +884,10 @@
 		B2BA39E53089F28B006439E3 /* Procedural */ = {
 			isa = PBXGroup;
 			children = (
-				B2BA39E13089F28B006439E3 /* Capsule.hpp */,
-				B2BA39E23089F28B006439E3 /* Capsule.cpp */,
 				B2BA39E33089F28B006439E3 /* ChamferBox.hpp */,
 				B2BA39E43089F28B006439E3 /* ChamferBox.cpp */,
+				B2BA39E13089F28B006439E3 /* Capsule.hpp */,
+				B2BA39E23089F28B006439E3 /* Capsule.cpp */,
 			);
 			path = Procedural;
 			sourceTree = "<group>";
@@ -936,6 +936,7 @@
 				B2BA39EA3089F28B006439E3 /* Renderer */,
 				B2BA39F03089F28B006439E3 /* Textures */,
 				B2BA39D53089F28B006439E3 /* Materials */,
+				B2BA39E53089F28B006439E3 /* Procedural */,
 				B2BA39B13089F28B006439E3 /* Animation */,
 				B2BA39B43089F28B006439E3 /* Asset */,
 				B2BA39C23089F28B006439E3 /* Camera */,
@@ -943,7 +944,6 @@
 				B2BA39CC3089F28B006439E3 /* Geometry */,
 				B2BA39D23089F28B006439E3 /* Lighting */,
 				B2BA39E03089F28B006439E3 /* PostProcess */,
-				B2BA39E53089F28B006439E3 /* Procedural */,
 				B2BA39F63089F28B006439E3 /* UI */,
 			);
 			path = Renderer;

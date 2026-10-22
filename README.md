@@ -167,7 +167,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/Materials/Material.hpp`, `Renderer/Materials/Material.mm`
   - **Concepts:** 256-byte aligned `MaterialUniforms`, 6 PBR texture bindings, automatic transparency flagging (`color.w < 0.99f`), `Sync(frameIndex)`.
   - **Milestone:** Implement `Material`.
-- [ ] **Day 32 — Procedural Chamfered Box Generator**
+- [x] **Day 32 — Procedural Chamfered Box Generator**
   - **Files:** `Renderer/Procedural/ChamferBox.hpp`, `Renderer/Procedural/ChamferBox.cpp`
   - **Concepts:** 64-byte SIMD-aligned `Vertex` struct, 6 inner faces + 12 curved bevel edges with smooth normal interpolation.
   - **Milestone:** Implement `ChamferBoxGenerator::Generate`.
