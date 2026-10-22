@@ -92,11 +92,11 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Platform/Events/WindowEvents.hpp`, `Platform/Events/KeyEvents.hpp`, `Platform/Events/MouseEvents.hpp`
   - **Concepts:** Concrete event classes (`WindowResizeEvent`, `WindowCloseEvent`, `KeyPressedEvent`, `MouseMovedEvent`, `MouseScrolledEvent`, `MouseButtonPressedEvent`).
   - **Milestone:** Implement all three event headers and test routing through `EventDispatcher`.
-- [ ] **Day 15 — Hardware Gamepad & Keyboard Polling Bridge**
+- [x] **Day 15 — Hardware Gamepad & Keyboard Polling Bridge**
   - **Files:** `Platform/Input/KeyCodes.hpp`, `Platform/Input/GameControllerBridge.hpp`, `Platform/Input/GameControllerBridge.mm`
   - **Concepts:** macOS virtual keycodes (`Key::W = 13`, `Key::Space = 49`), `GameController.framework` (`GCController`, `GCExtendedGamepad`), `0.15f` radial thumbstick deadzone.
   - **Milestone:** Implement `KeyCodes.hpp` and `InputBridge`; test polling with a Bluetooth controller.
-- [ ] **Day 16 — Abstract Window Interface**
+- [x] **Day 16 — Abstract Window Interface**
   - **Files:** `Platform/Window/Window.hpp`, `Platform/Window/NativeWindow.hpp`
   - **Concepts:** Platform-independent `Window` contract, `WindowProps`, `EventCallbackFn`, opaque `void*` handles (`m_WindowHandle`, `m_ViewHandle`, `m_DelegateHandle`).
   - **Milestone:** Write `Window.hpp` and `NativeWindow.hpp`.

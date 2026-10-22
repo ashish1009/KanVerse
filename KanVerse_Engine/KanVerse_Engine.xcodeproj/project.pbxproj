@@ -561,9 +561,9 @@
 		B2BA376730891629006439E3 /* Window */ = {
 			isa = PBXGroup;
 			children = (
+				B2BA376630891629006439E3 /* Window.hpp */,
 				B2BA376430891629006439E3 /* NativeWindow.hpp */,
 				B2BA376530891629006439E3 /* NativeWindow.mm */,
-				B2BA376630891629006439E3 /* Window.hpp */,
 			);
 			path = Window;
 			sourceTree = "<group>";
