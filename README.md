@@ -195,11 +195,15 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `KanVerse_App/Shaders/TexturedMaterial.metal` (Initial Forward Pass)
   - **Concepts:** Writing `vertex_main` (instanced `modelMatrix` & `normalMatrix`) and a basic Lambertian + Blinn-Phong `fragment_main` to test our RHI before full PBR.
   - **Milestone:** Compile `TexturedMaterial.metal` into `default.metallib`.
-- [ ] **Day 39 — Core Renderer (Swapchain Forward Pass & Hardware Instancing)**
+- [ ] **Day 39 — Offscreen HDR & SDR Framebuffers**
+  - **Files:** `Renderer/Framebuffer/Framebuffer.hpp`, `Renderer/Framebuffer/Framebuffer.mm`
+  - **Concepts:** `MTL::StorageModePrivate` textures (`MTL::TextureUsageRenderTarget | MTL::TextureUsageShaderRead`), `RGBA16Float` and `BGRA8Unorm_sRGB` attachments, `Depth32Float`, `Resize()`.
+  - **Milestone:** Implement `MetalFramebuffer`.
+- [ ] **Day 40 — Core Renderer (Swapchain Forward Pass & Hardware Instancing)**
   - **Files:** `Renderer/Renderer/Renderer.hpp`, `Renderer/Renderer/Renderer.mm` (Core Swapchain Pass)
   - **Concepts:** Allocating triple-buffered `GPUUniforms` and `InstanceBuffers`, implementing `BeginScene`, `SubmitInstanced`, and `EndScene` rendering directly to `MTKView`.
   - **Milestone:** Uncomment `Renderer::Init()` in `Application.mm`.
-- [ ] **Day 40 — Phase 3 Visual Milestone: Interactive 3D Cube!**
+- [ ] **Day 41 — Phase 3 Visual Milestone: Interactive 3D Cube!**
   - **Files:** Test Layer in `KanVerse_App`
   - **Concepts:** Connecting `CameraController`, `Mesh::CreateChamferBox`, `Material`, and `Renderer::SubmitInstanced`.
   - **Milestone:** Orbit and zoom around a lit, textured 3D ChamferBox in your macOS Metal window at 120 FPS!
@@ -209,10 +213,6 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 4: Dear ImGui Backend, Docking, Offscreen Framebuffers & Editor Viewport (Days 41–48)
 *Goal: Render our 3D scene into an offscreen texture and display it inside a dockable Blender/Unreal-style Dear ImGui Editor window.*
 
-- [ ] **Day 41 — Offscreen HDR & SDR Framebuffers**
-  - **Files:** `Renderer/Framebuffer/Framebuffer.hpp`, `Renderer/Framebuffer/Framebuffer.mm`
-  - **Concepts:** `MTL::StorageModePrivate` textures (`MTL::TextureUsageRenderTarget | MTL::TextureUsageShaderRead`), `RGBA16Float` and `BGRA8Unorm_sRGB` attachments, `Depth32Float`, `Resize()`.
-  - **Milestone:** Implement `MetalFramebuffer`.
 - [ ] **Day 42 — Dear ImGui & ImGuizmo Vendor Integration**
   - **Files:** `Vendor/imgui/`, `Vendor/imguizmo/`
   - **Concepts:** Adding Dear ImGui (`docking` branch) with `imgui_impl_metal.mm` and `imgui_impl_osx.mm`, plus `ImGuizmo.h`/`.cpp` to the build target.
