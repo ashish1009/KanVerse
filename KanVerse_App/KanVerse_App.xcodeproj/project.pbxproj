@@ -315,9 +315,9 @@
 			children = (
 				B2BA391C3089F27A006439E3 /* TexturedMaterial.metal */,
 				B2BA391A3089F27A006439E3 /* ShadowDepth.metal */,
-				B2BA39153089F27A006439E3 /* Bloom.metal */,
-				B2BA39163089F27A006439E3 /* DebrisSimulation.metal */,
 				B2BA39173089F27A006439E3 /* Equirectangular.metal */,
+				B2BA39163089F27A006439E3 /* DebrisSimulation.metal */,
+				B2BA39153089F27A006439E3 /* Bloom.metal */,
 				B2BA39183089F27A006439E3 /* Irradiance.metal */,
 				B2BA39193089F27A006439E3 /* MousePicking.metal */,
 				B2BA391B3089F27A006439E3 /* Skybox.metal */,
