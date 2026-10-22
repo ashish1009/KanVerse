@@ -205,11 +205,11 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 4: Advanced PBR, Shadows, IBL, Compute Bloom, ACES Tonemapping & Atmosphere (Days 75–86)
 *Goal: Upgrade the Renderer to AAA visual fidelity with PCF Shadow Mapping, HDR Skyboxes, Image-Based Lighting, Dual-Kawase Compute Bloom, and live World Settings controls.*
 
-- [ ] **Day 40 — Cubemap Textures (Procedural HDR Sky, Equirectangular `.hdr` & Irradiance)**
+- [x] **Day 40 — Cubemap Textures (Procedural HDR Sky, Equirectangular `.hdr` & Irradiance)**
   - **Files:** `Renderer/Textures/TextureCube.hpp`, `Renderer/Textures/TextureCube.mm`
   - **Concepts:** Analytical HDR sky synthesis (`__fp16`), loading `.hdr` files via `stbi_loadf`, dispatching GPU compute convolution, and generating mipmaps for roughness-based specular reflections.
   - **Milestone:** Implement `TextureCube`.
-- [ ] **Day 41 — Shadow Depth Shader & Orthographic Shadow Pass**
+- [x] **Day 41 — Shadow Depth Shader & Orthographic Shadow Pass**
   - **Files:** `KanVerse_App/Shaders/ShadowDepth.metal`, `Renderer/Renderer/Renderer.mm`, `Scene/Scene.mm`
   - **Concepts:** Instanced depth-only vertex shader (`shadow_vertex_main`), 2048x2048 `Depth32Float` shadow framebuffer, `BeginShadowPass`, and `Scene::OnRenderShadowPass` (skipping transparent & emissive bulb meshes).
   - **Milestone:** Render the scene's directional shadow map every frame and preview the depth texture in a debug ImGui window!
