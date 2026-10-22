@@ -221,7 +221,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `KanVerse_App/Shaders/Bloom.metal`, `Renderer/PostProcess/BloomPass.hpp`, `Renderer/PostProcess/BloomPass.cpp`
   - **Concepts:** Soft-knee luminance threshold prefiltering, 13-tap anti-flicker downsample kernel (`bloom_downsample`), 9-tap 3x3 tent filter upsample kernel (`bloom_upsample`) across a 4-mip `RGBA16Float` pyramid.
   - **Milestone:** Implement `Bloom.metal` and `BloomPass`.
-- [ ] **Day 44 — ACES Filmic Tonemapping & Post-Process Composite**
+- [x] **Day 44 — ACES Filmic Tonemapping & Post-Process Composite**
   - **Files:** `KanVerse_App/Shaders/Tonemap.metal`, `Renderer/Renderer/Renderer.mm`
   - **Concepts:** Compositing HDR scene radiance with the compute bloom texture (`(hdrColor * exposure) + (bloomColor * bloomIntensity)`) and mapping to SDR via the Narkowicz ACES Filmic curve.
   - **Milestone:** Connect `HDRFramebuffer` -> `BloomPass` -> `TonemapPipeline` -> Editor Viewport Texture!

@@ -319,9 +319,9 @@
 				B2BA391B3089F27A006439E3 /* Skybox.metal */,
 				B2BA39183089F27A006439E3 /* Irradiance.metal */,
 				B2BA39153089F27A006439E3 /* Bloom.metal */,
+				B2BA391D3089F27A006439E3 /* Tonemap.metal */,
 				B2BA39163089F27A006439E3 /* DebrisSimulation.metal */,
 				B2BA39193089F27A006439E3 /* MousePicking.metal */,
-				B2BA391D3089F27A006439E3 /* Tonemap.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
