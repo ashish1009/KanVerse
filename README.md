@@ -183,7 +183,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/Camera/Camera.hpp`, `Renderer/Camera/PerspectiveCamera.hpp`, `Renderer/Camera/PerspectiveCamera.cpp`
   - **Concepts:** Base `Camera` contract, caching `m_ViewMatrix` (`Math::LookAt`) and `m_ViewProjectionMatrix`, viewport resize handling.
   - **Milestone:** Implement `Camera` and `PerspectiveCamera`.
-- [ ] **Day 36 — Orbit Camera Controller & Screen-Shake Trauma**
+- [x] **Day 36 — Orbit Camera Controller & Screen-Shake Trauma**
   - **Files:** `Renderer/Camera/CameraController.hpp`, `Renderer/Camera/CameraController.mm`
   - **Concepts:** Spherical orbit angles (`m_Yaw`, `m_Pitch`, `m_Distance`), mouse arcball pan/zoom, non-linear quadratic screen-shake trauma (`m_Trauma * m_Trauma`).
   - **Milestone:** Implement `CameraController`.
