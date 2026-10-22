@@ -38,11 +38,11 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Core/Diagnostics/Assert.hpp`
   - **Concepts:** Branch prediction hints (`__builtin_expect`), hardware traps (`__builtin_trap()`), ANSI escape color codes (`\033[31m`), preprocessor `do { ... } while(false)` hygiene.
   - **Milestone:** Write `KV_CORE_ASSERT` and `KV_ASSERT`; verify LLDB trap in Xcode.
-- [-] **Day 3 — Tri-Sink Structured Logging**
+- [x] **Day 3 — Tri-Sink Structured Logging**
   - **Files:** `Core/Diagnostics/Log.hpp`, `Core/Diagnostics/Log.cpp`
   - **Concepts:** C++23 `std::vformat` and `std::make_format_args`, variadic templates, triple-sink routing (`std::cout`, `std::ofstream`, and Apple Unified Logging `<os/log.h>`).
   - **Milestone:** Log all 5 severity levels (`Trace` to `Fatal`) and verify `KanVerse_Runtime.log` is created on disk.
-- [ ] **Day 4 — Lock-Free Atomic Memory Tracker**
+- [-] **Day 4 — Lock-Free Atomic Memory Tracker**
   - **Files:** `Core/Memory/MemoryTracking.hpp` (Part 1)
   - **Concepts:** Lock-free concurrency with `std::atomic`, `std::memory_order_relaxed`, Compare-And-Swap (`compare_exchange_weak`) loop for high-water mark (`PeakUsage`).
   - **Milestone:** Implement `MemoryStats` and `MemoryTracker` (`RecordAllocation`, `RecordDeallocation`, `GetStats`).
