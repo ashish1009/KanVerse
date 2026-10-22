@@ -17,6 +17,9 @@
 #include <vector>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
+#include <memory>
+#include <string>
 
 // Core/Diagnostics
 #include "Core/Diagnostics/Assert.hpp"

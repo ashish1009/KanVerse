@@ -14,8 +14,8 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase Progress Overview
 - [x] **Phase 1:** Engine Core, Diagnostics, Memory & SIMD Math (Days 1–12)
 - [x] **Phase 2:** Platform Events, Input Polling & Cocoa/Metal Windowing (Days 13–23)
-- [-] **Phase 3:** Metal RHI — Buffers, Shaders, Pipelines, Textures & First 3D Draw (Days 24–40)
-- [ ] **Phase 4:** Advanced PBR, Shadows, IBL, Compute Bloom, ACES Tonemapping & Atmosphere (Days 79–90)
+- [x] **Phase 3:** Metal RHI — Buffers, Shaders, Pipelines, Textures & First 3D Draw (Days 24–40)
+- [-] **Phase 4:** Advanced PBR, Shadows, IBL, Compute Bloom, ACES Tonemapping & Atmosphere (Days 79–90)
 - [ ] **Phase 5:** Dear ImGui Backend, Docking, Offscreen Framebuffers & Editor Viewport (Days 41–48)
 - [ ] **Phase 6:** Generational ECS, Components & Asset Manager (Days 49–56)
 - [ ] **Phase 7:** KanVerse Studio Editor — Hierarchy, Inspector, Content Browser, Gizmos & Picking (Days 57–70)
