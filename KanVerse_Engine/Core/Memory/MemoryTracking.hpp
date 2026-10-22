@@ -78,5 +78,91 @@ namespace KanVerse {
     inline static std::atomic<size_t>   s_PeakUsage{0};       /*!< Peak high-water mark residency. */
     inline static std::atomic<uint64_t> s_AllocationCount{0}; /*!< Cumulative allocation operation calls. */
   };
-  
+
+  /*!
+   * @class ScopedMemoryAllocation
+   * @brief RAII scoped guard that registers byte allocations on construction and releases them on destruction.
+   * @note Designed to be embedded as a private member in GPU resource wrappers to automate tracking.
+   */
+  class ScopedMemoryAllocation {
+  public:
+    /*!
+     * @brief Default constructor initializing an empty zero-byte allocation guard.
+     */
+    ScopedMemoryAllocation() = default;
+    
+    /*!
+     * @brief Constructs an allocation guard and registers bytes with the global tracker.
+     * @param size Number of bytes being tracked.
+     */
+    explicit ScopedMemoryAllocation(size_t size) : m_Size(size) {
+      if (m_Size > 0) {
+        MemoryTracker::RecordAllocation(m_Size);
+      }
+    }
+    
+    /*!
+     * @brief Destructor automatically releasing all registered bytes from the tracker.
+     */
+    ~ScopedMemoryAllocation() {
+      Release();
+    }
+    
+    ScopedMemoryAllocation(const ScopedMemoryAllocation&) = delete;
+    ScopedMemoryAllocation& operator=(const ScopedMemoryAllocation&) = delete;
+    
+    /*!
+     * @brief Move constructor transferring tracked byte ownership without double counting.
+     * @param other R-value reference to the source guard.
+     */
+    ScopedMemoryAllocation(ScopedMemoryAllocation&& other) noexcept
+    : m_Size(other.m_Size) {
+      other.m_Size = 0;
+    }
+    
+    /*!
+     * @brief Move assignment operator transferring tracked byte ownership safely.
+     * @param other R-value reference to the source guard.
+     * @return Reference to this guard instance.
+     */
+    ScopedMemoryAllocation& operator=(ScopedMemoryAllocation&& other) noexcept {
+      if (this != &other) {
+        Release();
+        m_Size = other.m_Size;
+        other.m_Size = 0;
+      }
+      return *this;
+    }
+    
+    /*!
+     * @brief Adjusts the tracked memory footprint, releasing previous bytes and recording new ones.
+     * @param newSize New footprint in bytes (default 0).
+     */
+    void Reset(size_t newSize = 0) {
+      Release();
+      m_Size = newSize;
+      if (m_Size > 0) {
+        MemoryTracker::RecordAllocation(m_Size);
+      }
+    }
+    
+    /*!
+     * @brief Queries the total bytes registered by this scoped guard.
+     * @return Tracked byte footprint.
+     */
+    [[nodiscard]] size_t GetSize() const noexcept { return m_Size; }
+    
+  private:
+    /*!
+     * @brief Internal helper releasing registered memory tallies back to MemoryTracker.
+     */
+    void Release() noexcept {
+      if (m_Size > 0) {
+        MemoryTracker::RecordDeallocation(m_Size);
+        m_Size = 0;
+      }
+    }
+    
+    size_t m_Size{0}; /*!< Total bytes currently registered by this guard instance. */
+  };
 } // namespace KanVerse

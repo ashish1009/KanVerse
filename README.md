@@ -50,7 +50,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Core/Memory/MemoryTracking.hpp` (Part 2)
   - **Concepts:** Strict RAII design, deleting copy constructors/assignments, move semantics (`&& noexcept`) without double-counting bytes.
   - **Milestone:** Implement `ScopedMemoryAllocation`; verify `CurrentUsage` returns to `0` upon exiting a test scope.
-- [ ] **Day 6 — High-Resolution Monotonic Frame Timer**
+- [x] **Day 6 — High-Resolution Monotonic Frame Timer**
   - **Files:** `Core/Time/TimeStep.hpp`, `Core/Time/Clock.hpp`, `Core/Time/Clock.cpp`
   - **Concepts:** `std::chrono::steady_clock`, floating-point duration casting, `constexpr` and `[[nodiscard]]` attributes, implicit `operator float()`.
   - **Milestone:** Run a 60-iteration loop with `usleep(16666)` and log `dt.GetMilliseconds()`.

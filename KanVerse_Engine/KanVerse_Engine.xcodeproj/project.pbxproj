@@ -400,8 +400,8 @@
 		B2BA369930890C4F006439E3 = {
 			isa = PBXGroup;
 			children = (
-				B2BA375030891629006439E3 /* KanVerse_Headers.h */,
 				B2BA376930891629006439E3 /* PrefixHeader.pch */,
+				B2BA375030891629006439E3 /* KanVerse_Headers.h */,
 				B2BA374F30891629006439E3 /* Core */,
 				B2BA373930891629006439E3 /* Audio */,
 				B2BA375A30891629006439E3 /* Physics */,
@@ -492,9 +492,9 @@
 		B2BA374E30891629006439E3 /* Time */ = {
 			isa = PBXGroup;
 			children = (
+				B2BA374D30891629006439E3 /* TimeStep.hpp */,
 				B2BA374B30891629006439E3 /* Clock.hpp */,
 				B2BA374C30891629006439E3 /* Clock.cpp */,
-				B2BA374D30891629006439E3 /* TimeStep.hpp */,
 			);
 			path = Time;
 			sourceTree = "<group>";
@@ -504,12 +504,12 @@
 			children = (
 				B2BA374030891629006439E3 /* Diagnostics */,
 				B2BA374830891629006439E3 /* Memory */,
+				B2BA374E30891629006439E3 /* Time */,
 				B2BA373C30891629006439E3 /* Application */,
 				B2BA374430891629006439E3 /* Layers */,
 				B2BA374630891629006439E3 /* Math */,
 				B2BA374930891629006439E3 /* Serialization */,
 				B2BA374A30891629006439E3 /* Threading */,
-				B2BA374E30891629006439E3 /* Time */,
 			);
 			path = Core;
 			sourceTree = "<group>";
