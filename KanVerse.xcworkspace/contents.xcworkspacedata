@@ -5,7 +5,7 @@
       location = "group:README.md">
    </FileRef>
    <FileRef
-      location = "group:Skilks">
+      location = "group:Agent_Skills">
    </FileRef>
    <FileRef
       location = "group:Documents">
