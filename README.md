@@ -25,293 +25,12 @@ Use the following Markdown checkbox states to track your daily progress:
 
 ---
 
-## 📁 Complete Directory Tree Hierarchy
-
-Folders marked with `[FUTURE]` are pre-allocated for upcoming engine features (UI, Serialization, Scripting, Compute Particles, Animation).
-
-```text
-KanVerse/
-├── KanVerse_Engine/
-│   ├── KanVerse_Headers.h
-│   ├── PrefixHeader.pch
-│   ├── Audio/
-│   │   ├── AudioSystem.hpp
-│   │   └── AudioSystem.mm
-│   ├── Core/
-│   │   ├── Application/
-│   │   │   ├── Application.hpp
-│   │   │   └── Application.mm
-│   │   ├── Diagnostics/
-│   │   │   ├── Assert.hpp
-│   │   │   ├── Log.hpp
-│   │   │   └── Log.cpp
-│   │   ├── Layers/
-│   │   │   ├── Layer.hpp
-│   │   │   ├── LayerStack.hpp
-│   │   │   └── LayerStack.cpp
-│   │   ├── Math/
-│   │   │   └── Math.hpp
-│   │   ├── Memory/
-│   │   │   └── MemoryTracking.hpp
-│   │   ├── Time/
-│   │   │   ├── Clock.hpp
-│   │   │   ├── Clock.cpp
-│   │   │   └── TimeStep.hpp
-│   │   ├── Threading/                  # [FUTURE] Job System & Task Graph
-│   │   └── Serialization/              # [FUTURE] YAML/Binary Scene Archivers
-│   ├── Physics/
-│   │   ├── BoundingBox.hpp
-│   │   ├── BoundingBox.cpp
-│   │   ├── ColliderPrimitives.hpp
-│   │   ├── ColliderPrimitives.cpp
-│   │   ├── PBDSolver.hpp
-│   │   ├── PBDSolver.cpp
-│   │   ├── PlayerControllerSystem.hpp
-│   │   ├── PlayerControllerSystem.cpp
-│   │   └── Broadphase/                 # [FUTURE] BVH / Spatial Hashing
-│   ├── Platform/
-│   │   ├── Events/
-│   │   │   ├── Event.hpp
-│   │   │   ├── KeyEvents.hpp
-│   │   │   ├── MouseEvents.hpp
-│   │   │   └── WindowEvents.hpp
-│   │   ├── Input/
-│   │   │   ├── GameControllerBridge.hpp
-│   │   │   ├── GameControllerBridge.mm
-│   │   │   └── KeyCodes.hpp
-│   │   └── Window/
-│   │       ├── Window.hpp
-│   │       ├── NativeWindow.hpp
-│   │       └── NativeWindow.mm
-│   ├── Renderer/
-│   │   ├── Asset/
-│   │   │   ├── AssetManager.hpp
-│   │   │   └── AssetManager.cpp
-│   │   ├── Buffers/
-│   │   │   ├── BufferLayout.hpp
-│   │   │   ├── IndexBuffer.hpp
-│   │   │   ├── IndexBuffer.mm
-│   │   │   ├── VertexBuffer.hpp
-│   │   │   └── VertexBuffer.mm
-│   │   ├── Camera/
-│   │   │   ├── Camera.hpp
-│   │   │   ├── CameraController.hpp
-│   │   │   ├── CameraController.mm
-│   │   │   ├── PerspectiveCamera.hpp
-│   │   │   ├── PerspectiveCamera.cpp
-│   │   │   ├── SpringArm.hpp
-│   │   │   └── SpringArm.cpp
-│   │   ├── Context/
-│   │   │   ├── RenderContext.hpp
-│   │   │   └── RenderContext.mm
-│   │   ├── Framebuffer/
-│   │   │   ├── Framebuffer.hpp
-│   │   │   └── Framebuffer.mm
-│   │   ├── Geometry/
-│   │   │   ├── Mesh.hpp
-│   │   │   ├── Mesh.cpp
-│   │   │   └── SubMesh.hpp
-│   │   ├── Lighting/
-│   │   │   ├── DirectionalLight.hpp
-│   │   │   ├── EnvironmentLighting.hpp
-│   │   │   ├── Light.hpp
-│   │   │   ├── PointLight.hpp
-│   │   │   └── PointLight.cpp
-│   │   ├── Materials/
-│   │   │   ├── Material.hpp
-│   │   │   └── Material.mm
-│   │   ├── Pipeline/
-│   │   │   ├── FrameSync.hpp
-│   │   │   ├── FrameSync.mm
-│   │   │   ├── Pipeline.hpp
-│   │   │   ├── Pipeline.mm
-│   │   │   ├── Shader.hpp
-│   │   │   └── Shader.mm
-│   │   ├── PostProcess/
-│   │   │   ├── BloomPass.hpp
-│   │   │   ├── BloomPass.cpp
-│   │   │   └── SSAO/                   # [FUTURE] Screen-Space Ambient Occlusion
-│   │   ├── Procedural/
-│   │   │   ├── Capsule.hpp
-│   │   │   ├── Capsule.cpp
-│   │   │   ├── ChamferBox.hpp
-│   │   │   └── ChamferBox.cpp
-│   │   ├── Renderer/
-│   │   │   ├── RenderCommand.hpp
-│   │   │   ├── RenderCommand.mm
-│   │   │   ├── Renderer.hpp
-│   │   │   └── Renderer.mm
-│   │   ├── Textures/
-│   │   │   ├── Texture.hpp
-│   │   │   ├── Texture2D.hpp
-│   │   │   ├── Texture2D.mm
-│   │   │   ├── TextureCube.hpp
-│   │   │   └── TextureCube.mm
-│   │   ├── UI/                         # [FUTURE] ImGui / Metal HUD Overlay
-│   │   └── Animation/                  # [FUTURE] Skeletal Rigging & Skinning
-│   └── Scene/
-│       ├── Components.hpp
-│       ├── Entity.hpp
-│       ├── EntityID.hpp
-│       ├── Registry.hpp
-│       ├── Scene.hpp
-│       ├── Scene.mm
-│       ├── SparseSet.hpp
-│       └── Prefabs/                    # [FUTURE] Reusable Entity Templates
-├── KanVerse_App/
-│   ├── PrefixHeader.pch
-│   ├── Assets/
-│   │   ├── Audio/                      # [FUTURE] .wav / .caf Sound Cues
-│   │   ├── Meshes/                     # [FUTURE] .obj / .gltf 3D Models
-│   │   ├── Scenes/                     # [FUTURE] Saved Level Files
-│   │   └── Textures/
-│   │       ├── HDR/
-│   │       └── PBR/
-│   │           ├── Floor/
-│   │           ├── Ground/
-│   │           ├── Metal/
-│   │           ├── Roof/
-│   │           ├── Wall/
-│   │           └── Wood/
-│   ├── Factories/
-│   │   ├── EntityFactory.hpp
-│   │   ├── EntityFactory.cpp
-│   │   ├── MaterialFactory.hpp
-│   │   └── MaterialFactory.cpp
-│   ├── Layers/
-│   │   ├── KanVerseLayer.hpp
-│   │   ├── KanVerseLayer.mm
-│   │   └── DebugOverlayLayer/          # [FUTURE] Telemetry & Profiler UI
-│   ├── Shaders/
-│   │   ├── Bloom.metal
-│   │   ├── DebrisSimulation.metal
-│   │   ├── Equirectangular.metal
-│   │   ├── Irradiance.metal
-│   │   ├── ShadowDepth.metal
-│   │   ├── Skybox.metal
-│   │   ├── TexturedMaterial.metal
-│   │   └── Tonemap.metal
-│   ├── Source/
-│   │   ├── EntryPoint.mm
-│   │   ├── KanVerseApp.mm
-│   │   └── MetalImpl.cpp
-│   ├── Systems/
-│   │   ├── AI/
-│   │   │   ├── EnemyControllerSystem.hpp
-│   │   │   └── EnemyControllerSystem.cpp
-│   │   ├── Gameplay/
-│   │   │   ├── DoorSystem.hpp
-│   │   │   ├── DoorSystem.cpp
-│   │   │   ├── Combat/                 # [FUTURE] Health, Hitboxes & Projectiles
-│   │   │   └── Inventory/              # [FUTURE] Keys, Collectibles & Triggers
-│   │   └── Player/
-│   │       ├── CameraRigSystem.hpp
-│   │       ├── CameraRigSystem.cpp
-│   │       ├── InputBridgeSystem.hpp
-│   │       ├── InputBridgeSystem.cpp
-│   │       └── PlayerInputIntent.hpp
-│   └── World/
-│       ├── LevelBuilder.hpp
-│       ├── LevelBuilder.cpp
-│       ├── SceneManager.hpp
-│       ├── SceneManager.cpp
-│       ├── Architecture/
-│       │   ├── House_1_Builder.hpp
-│       │   └── House_1_Builder.cpp
-│       ├── Builders/
-│       │   ├── DestructibleFloorBuilder.hpp
-│       │   ├── DestructibleFloorBuilder.cpp
-│       │   ├── DestructibleWallBuilder.hpp
-│       │   ├── DestructibleWallBuilder.cpp
-│       │   ├── EnemyFactory.hpp
-│       │   ├── EnemyFactory.cpp
-│       │   ├── FloorBuilder.hpp
-│       │   ├── FloorBuilder.cpp
-│       │   ├── GroundBuilder.hpp
-│       │   ├── GroundBuilder.cpp
-│       │   ├── LightBuilder.hpp
-│       │   ├── LightBuilder.cpp
-│       │   ├── RoofBuilder.hpp
-│       │   ├── RoofBuilder.cpp
-│       │   ├── StairsBuilder.hpp
-│       │   ├── StairsBuilder.cpp
-│       │   ├── WallBuilder.hpp
-│       │   └── WallBuilder.cpp
-│       └── Environment/
-│           ├── AtmosphereSystem.hpp
-│           └── AtmosphereSystem.cpp
-└── Vendor/                             # [FUTURE] Third-Party Dependencies
-    ├── metal-cpp/
-    └── stb_image/
-```
-
----
-
-## ⚡ macOS Terminal Scaffolding Command
-
-Run this command in your macOS Terminal (`zsh`) to generate all directories and empty source/header files in one shot:
-
-```bash
-# 1. Create Engine Directories (Current + Future)
-mkdir -p KanVerse_Engine/{Audio,Core/{Application,Diagnostics,Layers,Math,Memory,Time,Threading,Serialization},Physics/Broadphase,Platform/{Events,Input,Window},Renderer/{Asset,Buffers,Camera,Context,Framebuffer,Geometry,Lighting,Materials,Pipeline,PostProcess/SSAO,Procedural,Renderer,Textures,UI,Animation},Scene/Prefabs}
-
-# 2. Create App & Vendor Directories (Current + Future)
-mkdir -p KanVerse_App/{Assets/{Audio,Meshes,Scenes,Textures/{HDR,PBR/{Floor,Ground,Metal,Roof,Wall,Wood}}},Factories,Layers/DebugOverlayLayer,Shaders,Source,Systems/{AI,Gameplay/{Combat,Inventory},Player},World/{Architecture,Builders,Environment}}
-mkdir -p Vendor/{metal-cpp,stb_image}
-
-# 3. Create All Empty Source & Header Files inside KanVerse_Engine
-touch KanVerse_Engine/{KanVerse_Headers.h,PrefixHeader.pch} \
-      KanVerse_Engine/Audio/{AudioSystem.hpp,AudioSystem.mm} \
-      KanVerse_Engine/Core/Application/{Application.hpp,Application.mm} \
-      KanVerse_Engine/Core/Diagnostics/{Assert.hpp,Log.hpp,Log.cpp} \
-      KanVerse_Engine/Core/Layers/{Layer.hpp,LayerStack.hpp,LayerStack.cpp} \
-      KanVerse_Engine/Core/Math/Math.hpp \
-      KanVerse_Engine/Core/Memory/MemoryTracking.hpp \
-      KanVerse_Engine/Core/Time/{Clock.hpp,Clock.cpp,TimeStep.hpp} \
-      KanVerse_Engine/Physics/{BoundingBox.hpp,BoundingBox.cpp,ColliderPrimitives.hpp,ColliderPrimitives.cpp,PBDSolver.hpp,PBDSolver.cpp,PlayerControllerSystem.hpp,PlayerControllerSystem.cpp} \
-      KanVerse_Engine/Platform/Events/{Event.hpp,KeyEvents.hpp,MouseEvents.hpp,WindowEvents.hpp} \
-      KanVerse_Engine/Platform/Input/{GameControllerBridge.hpp,GameControllerBridge.mm,KeyCodes.hpp} \
-      KanVerse_Engine/Platform/Window/{Window.hpp,NativeWindow.hpp,NativeWindow.mm} \
-      KanVerse_Engine/Renderer/Asset/{AssetManager.hpp,AssetManager.cpp} \
-      KanVerse_Engine/Renderer/Buffers/{BufferLayout.hpp,IndexBuffer.hpp,IndexBuffer.mm,VertexBuffer.hpp,VertexBuffer.mm} \
-      KanVerse_Engine/Renderer/Camera/{Camera.hpp,CameraController.hpp,CameraController.mm,PerspectiveCamera.hpp,PerspectiveCamera.cpp,SpringArm.hpp,SpringArm.cpp} \
-      KanVerse_Engine/Renderer/Context/{RenderContext.hpp,RenderContext.mm} \
-      KanVerse_Engine/Renderer/Framebuffer/{Framebuffer.hpp,Framebuffer.mm} \
-      KanVerse_Engine/Renderer/Geometry/{Mesh.hpp,Mesh.cpp,SubMesh.hpp} \
-      KanVerse_Engine/Renderer/Lighting/{DirectionalLight.hpp,EnvironmentLighting.hpp,Light.hpp,PointLight.hpp,PointLight.cpp} \
-      KanVerse_Engine/Renderer/Materials/{Material.hpp,Material.mm} \
-      KanVerse_Engine/Renderer/Pipeline/{FrameSync.hpp,FrameSync.mm,Pipeline.hpp,Pipeline.mm,Shader.hpp,Shader.mm} \
-      KanVerse_Engine/Renderer/PostProcess/{BloomPass.hpp,BloomPass.cpp} \
-      KanVerse_Engine/Renderer/Procedural/{Capsule.hpp,Capsule.cpp,ChamferBox.hpp,ChamferBox.cpp} \
-      KanVerse_Engine/Renderer/Renderer/{RenderCommand.hpp,RenderCommand.mm,Renderer.hpp,Renderer.mm} \
-      KanVerse_Engine/Renderer/Textures/{Texture.hpp,Texture2D.hpp,Texture2D.mm,TextureCube.hpp,TextureCube.mm} \
-      KanVerse_Engine/Scene/{Components.hpp,Entity.hpp,EntityID.hpp,Registry.hpp,Scene.hpp,Scene.mm,SparseSet.hpp}
-
-# 4. Create All Empty Source, Header & Shader Files inside KanVerse_App
-touch KanVerse_App/PrefixHeader.pch \
-      KanVerse_App/Factories/{EntityFactory.hpp,EntityFactory.cpp,MaterialFactory.hpp,MaterialFactory.cpp} \
-      KanVerse_App/Layers/{KanVerseLayer.hpp,KanVerseLayer.mm} \
-      KanVerse_App/Shaders/{Bloom.metal,DebrisSimulation.metal,Equirectangular.metal,Irradiance.metal,ShadowDepth.metal,Skybox.metal,TexturedMaterial.metal,Tonemap.metal} \
-      KanVerse_App/Source/{EntryPoint.mm,KanVerseApp.mm,MetalImpl.cpp} \
-      KanVerse_App/Systems/AI/{EnemyControllerSystem.hpp,EnemyControllerSystem.cpp} \
-      KanVerse_App/Systems/Gameplay/{DoorSystem.hpp,DoorSystem.cpp} \
-      KanVerse_App/Systems/Player/{CameraRigSystem.hpp,CameraRigSystem.cpp,InputBridgeSystem.hpp,InputBridgeSystem.cpp,PlayerInputIntent.hpp} \
-      KanVerse_App/World/{LevelBuilder.hpp,LevelBuilder.cpp,SceneManager.hpp,SceneManager.cpp} \
-      KanVerse_App/World/Architecture/{House_1_Builder.hpp,House_1_Builder.cpp} \
-      KanVerse_App/World/Builders/{DestructibleFloorBuilder.hpp,DestructibleFloorBuilder.cpp,DestructibleWallBuilder.hpp,DestructibleWallBuilder.cpp,EnemyFactory.hpp,EnemyFactory.cpp,FloorBuilder.hpp,FloorBuilder.cpp,GroundBuilder.hpp,GroundBuilder.cpp,LightBuilder.hpp,LightBuilder.cpp,RoofBuilder.hpp,RoofBuilder.cpp,StairsBuilder.hpp,StairsBuilder.cpp,WallBuilder.hpp,WallBuilder.cpp} \
-      KanVerse_App/World/Environment/{AtmosphereSystem.hpp,AtmosphereSystem.cpp}
-
-echo "KanVerse subdirectories and files created successfully in $(pwd)!"
-```
-
----
-
 ## 🗺️ 100-Day Master Implementation Roadmap
 
 ### Phase 1: Engine Core, Diagnostics, Memory & SIMD Math (Days 1–12)
 *Goal: Build the zero-dependency foundational primitives that every other file in the engine includes.*
 
-- [ ] **Day 1 — Workspace & Xcode/CMake Setup**
+- [x] **Day 1 — Workspace & Xcode/CMake Setup**
   - **Files:** Project Configuration (`KanVerse_Engine` static lib & `KanVerse_App` bundle)
   - **Concepts:** C++23 (`-std=c++2b`), Objective-C++ (`.mm`), ARC vs Manual Retain/Release, linking `Metal`, `AppKit`, `QuartzCore`, `GameController`, and `AVFoundation` frameworks.
   - **Milestone:** Download `metal-cpp` and `stb_image.h` into `Vendor/` and compile an empty target.
@@ -606,3 +325,284 @@ echo "KanVerse subdirectories and files created successfully in $(pwd)!"
 - [ ] **Day 65 — Kinematic Player Controller (Part 2: Banking, Pitching & Squash-and-Stretch Spring)**
   - **Files:** `Physics/PlayerControllerSystem.cpp` (Part 2)
   - **Concepts:** Shortest-arc yaw interpolation, turn banking (`RollAngle`), sprint leaning (`PitchAngle`), Hooke's Law damped spring (`-k * x - c * v`) with volume-preserving scale. *(Note: ensure `*` is present in `controller.RollAngle
+
+---
+
+## 📁 Complete Directory Tree Hierarchy
+
+Folders marked with `[FUTURE]` are pre-allocated for upcoming engine features (UI, Serialization, Scripting, Compute Particles, Animation).
+
+```text
+KanVerse/
+├── KanVerse_Engine/
+│   ├── KanVerse_Headers.h
+│   ├── PrefixHeader.pch
+│   ├── Audio/
+│   │   ├── AudioSystem.hpp
+│   │   └── AudioSystem.mm
+│   ├── Core/
+│   │   ├── Application/
+│   │   │   ├── Application.hpp
+│   │   │   └── Application.mm
+│   │   ├── Diagnostics/
+│   │   │   ├── Assert.hpp
+│   │   │   ├── Log.hpp
+│   │   │   └── Log.cpp
+│   │   ├── Layers/
+│   │   │   ├── Layer.hpp
+│   │   │   ├── LayerStack.hpp
+│   │   │   └── LayerStack.cpp
+│   │   ├── Math/
+│   │   │   └── Math.hpp
+│   │   ├── Memory/
+│   │   │   └── MemoryTracking.hpp
+│   │   ├── Time/
+│   │   │   ├── Clock.hpp
+│   │   │   ├── Clock.cpp
+│   │   │   └── TimeStep.hpp
+│   │   ├── Threading/                  # [FUTURE] Job System & Task Graph
+│   │   └── Serialization/              # [FUTURE] YAML/Binary Scene Archivers
+│   ├── Physics/
+│   │   ├── BoundingBox.hpp
+│   │   ├── BoundingBox.cpp
+│   │   ├── ColliderPrimitives.hpp
+│   │   ├── ColliderPrimitives.cpp
+│   │   ├── PBDSolver.hpp
+│   │   ├── PBDSolver.cpp
+│   │   ├── PlayerControllerSystem.hpp
+│   │   ├── PlayerControllerSystem.cpp
+│   │   └── Broadphase/                 # [FUTURE] BVH / Spatial Hashing
+│   ├── Platform/
+│   │   ├── Events/
+│   │   │   ├── Event.hpp
+│   │   │   ├── KeyEvents.hpp
+│   │   │   ├── MouseEvents.hpp
+│   │   │   └── WindowEvents.hpp
+│   │   ├── Input/
+│   │   │   ├── GameControllerBridge.hpp
+│   │   │   ├── GameControllerBridge.mm
+│   │   │   └── KeyCodes.hpp
+│   │   └── Window/
+│   │       ├── Window.hpp
+│   │       ├── NativeWindow.hpp
+│   │       └── NativeWindow.mm
+│   ├── Renderer/
+│   │   ├── Asset/
+│   │   │   ├── AssetManager.hpp
+│   │   │   └── AssetManager.cpp
+│   │   ├── Buffers/
+│   │   │   ├── BufferLayout.hpp
+│   │   │   ├── IndexBuffer.hpp
+│   │   │   ├── IndexBuffer.mm
+│   │   │   ├── VertexBuffer.hpp
+│   │   │   └── VertexBuffer.mm
+│   │   ├── Camera/
+│   │   │   ├── Camera.hpp
+│   │   │   ├── CameraController.hpp
+│   │   │   ├── CameraController.mm
+│   │   │   ├── PerspectiveCamera.hpp
+│   │   │   ├── PerspectiveCamera.cpp
+│   │   │   ├── SpringArm.hpp
+│   │   │   └── SpringArm.cpp
+│   │   ├── Context/
+│   │   │   ├── RenderContext.hpp
+│   │   │   └── RenderContext.mm
+│   │   ├── Framebuffer/
+│   │   │   ├── Framebuffer.hpp
+│   │   │   └── Framebuffer.mm
+│   │   ├── Geometry/
+│   │   │   ├── Mesh.hpp
+│   │   │   ├── Mesh.cpp
+│   │   │   └── SubMesh.hpp
+│   │   ├── Lighting/
+│   │   │   ├── DirectionalLight.hpp
+│   │   │   ├── EnvironmentLighting.hpp
+│   │   │   ├── Light.hpp
+│   │   │   ├── PointLight.hpp
+│   │   │   └── PointLight.cpp
+│   │   ├── Materials/
+│   │   │   ├── Material.hpp
+│   │   │   └── Material.mm
+│   │   ├── Pipeline/
+│   │   │   ├── FrameSync.hpp
+│   │   │   ├── FrameSync.mm
+│   │   │   ├── Pipeline.hpp
+│   │   │   ├── Pipeline.mm
+│   │   │   ├── Shader.hpp
+│   │   │   └── Shader.mm
+│   │   ├── PostProcess/
+│   │   │   ├── BloomPass.hpp
+│   │   │   ├── BloomPass.cpp
+│   │   │   └── SSAO/                   # [FUTURE] Screen-Space Ambient Occlusion
+│   │   ├── Procedural/
+│   │   │   ├── Capsule.hpp
+│   │   │   ├── Capsule.cpp
+│   │   │   ├── ChamferBox.hpp
+│   │   │   └── ChamferBox.cpp
+│   │   ├── Renderer/
+│   │   │   ├── RenderCommand.hpp
+│   │   │   ├── RenderCommand.mm
+│   │   │   ├── Renderer.hpp
+│   │   │   └── Renderer.mm
+│   │   ├── Textures/
+│   │   │   ├── Texture.hpp
+│   │   │   ├── Texture2D.hpp
+│   │   │   ├── Texture2D.mm
+│   │   │   ├── TextureCube.hpp
+│   │   │   └── TextureCube.mm
+│   │   ├── UI/                         # [FUTURE] ImGui / Metal HUD Overlay
+│   │   └── Animation/                  # [FUTURE] Skeletal Rigging & Skinning
+│   └── Scene/
+│       ├── Components.hpp
+│       ├── Entity.hpp
+│       ├── EntityID.hpp
+│       ├── Registry.hpp
+│       ├── Scene.hpp
+│       ├── Scene.mm
+│       ├── SparseSet.hpp
+│       └── Prefabs/                    # [FUTURE] Reusable Entity Templates
+├── KanVerse_App/
+│   ├── PrefixHeader.pch
+│   ├── Assets/
+│   │   ├── Audio/                      # [FUTURE] .wav / .caf Sound Cues
+│   │   ├── Meshes/                     # [FUTURE] .obj / .gltf 3D Models
+│   │   ├── Scenes/                     # [FUTURE] Saved Level Files
+│   │   └── Textures/
+│   │       ├── HDR/
+│   │       └── PBR/
+│   │           ├── Floor/
+│   │           ├── Ground/
+│   │           ├── Metal/
+│   │           ├── Roof/
+│   │           ├── Wall/
+│   │           └── Wood/
+│   ├── Factories/
+│   │   ├── EntityFactory.hpp
+│   │   ├── EntityFactory.cpp
+│   │   ├── MaterialFactory.hpp
+│   │   └── MaterialFactory.cpp
+│   ├── Layers/
+│   │   ├── KanVerseLayer.hpp
+│   │   ├── KanVerseLayer.mm
+│   │   └── DebugOverlayLayer/          # [FUTURE] Telemetry & Profiler UI
+│   ├── Shaders/
+│   │   ├── Bloom.metal
+│   │   ├── DebrisSimulation.metal
+│   │   ├── Equirectangular.metal
+│   │   ├── Irradiance.metal
+│   │   ├── ShadowDepth.metal
+│   │   ├── Skybox.metal
+│   │   ├── TexturedMaterial.metal
+│   │   └── Tonemap.metal
+│   ├── Source/
+│   │   ├── EntryPoint.mm
+│   │   ├── KanVerseApp.mm
+│   │   └── MetalImpl.cpp
+│   ├── Systems/
+│   │   ├── AI/
+│   │   │   ├── EnemyControllerSystem.hpp
+│   │   │   └── EnemyControllerSystem.cpp
+│   │   ├── Gameplay/
+│   │   │   ├── DoorSystem.hpp
+│   │   │   ├── DoorSystem.cpp
+│   │   │   ├── Combat/                 # [FUTURE] Health, Hitboxes & Projectiles
+│   │   │   └── Inventory/              # [FUTURE] Keys, Collectibles & Triggers
+│   │   └── Player/
+│   │       ├── CameraRigSystem.hpp
+│   │       ├── CameraRigSystem.cpp
+│   │       ├── InputBridgeSystem.hpp
+│   │       ├── InputBridgeSystem.cpp
+│   │       └── PlayerInputIntent.hpp
+│   └── World/
+│       ├── LevelBuilder.hpp
+│       ├── LevelBuilder.cpp
+│       ├── SceneManager.hpp
+│       ├── SceneManager.cpp
+│       ├── Architecture/
+│       │   ├── House_1_Builder.hpp
+│       │   └── House_1_Builder.cpp
+│       ├── Builders/
+│       │   ├── DestructibleFloorBuilder.hpp
+│       │   ├── DestructibleFloorBuilder.cpp
+│       │   ├── DestructibleWallBuilder.hpp
+│       │   ├── DestructibleWallBuilder.cpp
+│       │   ├── EnemyFactory.hpp
+│       │   ├── EnemyFactory.cpp
+│       │   ├── FloorBuilder.hpp
+│       │   ├── FloorBuilder.cpp
+│       │   ├── GroundBuilder.hpp
+│       │   ├── GroundBuilder.cpp
+│       │   ├── LightBuilder.hpp
+│       │   ├── LightBuilder.cpp
+│       │   ├── RoofBuilder.hpp
+│       │   ├── RoofBuilder.cpp
+│       │   ├── StairsBuilder.hpp
+│       │   ├── StairsBuilder.cpp
+│       │   ├── WallBuilder.hpp
+│       │   └── WallBuilder.cpp
+│       └── Environment/
+│           ├── AtmosphereSystem.hpp
+│           └── AtmosphereSystem.cpp
+└── Vendor/                             # [FUTURE] Third-Party Dependencies
+    ├── metal-cpp/
+    └── stb_image/
+```
+
+---
+
+## ⚡ macOS Terminal Scaffolding Command
+
+Run this command in your macOS Terminal (`zsh`) to generate all directories and empty source/header files in one shot:
+
+```bash
+# 1. Create Engine Directories (Current + Future)
+mkdir -p KanVerse_Engine/{Audio,Core/{Application,Diagnostics,Layers,Math,Memory,Time,Threading,Serialization},Physics/Broadphase,Platform/{Events,Input,Window},Renderer/{Asset,Buffers,Camera,Context,Framebuffer,Geometry,Lighting,Materials,Pipeline,PostProcess/SSAO,Procedural,Renderer,Textures,UI,Animation},Scene/Prefabs}
+
+# 2. Create App & Vendor Directories (Current + Future)
+mkdir -p KanVerse_App/{Assets/{Audio,Meshes,Scenes,Textures/{HDR,PBR/{Floor,Ground,Metal,Roof,Wall,Wood}}},Factories,Layers/DebugOverlayLayer,Shaders,Source,Systems/{AI,Gameplay/{Combat,Inventory},Player},World/{Architecture,Builders,Environment}}
+mkdir -p Vendor/{metal-cpp,stb_image}
+
+# 3. Create All Empty Source & Header Files inside KanVerse_Engine
+touch KanVerse_Engine/{KanVerse_Headers.h,PrefixHeader.pch} \
+      KanVerse_Engine/Audio/{AudioSystem.hpp,AudioSystem.mm} \
+      KanVerse_Engine/Core/Application/{Application.hpp,Application.mm} \
+      KanVerse_Engine/Core/Diagnostics/{Assert.hpp,Log.hpp,Log.cpp} \
+      KanVerse_Engine/Core/Layers/{Layer.hpp,LayerStack.hpp,LayerStack.cpp} \
+      KanVerse_Engine/Core/Math/Math.hpp \
+      KanVerse_Engine/Core/Memory/MemoryTracking.hpp \
+      KanVerse_Engine/Core/Time/{Clock.hpp,Clock.cpp,TimeStep.hpp} \
+      KanVerse_Engine/Physics/{BoundingBox.hpp,BoundingBox.cpp,ColliderPrimitives.hpp,ColliderPrimitives.cpp,PBDSolver.hpp,PBDSolver.cpp,PlayerControllerSystem.hpp,PlayerControllerSystem.cpp} \
+      KanVerse_Engine/Platform/Events/{Event.hpp,KeyEvents.hpp,MouseEvents.hpp,WindowEvents.hpp} \
+      KanVerse_Engine/Platform/Input/{GameControllerBridge.hpp,GameControllerBridge.mm,KeyCodes.hpp} \
+      KanVerse_Engine/Platform/Window/{Window.hpp,NativeWindow.hpp,NativeWindow.mm} \
+      KanVerse_Engine/Renderer/Asset/{AssetManager.hpp,AssetManager.cpp} \
+      KanVerse_Engine/Renderer/Buffers/{BufferLayout.hpp,IndexBuffer.hpp,IndexBuffer.mm,VertexBuffer.hpp,VertexBuffer.mm} \
+      KanVerse_Engine/Renderer/Camera/{Camera.hpp,CameraController.hpp,CameraController.mm,PerspectiveCamera.hpp,PerspectiveCamera.cpp,SpringArm.hpp,SpringArm.cpp} \
+      KanVerse_Engine/Renderer/Context/{RenderContext.hpp,RenderContext.mm} \
+      KanVerse_Engine/Renderer/Framebuffer/{Framebuffer.hpp,Framebuffer.mm} \
+      KanVerse_Engine/Renderer/Geometry/{Mesh.hpp,Mesh.cpp,SubMesh.hpp} \
+      KanVerse_Engine/Renderer/Lighting/{DirectionalLight.hpp,EnvironmentLighting.hpp,Light.hpp,PointLight.hpp,PointLight.cpp} \
+      KanVerse_Engine/Renderer/Materials/{Material.hpp,Material.mm} \
+      KanVerse_Engine/Renderer/Pipeline/{FrameSync.hpp,FrameSync.mm,Pipeline.hpp,Pipeline.mm,Shader.hpp,Shader.mm} \
+      KanVerse_Engine/Renderer/PostProcess/{BloomPass.hpp,BloomPass.cpp} \
+      KanVerse_Engine/Renderer/Procedural/{Capsule.hpp,Capsule.cpp,ChamferBox.hpp,ChamferBox.cpp} \
+      KanVerse_Engine/Renderer/Renderer/{RenderCommand.hpp,RenderCommand.mm,Renderer.hpp,Renderer.mm} \
+      KanVerse_Engine/Renderer/Textures/{Texture.hpp,Texture2D.hpp,Texture2D.mm,TextureCube.hpp,TextureCube.mm} \
+      KanVerse_Engine/Scene/{Components.hpp,Entity.hpp,EntityID.hpp,Registry.hpp,Scene.hpp,Scene.mm,SparseSet.hpp}
+
+# 4. Create All Empty Source, Header & Shader Files inside KanVerse_App
+touch KanVerse_App/PrefixHeader.pch \
+      KanVerse_App/Factories/{EntityFactory.hpp,EntityFactory.cpp,MaterialFactory.hpp,MaterialFactory.cpp} \
+      KanVerse_App/Layers/{KanVerseLayer.hpp,KanVerseLayer.mm} \
+      KanVerse_App/Shaders/{Bloom.metal,DebrisSimulation.metal,Equirectangular.metal,Irradiance.metal,ShadowDepth.metal,Skybox.metal,TexturedMaterial.metal,Tonemap.metal} \
+      KanVerse_App/Source/{EntryPoint.mm,KanVerseApp.mm,MetalImpl.cpp} \
+      KanVerse_App/Systems/AI/{EnemyControllerSystem.hpp,EnemyControllerSystem.cpp} \
+      KanVerse_App/Systems/Gameplay/{DoorSystem.hpp,DoorSystem.cpp} \
+      KanVerse_App/Systems/Player/{CameraRigSystem.hpp,CameraRigSystem.cpp,InputBridgeSystem.hpp,InputBridgeSystem.cpp,PlayerInputIntent.hpp} \
+      KanVerse_App/World/{LevelBuilder.hpp,LevelBuilder.cpp,SceneManager.hpp,SceneManager.cpp} \
+      KanVerse_App/World/Architecture/{House_1_Builder.hpp,House_1_Builder.cpp} \
+      KanVerse_App/World/Builders/{DestructibleFloorBuilder.hpp,DestructibleFloorBuilder.cpp,DestructibleWallBuilder.hpp,DestructibleWallBuilder.cpp,EnemyFactory.hpp,EnemyFactory.cpp,FloorBuilder.hpp,FloorBuilder.cpp,GroundBuilder.hpp,GroundBuilder.cpp,LightBuilder.hpp,LightBuilder.cpp,RoofBuilder.hpp,RoofBuilder.cpp,StairsBuilder.hpp,StairsBuilder.cpp,WallBuilder.hpp,WallBuilder.cpp} \
+      KanVerse_App/World/Environment/{AtmosphereSystem.hpp,AtmosphereSystem.cpp}
+
+echo "KanVerse subdirectories and files created successfully in $(pwd)!"
+```

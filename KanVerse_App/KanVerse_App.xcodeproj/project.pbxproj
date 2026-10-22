@@ -38,6 +38,13 @@
 		B2BA37343089161D006439E3 /* DestructibleWallBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA37003089161D006439E3 /* DestructibleWallBuilder.cpp */; };
 		B2BA37353089161D006439E3 /* GroundBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA37063089161D006439E3 /* GroundBuilder.cpp */; };
 		B2BA37363089161D006439E3 /* AtmosphereSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA37113089161D006439E3 /* AtmosphereSystem.cpp */; };
+		B2BA38123089D154006439E3 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA38113089D154006439E3 /* MetalKit.framework */; };
+		B2BA38143089D160006439E3 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA38133089D160006439E3 /* Quartz.framework */; };
+		B2BA38163089D167006439E3 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA38153089D167006439E3 /* QuartzCore.framework */; };
+		B2BA38183089D176006439E3 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA38173089D176006439E3 /* Metal.framework */; };
+		B2BA381A3089D17F006439E3 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA38193089D17F006439E3 /* GameController.framework */; };
+		B2BA381C3089D184006439E3 /* AVFAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA381B3089D184006439E3 /* AVFAudio.framework */; };
+		B2BA381E3089D19E006439E3 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA381D3089D19E006439E3 /* AppKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -107,6 +114,13 @@
 		B2BA37143089161D006439E3 /* LevelBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LevelBuilder.cpp; sourceTree = "<group>"; };
 		B2BA37153089161D006439E3 /* SceneManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SceneManager.hpp; sourceTree = "<group>"; };
 		B2BA37163089161D006439E3 /* SceneManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SceneManager.cpp; sourceTree = "<group>"; };
+		B2BA38113089D154006439E3 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		B2BA38133089D160006439E3 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
+		B2BA38153089D167006439E3 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		B2BA38173089D176006439E3 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		B2BA38193089D17F006439E3 /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
+		B2BA381B3089D184006439E3 /* AVFAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFAudio.framework; path = System/Library/Frameworks/AVFAudio.framework; sourceTree = SDKROOT; };
+		B2BA381D3089D19E006439E3 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +128,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2BA381E3089D19E006439E3 /* AppKit.framework in Frameworks */,
+				B2BA381C3089D184006439E3 /* AVFAudio.framework in Frameworks */,
+				B2BA381A3089D17F006439E3 /* GameController.framework in Frameworks */,
+				B2BA38183089D176006439E3 /* Metal.framework in Frameworks */,
+				B2BA38123089D154006439E3 /* MetalKit.framework in Frameworks */,
+				B2BA38163089D167006439E3 /* QuartzCore.framework in Frameworks */,
+				B2BA38143089D160006439E3 /* Quartz.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,13 +145,14 @@
 			isa = PBXGroup;
 			children = (
 				B2BA36C730891009006439E3 /* PrefixHeader.pch */,
+				B2BA36EA3089161D006439E3 /* Source */,
 				B2BA36D43089161D006439E3 /* Assets */,
 				B2BA36D93089161D006439E3 /* Factories */,
 				B2BA36DD3089161D006439E3 /* Layers */,
 				B2BA36E63089161D006439E3 /* Shaders */,
-				B2BA36EA3089161D006439E3 /* Source */,
 				B2BA36F93089161D006439E3 /* Systems */,
 				B2BA37173089161D006439E3 /* World */,
+				B2BA38103089D153006439E3 /* Frameworks */,
 				B2BA36BA30890C5C006439E3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -412,6 +434,20 @@
 			path = World;
 			sourceTree = "<group>";
 		};
+		B2BA38103089D153006439E3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA381D3089D19E006439E3 /* AppKit.framework */,
+				B2BA381B3089D184006439E3 /* AVFAudio.framework */,
+				B2BA38193089D17F006439E3 /* GameController.framework */,
+				B2BA38173089D176006439E3 /* Metal.framework */,
+				B2BA38153089D167006439E3 /* QuartzCore.framework */,
+				B2BA38133089D160006439E3 /* Quartz.framework */,
+				B2BA38113089D154006439E3 /* MetalKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -630,6 +666,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				HEADER_SEARCH_PATHS = (
+					"${PROJECT_DIR}",
+					"${PROJECT_DIR}/../KanVerse_Engine",
+					"${PROJECT_DIR}/../KanVerse_Engine/Vendors/metal-cpp",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -640,6 +681,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				HEADER_SEARCH_PATHS = (
+					"${PROJECT_DIR}",
+					"${PROJECT_DIR}/../KanVerse_Engine",
+					"${PROJECT_DIR}/../KanVerse_Engine/Vendors/metal-cpp",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
