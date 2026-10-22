@@ -179,7 +179,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/Geometry/SubMesh.hpp`, `Renderer/Geometry/Mesh.hpp`, `Renderer/Geometry/Mesh.cpp`
   - **Concepts:** `Submesh` partitioning and local AABB encapsulation, binding `VertexBuffer` and `IndexBuffer` into `Mesh`.
   - **Milestone:** Implement `SubMesh.hpp` and `Mesh`.
-- [ ] **Day 35 — Perspective Camera & View-Projection Matrices**
+- [x] **Day 35 — Perspective Camera & View-Projection Matrices**
   - **Files:** `Renderer/Camera/Camera.hpp`, `Renderer/Camera/PerspectiveCamera.hpp`, `Renderer/Camera/PerspectiveCamera.cpp`
   - **Concepts:** Base `Camera` contract, caching `m_ViewMatrix` (`Math::LookAt`) and `m_ViewProjectionMatrix`, viewport resize handling.
   - **Milestone:** Implement `Camera` and `PerspectiveCamera`.
