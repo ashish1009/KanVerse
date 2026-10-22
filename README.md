@@ -135,7 +135,7 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 3: Metal RHI — Buffers, Shaders, Pipelines, Textures & First 3D Draw (Days 24–40)
 *Goal: Build the Render Hardware Interface (RHI) right now so we can put 3D geometry on screen immediately.*
 
-- [ ] **Day 24 — Vertex Attribute Layout & SIMD Stride Reflection**
+- [x] **Day 24 — Vertex Attribute Layout & SIMD Stride Reflection**
   - **Files:** `Renderer/Buffers/BufferLayout.hpp`
   - **Concepts:** `ShaderDataType`, Metal 16-byte alignment (`ShaderDataType::Float3 == 16`), automatic offset and stride calculation.
   - **Milestone:** Implement `ShaderDataType`, `ShaderDataTypeSize`, `BufferElement`, and `BufferLayout`.
