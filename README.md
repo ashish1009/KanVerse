@@ -13,8 +13,8 @@ Use the following Markdown checkbox states to track your daily progress:
 
 ### Phase Progress Overview
 - [x] **Phase 1:** Engine Core, Diagnostics, Memory & SIMD Math (Days 1–12)
-- [ ] **Phase 2:** Platform Events, Input Polling & Cocoa/Metal Windowing (Days 13–23)
-- [ ] **Phase 3:** Physics Engine & Spatial Mathematics (Days 24–29)
+- [x] **Phase 2:** Platform Events, Input Polling & Cocoa/Metal Windowing (Days 13–23)
+- [-] **Phase 3:** Physics Engine & Spatial Mathematics (Days 24–29)
 - [ ] **Phase 4:** Generational Entity-Component-System (ECS) Architecture (Days 30–35)
 - [ ] **Phase 5:** Metal RHI — Buffers, Shaders, Textures, Samplers & Pipelines (Days 36–52)
 - [ ] **Phase 6:** Metal Shaders, Compute Bloom, PBR & High-Level Renderer (Days 53–62)
@@ -124,7 +124,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Source/EntryPoint.mm`, `Source/KanVerseApp.mm`
   - **Concepts:** Engine `main()` vs Client `CreateApplication()`, scoped lifetime block for post-teardown `MemoryTracker::GetStats()` verification.
   - **Milestone:** Implement `EntryPoint.mm` and `KanVerseApp.mm`.
-- [ ] **Day 23 — Phase 2 Integration Milestone**
+- [x] **Day 23 — Phase 2 Integration Milestone**
   - **Files:** Full Phase 1 + Phase 2 Build
   - **Concepts:** End-to-end event loop, Cmd+Q clean shutdown, P-Core scheduling, Retina resize events.
   - **Milestone:** Launch the 120Hz macOS window, test input/resize logs, quit via `Cmd+Q`, and verify `0 bytes leaked`.

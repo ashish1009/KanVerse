@@ -15,50 +15,50 @@ namespace KanVerse::Testing {
    * @brief Exercises all Phase 1 subsystems and validates correctness and memory safety.
    */
   void RunPhase1Tests() {
-    KV_CORE_INFO("==================================================");
-    KV_CORE_INFO("       STARTING KANVERSE PHASE 1 TEST SUITE       ");
-    KV_CORE_INFO("==================================================");
+    KV_INFO("==================================================");
+    KV_INFO("       STARTING KANVERSE PHASE 1 TEST SUITE       ");
+    KV_INFO("==================================================");
     
     // ---------------------------------------------------------------------
     // Test 1: Diagnostics & Logging (All 5 Severities)
     // ---------------------------------------------------------------------
-    KV_CORE_TRACE("Phase1Test: Testing Trace level logging (Value: {:.4f})", 3.14159);
-    KV_CORE_INFO("Phase1Test: Testing Info level logging.");
-    KV_CORE_WARN("Phase1Test: Testing Warn level logging.");
-    KV_CORE_ERROR("Phase1Test: Testing Error level logging.");
+    KV_TRACE("Phase1Test: Testing Trace level logging (Value: {:.4f})", 3.14159);
+    KV_INFO("Phase1Test: Testing Info level logging.");
+    KV_WARN("Phase1Test: Testing Warn level logging.");
+    KV_ERROR("Phase1Test: Testing Error level logging.");
     
     // Note: We skip Fatal here as it triggers assertions/faults.
-    KV_CORE_INFO("[PASS] Test 1: Diagnostics & Logging verified.");
+    KV_INFO("[PASS] Test 1: Diagnostics & Logging verified.");
     
     // ---------------------------------------------------------------------
     // Test 2: Branch-Predicted Assertions
     // ---------------------------------------------------------------------
     int dummyValue = 42;
-    KV_CORE_ASSERT(dummyValue == 42, "Dummy value must equal 42!");
-    KV_CORE_INFO("[PASS] Test 2: Assertions verified.");
+    KV_ASSERT(dummyValue == 42, "Dummy value must equal 42!");
+    KV_INFO("[PASS] Test 2: Assertions verified.");
     
     // ---------------------------------------------------------------------
     // Test 3: Thread-Safe Memory Tracking & RAII Scoped Allocation Guards
     // ---------------------------------------------------------------------
     {
       MemoryStats initialStats = MemoryTracker::GetStats();
-      KV_CORE_INFO("Initial Heap Usage: {} bytes", initialStats.CurrentUsage);
+      KV_INFO("Initial Heap Usage: {} bytes", initialStats.CurrentUsage);
       
       // Scope block to test RAII ScopedMemoryAllocation
       {
         ScopedMemoryAllocation testGuard(2048); // Simulate tracking 2 KB
         MemoryStats midStats = MemoryTracker::GetStats();
-        KV_CORE_ASSERT(midStats.CurrentUsage >= 2048, "Memory tracker failed to record allocation!");
-        KV_CORE_INFO("Inside Scope - Current Usage: {} bytes | Peak: {} bytes",
+        KV_ASSERT(midStats.CurrentUsage >= 2048, "Memory tracker failed to record allocation!");
+        KV_INFO("Inside Scope - Current Usage: {} bytes | Peak: {} bytes",
                      midStats.CurrentUsage, midStats.PeakUsage);
       } // Destructor automatically fires here, releasing 2048 bytes
       
       MemoryStats finalStats = MemoryTracker::GetStats();
-      KV_CORE_INFO("Outside Scope - Current Usage: {} bytes", finalStats.CurrentUsage);
-      KV_CORE_ASSERT(finalStats.CurrentUsage == initialStats.CurrentUsage,
+      KV_INFO("Outside Scope - Current Usage: {} bytes", finalStats.CurrentUsage);
+      KV_ASSERT(finalStats.CurrentUsage == initialStats.CurrentUsage,
                      "ScopedMemoryAllocation failed to unwind memory cleanly!");
     }
-    KV_CORE_INFO("[PASS] Test 3: Memory Tracking & RAII Guards verified.");
+    KV_INFO("[PASS] Test 3: Memory Tracking & RAII Guards verified.");
     
     // ---------------------------------------------------------------------
     // Test 4: High-Resolution Monotonic Clock & TimeStep
@@ -71,15 +71,15 @@ namespace KanVerse::Testing {
       std::this_thread::sleep_for(std::chrono::milliseconds(16));
       
       TimeStep dt = testClock.Tick();
-      KV_CORE_INFO("Clock Tick Delta - Seconds: {:.4f}s | Milliseconds: {:.2f}ms",
+      KV_INFO("Clock Tick Delta - Seconds: {:.4f}s | Milliseconds: {:.2f}ms",
                    dt.GetSeconds(), dt.GetMilliseconds());
       
-      KV_CORE_ASSERT(dt.GetSeconds() > 0.0f, "TimeStep delta must be greater than zero!");
+      KV_ASSERT(dt.GetSeconds() > 0.0f, "TimeStep delta must be greater than zero!");
       
       float elapsed = testClock.GetElapsedSeconds();
-      KV_CORE_INFO("Total Elapsed Wall Time: {:.4f}s", elapsed);
+      KV_INFO("Total Elapsed Wall Time: {:.4f}s", elapsed);
     }
-    KV_CORE_INFO("[PASS] Test 4: Clock & TimeStep verified.");
+    KV_INFO("[PASS] Test 4: Clock & TimeStep verified.");
     
     // ---------------------------------------------------------------------
     // Test 5: SIMD Linear Algebra & Matrix Transformations
@@ -89,7 +89,7 @@ namespace KanVerse::Testing {
       Math::Vec3 v1 = Math::MakeVec3(1.0f, 2.0f, 3.0f);
       Math::Vec3 v2 = Math::MakeVec3(4.0f, 5.0f, 6.0f);
       Math::Vec3 vSum = v1 + v2;
-      KV_CORE_ASSERT(vSum.x == 5.0f && vSum.y == 7.0f && vSum.z == 9.0f, "SIMD Vector addition incorrect!");
+      KV_ASSERT(vSum.x == 5.0f && vSum.y == 7.0f && vSum.z == 9.0f, "SIMD Vector addition incorrect!");
       
       // Matrix Identity & Multiplication
       Math::Mat4 identityMat = Math::Identity();
@@ -97,7 +97,7 @@ namespace KanVerse::Testing {
       translationMat.columns[3] = Math::MakeVec4(10.0f, 20.0f, 30.0f, 1.0f);
       
       Math::Mat4 multResult = Math::Multiply(identityMat, translationMat);
-      KV_CORE_ASSERT(multResult.columns[3].x == 10.0f, "Matrix multiplication identity property failed!");
+      KV_ASSERT(multResult.columns[3].x == 10.0f, "Matrix multiplication identity property failed!");
       
       // Projection Matrix Test (Metal [0, 1] Depth Space)
       float fov = 1.57079f; // ~90 degrees
@@ -108,9 +108,9 @@ namespace KanVerse::Testing {
       Math::Vec4 testPoint = Math::MakeVec4(0.0f, 0.0f, -10.0f, 1.0f);
       [[maybe_unused]] Math::Vec4 projected = projMat * testPoint;
       
-      KV_CORE_INFO("SIMD Perspective Projection matrix computed successfully.");
+      KV_INFO("SIMD Perspective Projection matrix computed successfully.");
     }
-    KV_CORE_INFO("[PASS] Test 5: SIMD Math & Matrices verified.");
+    KV_INFO("[PASS] Test 5: SIMD Math & Matrices verified.");
     
     // ---------------------------------------------------------------------
     // Test 6: Metal Hardware RenderContext Verification
@@ -120,11 +120,11 @@ namespace KanVerse::Testing {
       // If testing outside Application::Run(), ensure MTLCreateSystemDefaultDevice() is valid.
       auto context = RenderContext::Create();
       if (context && context->GetDevice()) {
-        KV_CORE_INFO("Metal Device Verified: %s", context->GetDevice()->name()->utf8String());
-        KV_CORE_ASSERT(context->GetCommandQueue() != nullptr, "Primary command queue is null!");
-        KV_CORE_INFO("[PASS] Test 6: Metal RenderContext verified.");
+        KV_INFO("Metal Device Verified: %s", context->GetDevice()->name()->utf8String());
+        KV_ASSERT(context->GetCommandQueue() != nullptr, "Primary command queue is null!");
+        KV_INFO("[PASS] Test 6: Metal RenderContext verified.");
       } else {
-        KV_CORE_WARN("[SKIP] Test 6: Metal device not available in headless environment.");
+        KV_WARN("[SKIP] Test 6: Metal device not available in headless environment.");
       }
     }
     
@@ -137,11 +137,11 @@ namespace KanVerse::Testing {
       AudioSystem::LoadSound(SoundEffect::Jump, "NonExistentSoundCue.wav");
       AudioSystem::Shutdown();
     }
-    KV_CORE_INFO("[PASS] Test 7: AudioSystem lifecycle verified.");
+    KV_INFO("[PASS] Test 7: AudioSystem lifecycle verified.");
     
-    KV_CORE_INFO("==================================================");
-    KV_CORE_INFO("     ALL PHASE 1 TESTS COMPLETED SUCCESSFULLY     ");
-    KV_CORE_INFO("==================================================");
+    KV_INFO("==================================================");
+    KV_INFO("     ALL PHASE 1 TESTS COMPLETED SUCCESSFULLY     ");
+    KV_INFO("==================================================");
   }
   
 } // namespace KanVerse::Testing
