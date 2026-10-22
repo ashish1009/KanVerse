@@ -792,10 +792,10 @@
 			isa = PBXGroup;
 			children = (
 				B2BA39BB3089F28B006439E3 /* Camera.hpp */,
-				B2BA39BC3089F28B006439E3 /* CameraController.hpp */,
-				B2BA39BD3089F28B006439E3 /* CameraController.mm */,
 				B2BA39BE3089F28B006439E3 /* PerspectiveCamera.hpp */,
 				B2BA39BF3089F28B006439E3 /* PerspectiveCamera.cpp */,
+				B2BA39BC3089F28B006439E3 /* CameraController.hpp */,
+				B2BA39BD3089F28B006439E3 /* CameraController.mm */,
 				B2BA39C03089F28B006439E3 /* SpringArm.hpp */,
 				B2BA39C13089F28B006439E3 /* SpringArm.cpp */,
 			);
