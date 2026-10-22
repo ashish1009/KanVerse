@@ -35,3 +35,9 @@
 
 // Renderer
 #include "Renderer/Context/RenderContext.hpp"
+
+// Platform
+#include "Platform/Events/Event.hpp"
+#include "Platform/Events/WindowEvents.hpp"
+#include "Platform/Events/KeyEvents.hpp"
+#include "Platform/Events/MouseEvents.hpp"
