@@ -37,9 +37,6 @@
 // Audio
 #include "Audio/AudioSystem.hpp"
 
-// Renderer
-#include "Renderer/Context/RenderContext.hpp"
-
 // Platform
 #include "Platform/Events/Event.hpp"
 #include "Platform/Events/WindowEvents.hpp"
@@ -48,3 +45,6 @@
 
 #include "Platform/Input/GameControllerBridge.hpp"
 #include "Platform/Input/KeyCodes.hpp"
+
+// Renderer
+#include "Renderer/Context/RenderContext.hpp"
