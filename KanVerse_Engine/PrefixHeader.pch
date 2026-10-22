@@ -13,6 +13,9 @@
 
 // C++ Files
 #include <iostream>
+#include <span>
+#include <algorithm>
+#include <cstring>
 
 // Core/Diagnostics
 #include "Core/Diagnostics/Log.hpp"

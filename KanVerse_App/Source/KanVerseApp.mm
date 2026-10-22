@@ -1,12 +1,12 @@
 /*!
- * @file Main.mm
+ * @file KanVerseApp.mm
  * @brief KanVerse client application bootstrap and entry point harness.
  * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
  * @license MIT License
  */
 
 /*!
- * @class KanVerseKanVerseApp
+ * @class KanVerseApp
  * @brief Concrete client specialization of the core engine application.
  */
 class KanVerseKanVerseApp : public KanVerse::Application {

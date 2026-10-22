@@ -42,10 +42,12 @@ namespace KanVerse {
       OnEvent(e);
     });
     
+    Renderer::Init();
     m_Clock.Reset();
   }
   
   Application::~Application() {
+    Renderer::Shutdown();
     s_Instance = nullptr;
     KV_CORE_INFO("=== Application Destructor Finished ===");
   }
