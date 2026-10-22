@@ -27,8 +27,6 @@
 #include "Core/Application/Application.hpp"
 // Audio
 #include "Audio/AudioSystem.hpp"
-// Renderer
-#include "Renderer/Context/RenderContext.hpp"
 // Platform
 #include "Platform/Events/Event.hpp"
 #include "Platform/Events/WindowEvents.hpp"
@@ -36,6 +34,8 @@
 #include "Platform/Events/MouseEvents.hpp"
 #include "Platform/Input/GameControllerBridge.hpp"
 #include "Platform/Input/KeyCodes.hpp"
+// Renderer
+#include "Renderer/Context/RenderContext.hpp"
 // FILE: KanVerse_Engine/PrefixHeader.pch
 /*!
  * @file PrefixHeader.pch
@@ -2430,15 +2430,355 @@ namespace KanVerse {
 // FILE: KanVerse_Engine/Renderer/Asset/AssetManager.hpp
 
 // FILE: KanVerse_Engine/Renderer/Buffers/BufferLayout.hpp
-
+/*!
+ * @file BufferLayout.hpp
+ * @brief Memory layout reflection and descriptor types for GPU vertex attributes.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <cassert>
+namespace KanVerse {
+  /*!
+   * @enum ShaderDataType
+   * @brief Underlying data formats for vertex shader input attributes.
+   */
+  enum class ShaderDataType : uint8_t {
+    None = 0,
+    Float,
+    Float2,
+    Float3,
+    Float4,
+    Mat3,
+    Mat4,
+    Int,
+    Int2,
+    Int3,
+    Int4,
+    Bool
+  };
+  /*!
+   * @brief Calculates size in bytes for a given shader attribute type adhering to Apple Silicon / SIMD 16-byte alignment.
+   * @param type The shader attribute data format.
+   * @return Size in bytes.
+   */
+  [[nodiscard]] constexpr uint32_t ShaderDataTypeSize(ShaderDataType type) noexcept {
+    switch (type) {
+      case ShaderDataType::Float:    return 4;
+      case ShaderDataType::Float2:   return 8;
+      case ShaderDataType::Float3:   return 16; // 16-byte aligned in SIMD/MSL float3
+      case ShaderDataType::Float4:   return 16;
+      case ShaderDataType::Mat3:     return 4 * 3 * 4;
+      case ShaderDataType::Mat4:     return 4 * 4 * 4;
+      case ShaderDataType::Int:      return 4;
+      case ShaderDataType::Int2:     return 8;
+      case ShaderDataType::Int3:     return 16;
+      case ShaderDataType::Int4:     return 16;
+      case ShaderDataType::Bool:     return 1;
+      default: break;
+    }
+    return 0;
+  }
+  /*!
+   * @struct BufferElement
+   * @brief Descriptive metadata for a discrete element within an interleaved vertex buffer.
+   */
+  struct BufferElement {
+    std::string    Name;
+    ShaderDataType Type;
+    uint32_t       Size;
+    size_t         Offset{0};
+    bool           Normalized{false};
+    BufferElement() = default;
+    BufferElement(ShaderDataType type, std::string name, bool normalized = false)
+    : Name(std::move(name)),
+    Type(type),
+    Size(ShaderDataTypeSize(type)),
+    Offset(0),
+    Normalized(normalized) {}
+    [[nodiscard]] constexpr uint32_t GetComponentCount() const noexcept {
+      switch (Type) {
+        case ShaderDataType::Float:   return 1;
+        case ShaderDataType::Float2:  return 2;
+        case ShaderDataType::Float3:  return 3;
+        case ShaderDataType::Float4:  return 4;
+        case ShaderDataType::Mat3:    return 9;
+        case ShaderDataType::Mat4:    return 16;
+        case ShaderDataType::Int:     return 1;
+        case ShaderDataType::Int2:    return 2;
+        case ShaderDataType::Int3:    return 3;
+        case ShaderDataType::Int4:    return 4;
+        case ShaderDataType::Bool:    return 1;
+        default: break;
+      }
+      return 0;
+    }
+  };
+  /*!
+   * @class BufferLayout
+   * @brief Encapsulates an ordered collection of BufferElements with automatic stride calculation.
+   */
+  class BufferLayout {
+  public:
+    BufferLayout() = default;
+    BufferLayout(std::initializer_list<BufferElement> elements)
+    : m_Elements(elements) {
+      CalculateOffsetsAndStride();
+    }
+    [[nodiscard]] uint32_t GetStride() const noexcept { return m_Stride; }
+    [[nodiscard]] const std::vector<BufferElement>& GetElements() const noexcept { return m_Elements; }
+    [[nodiscard]] auto begin() noexcept { return m_Elements.begin(); }
+    [[nodiscard]] auto end() noexcept { return m_Elements.end(); }
+    [[nodiscard]] auto begin() const noexcept { return m_Elements.begin(); }
+    [[nodiscard]] auto end() const noexcept { return m_Elements.end(); }
+  private:
+    void CalculateOffsetsAndStride() {
+      size_t offset = 0;
+      m_Stride = 0;
+      for (auto& element : m_Elements) {
+        element.Offset = offset;
+        offset += element.Size;
+        m_Stride += element.Size;
+      }
+    }
+    std::vector<BufferElement> m_Elements;
+    uint32_t                   m_Stride{0};
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Buffers/IndexBuffer.hpp
-
+/*!
+ * @file IndexBuffer.hpp
+ * @brief RHI index buffer interface wrapping Metal GPU memory.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Memory/MemoryTracking.hpp"
+#include <cstdint>
+#include <memory>
+namespace MTL {
+  class Buffer;
+}
+namespace KanVerse {
+  /*!
+   * @enum IndexType
+   * @brief Index element width (16-bit or 32-bit unsigned integers).
+   */
+  enum class IndexType : uint8_t {
+    UInt16 = 0,
+    UInt32
+  };
+  /*!
+   * @class IndexBuffer
+   * @brief RAII abstraction for GPU index/element buffers.
+   */
+  class IndexBuffer {
+  public:
+    virtual ~IndexBuffer() = default;
+    /*!
+     * @brief Queries the element count in this index buffer.
+     */
+    [[nodiscard]] virtual uint32_t GetCount() const noexcept = 0;
+    /*!
+     * @brief Queries the index data type width (16-bit vs 32-bit).
+     */
+    [[nodiscard]] virtual IndexType GetIndexType() const noexcept = 0;
+    /*!
+     * @brief Accesses the native underlying MTL::Buffer pointer.
+     */
+    [[nodiscard]] virtual MTL::Buffer* GetNativeBuffer() const noexcept = 0;
+    /*!
+     * @brief Factory creating an IndexBuffer populated with 16-bit indices.
+     * @param indices Pointer to uint16_t array.
+     * @param count Number of indices.
+     * @return Unique pointer owning the IndexBuffer.
+     */
+    [[nodiscard]] static std::unique_ptr<IndexBuffer> Create(const uint16_t* indices, uint32_t count);
+    /*!
+     * @brief Factory creating an IndexBuffer populated with 32-bit indices.
+     * @param indices Pointer to uint32_t array.
+     * @param count Number of indices.
+     * @return Unique pointer owning the IndexBuffer.
+     */
+    [[nodiscard]] static std::unique_ptr<IndexBuffer> Create(const uint32_t* indices, uint32_t count);
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Buffers/IndexBuffer.mm
-
+/*!
+ * @file IndexBuffer.mm
+ * @brief Apple Metal implementation of IndexBuffer using metal-cpp.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Buffers/IndexBuffer.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Application/Application.hpp"
+#include "Core/Memory/MemoryTracking.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+namespace KanVerse {
+  class MetalIndexBuffer : public IndexBuffer {
+  public:
+    /*!
+     * @brief Allocates unified memory for indices and binds RAII allocation tracker.
+     * @param indices Raw pointer to index buffer array.
+     * @param count Number of elements.
+     * @param type Index element type (UInt16 or UInt32).
+     * @param elementSize Byte width per element.
+     */
+    MetalIndexBuffer(const void* indices, uint32_t count, IndexType type, size_t elementSize)
+    : m_Count(count), m_Type(type), m_MemoryGuard(count * elementSize) {
+      KV_CORE_ASSERT(indices != nullptr, "[KanVerse] Index source data pointer is null!");
+      KV_CORE_ASSERT(count > 0, "[KanVerse] Index count must be greater than zero!");
+      MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+      KV_CORE_ASSERT(device != nullptr, "[KanVerse] Active Metal device is null!");
+      const size_t totalSize = count * elementSize;
+      m_Buffer = device->newBuffer(indices, totalSize, MTL::ResourceStorageModeShared);
+      KV_CORE_ASSERT(m_Buffer != nullptr, "[KanVerse] Failed to allocate MTL::Buffer for IndexBuffer!");
+    }
+    /*!
+     * @brief Releases underlying native buffer; m_MemoryGuard automatically unwinds tracked bytes.
+     */
+    ~MetalIndexBuffer() override {
+      if (m_Buffer) {
+        m_Buffer->release();
+        m_Buffer = nullptr;
+      }
+    }
+    [[nodiscard]] uint32_t GetCount() const noexcept override {
+      return m_Count;
+    }
+    [[nodiscard]] IndexType GetIndexType() const noexcept override {
+      return m_Type;
+    }
+    [[nodiscard]] MTL::Buffer* GetNativeBuffer() const noexcept override {
+      return m_Buffer;
+    }
+  private:
+    MTL::Buffer*           m_Buffer{nullptr};                  /*!< Native Metal buffer pointer. */
+    uint32_t               m_Count{0};                         /*!< Total number of indices. */
+    IndexType              m_Type{IndexType::UInt16};          /*!< Element width identifier. */
+    ScopedMemoryAllocation m_MemoryGuard{};                    /*!< Automated RAII memory tracking guard. */
+  };
+  std::unique_ptr<IndexBuffer> IndexBuffer::Create(const uint16_t* indices, uint32_t count) {
+    return std::make_unique<MetalIndexBuffer>(indices, count, IndexType::UInt16, sizeof(uint16_t));
+  }
+  std::unique_ptr<IndexBuffer> IndexBuffer::Create(const uint32_t* indices, uint32_t count) {
+    return std::make_unique<MetalIndexBuffer>(indices, count, IndexType::UInt32, sizeof(uint32_t));
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Buffers/VertexBuffer.hpp
-
+/*!
+ * @file VertexBuffer.hpp
+ * @brief RHI vertex buffer interface wrapping Metal GPU memory.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Memory/MemoryTracking.hpp"
+#include "Renderer/Buffers/BufferLayout.hpp"
+#include <cstdint>
+#include <memory>
+namespace MTL {
+  class Buffer;
+}
+namespace KanVerse {
+  /*!
+   * @class VertexBuffer
+   * @brief RAII abstraction for GPU vertex buffers allocated in unified memory.
+   */
+  class VertexBuffer {
+  public:
+    virtual ~VertexBuffer() = default;
+    /*!
+     * @brief Binds buffer layout defining vertex attribute bindings.
+     * @param layout Description of vertex memory strides and offsets.
+     */
+    virtual void SetLayout(const BufferLayout& layout) = 0;
+    /*!
+     * @brief Queries the bound attribute layout.
+     */
+    [[nodiscard]] virtual const BufferLayout& GetLayout() const noexcept = 0;
+    /*!
+     * @brief Accesses the native underlying MTL::Buffer pointer.
+     */
+    [[nodiscard]] virtual MTL::Buffer* GetNativeBuffer() const noexcept = 0;
+    /*!
+     * @brief Size of the allocated buffer in bytes.
+     */
+    [[nodiscard]] virtual size_t GetSize() const noexcept = 0;
+    /*!
+     * @brief Factory method creating a VertexBuffer initialized with raw vertex memory.
+     * @param vertices Pointer to source vertex data.
+     * @param size Size in bytes to allocate.
+     * @return Unique pointer owning the VertexBuffer.
+     */
+    [[nodiscard]] static std::unique_ptr<VertexBuffer> Create(const void* vertices, size_t size);
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Buffers/VertexBuffer.mm
-
+/*!
+ * @file VertexBuffer.mm
+ * @brief Apple Metal implementation of VertexBuffer using metal-cpp.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Buffers/VertexBuffer.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Application/Application.hpp"
+#include "Core/Memory/MemoryTracking.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+namespace KanVerse {
+  class MetalVertexBuffer : public VertexBuffer {
+  public:
+    /*!
+     * @brief Allocates unified memory buffer and registers byte tracking via RAII guard.
+     * @param vertices Pointer to source vertex data.
+     * @param size Total buffer capacity in bytes.
+     */
+    MetalVertexBuffer(const void* vertices, size_t size)
+    : m_Size(size), m_MemoryGuard(size) {
+      KV_CORE_ASSERT(size > 0, "[KanVerse] Cannot allocate a zero-sized VertexBuffer!");
+      MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+      KV_CORE_ASSERT(device != nullptr, "[KanVerse] Active Metal device is null!");
+      m_Buffer = device->newBuffer(vertices, size, MTL::ResourceStorageModeShared);
+      KV_CORE_ASSERT(m_Buffer != nullptr, "[KanVerse] Failed to allocate MTL::Buffer for VertexBuffer!");
+    }
+    /*!
+     * @brief Releases underlying native buffer; m_MemoryGuard automatically unwinds tracked bytes.
+     */
+    ~MetalVertexBuffer() override {
+      if (m_Buffer) {
+        m_Buffer->release();
+        m_Buffer = nullptr;
+      }
+    }
+    void SetLayout(const BufferLayout& layout) override {
+      m_Layout = layout;
+    }
+    [[nodiscard]] const BufferLayout& GetLayout() const noexcept override {
+      return m_Layout;
+    }
+    [[nodiscard]] MTL::Buffer* GetNativeBuffer() const noexcept override {
+      return m_Buffer;
+    }
+    [[nodiscard]] size_t GetSize() const noexcept override {
+      return m_Size;
+    }
+  private:
+    MTL::Buffer*           m_Buffer{nullptr};     /*!< Native Apple Metal buffer pointer. */
+    size_t                 m_Size{0};             /*!< Total allocated size in bytes. */
+    BufferLayout           m_Layout;              /*!< Stride and attribute reflection schema. */
+    ScopedMemoryAllocation m_MemoryGuard{};       /*!< Automated RAII memory tracking guard. */
+  };
+  std::unique_ptr<VertexBuffer> VertexBuffer::Create(const void* vertices, size_t size) {
+    return std::make_unique<MetalVertexBuffer>(vertices, size);
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Camera/Camera.hpp
 
 // FILE: KanVerse_Engine/Renderer/Camera/CameraController.hpp
@@ -2598,17 +2938,511 @@ namespace KanVerse {
 // FILE: KanVerse_Engine/Renderer/Materials/Material.mm
 
 // FILE: KanVerse_Engine/Renderer/Pipeline/FrameSync.hpp
-
+/*!
+ * @file FrameSync.hpp
+ * @brief Triple-buffered flight synchronizer using Grand Central Dispatch semaphores.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <cstdint>
+namespace MTL {
+  class CommandBuffer;
+}
+namespace KanVerse {
+  /*!
+   * @class FrameSynchronizer
+   * @brief Manages CPU-GPU pacing across N frames in flight using dispatch semaphores.
+   */
+  class FrameSynchronizer {
+  public:
+    /*!
+     * @brief Constructs a frame synchronizer for a specified maximum flight depth.
+     * @param maxFramesInFlight Flight ring depth (default: 3).
+     */
+    explicit FrameSynchronizer(uint32_t maxFramesInFlight = 3);
+    /*!
+     * @brief Teardown releasing the underlying GCD semaphore handle.
+     */
+    ~FrameSynchronizer();
+    FrameSynchronizer(const FrameSynchronizer&) = delete;
+    FrameSynchronizer& operator=(const FrameSynchronizer&) = delete;
+    FrameSynchronizer(FrameSynchronizer&&) noexcept;
+    FrameSynchronizer& operator=(FrameSynchronizer&&) noexcept;
+    /*!
+     * @brief Blocks CPU thread until a flight slot becomes available and advances the ring index.
+     * @return Current active frame ring index (0 to maxFramesInFlight - 1).
+     */
+    uint32_t BeginFrame();
+    /*!
+     * @brief Registers the completion handler on the command buffer to signal the semaphore upon GPU completion.
+     * @param cmdBuffer Command buffer being committed.
+     */
+    void AttachToCommandBuffer(MTL::CommandBuffer* cmdBuffer);
+    /*!
+     * @brief Queries the current active frame ring index.
+     * @return Active flight index.
+     */
+    [[nodiscard]] uint32_t GetCurrentFrameIndex() const noexcept { return m_CurrentFrameIndex; }
+    /*!
+     * @brief Queries the maximum flight depth.
+     * @return Max frames in flight.
+     */
+    [[nodiscard]] uint32_t GetMaxFramesInFlight() const noexcept { return m_MaxFramesInFlight; }
+  private:
+    void*    m_Semaphore{nullptr};          ///< Opaque dispatch_semaphore_t handle.
+    uint32_t m_MaxFramesInFlight{3};
+    uint32_t m_CurrentFrameIndex{0};
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Pipeline/FrameSync.mm
-
+/*!
+ * @file FrameSync.mm
+ * @brief Implementation of the Grand Central Dispatch frame synchronizer.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Pipeline/FrameSync.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <QuartzCore/QuartzCore.hpp>
+#import <Metal/Metal.h>
+#import <dispatch/dispatch.h>
+namespace KanVerse {
+  FrameSynchronizer::FrameSynchronizer(uint32_t maxFramesInFlight)
+  : m_MaxFramesInFlight(maxFramesInFlight),
+  m_CurrentFrameIndex(0) {
+    dispatch_semaphore_t sema = dispatch_semaphore_create(maxFramesInFlight);
+    m_Semaphore = (__bridge_retained void*)sema;
+  }
+  FrameSynchronizer::~FrameSynchronizer() {
+    if (m_Semaphore) {
+      dispatch_semaphore_t sema = (__bridge_transfer dispatch_semaphore_t)m_Semaphore;
+      sema = nil;
+      m_Semaphore = nullptr;
+    }
+  }
+  FrameSynchronizer::FrameSynchronizer(FrameSynchronizer&& other) noexcept
+  : m_Semaphore(other.m_Semaphore),
+  m_MaxFramesInFlight(other.m_MaxFramesInFlight),
+  m_CurrentFrameIndex(other.m_CurrentFrameIndex) {
+    other.m_Semaphore = nullptr;
+  }
+  FrameSynchronizer& FrameSynchronizer::operator=(FrameSynchronizer&& other) noexcept {
+    if (this != &other) {
+      if (m_Semaphore) {
+        dispatch_semaphore_t sema = (__bridge_transfer dispatch_semaphore_t)m_Semaphore;
+        sema = nil;
+      }
+      m_Semaphore = other.m_Semaphore;
+      m_MaxFramesInFlight = other.m_MaxFramesInFlight;
+      m_CurrentFrameIndex = other.m_CurrentFrameIndex;
+      other.m_Semaphore = nullptr;
+    }
+    return *this;
+  }
+  uint32_t FrameSynchronizer::BeginFrame() {
+    dispatch_semaphore_t sema = (__bridge dispatch_semaphore_t)m_Semaphore;
+    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+    m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % m_MaxFramesInFlight;
+    return m_CurrentFrameIndex;
+  }
+  void FrameSynchronizer::AttachToCommandBuffer(MTL::CommandBuffer* cmdBuffer) {
+    dispatch_semaphore_t sema = (__bridge dispatch_semaphore_t)m_Semaphore;
+    __block dispatch_semaphore_t blockSema = sema;
+    cmdBuffer->addCompletedHandler(^void(MTL::CommandBuffer*) {
+      dispatch_semaphore_signal(blockSema);
+    });
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Pipeline/Pipeline.hpp
-
+/*!
+ * @file Pipeline.hpp
+ * @brief PipelineState interface coordinating shaders, vertex layouts, and raster states.
+ * @details Configures hardware rasterizer state, depth comparisons, backface culling,
+ *          and target render surface pixel formats.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Renderer/Buffers/BufferLayout.hpp"
+#include "Renderer/Pipeline/Shader.hpp"
+#include <memory>
+namespace MTL {
+  class RenderPipelineState;
+  class DepthStencilState;
+  class RenderCommandEncoder;
+}
+namespace KanVerse {
+  /*!
+   * @struct PipelineSpecification
+   * @brief Configuration specifications for building a graphics pipeline state.
+   */
+  struct PipelineSpecification {
+    std::shared_ptr<Shader> ShaderProgram{nullptr}; ///< Linked vertex and fragment shaders.
+    BufferLayout            Layout{};               ///< Interleaved vertex stream layout schema.
+    bool                    EnableDepthWrite{true}; ///< Depth buffer write enable flag.
+    bool                    EnableCulling{true};    ///< Back-face culling toggle.
+    bool                    Wireframe{false};       ///< Wireframe polygon rasterization toggle.
+    float                   DepthBiasConstant{0.0f};   ///< Constant bias offset for shadow mapping.
+    float                   DepthBiasSlopeScale{0.0f}; ///< Slope-scaled bias offset.
+    float                   DepthBiasClamp{0.0f};      ///< Maximum bias clamp.
+    bool                    UseHDRTarget{true};     ///< Configures color attachment for MTL::PixelFormatRGBA16Float.
+  };
+  /*!
+   * @class Pipeline
+   * @brief Encapsulates pipeline configuration, translated vertex layouts, and depth states.
+   */
+  class Pipeline {
+  public:
+    virtual ~Pipeline() = default;
+    /*!
+     * @brief Binds this pipeline state and its depth/stencil configuration to an active render encoder.
+     * @param encoder Active Metal command encoder.
+     */
+    virtual void Bind(MTL::RenderCommandEncoder* encoder) const = 0;
+    /*!
+     * @brief Queries configuration specification.
+     */
+    [[nodiscard]] virtual const PipelineSpecification& GetSpecification() const noexcept = 0;
+    /*!
+     * @brief Accesses the native underlying Metal pipeline state.
+     */
+    [[nodiscard]] virtual MTL::RenderPipelineState* GetNativePipelineState() const noexcept = 0;
+    /*!
+     * @brief Accesses the native underlying Metal depth stencil state.
+     */
+    [[nodiscard]] virtual MTL::DepthStencilState* GetNativeDepthState() const noexcept = 0;
+    /*!
+     * @brief Factory creating a compiled graphics Pipeline.
+     * @param spec Configuration specification.
+     * @return Unique pointer owning the Pipeline.
+     */
+    [[nodiscard]] static std::unique_ptr<Pipeline> Create(const PipelineSpecification& spec);
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Pipeline/Pipeline.mm
-
+/*!
+ * @file Pipeline.mm
+ * @brief Apple Metal implementation of graphics Pipeline and depth pre-pass translation.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Pipeline/Pipeline.hpp"
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Application/Application.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <QuartzCore/QuartzCore.hpp>
+#import <Foundation/Foundation.h>
+#include <cassert>
+namespace KanVerse {
+  static MTL::VertexFormat ShaderDataTypeToMetalFormat(ShaderDataType type) {
+    switch (type) {
+      case ShaderDataType::Float:   return MTL::VertexFormatFloat;
+      case ShaderDataType::Float2:  return MTL::VertexFormatFloat2;
+      case ShaderDataType::Float3:  return MTL::VertexFormatFloat3;
+      case ShaderDataType::Float4:  return MTL::VertexFormatFloat4;
+      case ShaderDataType::Int:     return MTL::VertexFormatInt;
+      case ShaderDataType::Int2:    return MTL::VertexFormatInt2;
+      case ShaderDataType::Int3:    return MTL::VertexFormatInt3;
+      case ShaderDataType::Int4:    return MTL::VertexFormatInt4;
+      default: break;
+    }
+    KV_CORE_ASSERT(false, "Unsupported ShaderDataType for vertex layout!");
+    return MTL::VertexFormatInvalid;
+  }
+  class MetalPipeline : public Pipeline {
+  public:
+    explicit MetalPipeline(const PipelineSpecification& spec)
+    : m_Spec(spec) {
+      Invalidate();
+    }
+    ~MetalPipeline() override {
+      if (m_DepthState) {
+        m_DepthState->release();
+        m_DepthState = nullptr;
+      }
+      if (m_PipelineState) {
+        m_PipelineState->release();
+        m_PipelineState = nullptr;
+      }
+    }
+    void Bind(MTL::RenderCommandEncoder* encoder) const override {
+      encoder->setRenderPipelineState(m_PipelineState);
+      encoder->setDepthStencilState(m_DepthState);
+      encoder->setCullMode(m_Spec.EnableCulling ? MTL::CullModeBack : MTL::CullModeNone);
+      encoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
+      if (m_Spec.DepthBiasSlopeScale > 0.0f || m_Spec.DepthBiasConstant > 0.0f) {
+        encoder->setDepthBias(m_Spec.DepthBiasConstant, m_Spec.DepthBiasSlopeScale, m_Spec.DepthBiasClamp);
+      }
+      if (m_Spec.Wireframe) {
+        encoder->setTriangleFillMode(MTL::TriangleFillModeLines);
+      } else {
+        encoder->setTriangleFillMode(MTL::TriangleFillModeFill);
+      }
+    }
+    [[nodiscard]] const PipelineSpecification& GetSpecification() const noexcept override {
+      return m_Spec;
+    }
+    [[nodiscard]] MTL::RenderPipelineState* GetNativePipelineState() const noexcept override {
+      return m_PipelineState;
+    }
+    [[nodiscard]] MTL::DepthStencilState* GetNativeDepthState() const noexcept override {
+      return m_DepthState;
+    }
+  private:
+    void Invalidate() {
+      MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+      KV_CORE_ASSERT(device != nullptr, "[KanVerse] Active Metal device is null!");
+      KV_CORE_ASSERT(m_Spec.ShaderProgram != nullptr, "[KanVerse] Pipeline requires a valid ShaderProgram!");
+      // 1. Build MTL::VertexDescriptor
+      auto vertexDescriptor = MTL::VertexDescriptor::vertexDescriptor();
+      uint32_t attributeIndex = 0;
+      for (const auto& element : m_Spec.Layout) {
+        auto attr = vertexDescriptor->attributes()->object(attributeIndex);
+        attr->setFormat(ShaderDataTypeToMetalFormat(element.Type));
+        attr->setOffset(element.Offset);
+        attr->setBufferIndex(0);
+        ++attributeIndex;
+      }
+      const uint32_t rawStride = m_Spec.Layout.GetStride();
+      const uint32_t alignedStride = (rawStride + 15) & ~15;
+      auto layoutDesc = vertexDescriptor->layouts()->object(0);
+      layoutDesc->setStride(alignedStride);
+      layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
+      // 2. Build MTL::RenderPipelineDescriptor
+      // Inside KanVerse_Engine/Renderer/Pipeline/Pipeline.mm (in MetalPipeline::Invalidate)
+      auto pipelineDescriptor = MTL::RenderPipelineDescriptor::alloc()->init();
+      pipelineDescriptor->setVertexFunction(m_Spec.ShaderProgram->GetVertexFunction());
+      if (m_Spec.ShaderProgram->GetFragmentFunction()) {
+        pipelineDescriptor->setFragmentFunction(m_Spec.ShaderProgram->GetFragmentFunction());
+        const MTL::PixelFormat targetPixelFormat = m_Spec.UseHDRTarget
+        ? MTL::PixelFormatRGBA16Float
+        : MTL::PixelFormatBGRA8Unorm_sRGB;
+        auto colorAttach = pipelineDescriptor->colorAttachments()->object(0);
+        colorAttach->setPixelFormat(targetPixelFormat);
+        // ---> ADD THESE LINES TO ENABLE ALPHA BLENDING <---
+        colorAttach->setBlendingEnabled(true);
+        colorAttach->setSourceRGBBlendFactor(MTL::BlendFactorSourceAlpha);
+        colorAttach->setDestinationRGBBlendFactor(MTL::BlendFactorOneMinusSourceAlpha);
+        colorAttach->setSourceAlphaBlendFactor(MTL::BlendFactorSourceAlpha);
+        colorAttach->setDestinationAlphaBlendFactor(MTL::BlendFactorOneMinusSourceAlpha);
+      } else {
+        pipelineDescriptor->setFragmentFunction(nullptr);
+      }
+      pipelineDescriptor->setVertexDescriptor(vertexDescriptor);
+      pipelineDescriptor->setDepthAttachmentPixelFormat(MTL::PixelFormatDepth32Float);
+      NS::Error* error = nullptr;
+      m_PipelineState = device->newRenderPipelineState(pipelineDescriptor, &error);
+      pipelineDescriptor->release();
+      if (!m_PipelineState) {
+        KV_CORE_ERROR("Pipeline compilation error: %s",
+                      error ? error->localizedDescription()->utf8String() : "Unknown error");
+        KV_CORE_ASSERT(false, "Failed to create MTL::RenderPipelineState!");
+        return;
+      }
+      // 3. Build DepthStencilState
+      auto depthDescriptor = MTL::DepthStencilDescriptor::alloc()->init();
+      depthDescriptor->setDepthCompareFunction(MTL::CompareFunctionLessEqual);
+      depthDescriptor->setDepthWriteEnabled(m_Spec.EnableDepthWrite);
+      m_DepthState = device->newDepthStencilState(depthDescriptor);
+      depthDescriptor->release();
+    }
+    PipelineSpecification     m_Spec;
+    MTL::RenderPipelineState* m_PipelineState{nullptr};
+    MTL::DepthStencilState*   m_DepthState{nullptr};
+  };
+  std::unique_ptr<Pipeline> Pipeline::Create(const PipelineSpecification& spec) {
+    return std::make_unique<MetalPipeline>(spec);
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Pipeline/Shader.hpp
-
+/*!
+ * @file Shader.hpp
+ * @brief High-level MSL shader compiler and function reflection container.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <string>
+#include <string_view>
+#include <memory>
+namespace MTL {
+  class Function;
+  class Library;
+}
+namespace KanVerse {
+  /*!
+   * @class Shader
+   * @brief Manages Metal Shading Language compilation and function handles.
+   */
+  class Shader {
+  public:
+    virtual ~Shader() = default;
+    /*!
+     * @brief Queries the debug name or source identifier for this shader.
+     */
+    [[nodiscard]] virtual const std::string& GetName() const noexcept = 0;
+    /*!
+     * @brief Accesses the underlying compiled vertex entry function.
+     */
+    [[nodiscard]] virtual MTL::Function* GetVertexFunction() const noexcept = 0;
+    /*!
+     * @brief Accesses the underlying compiled fragment entry function.
+     */
+    [[nodiscard]] virtual MTL::Function* GetFragmentFunction() const noexcept = 0;
+    /*!
+     * @brief Factory creating a Shader compiled from inline Metal Shading Language source code.
+     * @param name Diagnostic identifier.
+     * @param source Complete MSL source code string.
+     * @param vertexEntry Name of the vertex entry function.
+     * @param fragmentEntry Name of the fragment entry function.
+     * @return Unique pointer owning the compiled Shader.
+     */
+    [[nodiscard]] static std::shared_ptr<Shader> CreateFromSource(
+                                                                  std::string_view name,
+                                                                  std::string_view source,
+                                                                  std::string_view vertexEntry = "vertex_main",
+                                                                  std::string_view fragmentEntry = "fragment_main"
+                                                                  );
+    /*!
+     * @brief Loads compiled vertex and fragment functions from the application bundle's default library.
+     * @param vertexName Symbol entry point name for vertex stage (e.g. "vertex_main").
+     * @param fragmentName Symbol entry point name for fragment stage (e.g. "fragment_main").
+     * @return Shared pointer to compiled Shader program.
+     */
+    [[nodiscard]] static std::shared_ptr<Shader> CreateFromDefaultLibrary(
+                                                                          const std::string& vertexName = "vertex_main",
+                                                                          const std::string& fragmentName = "fragment_main"
+                                                                          );
+    /*!
+     * @brief Constructs a depth-only shader program containing only a vertex stage entry point.
+     * @param vertexName Symbol entry point identifier for the vertex stage (e.g., "shadow_vertex_main").
+     * @return Shared pointer owning the compiled vertex-only Shader instance.
+     */
+    [[nodiscard]] static std::shared_ptr<Shader> CreateVertexOnly(std::string_view vertexName);
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Pipeline/Shader.mm
-
+/*!
+ * @file Shader.mm
+ * @brief Implementation of Apple Metal shading programs and function compilation.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Pipeline/Shader.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Application/Application.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <cassert>
+#include <iostream>
+#include <string>
+namespace KanVerse {
+  class MetalShader : public Shader {
+  public:
+    MetalShader(std::string_view name,
+                std::string_view source,
+                std::string_view vertexEntry,
+                std::string_view fragmentEntry)
+    : m_Name(name) {
+      MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+      KV_CORE_ASSERT(device != nullptr, "[KanVerse] Active Metal device is null!");
+      auto sourceStr = NS::String::string(std::string(source).c_str(), NS::UTF8StringEncoding);
+      NS::Error* error = nullptr;
+      MTL::CompileOptions* options = MTL::CompileOptions::alloc()->init();
+      options->setFastMathEnabled(true);
+      MTL::Library* library = device->newLibrary(sourceStr, options, &error);
+      options->release();
+      sourceStr->release();
+      if (!library) {
+        if (error) {
+          std::cerr << "[KanVerse] MSL Compilation Error: "
+          << error->localizedDescription()->utf8String() << std::endl;
+        }
+        KV_CORE_ASSERT(false, "[KanVerse] Failed to compile MSL shader source!");
+      }
+      auto vertName = NS::String::string(std::string(vertexEntry).c_str(), NS::UTF8StringEncoding);
+      m_VertexFunction = library->newFunction(vertName);
+      vertName->release();
+      KV_CORE_ASSERT(m_VertexFunction != nullptr, "[KanVerse] Vertex entry point symbol not found in library!");
+      if (!fragmentEntry.empty()) {
+        auto fragName = NS::String::string(std::string(fragmentEntry).c_str(), NS::UTF8StringEncoding);
+        m_FragmentFunction = library->newFunction(fragName);
+        fragName->release();
+        KV_CORE_ASSERT(m_FragmentFunction != nullptr, "[KanVerse] Fragment entry point symbol not found in library!");
+      }
+      library->release();
+    }
+    MetalShader(std::string_view name,
+                MTL::Library* library,
+                std::string_view vertexEntry,
+                std::string_view fragmentEntry)
+    : m_Name(name) {
+      KV_CORE_ASSERT(library != nullptr, "[KanVerse] Metal library handle is null!");
+      auto vertName = NS::String::string(std::string(vertexEntry).c_str(), NS::UTF8StringEncoding);
+      m_VertexFunction = library->newFunction(vertName);
+      vertName->release();
+      KV_CORE_ASSERT(m_VertexFunction != nullptr, "[KanVerse] Vertex entry point symbol not found in library!");
+      if (!fragmentEntry.empty()) {
+        auto fragName = NS::String::string(std::string(fragmentEntry).c_str(), NS::UTF8StringEncoding);
+        m_FragmentFunction = library->newFunction(fragName);
+        fragName->release();
+        KV_CORE_ASSERT(m_FragmentFunction != nullptr, "[KanVerse] Fragment entry point symbol not found in library!");
+      }
+    }
+    ~MetalShader() override {
+      if (m_VertexFunction) {
+        m_VertexFunction->release();
+        m_VertexFunction = nullptr;
+      }
+      if (m_FragmentFunction) {
+        m_FragmentFunction->release();
+        m_FragmentFunction = nullptr;
+      }
+    }
+    [[nodiscard]] const std::string& GetName() const noexcept override {
+      return m_Name;
+    }
+    [[nodiscard]] MTL::Function* GetVertexFunction() const noexcept override {
+      return m_VertexFunction;
+    }
+    [[nodiscard]] MTL::Function* GetFragmentFunction() const noexcept override {
+      return m_FragmentFunction;
+    }
+  private:
+    std::string    m_Name;
+    MTL::Function* m_VertexFunction{nullptr};
+    MTL::Function* m_FragmentFunction{nullptr};
+  };
+  std::shared_ptr<Shader> Shader::CreateFromSource(std::string_view name,
+                                                   std::string_view source,
+                                                   std::string_view vertexEntry,
+                                                   std::string_view fragmentEntry) {
+    return std::make_shared<MetalShader>(name, source, vertexEntry, fragmentEntry);
+  }
+  std::shared_ptr<Shader> Shader::CreateFromDefaultLibrary(const std::string& vertexName,
+                                                           const std::string& fragmentName) {
+    MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+    KV_CORE_ASSERT(device != nullptr, "[KanVerse] Active Metal device is null!");
+    MTL::Library* defaultLib = device->newDefaultLibrary();
+    KV_CORE_ASSERT(defaultLib != nullptr, "[KanVerse] Failed to load default.metallib from application bundle!");
+    auto shader = std::make_shared<MetalShader>("DefaultBundleShader", defaultLib, vertexName, fragmentName);
+    defaultLib->release();
+    return shader;
+  }
+  std::shared_ptr<Shader> Shader::CreateVertexOnly(std::string_view vertexName) {
+    MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+    KV_CORE_ASSERT(device != nullptr, "[KanVerse] Active Metal device is null!");
+    MTL::Library* defaultLib = device->newDefaultLibrary();
+    KV_CORE_ASSERT(defaultLib != nullptr, "[KanVerse] Failed to load default.metallib from bundle!");
+    auto shader = std::make_shared<MetalShader>(vertexName, defaultLib, vertexName, "");
+    defaultLib->release();
+    return shader;
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/PostProcess/BloomPass.cpp
 
 // FILE: KanVerse_Engine/Renderer/PostProcess/BloomPass.hpp

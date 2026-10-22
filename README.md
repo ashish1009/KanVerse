@@ -151,7 +151,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/Pipeline/Shader.hpp`, `Renderer/Pipeline/Shader.mm`
   - **Concepts:** Runtime MSL compilation (`newLibrary` with `setFastMathEnabled(true)`) vs precompiled `newDefaultLibrary()`, vertex-only shadow shaders (`CreateVertexOnly`).
   - **Milestone:** Implement `MetalShader` and all factory methods.
-- [ ] **Day 28 — Graphics Pipeline State & Depth/Blend Configuration**
+- [x] **Day 28 — Graphics Pipeline State & Depth/Blend Configuration**
   - **Files:** `Renderer/Pipeline/Pipeline.hpp`, `Renderer/Pipeline/Pipeline.mm`
   - **Concepts:** `MTL::VertexDescriptor` (16-byte aligned stride), `MTL::RenderPipelineDescriptor` (HDR `RGBA16Float` vs SDR `BGRA8Unorm_sRGB`, alpha blending), `MTL::DepthStencilState`, shadow depth bias.
   - **Milestone:** Implement `MetalPipeline`.
