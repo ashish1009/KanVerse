@@ -66,11 +66,11 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `KanVerse_Engine/PrefixHeader.pch`
   - **Concepts:** Precompiled header mechanics, accelerating `.cpp` and `.mm` compilation, suppressing clang warnings (`-Wdocumentation`, `-Wformat-security`).
   - **Milestone:** Populate `PrefixHeader.pch` and enable precompilation in Xcode.
-- [ ] **Day 10 — Metal-CPP Implementation & Hardware Context**
+- [x] **Day 10 — Metal-CPP Implementation & Hardware Context**
   - **Files:** `Source/MetalImpl.cpp`, `Renderer/Context/RenderContext.hpp`, `Renderer/Context/RenderContext.mm`
   - **Concepts:** Generating `metal-cpp` symbols via `*_PRIVATE_IMPLEMENTATION` macros, `__bridge MTL::Device*`, `MTL::CommandQueue`.
   - **Milestone:** Instantiate `RenderContext::Create()` and print the Apple M-series GPU name to the console.
-- [ ] **Day 11 — Low-Latency CoreAudio / AVFoundation Subsystem**
+- [x] **Day 11 — Low-Latency CoreAudio / AVFoundation Subsystem**
   - **Files:** `Audio/AudioSystem.hpp`, `Audio/AudioSystem.mm`
   - **Concepts:** Objective-C++ `@autoreleasepool`, `AVAudioPlayer`, rapid re-triggering (`player.currentTime = 0`), ARC memory management with STL maps.
   - **Milestone:** Implement `AudioSystem::Init`, `LoadSound`, `Play`, and `Shutdown`.
