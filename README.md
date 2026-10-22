@@ -88,7 +88,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Platform/Events/Event.hpp`
   - **Concepts:** Polymorphic events, bitflag categories (`1 << 0`), token pasting (`#type`) in `EVENT_CLASS_TYPE`, template dispatch (`EventDispatcher::Dispatch<T>`).
   - **Milestone:** Implement `EventType`, `EventCategory`, `Event`, and `EventDispatcher`.
-- [ ] **Day 14 — Window, Keyboard & Mouse Event Payloads**
+- [x] **Day 14 — Window, Keyboard & Mouse Event Payloads**
   - **Files:** `Platform/Events/WindowEvents.hpp`, `Platform/Events/KeyEvents.hpp`, `Platform/Events/MouseEvents.hpp`
   - **Concepts:** Concrete event classes (`WindowResizeEvent`, `WindowCloseEvent`, `KeyPressedEvent`, `MouseMovedEvent`, `MouseScrolledEvent`, `MouseButtonPressedEvent`).
   - **Milestone:** Implement all three event headers and test routing through `EventDispatcher`.

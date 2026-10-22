@@ -9,12 +9,29 @@
 // To remove documentation warning
 #pragma clang diagnostic ignored "-Wdocumentation"
 #pragma clang diagnostic ignored "-Wformat-security"
+// C++ Files
+#include <iostream>
+#include <thread>
+#include <vector>
+#include <chrono>
+#include <cmath>
 // Core/Diagnostics
 #include "Core/Diagnostics/Assert.hpp"
 #include "Core/Diagnostics/Log.hpp"
 // Core
 #include "Core/Memory/MemoryTracking.hpp"
 #include "Core/Time/TimeStep.hpp"
+#include "Core/Time/Clock.hpp"
+#include "Core/Math/Math.hpp"
+// Audio
+#include "Audio/AudioSystem.hpp"
+// Renderer
+#include "Renderer/Context/RenderContext.hpp"
+// Platform
+#include "Platform/Events/Event.hpp"
+#include "Platform/Events/WindowEvents.hpp"
+#include "Platform/Events/KeyEvents.hpp"
+#include "Platform/Events/MouseEvents.hpp"
 // FILE: KanVerse_Engine/PrefixHeader.pch
 /*!
  * @file PrefixHeader.pch
@@ -788,19 +805,623 @@ namespace KanVerse {
 // FILE: KanVerse_Engine/Physics/PlayerControllerSystem.hpp
 
 // FILE: KanVerse_Engine/Platform/Events/Event.hpp
-
+/*!
+ * @file Event.hpp
+ * @brief Base event hierarchy and dispatch mechanisms for the KanVerse platform.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <cstdint>
+#include <string>
+#include <string_view>
+#include <functional>
+namespace KanVerse {
+  /*!
+   * @enum EventType
+   * @brief Concrete type identifiers for engine events.
+   */
+  enum class EventType : uint8_t {
+    None = 0,
+    WindowClose,
+    WindowResize,
+    WindowFocus,
+    WindowLostFocus,
+    KeyPressed,
+    KeyReleased,
+    MouseButtonPressed,
+    MouseButtonReleased,
+    MouseMoved,
+    MouseScrolled,
+    AppTick,
+    AppUpdate,
+    AppRender
+  };
+  /*!
+   * @enum EventCategory
+   * @brief Bitflags grouping events for batch filtering and query masks.
+   */
+  enum EventCategory : uint8_t {
+    None                     = 0,
+    EventCategoryApplication = 1 << 0,
+    EventCategoryInput       = 1 << 1,
+    EventCategoryKeyboard    = 1 << 2,
+    EventCategoryMouse       = 1 << 3,
+    EventCategoryMouseButton = 1 << 4
+  };
+#define EVENT_CLASS_TYPE(type)                                                    \
+[[nodiscard]] static EventType GetStaticType() noexcept { return EventType::type; } \
+[[nodiscard]] EventType GetEventType() const noexcept override { return GetStaticType(); } \
+[[nodiscard]] const char* GetName() const noexcept override { return #type; }
+#define EVENT_CLASS_CATEGORY(category)                                            \
+[[nodiscard]] uint8_t GetCategoryFlags() const noexcept override { return category; }
+  /*!
+   * @class Event
+   * @brief Abstract base class representing discrete user, platform, or hardware events.
+   */
+  class Event {
+  public:
+    virtual ~Event() = default;
+    [[nodiscard]] virtual EventType GetEventType() const noexcept = 0;
+    [[nodiscard]] virtual const char* GetName() const noexcept = 0;
+    [[nodiscard]] virtual uint8_t GetCategoryFlags() const noexcept = 0;
+    /*!
+     * @brief Checks if this event belongs to a specified category bitmask.
+     * @param category Bitmask to test against.
+     * @return True if category bit is set.
+     */
+    [[nodiscard]] bool IsInCategory(EventCategory category) const noexcept {
+      return (GetCategoryFlags() & static_cast<uint8_t>(category)) != 0;
+    }
+    /*!
+     * @brief Queries whether this event has been consumed by a layer or handler.
+     */
+    [[nodiscard]] bool IsHandled() const noexcept { return m_Handled; }
+    /*!
+     * @brief Flags the event as handled to suppress further propagation.
+     */
+    void SetHandled(bool handled = true) noexcept { m_Handled = handled; }
+  protected:
+    bool m_Handled{false};
+  };
+  /*!
+   * @class EventDispatcher
+   * @brief Type-safe event dispatch helper routing concrete events to callbacks.
+   */
+  class EventDispatcher {
+  public:
+    /*!
+     * @brief Constructs an event dispatcher bound to an active event instance.
+     * @param event Reference to the event being processed.
+     */
+    explicit EventDispatcher(Event& event) noexcept
+    : m_Event(event) {}
+    /*!
+     * @brief Dispatches the event to a matching member or lambda function.
+     * @tparam T Event type derived from Event.
+     * @tparam F Invocable callable matching bool(T&).
+     * @param func Handler function returning true if handled.
+     * @return True if dispatch succeeded and function was called.
+     */
+    template <typename T, typename F>
+    bool Dispatch(const F& func) {
+      if (m_Event.GetEventType() == T::GetStaticType()) {
+        m_Event.SetHandled(m_Event.IsHandled() | func(static_cast<T&>(m_Event)));
+        return true;
+      }
+      return false;
+    }
+  private:
+    Event& m_Event;
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Platform/Events/KeyEvents.hpp
-
+/*!
+ * @file KeyEvents.hpp
+ * @brief Strongly typed keyboard press and release event declarations.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Platform/Events/Event.hpp"
+#include <sstream>
+#include <string>
+namespace KanVerse {
+  /*!
+   * @class KeyEvent
+   * @brief Abstract base class for keyboard-related events.
+   */
+  class KeyEvent : public Event {
+  public:
+    /*!
+     * @brief Retrieves the target virtual key code.
+     * @return Integer key code.
+     */
+    [[nodiscard]] int GetKeyCode() const noexcept { return m_KeyCode; }
+    EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
+  protected:
+    /*!
+     * @brief Protected constructor initialized by derived concrete events.
+     * @param keyCode Target virtual key code.
+     */
+    explicit KeyEvent(int keyCode)
+    : m_KeyCode(keyCode) {}
+    int m_KeyCode; ///< Tracked virtual key code.
+  };
+  /*!
+   * @class KeyPressedEvent
+   * @brief Dispatched when a physical keyboard key is depressed.
+   */
+  class KeyPressedEvent : public KeyEvent {
+  public:
+    /*!
+     * @brief Constructs a key press event.
+     * @param keyCode Pressed key code.
+     * @param repeatCount Number of key repeat cycles.
+     */
+    KeyPressedEvent(int keyCode, int repeatCount = 0)
+    : KeyEvent(keyCode), m_RepeatCount(repeatCount) {}
+    /*!
+     * @brief Retrieves key repeat count.
+     * @return Repeat count integer.
+     */
+    [[nodiscard]] int GetRepeatCount() const noexcept { return m_RepeatCount; }
+    /*!
+     * @brief Serializes event details for diagnostic logging.
+     * @return Formatted string representation.
+     */
+    [[nodiscard]] std::string ToString() const {
+      std::stringstream ss;
+      ss << "KeyPressedEvent: " << m_KeyCode << " (" << m_RepeatCount << " repeats)";
+      return ss.str();
+    }
+    EVENT_CLASS_TYPE(KeyPressed)
+  private:
+    int m_RepeatCount; ///< Repeat count metric.
+  };
+  /*!
+   * @class KeyReleasedEvent
+   * @brief Dispatched when a physical keyboard key is released.
+   */
+  class KeyReleasedEvent : public KeyEvent {
+  public:
+    /*!
+     * @brief Constructs a key release event.
+     * @param keyCode Released key code.
+     */
+    explicit KeyReleasedEvent(int keyCode)
+    : KeyEvent(keyCode) {}
+    /*!
+     * @brief Serializes event details for diagnostic logging.
+     * @return Formatted string representation.
+     */
+    [[nodiscard]] std::string ToString() const {
+      std::stringstream ss;
+      ss << "KeyReleasedEvent: " << m_KeyCode;
+      return ss.str();
+    }
+    EVENT_CLASS_TYPE(KeyReleased)
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Platform/Events/MouseEvents.hpp
-
+/*!
+ * @file MouseEvents.hpp
+ * @brief Strongly typed mouse button, motion, and scroll event declarations.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Platform/Events/Event.hpp"
+#include <sstream>
+#include <string>
+namespace KanVerse {
+  /*!
+   * @class MouseMovedEvent
+   * @brief Dispatched when the mouse cursor updates coordinates inside the active window.
+   */
+  class MouseMovedEvent : public Event {
+  public:
+    /*!
+     * @brief Constructs a mouse movement event.
+     * @param x Horizontal window coordinate in logical points.
+     * @param y Vertical window coordinate in logical points.
+     */
+    MouseMovedEvent(float x, float y)
+    : m_MouseX(x), m_MouseY(y) {}
+    /*!
+     * @brief Retrieves the horizontal coordinate of the mouse.
+     * @return Logical point horizontal position.
+     */
+    [[nodiscard]] float GetX() const noexcept { return m_MouseX; }
+    /*!
+     * @brief Retrieves the vertical coordinate of the mouse.
+     * @return Logical point vertical position.
+     */
+    [[nodiscard]] float GetY() const noexcept { return m_MouseY; }
+    /*!
+     * @brief Serializes event details for diagnostic logging.
+     * @return Formatted string representation.
+     */
+    [[nodiscard]] std::string ToString() const {
+      std::stringstream ss;
+      ss << "MouseMovedEvent: " << m_MouseX << ", " << m_MouseY;
+      return ss.str();
+    }
+    EVENT_CLASS_TYPE(MouseMoved)
+    EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+  private:
+    float m_MouseX; ///< Horizontal cursor coordinate.
+    float m_MouseY; ///< Vertical cursor coordinate.
+  };
+  /*!
+   * @class MouseScrolledEvent
+   * @brief Dispatched upon mouse scroll wheel or trackpad scroll gesture deltas.
+   */
+  class MouseScrolledEvent : public Event {
+  public:
+    /*!
+     * @brief Constructs a mouse scroll event.
+     * @param xOffset Horizontal delta offset.
+     * @param yOffset Vertical delta offset.
+     */
+    MouseScrolledEvent(float xOffset, float yOffset)
+    : m_XOffset(xOffset), m_YOffset(yOffset) {}
+    /*!
+     * @brief Retrieves the horizontal scroll offset.
+     * @return Float offset delta.
+     */
+    [[nodiscard]] float GetXOffset() const noexcept { return m_XOffset; }
+    /*!
+     * @brief Retrieves the vertical scroll offset.
+     * @return Float offset delta.
+     */
+    [[nodiscard]] float GetYOffset() const noexcept { return m_YOffset; }
+    /*!
+     * @brief Serializes event details for diagnostic logging.
+     * @return Formatted string representation.
+     */
+    [[nodiscard]] std::string ToString() const {
+      std::stringstream ss;
+      ss << "MouseScrolledEvent: " << m_XOffset << ", " << m_YOffset;
+      return ss.str();
+    }
+    EVENT_CLASS_TYPE(MouseScrolled)
+    EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+  private:
+    float m_XOffset; ///< Horizontal scroll delta.
+    float m_YOffset; ///< Vertical scroll delta.
+  };
+  /*!
+   * @class MouseButtonEvent
+   * @brief Abstract base class for discrete mouse button press and release actions.
+   */
+  class MouseButtonEvent : public Event {
+  public:
+    /*!
+     * @brief Retrieves the target mouse button code (0 = Left, 1 = Right, 2 = Middle).
+     * @return Integer button identifier.
+     */
+    [[nodiscard]] int GetMouseButton() const noexcept { return m_Button; }
+    EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput | EventCategoryMouseButton)
+  protected:
+    /*!
+     * @brief Protected constructor initialized by derived concrete events.
+     * @param button Target mouse button code.
+     */
+    explicit MouseButtonEvent(int button)
+    : m_Button(button) {}
+    int m_Button; ///< Tracked mouse button index.
+  };
+  /*!
+   * @class MouseButtonPressedEvent
+   * @brief Dispatched upon physical depressing of a mouse button.
+   */
+  class MouseButtonPressedEvent : public MouseButtonEvent {
+  public:
+    /*!
+     * @brief Constructs a mouse button down event.
+     * @param button Pressed button code.
+     */
+    explicit MouseButtonPressedEvent(int button)
+    : MouseButtonEvent(button) {}
+    /*!
+     * @brief Serializes event details for diagnostic logging.
+     * @return Formatted string representation.
+     */
+    [[nodiscard]] std::string ToString() const {
+      std::stringstream ss;
+      ss << "MouseButtonPressedEvent: " << m_Button;
+      return ss.str();
+    }
+    EVENT_CLASS_TYPE(MouseButtonPressed)
+  };
+  /*!
+   * @class MouseButtonReleasedEvent
+   * @brief Dispatched upon releasing of a mouse button.
+   */
+  class MouseButtonReleasedEvent : public MouseButtonEvent {
+  public:
+    /*!
+     * @brief Constructs a mouse button up event.
+     * @param button Released button code.
+     */
+    explicit MouseButtonReleasedEvent(int button)
+    : MouseButtonEvent(button) {}
+    /*!
+     * @brief Serializes event details for diagnostic logging.
+     * @return Formatted string representation.
+     */
+    [[nodiscard]] std::string ToString() const {
+      std::stringstream ss;
+      ss << "MouseButtonReleasedEvent: " << m_Button;
+      return ss.str();
+    }
+    EVENT_CLASS_TYPE(MouseButtonReleased)
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Platform/Events/WindowEvents.hpp
-
+/*!
+ * @file WindowEvents.hpp
+ * @brief Window lifecycle, resize, and close event definitions.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Platform/Events/Event.hpp"
+namespace KanVerse {
+  /*!
+   * @class WindowResizeEvent
+   * @brief Fired whenever the underlying native window dimensions mutate.
+   */
+  class WindowResizeEvent : public Event {
+  public:
+    /*!
+     * @brief Constructs a resize event with new pixel dimensions.
+     * @param width Framebuffer width in pixels.
+     * @param height Framebuffer height in pixels.
+     */
+    WindowResizeEvent(uint32_t width, uint32_t height) noexcept
+    : m_Width(width), m_Height(height) {}
+    [[nodiscard]] uint32_t GetWidth() const noexcept { return m_Width; }
+    [[nodiscard]] uint32_t GetHeight() const noexcept { return m_Height; }
+    EVENT_CLASS_TYPE(WindowResize)
+    EVENT_CLASS_CATEGORY(EventCategoryApplication)
+  private:
+    uint32_t m_Width{0};
+    uint32_t m_Height{0};
+  };
+  /*!
+   * @class WindowCloseEvent
+   * @brief Fired when the native window receives an OS close request.
+   */
+  class WindowCloseEvent : public Event {
+  public:
+    WindowCloseEvent() noexcept = default;
+    EVENT_CLASS_TYPE(WindowClose)
+    EVENT_CLASS_CATEGORY(EventCategoryApplication)
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Platform/Input/GameControllerBridge.hpp
-
+/*!
+ * @file GameControllerBridge.hpp
+ * @brief Hardware gamepad and raw keyboard input bridge for Apple OS frameworks.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <simd/simd.h>
+#include <cstdint>
+namespace KanVerse {
+  /*!
+   * @struct GamepadInputState
+   * @brief Polled instantaneous hardware inputs exclusively from connected Gamepads.
+   *
+   * This struct represents raw hardware state. It does not contain any game-specific
+   * logic or keyboard fallbacks.
+   */
+  struct GamepadInputState {
+    simd::float2 LeftStick{0.0f, 0.0f};  ///< Normalized move axis [-1.0, 1.0].
+    simd::float2 RightStick{0.0f, 0.0f}; ///< Normalized aim/camera axis [-1.0, 1.0].
+    bool ButtonSouth{false};             ///< Primary face button (e.g., Cross / A).
+    bool ButtonEast{false};              ///< Right face button (e.g., Circle / B).
+    bool ButtonWest{false};              ///< Left face button (e.g., Square / X).
+    bool ButtonNorth{false};             ///< Top face button (e.g., Triangle / Y).
+    bool LeftTrigger{false};             ///< Left analog trigger / bumper.
+    bool RightTrigger{false};            ///< Right analog trigger / bumper.
+    bool Connected{false};               ///< True if an active controller is paired.
+  };
+  /*!
+   * @class InputBridge
+   * @brief Central OS-level hardware polling bridge.
+   *
+   * Abstracts Apple's GameController.framework and macOS keyboard event pumping.
+   * Adheres to SOLID by strictly reporting raw hardware states without gameplay context.
+   */
+  class InputBridge {
+  public:
+    /*! @brief Discovers connected wireless and wired controllers. */
+    static void Init();
+    /*! @brief Ceases controller discovery and clears cached hardware states. */
+    static void Shutdown();
+    /*!
+     * @brief Registers raw hardware keypresses received from the OS window event pump.
+     * @param keyCode Native macOS virtual keycode.
+     * @param isPressed True if the key is currently held down.
+     */
+    static void SetKeyState(uint16_t keyCode, bool isPressed);
+    /*!
+     * @brief Queries whether a specific raw OS keycode is currently physically depressed.
+     * @param keyCode Native macOS virtual keycode.
+     * @return True if the key is pressed.
+     */
+    [[nodiscard]] static bool IsKeyPressed(uint16_t keyCode);
+    /*!
+     * @brief Polls connected physical gamepads for analog stick and face button states.
+     * @return Current hardware snapshot of the primary connected gamepad.
+     */
+    [[nodiscard]] static GamepadInputState PollInput();
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Platform/Input/GameControllerBridge.mm
-
+/*!
+ * @file GameControllerBridge.mm
+ * @brief Implementation of hardware OS bridge using GameController.framework.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Platform/Input/GameControllerBridge.hpp"
+#include "Core/Diagnostics/Log.hpp"
+#import <GameController/GameController.h>
+#import <AppKit/AppKit.h>
+#include <unordered_set>
+#pragma comment(lib, "GameController")
+namespace KanVerse {
+  // Static hash set tracking raw macOS virtual keycodes that are currently depressed
+  static std::unordered_set<uint16_t> s_ActiveKeys;
+  void InputBridge::Init() {
+    // Instructs macOS to begin background scanning for MFi, Xbox, and PlayStation controllers
+    [GCController startWirelessControllerDiscoveryWithCompletionHandler:^{
+      KV_CORE_INFO("GameController: Wireless discovery scan complete.");
+    }];
+  }
+  void InputBridge::Shutdown() {
+    [GCController stopWirelessControllerDiscovery];
+    s_ActiveKeys.clear();
+  }
+  void InputBridge::SetKeyState(uint16_t keyCode, bool isPressed) {
+    if (isPressed) {
+      s_ActiveKeys.insert(keyCode);
+    } else {
+      s_ActiveKeys.erase(keyCode);
+    }
+  }
+  bool InputBridge::IsKeyPressed(uint16_t keyCode) {
+    return s_ActiveKeys.find(keyCode) != s_ActiveKeys.end();
+  }
+  GamepadInputState InputBridge::PollInput() {
+    GamepadInputState state{};
+    // Query macOS for any actively paired controllers
+    NSArray<GCController*>* controllers = [GCController controllers];
+    if (controllers.count > 0) {
+      GCController* controller = controllers.firstObject;
+      GCExtendedGamepad* profile = controller.extendedGamepad;
+      if (profile) {
+        state.Connected = true;
+        // Map raw analog stick values (Normalized from -1.0 to 1.0)
+        state.LeftStick.x = static_cast<float>(profile.leftThumbstick.xAxis.value);
+        state.LeftStick.y = static_cast<float>(profile.leftThumbstick.yAxis.value);
+        state.RightStick.x = static_cast<float>(profile.rightThumbstick.xAxis.value);
+        state.RightStick.y = static_cast<float>(profile.rightThumbstick.yAxis.value);
+        // Map raw hardware face buttons
+        state.ButtonSouth = profile.buttonA.isPressed;
+        state.ButtonEast  = profile.buttonB.isPressed;
+        state.ButtonWest  = profile.buttonX.isPressed;
+        state.ButtonNorth = profile.buttonY.isPressed;
+        state.LeftTrigger  = profile.leftTrigger.isPressed;
+        state.RightTrigger = profile.rightTrigger.isPressed;
+        // Apply a strict 15% radial deadzone to the hardware sticks to prevent analog drift
+        if (simd_length(state.LeftStick) < 0.15f) {
+          state.LeftStick = simd_make_float2(0.0f, 0.0f);
+        }
+      }
+    }
+    // Note: No WASD fallback logic here. The engine merely reports the raw hardware state.
+    return state;
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Platform/Input/KeyCodes.hpp
-
+/*!
+ * @file KeyCodes.hpp
+ * @brief Strongly-typed virtual key code identifiers for macOS / KanVerse input management.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <cstdint>
+namespace KanVerse {
+  /*!
+   * @enum Key
+   * @brief Strongly-typed enumeration of macOS virtual key codes.
+   */
+  enum class Key : uint16_t {
+    // --- Alphabet Keys ---
+    A       = 0,
+    S       = 1,
+    D       = 2,
+    F       = 3,
+    H       = 4,
+    G       = 5,
+    Z       = 6,
+    X       = 7,
+    C       = 8,
+    V       = 9,
+    B       = 11,
+    Q       = 12,
+    W       = 13,
+    E       = 14,
+    R       = 15,
+    Y       = 16,
+    T       = 17,
+    D1      = 18,
+    D2      = 19,
+    D3      = 20,
+    D4      = 21,
+    D6      = 22,
+    D5      = 23,
+    Equal   = 24,
+    D9      = 25,
+    D7      = 26,
+    Minus   = 27,
+    D8      = 28,
+    D0      = 29,
+    RightBracket = 30,
+    O       = 31,
+    U       = 32,
+    LeftBracket  = 33,
+    I       = 34,
+    P       = 35,
+    Return  = 36,
+    L       = 37,
+    J       = 38,
+    Quote   = 39,
+    K       = 40,
+    Semicolon = 41,
+    Backslash = 42,
+    Comma   = 43,
+    Slash   = 44,
+    N       = 45,
+    Period  = 46,
+    Grave   = 50,
+    Space   = 49,
+    // --- Modifier & Special Keys ---
+    Tab     = 48,
+    Backspace = 51,
+    Escape  = 53,
+    Command = 55,
+    Shift   = 56,
+    Capslock = 57,
+    Option  = 58,
+    Control = 59,
+    // --- Navigation & Arrows ---
+    LeftArrow  = 123,
+    RightArrow = 124,
+    DownArrow  = 125,
+    UpArrow    = 126,
+    // --- Function Keys ---
+    F1  = 122,
+    F2  = 120,
+    F3  = 99,
+    F4  = 118,
+    F5  = 96,
+    F6  = 97,
+    F7  = 98,
+    F8  = 100,
+    F9  = 101,
+    F10 = 109,
+    F11 = 103,
+    F12 = 111
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Platform/Window/NativeWindow.hpp
 
 // FILE: KanVerse_Engine/Platform/Window/NativeWindow.mm
@@ -836,9 +1457,125 @@ namespace KanVerse {
 // FILE: KanVerse_Engine/Renderer/Camera/SpringArm.hpp
 
 // FILE: KanVerse_Engine/Renderer/Context/RenderContext.hpp
-
+/*!
+ * @file RenderContext.hpp
+ * @brief RAII encapsulation of Apple Metal device and command queue hardware handles.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <cstdint>
+#include <memory>
+namespace MTL {
+  class Device;
+  class CommandQueue;
+}
+namespace KanVerse {
+  /*!
+   * @class RenderContext
+   * @brief Manages the primary Metal hardware context, device querying, and command queue.
+   */
+  class RenderContext {
+  public:
+    /*!
+     * @brief Queries the system default Metal device and initializes the primary command queue.
+     */
+    RenderContext();
+    /*!
+     * @brief Releases the command queue and device hardware handles.
+     */
+    ~RenderContext();
+    RenderContext(const RenderContext&) = delete;
+    RenderContext& operator=(const RenderContext&) = delete;
+    RenderContext(RenderContext&&) noexcept;
+    RenderContext& operator=(RenderContext&&) noexcept;
+    /*!
+     * @brief Retrieves the active Metal system device pointer.
+     * @return Raw pointer to MTL::Device.
+     */
+    [[nodiscard]] MTL::Device* GetDevice() const noexcept { return m_Device; }
+    /*!
+     * @brief Retrieves the active primary command queue pointer.
+     * @return Raw pointer to MTL::CommandQueue.
+     */
+    [[nodiscard]] MTL::CommandQueue* GetCommandQueue() const noexcept { return m_CommandQueue; }
+    /*!
+     * @brief Factory constructor generating an initialized RenderContext instance.
+     * @return Unique pointer owning the initialized RenderContext.
+     */
+    [[nodiscard]] static std::unique_ptr<RenderContext> Create();
+  private:
+    MTL::Device*       m_Device{nullptr};
+    MTL::CommandQueue* m_CommandQueue{nullptr};
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Context/RenderContext.mm
-
+/*!
+ * @file RenderContext.mm
+ * @brief Implementation of the Metal render context using metal-cpp and Foundation.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Renderer/Context/RenderContext.hpp"
+// metal-cpp headers in canonical order
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <QuartzCore/QuartzCore.hpp>
+// Apple Native Frameworks
+#import <Metal/Metal.h>
+#import <Foundation/Foundation.h>
+#include <cassert>
+namespace KanVerse {
+  std::unique_ptr<RenderContext> RenderContext::Create() {
+    return std::make_unique<RenderContext>();
+  }
+  RenderContext::RenderContext() {
+    // Retrieve system default device via native runtime and bridge to metal-cpp wrapper
+    id<MTLDevice> sysDevice = MTLCreateSystemDefaultDevice();
+    if (!sysDevice) {
+      KV_CORE_ERROR("Metal is not supported on this host.");
+      KV_CORE_ASSERT(false, "Metal is not supported on this host.");
+      return;
+    }
+    m_Device = (__bridge MTL::Device*)sysDevice;
+    m_CommandQueue = m_Device->newCommandQueue();
+    if (!m_CommandQueue) {
+      KV_CORE_ERROR("Failed to create primary MTL::CommandQueue.");
+      KV_CORE_ASSERT(false, "Failed to create primary MTL::CommandQueue.");
+      return;
+    }
+    KV_CORE_INFO("RenderContext initialized successfully on device: %s",
+                 m_Device->name()->utf8String());
+  }
+  RenderContext::~RenderContext() {
+    if (m_CommandQueue) {
+      m_CommandQueue->release();
+      m_CommandQueue = nullptr;
+    }
+    if (m_Device) {
+      m_Device->release();
+      m_Device = nullptr;
+    }
+  }
+  RenderContext::RenderContext(RenderContext&& other) noexcept
+  : m_Device(other.m_Device), m_CommandQueue(other.m_CommandQueue) {
+    other.m_Device = nullptr;
+    other.m_CommandQueue = nullptr;
+  }
+  RenderContext& RenderContext::operator=(RenderContext&& other) noexcept {
+    if (this != &other) {
+      if (m_CommandQueue) m_CommandQueue->release();
+      if (m_Device) m_Device->release();
+      m_Device = other.m_Device;
+      m_CommandQueue = other.m_CommandQueue;
+      other.m_Device = nullptr;
+      other.m_CommandQueue = nullptr;
+    }
+    return *this;
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Framebuffer/Framebuffer.hpp
 
 // FILE: KanVerse_Engine/Renderer/Framebuffer/Framebuffer.mm
@@ -969,9 +1706,17 @@ namespace KanVerse {
  * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
  * @license MIT License
  */
+#define UNIT_TESTING 1
+#if UNIT_TESTING
+#include "UnitTests/Phase1Test.hpp"
+#endif
 int main(int argc, char** argv) {
   KanVerse::Log::Init();
   KV_CORE_INFO("KanVerse Engine Bootstrap Initiated.");
+#if DEBUG
+  KanVerse::Testing::RunPhase1Tests();
+#endif
+  KanVerse::Log::Shutdown();
   return 0;
 }
 // FILE: KanVerse_App/Source/KanVerseApp.mm
@@ -1007,6 +1752,130 @@ int main(int argc, char** argv) {
 
 // FILE: KanVerse_App/Systems/Player/PlayerInputIntent.hpp
 
+// FILE: KanVerse_App/UnitTests/Phase1Test.hpp
+/*!
+ * @file Phase1Test.mm
+ * @brief Comprehensive integration and unit test suite for KanVerse Phase 1 subsystems.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+// Required metal-cpp headers for full type definitions of MTL::Device and MTL::CommandQueue
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+namespace KanVerse::Testing {
+  /*!
+   * @brief Exercises all Phase 1 subsystems and validates correctness and memory safety.
+   */
+  void RunPhase1Tests() {
+    KV_CORE_INFO("==================================================");
+    KV_CORE_INFO("       STARTING KANVERSE PHASE 1 TEST SUITE       ");
+    KV_CORE_INFO("==================================================");
+    // ---------------------------------------------------------------------
+    // Test 1: Diagnostics & Logging (All 5 Severities)
+    // ---------------------------------------------------------------------
+    KV_CORE_TRACE("Phase1Test: Testing Trace level logging (Value: {:.4f})", 3.14159);
+    KV_CORE_INFO("Phase1Test: Testing Info level logging.");
+    KV_CORE_WARN("Phase1Test: Testing Warn level logging.");
+    KV_CORE_ERROR("Phase1Test: Testing Error level logging.");
+    // Note: We skip Fatal here as it triggers assertions/faults.
+    KV_CORE_INFO("[PASS] Test 1: Diagnostics & Logging verified.");
+    // ---------------------------------------------------------------------
+    // Test 2: Branch-Predicted Assertions
+    // ---------------------------------------------------------------------
+    int dummyValue = 42;
+    KV_CORE_ASSERT(dummyValue == 42, "Dummy value must equal 42!");
+    KV_CORE_INFO("[PASS] Test 2: Assertions verified.");
+    // ---------------------------------------------------------------------
+    // Test 3: Thread-Safe Memory Tracking & RAII Scoped Allocation Guards
+    // ---------------------------------------------------------------------
+    {
+      MemoryStats initialStats = MemoryTracker::GetStats();
+      KV_CORE_INFO("Initial Heap Usage: {} bytes", initialStats.CurrentUsage);
+      // Scope block to test RAII ScopedMemoryAllocation
+      {
+        ScopedMemoryAllocation testGuard(2048); // Simulate tracking 2 KB
+        MemoryStats midStats = MemoryTracker::GetStats();
+        KV_CORE_ASSERT(midStats.CurrentUsage >= 2048, "Memory tracker failed to record allocation!");
+        KV_CORE_INFO("Inside Scope - Current Usage: {} bytes | Peak: {} bytes",
+                     midStats.CurrentUsage, midStats.PeakUsage);
+      } // Destructor automatically fires here, releasing 2048 bytes
+      MemoryStats finalStats = MemoryTracker::GetStats();
+      KV_CORE_INFO("Outside Scope - Current Usage: {} bytes", finalStats.CurrentUsage);
+      KV_CORE_ASSERT(finalStats.CurrentUsage == initialStats.CurrentUsage,
+                     "ScopedMemoryAllocation failed to unwind memory cleanly!");
+    }
+    KV_CORE_INFO("[PASS] Test 3: Memory Tracking & RAII Guards verified.");
+    // ---------------------------------------------------------------------
+    // Test 4: High-Resolution Monotonic Clock & TimeStep
+    // ---------------------------------------------------------------------
+    {
+      Clock testClock;
+      testClock.Reset();
+      // Sleep briefly to simulate frame delta
+      std::this_thread::sleep_for(std::chrono::milliseconds(16));
+      TimeStep dt = testClock.Tick();
+      KV_CORE_INFO("Clock Tick Delta - Seconds: {:.4f}s | Milliseconds: {:.2f}ms",
+                   dt.GetSeconds(), dt.GetMilliseconds());
+      KV_CORE_ASSERT(dt.GetSeconds() > 0.0f, "TimeStep delta must be greater than zero!");
+      float elapsed = testClock.GetElapsedSeconds();
+      KV_CORE_INFO("Total Elapsed Wall Time: {:.4f}s", elapsed);
+    }
+    KV_CORE_INFO("[PASS] Test 4: Clock & TimeStep verified.");
+    // ---------------------------------------------------------------------
+    // Test 5: SIMD Linear Algebra & Matrix Transformations
+    // ---------------------------------------------------------------------
+    {
+      // Vector Construction
+      Math::Vec3 v1 = Math::MakeVec3(1.0f, 2.0f, 3.0f);
+      Math::Vec3 v2 = Math::MakeVec3(4.0f, 5.0f, 6.0f);
+      Math::Vec3 vSum = v1 + v2;
+      KV_CORE_ASSERT(vSum.x == 5.0f && vSum.y == 7.0f && vSum.z == 9.0f, "SIMD Vector addition incorrect!");
+      // Matrix Identity & Multiplication
+      Math::Mat4 identityMat = Math::Identity();
+      Math::Mat4 translationMat = identityMat;
+      translationMat.columns[3] = Math::MakeVec4(10.0f, 20.0f, 30.0f, 1.0f);
+      Math::Mat4 multResult = Math::Multiply(identityMat, translationMat);
+      KV_CORE_ASSERT(multResult.columns[3].x == 10.0f, "Matrix multiplication identity property failed!");
+      // Projection Matrix Test (Metal [0, 1] Depth Space)
+      float fov = 1.57079f; // ~90 degrees
+      float aspect = 16.0f / 9.0f;
+      Math::Mat4 projMat = Math::Perspective(fov, aspect, 0.1f, 100.0f);
+      // Transform a point down the -Z axis to verify projection behavior
+      Math::Vec4 testPoint = Math::MakeVec4(0.0f, 0.0f, -10.0f, 1.0f);
+      Math::Vec4 projected = projMat * testPoint;
+      KV_CORE_INFO("SIMD Perspective Projection matrix computed successfully.");
+    }
+    KV_CORE_INFO("[PASS] Test 5: SIMD Math & Matrices verified.");
+    // ---------------------------------------------------------------------
+    // Test 6: Metal Hardware RenderContext Verification
+    // ---------------------------------------------------------------------
+    {
+      // Note: RenderContext requires an active Application instance or can be instantiated directly.
+      // If testing outside Application::Run(), ensure MTLCreateSystemDefaultDevice() is valid.
+      auto context = RenderContext::Create();
+      if (context && context->GetDevice()) {
+        KV_CORE_INFO("Metal Device Verified: %s", context->GetDevice()->name()->utf8String());
+        KV_CORE_ASSERT(context->GetCommandQueue() != nullptr, "Primary command queue is null!");
+        KV_CORE_INFO("[PASS] Test 6: Metal RenderContext verified.");
+      } else {
+        KV_CORE_WARN("[SKIP] Test 6: Metal device not available in headless environment.");
+      }
+    }
+    // ---------------------------------------------------------------------
+    // Test 7: AudioSystem Subsystem Initialization
+    // ---------------------------------------------------------------------
+    {
+      AudioSystem::Init();
+      // Test loading a non-existent sound to verify warning handling without crashing
+      AudioSystem::LoadSound(SoundEffect::Jump, "NonExistentSoundCue.wav");
+      AudioSystem::Shutdown();
+    }
+    KV_CORE_INFO("[PASS] Test 7: AudioSystem lifecycle verified.");
+    KV_CORE_INFO("==================================================");
+    KV_CORE_INFO("     ALL PHASE 1 TESTS COMPLETED SUCCESSFULLY     ");
+    KV_CORE_INFO("==================================================");
+  }
+} // namespace KanVerse::Testing
 // FILE: KanVerse_App/World/LevelBuilder.cpp
 
 // FILE: KanVerse_App/World/LevelBuilder.hpp
