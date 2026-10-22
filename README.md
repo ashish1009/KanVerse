@@ -147,7 +147,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/Pipeline/FrameSync.hpp`, `Renderer/Pipeline/FrameSync.mm`
   - **Concepts:** Triple buffering (`kMaxFramesInFlight = 3`), `dispatch_semaphore_create(3)`, `dispatch_semaphore_wait`, `cmdBuffer->addCompletedHandler` signaling.
   - **Milestone:** Implement `FrameSynchronizer`.
-- [ ] **Day 27 — Metal Shading Language (MSL) Compiler & Library Loader**
+- [x] **Day 27 — Metal Shading Language (MSL) Compiler & Library Loader**
   - **Files:** `Renderer/Pipeline/Shader.hpp`, `Renderer/Pipeline/Shader.mm`
   - **Concepts:** Runtime MSL compilation (`newLibrary` with `setFastMathEnabled(true)`) vs precompiled `newDefaultLibrary()`, vertex-only shadow shaders (`CreateVertexOnly`).
   - **Milestone:** Implement `MetalShader` and all factory methods.

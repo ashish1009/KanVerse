@@ -856,10 +856,10 @@
 			children = (
 				B2BA39D63089F28B006439E3 /* FrameSync.hpp */,
 				B2BA39D73089F28B006439E3 /* FrameSync.mm */,
-				B2BA39D83089F28B006439E3 /* Pipeline.hpp */,
-				B2BA39D93089F28B006439E3 /* Pipeline.mm */,
 				B2BA39DA3089F28B006439E3 /* Shader.hpp */,
 				B2BA39DB3089F28B006439E3 /* Shader.mm */,
+				B2BA39D83089F28B006439E3 /* Pipeline.hpp */,
+				B2BA39D93089F28B006439E3 /* Pipeline.mm */,
 			);
 			path = Pipeline;
 			sourceTree = "<group>";
