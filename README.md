@@ -213,7 +213,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `KanVerse_App/Shaders/ShadowDepth.metal`, `Renderer/Renderer/Renderer.mm`, `Scene/Scene.mm`
   - **Concepts:** Instanced depth-only vertex shader (`shadow_vertex_main`), 2048x2048 `Depth32Float` shadow framebuffer, `BeginShadowPass`, and `Scene::OnRenderShadowPass` (skipping transparent & emissive bulb meshes).
   - **Milestone:** Render the scene's directional shadow map every frame and preview the depth texture in a debug ImGui window!
-- [ ] **Day 42 — Equirectangular-to-Cubemap & Irradiance Convolution Shaders**
+- [x] **Day 42 — Equirectangular-to-Cubemap & Irradiance Convolution Shaders**
   - **Files:** `KanVerse_App/Shaders/Equirectangular.metal`, `KanVerse_App/Shaders/Irradiance.metal`, `KanVerse_App/Shaders/Skybox.metal`
   - **Concepts:** Spherical UV mapping, 6-slice `texture2d_array` compute writes, hemisphere Riemann-sum diffuse irradiance convolution, and vertex-less fullscreen skybox rendering.
   - **Milestone:** Compile `Equirectangular.metal`, `Irradiance.metal`, and `Skybox.metal`.
