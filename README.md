@@ -15,7 +15,7 @@ Use the following Markdown checkbox states to track your daily progress:
 - [x] **Phase 1:** Engine Core, Diagnostics, Memory & SIMD Math (Days 1–12)
 - [x] **Phase 2:** Platform Events, Input Polling & Cocoa/Metal Windowing (Days 13–23)
 - [x] **Phase 3:** Metal RHI — Buffers, Shaders, Pipelines, Textures & First 3D Draw (Days 24–40)
-- [-] **Phase 4:** Advanced PBR, Shadows, IBL, Compute Bloom, ACES Tonemapping & Atmosphere (Days 79–90)
+- [x] **Phase 4:** Advanced PBR, Shadows, IBL, Compute Bloom, ACES Tonemapping & Atmosphere (Days 79–90)
 - [ ] **Phase 5:** Dear ImGui Backend, Docking, Offscreen Framebuffers & Editor Viewport (Days 41–48)
 - [ ] **Phase 6:** Generational ECS, Components & Asset Manager (Days 49–56)
 - [ ] **Phase 7:** KanVerse Studio Editor — Hierarchy, Inspector, Content Browser, Gizmos & Picking (Days 57–70)
@@ -225,11 +225,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `KanVerse_App/Shaders/Tonemap.metal`, `Renderer/Renderer/Renderer.mm`
   - **Concepts:** Compositing HDR scene radiance with the compute bloom texture (`(hdrColor * exposure) + (bloomColor * bloomIntensity)`) and mapping to SDR via the Narkowicz ACES Filmic curve.
   - **Milestone:** Connect `HDRFramebuffer` -> `BloomPass` -> `TonemapPipeline` -> Editor Viewport Texture!
-- [ ] **Day 45 — Dynamic Atmosphere & Time-of-Day System**
-  - **Files:** `World/Environment/AtmosphereSystem.hpp`, `World/Environment/AtmosphereSystem.cpp`
-  - **Concepts:** Presets (`Sunrise`, `Noon`, `Sunset`, `Dusk`, `Night`), continuous day/night cycle (`EnableDynamicCycle`), and `AutoFitShadowBounds`.
-  - **Milestone:** Implement `AtmosphereSystem`.
-- [ ] **Day 46 — Core Renderer (Swapchain Forward Pass & Hardware Instancing)**
+- [x] **Day 45 — Core Renderer (Swapchain Forward Pass & Hardware Instancing)**
   - **Files:** `Renderer/Renderer/Renderer.hpp`, `Renderer/Renderer/Renderer.mm` (Core Swapchain Pass)
   - **Concepts:** Allocating triple-buffered `GPUUniforms` and `InstanceBuffers`, implementing `BeginScene`, `SubmitInstanced`, and `EndScene` rendering directly to `MTKView`.
   - **Milestone:** Uncomment `Renderer::Init()` in `Application.mm`.
@@ -239,35 +235,35 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 5: Dear ImGui Backend, Docking, Offscreen Framebuffers & Editor Viewport (Days 41–48)
 *Goal: Render our 3D scene into an offscreen texture and display it inside a dockable Blender/Unreal-style Dear ImGui Editor window.*
 
-- [ ] **Day 47 — Dear ImGui & ImGuizmo Vendor Integration**
+- [ ] **Day 46 — Dear ImGui & ImGuizmo Vendor Integration**
   - **Files:** `Vendor/imgui/`, `Vendor/imguizmo/`
   - **Concepts:** Adding Dear ImGui (`docking` branch) with `imgui_impl_metal.mm` and `imgui_impl_osx.mm`, plus `ImGuizmo.h`/`.cpp` to the build target.
   - **Milestone:** Compile `Vendor/imgui` and `Vendor/imguizmo` with Objective-C++ enabled.
-- [ ] **Day 48 — `ImGuiLayer` Lifecycle & Metal Render Pass Encoding**
+- [ ] **Day 47 — `ImGuiLayer` Lifecycle & Metal Render Pass Encoding**
   - **Files:** `Renderer/UI/ImGuiLayer.hpp`, `Renderer/UI/ImGuiLayer.mm`
   - **Concepts:** Initializing `ImGui::CreateContext()`, enabling `ImGuiConfigFlags_DockingEnable` and `ImGuiConfigFlags_ViewportsEnable`, encoding `ImGui_ImplMetal_RenderDrawData` inside a dedicated UI render pass on the swapchain.
   - **Milestone:** Push `ImGuiLayer` as an Overlay (`PushOverlay`) and render `ImGui::ShowDemoWindow()` over your 3D view.
-- [ ] **Day 49 — Event Blocking & Input Routing Between ImGui and 3D Viewport**
+- [ ] **Day 48 — Event Blocking & Input Routing Between ImGui and 3D Viewport**
   - **Files:** `Renderer/UI/ImGuiLayer.mm`, `Platform/Window/NativeWindow.mm`
   - **Concepts:** Forwarding `NSEvent`s to `ImGui_ImplOSX_HandleEvent`, checking `io.WantCaptureMouse` and `io.WantCaptureKeyboard` so clicking UI buttons doesn't move the 3D camera.
   - **Milestone:** Verify typing in an ImGui text box or dragging a slider blocks underlying gameplay events when hovered outside the 3D viewport.
-- [ ] **Day 50 — Custom Studio Dark Theme, Fonts & Reusable UI Widgets**
+- [ ] **Day 49 — Custom Studio Dark Theme, Fonts & Reusable UI Widgets**
   - **Files:** `Renderer/UI/ImGuiTheme.hpp`, `Renderer/UI/ImGuiTheme.cpp`, `Renderer/UI/UIWidgets.hpp`
   - **Concepts:** Designing a sleek Blender/Unreal-inspired charcoal dark theme, loading crisp Retina `.ttf` fonts (Inter / JetBrains Mono), and creating `UI::DrawVec3Control` (with red/green/blue X/Y/Z reset buttons).
   - **Milestone:** Apply `ImGuiTheme::ApplyDarkTheme()` on startup.
-- [ ] **Day 51 — Master DockSpace & Main Menu Bar**
+- [ ] **Day 50 — Master DockSpace & Main Menu Bar**
   - **Files:** `Layers/EditorLayer.hpp`, `Layers/EditorLayer.mm` (Part 1)
   - **Concepts:** Setting up a fullscreen persistent `ImGui::DockSpaceOverViewport`, top menu bar (`File -> New/Open/Save Scene`, `View -> Panels`, `Build -> Lighting`), and layout persistence (`imgui.ini`).
   - **Milestone:** Create `EditorLayer` with a dockable workspace.
-- [ ] **Day 52 — Interactive 3D Editor Viewport Panel**
+- [ ] **Day 51 — Interactive 3D Editor Viewport Panel**
   - **Files:** `Layers/EditorLayer.mm` (Part 2)
   - **Concepts:** Rendering the 3D scene into an offscreen `Framebuffer`, passing `(ImTextureID)framebuffer->GetColorAttachment(0)` into `ImGui::Image()`, and dynamically calling `framebuffer->Resize(viewportSize.x, viewportSize.y)` when the ImGui panel is dragged/resized!
   - **Milestone:** Resize the docked 3D Viewport tab inside ImGui and watch the Metal render target resize smoothly at 120Hz.
-- [ ] **Day 53 — Phase 4 Milestone: Blender/Maya-Style `EditorCamera`**
+- [ ] **Day 52 — Phase 4 Milestone: Blender/Maya-Style `EditorCamera`**
   - **Files:** `Editor/Viewport/EditorCamera.hpp`, `Editor/Viewport/EditorCamera.cpp`
   - **Concepts:** Free-fly WASD + Right-Click look and Alt + Left/Middle/Right-Click Maya-style Orbit/Pan/Zoom camera exclusively for level editing when the Viewport panel is focused/hovered.
   - **Milestone:** Fly around your 3D scene inside the docked Viewport panel!
-- [ ] **Day 54 — World Settings & Post-Process Editor Panel**
+- [ ] **Day 53 — World Settings & Post-Process Editor Panel**
   - **Files:** `Editor/Panels/WorldSettingsPanel.hpp`, `Editor/Panels/WorldSettingsPanel.cpp`
   - **Concepts:** Dockable panel to switch `TimeOfDay` presets, scrub the Day/Night cycle slider, toggle `IBL` and `EnvironmentMode` (`CrispHDR`, `Irradiance`, `Procedural`), and tune `Bloom Threshold`, `SoftKnee`, `Bloom Intensity`, and `Camera Exposure` in real time.
   - **Milestone:** Scrub the sun across the sky and tune HDR bloom glow live from the `World Settings` panel!
@@ -277,35 +273,35 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 6: Generational ECS, Components & Asset Manager (Days 49–56)
 *Goal: Build the data-oriented ECS and centralized Asset Manager that power both the Editor and Runtime.*
 
-- [ ] **Day 55 — 64-Bit Generational Entity Handles**
+- [ ] **Day 54 — 64-Bit Generational Entity Handles**
   - **Files:** `Scene/EntityID.hpp`
   - **Concepts:** Bit-packing 32-bit slot index (`GetIndex`) and 32-bit generation counter (`GetGeneration`) into `uint64_t`.
   - **Milestone:** Implement `EntityID`, `NullEntity`, `GetIndex`, `GetGeneration`, and `CreateID`.
-- [ ] **Day 56 — Paged Sparse Set Container (Part 1: Allocation & Emplace)**
+- [ ] **Day 55 — Paged Sparse Set Container (Part 1: Allocation & Emplace)**
   - **Files:** `Scene/SparseSet.hpp` (Part 1)
   - **Concepts:** Paged Sparse Sets (`PageSize = 4096`) allocating `uint32_t*` pages on demand (`AssurePage`), $O(1)$ `EntityID -> Dense Index` mapping.
   - **Milestone:** Implement `ISparseSet`, `SparseSet` constructors, `AssurePage`, `Contains`, and `Emplace`.
-- [ ] **Day 57 — Paged Sparse Set Container (Part 2: Swap-and-Pop & Memory Guard)**
+- [ ] **Day 56 — Paged Sparse Set Container (Part 2: Swap-and-Pop & Memory Guard)**
   - **Files:** `Scene/SparseSet.hpp` (Part 2)
   - **Concepts:** $O(1)$ Swap-and-Pop removal in `Remove()` to keep `m_DenseEntities` and `m_DenseComponents` 100% contiguous, `UpdateMemoryTracking()`.
   - **Milestone:** Implement `Get`, `Remove`, `Clear`, and `UpdateMemoryTracking`.
-- [ ] **Day 58 — Generational Registry & Variadic Query Views**
+- [ ] **Day 57 — Generational Registry & Variadic Query Views**
   - **Files:** `Scene/Registry.hpp`
   - **Concepts:** Type-erased component pool map, slot recycling (`m_FreeList`), C++20 fold expressions to find the smallest pool (`FindSmallestPool`) in `Registry::View<Components...>`.
   - **Milestone:** Implement `Registry` and `GetView<...>()` queries.
-- [ ] **Day 59 — High-Level Entity Wrapper & Core ECS Components**
+- [ ] **Day 58 — High-Level Entity Wrapper & Core ECS Components**
   - **Files:** `Scene/Entity.hpp`, `Scene/Components.hpp`
   - **Concepts:** Facade `Entity` handle, `TagComponent`, `TransformComponent` (`T * Rz * Ry * Rx * S`), `MeshComponent`, `MaterialComponent`, `CameraComponent`, `DirectionalLightComponent`, `PointLightComponent`, `EnvironmentLightComponent`.
   - **Milestone:** Implement `Entity.hpp` and the rendering/transform components in `Components.hpp`.
-- [ ] **Day 60 — Scene Container & Instanced Batch Rendering**
+- [ ] **Day 59 — Scene Container & Instanced Batch Rendering**
   - **Files:** `Scene/Scene.hpp`, `Scene/Scene.mm` (Part 1: Rendering & Lifecycle)
   - **Concepts:** `CreateEntity`, `DestroyEntity`, grouping entities by `std::pair<Mesh*, Material*>` into `opaqueBatches` and `transparentBatches` inside `OnRenderRuntime` and `OnRenderEditor`.
   - **Milestone:** Render an entire `Scene` of ECS entities into the Editor Viewport!
-- [ ] **Day 61 — Global Asset Manager & Texture/Material Cache**
+- [ ] **Day 60 — Global Asset Manager & Texture/Material Cache**
   - **Files:** `Renderer/Asset/AssetManager.hpp`, `Renderer/Asset/AssetManager.cpp`
   - **Concepts:** Deduplicated registry for `Shader`, `Material`, `Mesh`, and `Texture2D` (`LoadTexture` with cache lookup), preventing redundant disk reads and VRAM allocations.
   - **Milestone:** Implement `AssetManager` and verify loading the same texture 50 times allocates only 1 `MTL::Texture`.
-- [ ] **Day 62 — PBR Material Factory & Standardized Entity Factory**
+- [ ] **Day 61 — PBR Material Factory & Standardized Entity Factory**
   - **Files:** `Factories/MaterialFactory.hpp`, `Factories/MaterialFactory.cpp`, `Factories/EntityFactory.hpp`, `Factories/EntityFactory.cpp`
   - **Concepts:** Auto-scanning PBR folders (`albedo.png`, `normal.png`, `roughness.png`, `metallic.png`, `ao.png`, `height.png`), one-line `EntityFactory::SpawnMesh`.
   - **Milestone:** Implement `MaterialFactory` and `EntityFactory`.
@@ -315,51 +311,51 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 7: KanVerse Studio Editor — Hierarchy, Inspector, Content Browser, Gizmos & Picking (Days 57–70)
 *Goal: Build the complete visual authoring suite so you can create, inspect, transform, and paint entities just like Blender or Unreal Engine.*
 
-- [ ] **Day 63 — Scene Hierarchy Panel (Entity Tree & Search)**
+- [ ] **Day 62 — Scene Hierarchy Panel (Entity Tree & Search)**
   - **Files:** `Editor/Panels/SceneHierarchyPanel.hpp`, `Editor/Panels/SceneHierarchyPanel.cpp` (Part 1)
   - **Concepts:** Iterating `Registry` entities, rendering `ImGui::TreeNodeEx` rows with selection highlighting, live search filter bar by `TagComponent`, and tracking `m_SelectedEntity`.
   - **Milestone:** View all live scene entities in the docked `Scene Hierarchy` panel and click to select them.
-- [ ] **Day 64 — Scene Hierarchy Context Menus (Create, Duplicate, Delete)**
+- [ ] **Day 63 — Scene Hierarchy Context Menus (Create, Duplicate, Delete)**
   - **Files:** `Editor/Panels/SceneHierarchyPanel.cpp` (Part 2)
   - **Concepts:** Right-click blank space (`ImGui::BeginPopupContextWindow`) to spawn primitives (`Empty Entity`, `Chamfer Box`, `Capsule`, `Point Light`, `Directional Light`, `Camera`), right-click entity (`BeginPopupContextItem`) to `Duplicate` (`Cmd+D`) or `Delete` (`Backspace`).
   - **Milestone:** Spawn and delete 3D objects in real-time using right-click context menus!
-- [ ] **Day 65 — Properties / Inspector Panel (Tag & Transform Editor)**
+- [ ] **Day 64 — Properties / Inspector Panel (Tag & Transform Editor)**
   - **Files:** `Editor/Panels/InspectorPanel.hpp`, `Editor/Panels/InspectorPanel.cpp` (Part 1)
   - **Concepts:** Displaying the selected entity's `TagComponent` text input, `Add Component` button popup, and `TransformComponent` (`Translation`, Euler `Rotation` in degrees, `Scale`) using `UI::DrawVec3Control`.
   - **Milestone:** Drag X/Y/Z sliders in the Inspector and watch the 3D object move/rotate/scale in the Viewport.
-- [ ] **Day 66 — Inspector Panel (Camera, Light & Environment Editors)**
+- [ ] **Day 65 — Inspector Panel (Camera, Light & Environment Editors)**
   - **Files:** `Editor/Panels/InspectorPanel.cpp` (Part 2)
   - **Concepts:** Component accordions (`DrawComponent<T>`) with a gear icon to remove components; color pickers (`ImGui::ColorEdit3`), intensity sliders, and radius/attenuation controls for `DirectionalLightComponent`, `PointLightComponent`, and `CameraComponent`.
   - **Milestone:** Adjust point light color and intensity live in the Inspector.
-- [ ] **Day 67 — Inspector Panel (Mesh & PBR Material Editor)**
+- [ ] **Day 66 — Inspector Panel (Mesh & PBR Material Editor)**
   - **Files:** `Editor/Panels/InspectorPanel.cpp` (Part 3), `Editor/Panels/MaterialEditorPanel.hpp`, `Editor/Panels/MaterialEditorPanel.cpp`
   - **Concepts:** Editing `MaterialComponent` properties (`BaseColor`, `EmissiveColor` HDR multiplier, `Roughness`, `Metallic`, `TilingFactor`), displaying 64x64 thumbnail previews of bound `Albedo`, `Normal`, `Roughness`, and `Metallic` maps.
   - **Milestone:** Tweak roughness/metallic sliders and emissive glow on any selected entity.
-- [ ] **Day 68 — Content Browser Panel (Directory Tree & Grid Thumbnails)**
+- [ ] **Day 67 — Content Browser Panel (Directory Tree & Grid Thumbnails)**
   - **Files:** `Editor/Panels/ContentBrowserPanel.hpp`, `Editor/Panels/ContentBrowserPanel.cpp` (Part 1)
   - **Concepts:** Navigating `KanVerse_App/Assets/` using `std::filesystem::directory_iterator`, breadcrumb navigation bar (`Assets > Textures > PBR > Wall`), Back/Forward buttons, and responsive grid layout (`ImGui::Columns`) with folder/file icons and texture thumbnails.
   - **Milestone:** Browse all folders, shaders, scenes, and PBR texture directories inside the docked `Content Browser`.
-- [ ] **Day 69 — Drag-and-Drop Asset Workflow (Content Browser -> Viewport & Inspector)**
+- [ ] **Day 68 — Drag-and-Drop Asset Workflow (Content Browser -> Viewport & Inspector)**
   - **Files:** `Editor/Panels/ContentBrowserPanel.cpp` (Part 2), `Editor/Panels/InspectorPanel.cpp`, `Layers/EditorLayer.mm`
   - **Concepts:** `ImGui::BeginDragDropSource` on PBR folders, textures, and `.kvscene` files in the Content Browser; `ImGui::BeginDragDropTarget` on Inspector texture slots and the 3D Viewport to drop materials directly onto meshes!
   - **Milestone:** Drag a PBR material folder from the Content Browser onto a 3D cube in the Viewport to skin it instantly.
-- [ ] **Day 70 — 3D Transform Gizmos (`ImGuizmo`: Translate, Rotate, Scale)**
+- [ ] **Day 69 — 3D Transform Gizmos (`ImGuizmo`: Translate, Rotate, Scale)**
   - **Files:** `Editor/Gizmos/GizmoController.hpp`, `Editor/Gizmos/GizmoController.cpp`
   - **Concepts:** Integrating `ImGuizmo::Manipulate` over the 3D Viewport rect, decomposing the manipulated $4 \times 4$ matrix back into `Translation`, `Rotation`, and `Scale`, hotkeys (`W` = Translate, `E` = Rotate, `R` = Scale, `Q` = Select), Local vs World space toggle, and grid snapping (`Cmd` held).
   - **Milestone:** Grab the 3D X/Y/Z arrows and rotation rings in the Viewport to move and rotate entities like Blender!
-- [ ] **Day 71 — GPU Mouse Picking & Entity Selection Outline**
+- [ ] **Day 70 — GPU Mouse Picking & Entity Selection Outline**
   - **Files:** `KanVerse_App/Shaders/MousePicking.metal`, `Editor/Viewport/ViewportPicker.hpp`, `Editor/Viewport/ViewportPicker.mm`
   - **Concepts:** Rendering entity IDs (`R32Uint` texture attachment or fast ray-OBB intersection) under the mouse cursor on Left-Click in the 3D Viewport so clicking any 3D mesh selects it in the Hierarchy and attaches the 3D Gizmo.
   - **Milestone:** Click any 3D object in the Viewport to select it and see its transform gizmo appear.
-- [ ] **Day 72 — In-Engine Console & Log Filter Panel**
+- [ ] **Day 71 — In-Engine Console & Log Filter Panel**
   - **Files:** `Editor/Panels/ConsolePanel.hpp`, `Editor/Panels/ConsolePanel.cpp`, `Core/Diagnostics/Log.cpp`
   - **Concepts:** Adding a 4th ring-buffer sink to `Log::Dispatch` that feeds `ConsolePanel`; rendering color-coded log messages (`Trace`, `Info`, `Warn`, `Error`) with severity filter checkboxes, `Clear` button, and auto-scroll.
   - **Milestone:** View all engine logs directly inside the docked `Console` panel at the bottom of KanVerse Studio.
-- [ ] **Day 73 — Real-Time Hardware Profiler & Memory Telemetry Panel**
+- [ ] **Day 72 — Real-Time Hardware Profiler & Memory Telemetry Panel**
   - **Files:** `Editor/Panels/ProfilerPanel.hpp`, `Editor/Panels/ProfilerPanel.cpp`
   - **Concepts:** Visualizing FPS, frame delta time graph (`ImGui::PlotLines`), Apple Silicon unified memory stats from `MemoryTracker::GetStats()` (`CurrentUsage`, `PeakUsage`, `AllocationCount`), and draw call / instance counts.
   - **Milestone:** Dock the `Profiler` panel and monitor real-time RAM/VRAM usage and frame pacing.
-- [ ] **Day 74 — Command Pattern Undo / Redo System (`Cmd+Z` / `Cmd+Shift+Z`)**
+- [ ] **Day 73 — Command Pattern Undo / Redo System (`Cmd+Z` / `Cmd+Shift+Z`)**
   - **Files:** `Editor/Commands/EditorCommand.hpp`, `Editor/Commands/UndoRedoStack.hpp`
   - **Concepts:** Recording `TransformCommand`, `PropertyEditCommand`, and `SpawnDeleteCommand` onto a bounded history stack when gizmo drags or Inspector edits finish (`ImGui::IsItemDeactivatedAfterEdit()`).
   - **Milestone:** Move an object with the 3D gizmo, press `Cmd+Z`, and watch it snap back to its previous position.
@@ -369,27 +365,27 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 8: Physics Engine, Colliders, PBD Solver & Visual Debug Renderer (Days 69–76)
 *Goal: Build the collision and soft-body physics engine and visualize wireframe colliders inside KanVerse Studio.*
 
-- [ ] **Day 75 — Axis-Aligned Bounding Boxes (AABB) & Raycasting**
+- [ ] **Day 74 — Axis-Aligned Bounding Boxes (AABB) & Raycasting**
   - **Files:** `Physics/BoundingBox.hpp`, `Physics/BoundingBox.cpp` (Part 1)
   - **Concepts:** `AABB` (`Min`, `Max`), `simd::clamp` for `ClosestPoint`, Slab Method for `IntersectsRay` (`tMin`, `tMax`, hit normals).
   - **Milestone:** Implement `Ray`, `RaycastHit`, and all `AABB` methods.
-- [ ] **Day 76 — Oriented Bounding Boxes (OBB) & 15-Axis SAT**
+- [ ] **Day 75 — Oriented Bounding Boxes (OBB) & 15-Axis SAT**
   - **Files:** `Physics/BoundingBox.cpp` (Part 2)
   - **Concepts:** `OBB` (`Center`, `HalfExtents`, `Axes[3]`), local-space ray transformation, 15-axis Separating Axis Theorem (SAT) intersection test.
   - **Milestone:** Implement `OBB::FromTransform`, `ClosestPoint`, `Contains`, `Intersects`, and `IntersectsRay`.
-- [ ] **Day 77 — Capsule & Cylinder Narrowphase Contact Generation**
+- [ ] **Day 76 — Capsule & Cylinder Narrowphase Contact Generation**
   - **Files:** `Physics/ColliderPrimitives.hpp`, `Physics/ColliderPrimitives.cpp`
   - **Concepts:** Swept-sphere `CapsuleCollider`, closest-point segment projection, iterative segment-to-OBB contact generation (`ContactManifold`), `CylinderCollider`.
   - **Milestone:** Implement `ContactManifold`, `CapsuleCollider`, and `CylinderCollider`.
-- [ ] **Day 78 — Position-Based Dynamics (PBD) Distance & Cluster Solver**
+- [ ] **Day 77 — Position-Based Dynamics (PBD) Distance & Cluster Solver**
   - **Files:** `Physics/PBDSolver.hpp`, `Physics/PBDSolver.cpp`
   - **Concepts:** `PBDParticle`, Gauss-Seidel `PBDDistanceConstraint` projection, volumetric shape-matching `PBDCluster` (`RestPositions`, `Stiffness`), floor collision resolution.
   - **Milestone:** Implement `PBDSolver`.
-- [ ] **Day 79 — Physics & Gameplay ECS Components + Inspector Integration**
+- [ ] **Day 78 — Physics & Gameplay ECS Components + Inspector Integration**
   - **Files:** `Scene/Components.hpp`, `Editor/Panels/InspectorPanel.cpp`
   - **Concepts:** Adding `ColliderComponent` (`Box`, `Capsule`, `Cylinder`), `CharacterControllerComponent`, `DebrisComponent`, `FracturableComponent`, `DoorComponent`, and `AIControllerComponent` to `Components.hpp` and exposing their fields in `InspectorPanel`.
   - **Milestone:** Add and configure a `ColliderComponent` or `FracturableComponent` on any entity using the Inspector!
-- [ ] **Day 80 — Editor Wireframe Collider & Light Radius Visualizer**
+- [ ] **Day 79 — Editor Wireframe Collider & Light Radius Visualizer**
   - **Files:** `Renderer/Renderer/Renderer.mm`, `Layers/EditorLayer.mm`
   - **Concepts:** Using `PipelineSpecification::Wireframe = true` to draw green wireframe boxes/capsules around entities with `ColliderComponent` and yellow wireframe spheres for `PointLightComponent` radii when `Show Colliders` is toggled in the Viewport toolbar.
   - **Milestone:** Toggle `Show Colliders` in the Editor and visually align your collision bounds with your meshes!
@@ -399,19 +395,19 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 9: Scene Serialization, Prefabs, Undo/Redo & Play-In-Editor (PIE) State Machine (Days 83–90)
 *Goal: Save/load levels to disk (`.kvscene`) and implement the Play / Pause / Stop toolbar so you can playtest your game directly inside the Editor!*
 
-- [ ] **Day 81 — Scene Serializer (`yaml-cpp` / JSON Entity & Component Writer)**
+- [ ] **Day 80 — Scene Serializer (`yaml-cpp` / JSON Entity & Component Writer)**
   - **Files:** `Core/Serialization/SceneSerializer.hpp`, `Core/Serialization/SceneSerializer.cpp` (Part 1)
   - **Concepts:** Iterating `Registry` entities and serializing `EntityID`, `TagComponent`, `TransformComponent`, `MeshComponent`, `MaterialComponent`, lights, colliders, doors, and AI settings to human-readable `.kvscene` files.
   - **Milestone:** Press `Cmd+S` in the Editor to save your current scene to `Assets/Scenes/Level1.kvscene`.
-- [ ] **Day 82 — Scene Deserializer & Drag-and-Drop Scene Loading**
+- [ ] **Day 81 — Scene Deserializer & Drag-and-Drop Scene Loading**
   - **Files:** `Core/Serialization/SceneSerializer.cpp` (Part 2), `World/SceneManager.hpp`, `World/SceneManager.cpp`
   - **Concepts:** Parsing `.kvscene` files, reconstructing entities, re-binding cached materials/meshes via `AssetManager`, and double-clicking `.kvscene` files in the Content Browser to load them.
   - **Milestone:** Implement `SceneSerializer::Deserialize` and `SceneManager`.
-- [ ] **Day 83 — Deep Scene Cloning (`Scene::Copy`) for Safe Play-In-Editor**
+- [ ] **Day 82 — Deep Scene Cloning (`Scene::Copy`) for Safe Play-In-Editor**
   - **Files:** `Scene/Scene.mm`
   - **Concepts:** Copying all entities and component pools from `m_EditorScene` into a transient `m_RuntimeScene` so when the player shatters walls, opens doors, or defeats enemies during Play mode, stopping the game restores the untouched `m_EditorScene`!
   - **Milestone:** Implement `Scene::Copy(const std::shared_ptr<Scene>& source)`.
-- [ ] **Day 84 — Play / Simulate / Pause / Stop Viewport Toolbar (PIE State Machine)**
+- [ ] **Day 83 — Play / Simulate / Pause / Stop Viewport Toolbar (PIE State Machine)**
   - **Files:** `Layers/EditorLayer.hpp`, `Layers/EditorLayer.mm`
   - **Concepts:** `SceneState` enum (`Edit`, `Play`, `Simulate`, `Pause`):
     - **Edit Mode:** Uses `EditorCamera`, renders gizmos, physics paused.
@@ -424,6 +420,10 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 10: Procedural Architectural Builders & In-Editor Level Design Tools (Days 87–96)
 *Goal: Build parametric architectural generators and expose them in an interactive Level Builder Panel inside KanVerse Studio.*
 
+- [ ] **Day 84 — Dynamic Atmosphere & Time-of-Day System**
+  - **Files:** `World/Environment/AtmosphereSystem.hpp`, `World/Environment/AtmosphereSystem.cpp`
+  - **Concepts:** Presets (`Sunrise`, `Noon`, `Sunset`, `Dusk`, `Night`), continuous day/night cycle (`EnableDynamicCycle`), and `AutoFitShadowBounds`.
+  - **Milestone:** Implement `AtmosphereSystem`.
 - [ ] **Day 85 — Ground, Floor & Flat/Pitched Roof Builders**
   - **Files:** `World/Builders/GroundBuilder.hpp`/`.cpp`, `World/Builders/FloorBuilder.hpp`/`.cpp`, `World/Builders/RoofBuilder.hpp`/`.cpp`
   - **Concepts:** World-scale UV tiling (`tilingFactor = scale`), flat slabs vs pitched roof trigonometry (`cos(PitchAngle)`, `tan(PitchAngle)`).
