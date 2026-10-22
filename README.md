@@ -84,7 +84,7 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 2: Platform Events, Input Polling & Cocoa/Metal Windowing (Days 13–23)
 *Goal: Establish OS communication, keyboard/mouse/gamepad input, and a live 120Hz Retina `MTKView` window.*
 
-- [ ] **Day 13 — Base Event Hierarchy & Type-Safe Dispatcher**
+- [x] **Day 13 — Base Event Hierarchy & Type-Safe Dispatcher**
   - **Files:** `Platform/Events/Event.hpp`
   - **Concepts:** Polymorphic events, bitflag categories (`1 << 0`), token pasting (`#type`) in `EVENT_CLASS_TYPE`, template dispatch (`EventDispatcher::Dispatch<T>`).
   - **Milestone:** Implement `EventType`, `EventCategory`, `Event`, and `EventDispatcher`.
