@@ -74,7 +74,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Audio/AudioSystem.hpp`, `Audio/AudioSystem.mm`
   - **Concepts:** Objective-C++ `@autoreleasepool`, `AVAudioPlayer`, rapid re-triggering (`player.currentTime = 0`), ARC memory management with STL maps.
   - **Milestone:** Implement `AudioSystem::Init`, `LoadSound`, `Play`, and `Shutdown`.
-- [ ] **Day 12 — Phase 1 Review & Unit Testing**
+- [-] **Day 12 — Phase 1 Review & Unit Testing**
   - **Files:** Test harness in `Source/EntryPoint.mm`
   - **Concepts:** Memory leak verification, log file inspection, math edge-case validation.
   - **Milestone:** Exercise all Phase 1 systems in a test run and verify `0 bytes leaked` at exit.

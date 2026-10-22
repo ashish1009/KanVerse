@@ -1,0 +1,1061 @@
+// FILE: KanVerse_Engine/KanVerse_Headers.h
+/*!
+ * @file KanVerse_Headers.h
+ * @brief KanVerse_Engine mendatory header files
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+// To remove documentation warning
+#pragma clang diagnostic ignored "-Wdocumentation"
+#pragma clang diagnostic ignored "-Wformat-security"
+// Core/Diagnostics
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Diagnostics/Log.hpp"
+// Core
+#include "Core/Memory/MemoryTracking.hpp"
+#include "Core/Time/TimeStep.hpp"
+// FILE: KanVerse_Engine/PrefixHeader.pch
+/*!
+ * @file PrefixHeader.pch
+ * @brief KanVerse_App prefix header for precompiled files
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+// To remove documentation warning
+#pragma clang diagnostic ignored "-Wdocumentation"
+#pragma clang diagnostic ignored "-Wformat-security"
+// C++ Files
+#include <iostream>
+// Core/Diagnostics
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+// Core/Memory
+#include "Core/Memory/MemoryTracking.hpp"
+// FILE: KanVerse_Engine/Audio/AudioSystem.hpp
+/*!
+ * @file AudioSystem.hpp
+ * @brief CoreAudio sound effect manager for KanVerse.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <memory>
+namespace KanVerse {
+  /*!
+   * @enum SoundEffect
+   * @brief Enumerated identifiers for game audio cues.
+   */
+  enum class SoundEffect : uint8_t {
+    Jump = 0,
+    DoubleJump,
+    Slide,
+    GroundSlam,
+    Shatter,
+    PrismCollect
+    /* Add More */
+  };
+  /*!
+   * @class AudioSystem
+   * @brief Manages loading and immediate playback of sound effects.
+   */
+  class AudioSystem {
+  public:
+    /*!
+     * @brief Initializes the audio subsystem.
+     */
+    static void Init();
+    /*!
+     * @brief Cleans up cached audio players.
+     */
+    static void Shutdown();
+    /*!
+     * @brief Loads a sound effect from file path and binds it to an effect ID.
+     */
+    static void LoadSound(SoundEffect effect, std::string_view filepath);
+    /*!
+     * @brief Triggers playback of a loaded sound effect.
+     */
+    static void Play(SoundEffect effect);
+  };
+} // namespace KanVerse
+// FILE: KanVerse_Engine/Audio/AudioSystem.mm
+/*!
+ * @file AudioSystem.mm
+ * @brief Implementation of AudioSystem using AVFoundation for low-latency playback.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Audio/AudioSystem.hpp"
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#import <AVFoundation/AVFoundation.h>
+#import <Foundation/Foundation.h>
+namespace KanVerse {
+  static std::unordered_map<SoundEffect, AVAudioPlayer*> s_AudioPlayers;
+  void AudioSystem::Init() {
+    KV_CORE_INFO("AudioSystem initialized.");
+  }
+  void AudioSystem::Shutdown() {
+    for (auto& [effect, player] : s_AudioPlayers) {
+      if (player) {
+        [player stop];
+        // Note: Removed [player release] because ARC manages memory automatically here
+      }
+    }
+    s_AudioPlayers.clear();
+    KV_CORE_INFO("AudioSystem shutdown complete.");
+  }
+  void AudioSystem::LoadSound(SoundEffect effect, std::string_view filepath) {
+    @autoreleasepool {
+      NSString* pathStr = [NSString stringWithUTF8String:filepath.data()];
+      NSURL* url = [NSURL fileURLWithPath:pathStr];
+      NSError* error = nil;
+      AVAudioPlayer* player = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:&error];
+      if (error || !player) {
+        KV_CORE_WARN("AudioSystem: Failed to load sound file from '{}'", filepath);
+        return;
+      }
+      [player prepareToPlay];
+      s_AudioPlayers[effect] = player;
+      KV_CORE_INFO("AudioSystem: Loaded sound successfully: '{}'", filepath);
+    }
+  }
+  void AudioSystem::Play(SoundEffect effect) {
+    auto it = s_AudioPlayers.find(effect);
+    if (it != s_AudioPlayers.end() && it->second) {
+      AVAudioPlayer* player = it->second;
+      if (player.isPlaying) {
+        player.currentTime = 0; // Rewind for rapid triggers
+      }
+      [player play];
+    }
+  }
+} // namespace KanVerse
+// FILE: KanVerse_Engine/Core/Application/Application.hpp
+
+// FILE: KanVerse_Engine/Core/Application/Application.mm
+
+// FILE: KanVerse_Engine/Core/Diagnostics/Assert.hpp
+/*!
+ * @file Assert.hpp
+ * @brief Branch-predicted assert macros with diagnostic output.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <iostream>
+#if defined(DEBUG) || !defined(NDEBUG)
+  #define KV_ENABLE_ASSERTS 1
+#else
+  #define KV_ENABLE_ASSERTS 0
+#endif
+#if KV_ENABLE_ASSERTS
+  #if defined(__has_builtin) && __has_builtin(__builtin_trap)
+    #define KV_BREAK() __builtin_trap()
+  #else
+    #include <csignal>
+    #define KV_BREAK() raise(SIGTRAP)
+  #endif
+  #define KV_CORE_ASSERT(condition, msg) \
+  do { \
+    if (__builtin_expect(!(condition), 0)) { \
+      std::cerr << "\033[31m[KanVerse Assert] Assertion Failed: (" #condition ") at " \
+                << __FILE__ << ":" << __LINE__ << " - " << msg << "\033[0m" << std::endl; \
+      KV_BREAK(); \
+    } \
+  } while (false)
+  #define KV_ASSERT(condition, msg) KV_CORE_ASSERT(condition, msg)
+#else
+  #define KV_CORE_ASSERT(condition, msg) ((void)0)
+  #define KV_ASSERT(condition, msg)      ((void)0)
+  #define KV_BREAK()                     ((void)0)
+#endif
+// FILE: KanVerse_Engine/Core/Diagnostics/Log.cpp
+/*!
+ * @file Log.cpp
+ * @brief Dispatch implementation routing formatted strings to stdout, local files, and Apple Unified Logging.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Core/Diagnostics/Log.hpp"
+#include <iostream>
+#include <fstream>
+#include <os/log.h>
+namespace KanVerse {
+  static os_log_t      s_CoreLogger   = nullptr;
+  static os_log_t      s_ClientLogger = nullptr;
+  static std::ofstream s_FileLogger;
+  void Log::Init() {
+    if (!s_CoreLogger) {
+      s_CoreLogger = os_log_create("com.kanverse.engine", "Core");
+    }
+    if (!s_ClientLogger) {
+      s_ClientLogger = os_log_create("com.kanverse.app", "Client");
+    }
+    // Open file sink in truncation mode to ensure a clean log per application run
+    if (!s_FileLogger.is_open()) {
+      s_FileLogger.open("KanVerse_Runtime.log", std::ios::out | std::ios::trunc);
+    }
+  }
+  void Log::Shutdown() {
+    if (s_FileLogger.is_open()) {
+      s_FileLogger.close();
+    }
+  }
+  void Log::Dispatch(bool isCore, LogLevel level, const std::string& message) {
+    os_log_t log = isCore ? s_CoreLogger : s_ClientLogger;
+    // Auto-initialize if macros are called before Application::Init()
+    if (!log || !s_FileLogger.is_open()) {
+      Init();
+      log = isCore ? s_CoreLogger : s_ClientLogger;
+    }
+    os_log_type_t osType = OS_LOG_TYPE_DEFAULT;
+    const char* colorCode = "\033[0m";
+    const char* levelStr  = "[INFO]";
+    // Map internal log levels to ANSI terminal colors and Apple OS log types
+    switch (level) {
+      case LogLevel::Trace:
+        osType    = OS_LOG_TYPE_DEBUG;
+        colorCode = "\033[90m"; // Gray
+        levelStr  = "[TRACE]";
+        break;
+      case LogLevel::Info:
+        osType    = OS_LOG_TYPE_INFO;
+        colorCode = "\033[32m"; // Green
+        levelStr  = "[INFO]";
+        break;
+      case LogLevel::Warn:
+        osType    = OS_LOG_TYPE_DEFAULT;
+        colorCode = "\033[33m"; // Yellow
+        levelStr  = "[WARN]";
+        break;
+      case LogLevel::Error:
+        osType    = OS_LOG_TYPE_ERROR;
+        colorCode = "\033[31m"; // Red
+        levelStr  = "[ERROR]";
+        break;
+      case LogLevel::Fatal:
+        osType    = OS_LOG_TYPE_FAULT;
+        colorCode = "\033[35m"; // Magenta
+        levelStr  = "[FATAL]";
+        break;
+    }
+    const char* tag = isCore ? "KANVERSE_CORE" : "KANVERSE_APP";
+    // 1. Synchronous Terminal Sink (with ANSI color codes)
+    std::cout << colorCode << levelStr << " [" << tag << "] " << message << "\033[0m" << std::endl;
+    // 2. Persistent File Sink (stripped of ANSI codes for readability)
+    if (s_FileLogger.is_open()) {
+      s_FileLogger << levelStr << " [" << tag << "] " << message << "\n";
+      s_FileLogger.flush(); // Force write to disk immediately to capture crash data
+    }
+#if 0 // Be default we see logs on console
+    // 3. Apple Unified Logging Sink (integrates with macOS Console.app)
+    os_log_with_type(log, osType, "%{public}s", message.c_str());
+#endif
+  }
+} // namespace KanVerse
+// FILE: KanVerse_Engine/Core/Diagnostics/Log.hpp
+/*!
+ * @file Log.hpp
+ * @brief Structured, zero-dependency logging interface utilizing C++23 std::format.
+ * @details Provides high-performance formatting and routes output to three simultaneous
+ *          sinks: the terminal (with ANSI colors), a local disk file (KanVerse_Runtime.log),
+ *          and Apple Unified Logging (os_log).
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+namespace KanVerse {
+  /*!
+   * @enum LogLevel
+   * @brief Granular severity levels for diagnostic filtering.
+   */
+  enum class LogLevel : uint8_t {
+    Trace,
+    Info,
+    Warn,
+    Error,
+    Fatal
+  };
+  /*!
+   * @class Log
+   * @brief Static gateway for engine and application logging.
+   */
+  class Log {
+  public:
+    /*!
+     * @brief Initializes Apple os_log subsystems and opens the local file sink.
+     */
+    static void Init();
+    /*!
+     * @brief Closes the file sink and finalizes logging operations.
+     */
+    static void Shutdown();
+    /*!
+     * @brief Formats and dispatches a message tagged for the Engine/Core subsystem.
+     * @tparam Args Variadic template arguments for std::format.
+     * @param level Severity of the log message.
+     * @param fmt Format string compliant with C++23 std::format.
+     * @param args Arguments to be formatted.
+     */
+    template <typename... Args>
+    static void CorePrint(LogLevel level, std::string_view fmt, Args&&... args) {
+      std::string message = std::vformat(fmt, std::make_format_args(args...));
+      Dispatch(true, level, message);
+    }
+    /*!
+     * @brief Formats and dispatches a message tagged for the Client/App subsystem.
+     * @tparam Args Variadic template arguments for std::format.
+     * @param level Severity of the log message.
+     * @param fmt Format string compliant with C++23 std::format.
+     * @param args Arguments to be formatted.
+     */
+    template <typename... Args>
+    static void ClientPrint(LogLevel level, std::string_view fmt, Args&&... args) {
+      std::string message = std::vformat(fmt, std::make_format_args(args...));
+      Dispatch(false, level, message);
+    }
+  private:
+    /*!
+     * @brief Routes the pre-formatted string to terminal, file, and Apple os_log sinks.
+     * @param isCore True if message originated from KanVerse_Engine, false for KanVerse_App.
+     * @param level Severity level dictating output color and OS log type.
+     * @param message The fully formatted string.
+     */
+    static void Dispatch(bool isCore, LogLevel level, const std::string& message);
+  };
+} // namespace KanVerse
+// ==============================================================================
+// Engine Internal Log Macros (Strips subsystem routing overhead)
+// ==============================================================================
+#define KV_CORE_TRACE(...) ::KanVerse::Log::CorePrint(::KanVerse::LogLevel::Trace, __VA_ARGS__)
+#define KV_CORE_INFO(...)  ::KanVerse::Log::CorePrint(::KanVerse::LogLevel::Info,  __VA_ARGS__)
+#define KV_CORE_WARN(...)  ::KanVerse::Log::CorePrint(::KanVerse::LogLevel::Warn,  __VA_ARGS__)
+#define KV_CORE_ERROR(...) ::KanVerse::Log::CorePrint(::KanVerse::LogLevel::Error, __VA_ARGS__)
+#define KV_CORE_FATAL(...) ::KanVerse::Log::CorePrint(::KanVerse::LogLevel::Fatal, __VA_ARGS__)
+// ==============================================================================
+// Client Application Log Macros
+// ==============================================================================
+#define KV_TRACE(...)      ::KanVerse::Log::ClientPrint(::KanVerse::LogLevel::Trace, __VA_ARGS__)
+#define KV_INFO(...)       ::KanVerse::Log::ClientPrint(::KanVerse::LogLevel::Info,  __VA_ARGS__)
+#define KV_WARN(...)       ::KanVerse::Log::ClientPrint(::KanVerse::LogLevel::Warn,  __VA_ARGS__)
+#define KV_ERROR(...)      ::KanVerse::Log::ClientPrint(::KanVerse::LogLevel::Error, __VA_ARGS__)
+#define KV_FATAL(...)      ::KanVerse::Log::ClientPrint(::KanVerse::LogLevel::Fatal, __VA_ARGS__)
+// FILE: KanVerse_Engine/Core/Layers/Layer.hpp
+
+// FILE: KanVerse_Engine/Core/Layers/LayerStack.cpp
+
+// FILE: KanVerse_Engine/Core/Layers/LayerStack.hpp
+
+// FILE: KanVerse_Engine/Core/Math/Math.hpp
+/*!
+ * @file Math.hpp
+ * @brief High-performance SIMD linear algebra types and transformations for KanVerse.
+ * @details Wraps Apple's <simd/simd.h> with zero-overhead abstractions configured
+ *          specifically for Metal's right-handed coordinate system and [0, 1] clip depth.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <simd/simd.h>
+#include <cmath>
+namespace KanVerse::Math {
+  /// @brief 2-component floating-point vector backed by Apple SIMD.
+  using Vec2 = simd::float2;
+  /// @brief 3-component floating-point vector backed by Apple SIMD.
+  using Vec3 = simd::float3;
+  /// @brief 4-component floating-point vector backed by Apple SIMD.
+  using Vec4 = simd::float4;
+  /// @brief 4x4 column-major floating-point matrix backed by Apple SIMD.
+  using Mat4 = simd::float4x4;
+  /*!
+   * @brief Constructs an explicit 2-component floating-point SIMD vector.
+   * @param x Horizontal component.
+   * @param y Vertical component.
+   * @return Initialized 2D vector.
+   */
+  [[nodiscard]] constexpr Vec2 MakeVec2(float x, float y) noexcept {
+    return simd_make_float2(x, y);
+  }
+  /*!
+   * @brief Constructs an explicit 3-component floating-point SIMD vector.
+   * @param x X coordinate.
+   * @param y Y coordinate.
+   * @param z Z coordinate.
+   * @return Initialized 3D vector.
+   */
+  [[nodiscard]] constexpr Vec3 MakeVec3(float x, float y, float z) noexcept {
+    return simd_make_float3(x, y, z);
+  }
+  /*!
+   * @brief Constructs an explicit 4-component floating-point SIMD vector.
+   * @param x X coordinate.
+   * @param y Y coordinate.
+   * @param z Z coordinate.
+   * @param w W component.
+   * @return Initialized 4D vector.
+   */
+  [[nodiscard]] constexpr Vec4 MakeVec4(float x, float y, float z, float w) noexcept {
+    return simd_make_float4(x, y, z, w);
+  }
+  /*!
+   * @brief Returns a 4x4 identity matrix.
+   * @return Identity matrix.
+   */
+  [[nodiscard]] inline Mat4 Identity() noexcept {
+    return matrix_identity_float4x4;
+  }
+  /*!
+   * @brief Computes a perspective projection matrix targeting Metal depth space [0, 1].
+   * @param fovRadians Vertical field of view in radians.
+   * @param aspect Viewport aspect ratio (width / height).
+   * @param nearZ Distance to the near clipping plane.
+   * @param farZ Distance to the far clipping plane.
+   * @return 4x4 perspective projection matrix.
+   */
+  [[nodiscard]] inline Mat4 Perspective(float fovRadians, float aspect, float nearZ, float farZ) noexcept {
+    const float ys = 1.0f / std::tan(fovRadians * 0.5f);
+    const float xs = ys / aspect;
+    const float zs = farZ / (nearZ - farZ);
+    Mat4 m = {};
+    m.columns[0] = MakeVec4(xs,   0.0f, 0.0f,          0.0f);
+    m.columns[1] = MakeVec4(0.0f, ys,   0.0f,          0.0f);
+    m.columns[2] = MakeVec4(0.0f, 0.0f, zs,           -1.0f);
+    m.columns[3] = MakeVec4(0.0f, 0.0f, zs * nearZ,    0.0f);
+    return m;
+  }
+  /*!
+   * @brief Computes an orthographic projection matrix targeting Metal depth space [0, 1].
+   * @param left Minimum horizontal boundary.
+   * @param right Maximum horizontal boundary.
+   * @param bottom Minimum vertical boundary.
+   * @param top Maximum vertical boundary.
+   * @param nearZ Distance to the near clipping plane.
+   * @param farZ Distance to the far clipping plane.
+   * @return 4x4 column-major orthographic projection matrix.
+   */
+  [[nodiscard]] inline Mat4 Ortho(float left, float right, float bottom, float top, float nearZ, float farZ) noexcept {
+    const float rml = right - left;
+    const float tmb = top - bottom;
+    const float fmn = farZ - nearZ;
+    Mat4 m = {};
+    m.columns[0] = MakeVec4(2.0f / rml,           0.0f,                0.0f,          0.0f);
+    m.columns[1] = MakeVec4(0.0f,                 2.0f / tmb,          0.0f,          0.0f);
+    m.columns[2] = MakeVec4(0.0f,                 0.0f,               -1.0f / fmn,    0.0f);
+    m.columns[3] = MakeVec4(-(right + left) / rml, -(top + bottom) / tmb, -nearZ / fmn,  1.0f);
+    return m;
+  }
+  /*!
+   * @brief Computes a right-handed LookAt view matrix.
+   * @param eye Camera world position.
+   * @param target Target point the camera looks toward.
+   * @param up Normalized up direction vector.
+   * @return 4x4 view matrix.
+   */
+  [[nodiscard]] inline Mat4 LookAt(Vec3 eye, Vec3 target, Vec3 up) noexcept {
+    const Vec3 zAxis = simd::normalize(eye - target);
+    const Vec3 xAxis = simd::normalize(simd::cross(up, zAxis));
+    const Vec3 yAxis = simd::cross(zAxis, xAxis);
+    Mat4 m = matrix_identity_float4x4;
+    m.columns[0] = MakeVec4(xAxis.x, yAxis.x, zAxis.x, 0.0f);
+    m.columns[1] = MakeVec4(xAxis.y, yAxis.y, zAxis.y, 0.0f);
+    m.columns[2] = MakeVec4(xAxis.z, yAxis.z, zAxis.z, 0.0f);
+    m.columns[3] = MakeVec4(-simd::dot(xAxis, eye), -simd::dot(yAxis, eye), -simd::dot(zAxis, eye), 1.0f);
+    return m;
+  }
+  /*!
+   * @brief Computes a 4x4 rotation matrix around an arbitrary unit axis.
+   * @param angleRadians Angle of rotation in radians.
+   * @param axis Axis about which rotation occurs.
+   * @return 4x4 rotation matrix.
+   */
+  [[nodiscard]] inline Mat4 Rotate(float angleRadians, Vec3 axis) noexcept {
+    const Vec3 a = simd::normalize(axis);
+    const float cosA = std::cos(angleRadians);
+    const float sinA = std::sin(angleRadians);
+    const float k = 1.0f - cosA;
+    Mat4 m = {};
+    m.columns[0] = MakeVec4(a.x * a.x * k + cosA,       a.x * a.y * k + a.z * sinA, a.x * a.z * k - a.y * sinA, 0.0f);
+    m.columns[1] = MakeVec4(a.x * a.y * k - a.z * sinA, a.y * a.y * k + cosA,       a.y * a.z * k + a.x * sinA, 0.0f);
+    m.columns[2] = MakeVec4(a.x * a.z * k + a.y * sinA, a.y * a.z * k - a.x * sinA, a.z * a.z * k + cosA,       0.0f);
+    m.columns[3] = MakeVec4(0.0f,                       0.0f,                       0.0f,                       1.0f);
+    return m;
+  }
+  /*!
+   * @brief Multiplies two 4x4 matrices using SIMD vector instructions.
+   * @param lhs Left-hand matrix operand.
+   * @param rhs Right-hand matrix operand.
+   * @return Resulting 4x4 product matrix.
+   */
+  [[nodiscard]] inline Mat4 Multiply(Mat4 lhs, Mat4 rhs) noexcept {
+    return matrix_multiply(lhs, rhs);
+  }
+  /*!
+   * @brief Computes the inverse of a 4x4 matrix using SIMD acceleration.
+   * @param matrix The source 4x4 transformation matrix.
+   * @return Inverted 4x4 matrix.
+   */
+  [[nodiscard]] inline Mat4 Inverse(const Mat4& matrix) noexcept {
+    return simd_inverse(matrix);
+  }
+  /*!
+   * @brief Computes the transpose of a 4x4 matrix using SIMD acceleration.
+   * @param matrix The source 4x4 transformation matrix.
+   * @return Transposed 4x4 matrix.
+   */
+  [[nodiscard]] inline Mat4 Transpose(const Mat4& matrix) noexcept {
+    return simd_transpose(matrix);
+  }
+} // namespace KanVerse::Math
+// FILE: KanVerse_Engine/Core/Memory/MemoryTracking.hpp
+/*!
+ * @file MemoryTracking.hpp
+ * @brief Thread-safe memory allocation metrics and automated RAII allocation guards.
+ * @details Provides hardware-level tracking for Apple Silicon unified memory usage,
+ *          capturing allocation volume, peak heap watermarks, and scoped RAII wrappers.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <atomic>
+#include <cstddef>
+#include <cstdint>
+namespace KanVerse {
+  /*!
+   * @struct MemoryStats
+   * @brief Snapshot of active, peak, and historical engine allocation tallies.
+   */
+  struct MemoryStats {
+    size_t   TotalAllocated{0};  /*!< Cumulative bytes allocated across the entire process lifetime. */
+    size_t   TotalFreed{0};      /*!< Cumulative bytes released across the entire process lifetime. */
+    size_t   CurrentUsage{0};    /*!< Current active byte allocation residency in memory. */
+    size_t   PeakUsage{0};       /*!< High-water mark indicating maximum concurrent bytes allocated. */
+    uint64_t AllocationCount{0}; /*!< Total number of distinct allocation events recorded. */
+  };
+  /*!
+   * @class MemoryTracker
+   * @brief Lock-free atomic tracker recording allocations, deallocations, and peak residency.
+   */
+  class MemoryTracker {
+  public:
+    /*!
+     * @brief Atomically increments active memory usage and evaluates peak consumption.
+     * @param size Number of bytes allocated by the caller.
+     */
+    static void RecordAllocation(size_t size) noexcept {
+      s_TotalAllocated.fetch_add(size, std::memory_order_relaxed);
+      s_AllocationCount.fetch_add(1, std::memory_order_relaxed);
+      size_t current = s_CurrentUsage.fetch_add(size, std::memory_order_relaxed) + size;
+      size_t peak = s_PeakUsage.load(std::memory_order_relaxed);
+      while (current > peak && !s_PeakUsage.compare_exchange_weak(peak, current, std::memory_order_relaxed)) {
+        // Loop until peak reflects the highest observed usage across all worker threads
+      }
+    }
+    /*!
+     * @brief Atomically decrements active memory usage and tallies freed memory.
+     * @param size Number of bytes deallocated by the caller.
+     */
+    static void RecordDeallocation(size_t size) noexcept {
+      s_TotalFreed.fetch_add(size, std::memory_order_relaxed);
+      s_CurrentUsage.fetch_sub(size, std::memory_order_relaxed);
+    }
+    /*!
+     * @brief Queries an atomic snapshot of current engine memory statistics.
+     * @return MemoryStats struct populated with thread-safe atomic loads.
+     */
+    [[nodiscard]] static MemoryStats GetStats() noexcept {
+      return MemoryStats{
+        .TotalAllocated  = s_TotalAllocated.load(std::memory_order_relaxed),
+        .TotalFreed      = s_TotalFreed.load(std::memory_order_relaxed),
+        .CurrentUsage    = s_CurrentUsage.load(std::memory_order_relaxed),
+        .PeakUsage       = s_PeakUsage.load(std::memory_order_relaxed),
+        .AllocationCount = s_AllocationCount.load(std::memory_order_relaxed)
+      };
+    }
+  private:
+    inline static std::atomic<size_t>   s_TotalAllocated{0};  /*!< Process lifetime allocation counter. */
+    inline static std::atomic<size_t>   s_TotalFreed{0};      /*!< Process lifetime deallocation counter. */
+    inline static std::atomic<size_t>   s_CurrentUsage{0};    /*!< Instantaneous active heap residency. */
+    inline static std::atomic<size_t>   s_PeakUsage{0};       /*!< Peak high-water mark residency. */
+    inline static std::atomic<uint64_t> s_AllocationCount{0}; /*!< Cumulative allocation operation calls. */
+  };
+  /*!
+   * @class ScopedMemoryAllocation
+   * @brief RAII scoped guard that registers byte allocations on construction and releases them on destruction.
+   * @note Designed to be embedded as a private member in GPU resource wrappers to automate tracking.
+   */
+  class ScopedMemoryAllocation {
+  public:
+    /*!
+     * @brief Default constructor initializing an empty zero-byte allocation guard.
+     */
+    ScopedMemoryAllocation() = default;
+    /*!
+     * @brief Constructs an allocation guard and registers bytes with the global tracker.
+     * @param size Number of bytes being tracked.
+     */
+    explicit ScopedMemoryAllocation(size_t size) : m_Size(size) {
+      if (m_Size > 0) {
+        MemoryTracker::RecordAllocation(m_Size);
+      }
+    }
+    /*!
+     * @brief Destructor automatically releasing all registered bytes from the tracker.
+     */
+    ~ScopedMemoryAllocation() {
+      Release();
+    }
+    ScopedMemoryAllocation(const ScopedMemoryAllocation&) = delete;
+    ScopedMemoryAllocation& operator=(const ScopedMemoryAllocation&) = delete;
+    /*!
+     * @brief Move constructor transferring tracked byte ownership without double counting.
+     * @param other R-value reference to the source guard.
+     */
+    ScopedMemoryAllocation(ScopedMemoryAllocation&& other) noexcept
+    : m_Size(other.m_Size) {
+      other.m_Size = 0;
+    }
+    /*!
+     * @brief Move assignment operator transferring tracked byte ownership safely.
+     * @param other R-value reference to the source guard.
+     * @return Reference to this guard instance.
+     */
+    ScopedMemoryAllocation& operator=(ScopedMemoryAllocation&& other) noexcept {
+      if (this != &other) {
+        Release();
+        m_Size = other.m_Size;
+        other.m_Size = 0;
+      }
+      return *this;
+    }
+    /*!
+     * @brief Adjusts the tracked memory footprint, releasing previous bytes and recording new ones.
+     * @param newSize New footprint in bytes (default 0).
+     */
+    void Reset(size_t newSize = 0) {
+      Release();
+      m_Size = newSize;
+      if (m_Size > 0) {
+        MemoryTracker::RecordAllocation(m_Size);
+      }
+    }
+    /*!
+     * @brief Queries the total bytes registered by this scoped guard.
+     * @return Tracked byte footprint.
+     */
+    [[nodiscard]] size_t GetSize() const noexcept { return m_Size; }
+  private:
+    /*!
+     * @brief Internal helper releasing registered memory tallies back to MemoryTracker.
+     */
+    void Release() noexcept {
+      if (m_Size > 0) {
+        MemoryTracker::RecordDeallocation(m_Size);
+        m_Size = 0;
+      }
+    }
+    size_t m_Size{0}; /*!< Total bytes currently registered by this guard instance. */
+  };
+} // namespace KanVerse
+// FILE: KanVerse_Engine/Core/Time/Clock.cpp
+/*!
+ * @file Clock.cpp
+ * @brief Implementation of monotonic high-resolution frame timer.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Core/Time/Clock.hpp"
+namespace KanVerse {
+  Clock::Clock() noexcept
+  : m_StartTime(SteadyClock::now()),
+  m_LastFrameTime(m_StartTime) {}
+  void Clock::Reset() noexcept {
+    m_StartTime = SteadyClock::now();
+    m_LastFrameTime = m_StartTime;
+  }
+  TimeStep Clock::Tick() noexcept {
+    const auto current = SteadyClock::now();
+    const std::chrono::duration<float> delta = current - m_LastFrameTime;
+    m_LastFrameTime = current;
+    return TimeStep(delta.count());
+  }
+  float Clock::GetElapsedSeconds() const noexcept {
+    const auto current = SteadyClock::now();
+    const std::chrono::duration<float> elapsed = current - m_StartTime;
+    return elapsed.count();
+  }
+} // namespace KanVerse
+// FILE: KanVerse_Engine/Core/Time/Clock.hpp
+/*!
+ * @file Clock.hpp
+ * @brief Monotonic high-resolution frame timer interface.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Time/TimeStep.hpp"
+#include <chrono>
+namespace KanVerse {
+  /*!
+   * @class Clock
+   * @brief Monotonic steady-clock pacing engine loops and computing frame deltas.
+   */
+  class Clock {
+  public:
+    using SteadyClock = std::chrono::steady_clock;
+    using TimePoint   = SteadyClock::time_point;
+    /*!
+     * @brief Initializes clock timestamps to current steady time point.
+     */
+    Clock() noexcept;
+    /*!
+     * @brief Resets engine startup timestamp and last frame reference to now.
+     */
+    void Reset() noexcept;
+    /*!
+     * @brief Samples the timer, computes elapsed frame delta, and advances baseline.
+     * @return TimeStep holding discrete delta duration since previous Tick().
+     */
+    TimeStep Tick() noexcept;
+    /*!
+     * @brief Queries total elapsed wall time since clock instantiation or Reset().
+     * @return Cumulative elapsed seconds.
+     */
+    [[nodiscard]] float GetElapsedSeconds() const noexcept;
+  private:
+    TimePoint m_StartTime;
+    TimePoint m_LastFrameTime;
+  };
+} // namespace KanVerse
+// FILE: KanVerse_Engine/Core/Time/TimeStep.hpp
+/*!
+ * @file TimeStep.hpp
+ * @brief Strongly typed frame delta time representation for KanVerse.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+namespace KanVerse {
+  /*!
+   * @class TimeStep
+   * @brief Encapsulates discrete elapsed time intervals between frames.
+   */
+  class TimeStep {
+  public:
+    /*!
+     * @brief Constructs a TimeStep representing a duration in seconds.
+     * @param timeInSeconds Duration in fractional seconds.
+     */
+    constexpr explicit TimeStep(float timeInSeconds = 0.0f) noexcept
+    : m_Time(timeInSeconds) {}
+    /*!
+     * @brief Retrieves elapsed time interval expressed in seconds.
+     * @return Delta time in seconds.
+     */
+    [[nodiscard]] constexpr float GetSeconds() const noexcept { return m_Time; }
+    /*!
+     * @brief Retrieves elapsed time interval expressed in milliseconds.
+     * @return Delta time in milliseconds.
+     */
+    [[nodiscard]] constexpr float GetMilliseconds() const noexcept { return m_Time * 1000.0f; }
+    /*!
+     * @brief Implicit conversion operator to primitive float (seconds).
+     */
+    constexpr operator float() const noexcept { return m_Time; }
+  private:
+    float m_Time{0.0f};
+  };
+} // namespace KanVerse
+// FILE: KanVerse_Engine/Physics/BoundingBox.cpp
+
+// FILE: KanVerse_Engine/Physics/BoundingBox.hpp
+
+// FILE: KanVerse_Engine/Physics/ColliderPrimitives.cpp
+
+// FILE: KanVerse_Engine/Physics/ColliderPrimitives.hpp
+
+// FILE: KanVerse_Engine/Physics/PBDSolver.cpp
+
+// FILE: KanVerse_Engine/Physics/PBDSolver.hpp
+
+// FILE: KanVerse_Engine/Physics/PlayerControllerSystem.cpp
+
+// FILE: KanVerse_Engine/Physics/PlayerControllerSystem.hpp
+
+// FILE: KanVerse_Engine/Platform/Events/Event.hpp
+
+// FILE: KanVerse_Engine/Platform/Events/KeyEvents.hpp
+
+// FILE: KanVerse_Engine/Platform/Events/MouseEvents.hpp
+
+// FILE: KanVerse_Engine/Platform/Events/WindowEvents.hpp
+
+// FILE: KanVerse_Engine/Platform/Input/GameControllerBridge.hpp
+
+// FILE: KanVerse_Engine/Platform/Input/GameControllerBridge.mm
+
+// FILE: KanVerse_Engine/Platform/Input/KeyCodes.hpp
+
+// FILE: KanVerse_Engine/Platform/Window/NativeWindow.hpp
+
+// FILE: KanVerse_Engine/Platform/Window/NativeWindow.mm
+
+// FILE: KanVerse_Engine/Platform/Window/Window.hpp
+
+// FILE: KanVerse_Engine/Renderer/Asset/AssetManager.cpp
+
+// FILE: KanVerse_Engine/Renderer/Asset/AssetManager.hpp
+
+// FILE: KanVerse_Engine/Renderer/Buffers/BufferLayout.hpp
+
+// FILE: KanVerse_Engine/Renderer/Buffers/IndexBuffer.hpp
+
+// FILE: KanVerse_Engine/Renderer/Buffers/IndexBuffer.mm
+
+// FILE: KanVerse_Engine/Renderer/Buffers/VertexBuffer.hpp
+
+// FILE: KanVerse_Engine/Renderer/Buffers/VertexBuffer.mm
+
+// FILE: KanVerse_Engine/Renderer/Camera/Camera.hpp
+
+// FILE: KanVerse_Engine/Renderer/Camera/CameraController.hpp
+
+// FILE: KanVerse_Engine/Renderer/Camera/CameraController.mm
+
+// FILE: KanVerse_Engine/Renderer/Camera/PerspectiveCamera.cpp
+
+// FILE: KanVerse_Engine/Renderer/Camera/PerspectiveCamera.hpp
+
+// FILE: KanVerse_Engine/Renderer/Camera/SpringArm.cpp
+
+// FILE: KanVerse_Engine/Renderer/Camera/SpringArm.hpp
+
+// FILE: KanVerse_Engine/Renderer/Context/RenderContext.hpp
+
+// FILE: KanVerse_Engine/Renderer/Context/RenderContext.mm
+
+// FILE: KanVerse_Engine/Renderer/Framebuffer/Framebuffer.hpp
+
+// FILE: KanVerse_Engine/Renderer/Framebuffer/Framebuffer.mm
+
+// FILE: KanVerse_Engine/Renderer/Geometry/Mesh.cpp
+
+// FILE: KanVerse_Engine/Renderer/Geometry/Mesh.hpp
+
+// FILE: KanVerse_Engine/Renderer/Geometry/SubMesh.hpp
+
+// FILE: KanVerse_Engine/Renderer/Lighting/DirectionalLight.hpp
+
+// FILE: KanVerse_Engine/Renderer/Lighting/EnvironmentLighting.hpp
+
+// FILE: KanVerse_Engine/Renderer/Lighting/Light.hpp
+
+// FILE: KanVerse_Engine/Renderer/Lighting/PointLight.cpp
+
+// FILE: KanVerse_Engine/Renderer/Lighting/PointLight.hpp
+
+// FILE: KanVerse_Engine/Renderer/Materials/Material.hpp
+
+// FILE: KanVerse_Engine/Renderer/Materials/Material.mm
+
+// FILE: KanVerse_Engine/Renderer/Pipeline/FrameSync.hpp
+
+// FILE: KanVerse_Engine/Renderer/Pipeline/FrameSync.mm
+
+// FILE: KanVerse_Engine/Renderer/Pipeline/Pipeline.hpp
+
+// FILE: KanVerse_Engine/Renderer/Pipeline/Pipeline.mm
+
+// FILE: KanVerse_Engine/Renderer/Pipeline/Shader.hpp
+
+// FILE: KanVerse_Engine/Renderer/Pipeline/Shader.mm
+
+// FILE: KanVerse_Engine/Renderer/PostProcess/BloomPass.cpp
+
+// FILE: KanVerse_Engine/Renderer/PostProcess/BloomPass.hpp
+
+// FILE: KanVerse_Engine/Renderer/Procedural/Capsule.cpp
+
+// FILE: KanVerse_Engine/Renderer/Procedural/Capsule.hpp
+
+// FILE: KanVerse_Engine/Renderer/Procedural/ChamferBox.cpp
+
+// FILE: KanVerse_Engine/Renderer/Procedural/ChamferBox.hpp
+
+// FILE: KanVerse_Engine/Renderer/Renderer/RenderCommand.hpp
+
+// FILE: KanVerse_Engine/Renderer/Renderer/RenderCommand.mm
+
+// FILE: KanVerse_Engine/Renderer/Renderer/Renderer.hpp
+
+// FILE: KanVerse_Engine/Renderer/Renderer/Renderer.mm
+
+// FILE: KanVerse_Engine/Renderer/Textures/Texture.hpp
+
+// FILE: KanVerse_Engine/Renderer/Textures/Texture2D.hpp
+
+// FILE: KanVerse_Engine/Renderer/Textures/Texture2D.mm
+
+// FILE: KanVerse_Engine/Renderer/Textures/TextureCube.hpp
+
+// FILE: KanVerse_Engine/Renderer/Textures/TextureCube.mm
+
+// FILE: KanVerse_Engine/Scene/Components.hpp
+
+// FILE: KanVerse_Engine/Scene/Entity.hpp
+
+// FILE: KanVerse_Engine/Scene/EntityID.hpp
+
+// FILE: KanVerse_Engine/Scene/Registry.hpp
+
+// FILE: KanVerse_Engine/Scene/Scene.hpp
+
+// FILE: KanVerse_Engine/Scene/Scene.mm
+
+// FILE: KanVerse_Engine/Scene/SparseSet.hpp
+
+// FILE: KanVerse_App/PrefixHeader.pch
+/*!
+ * @file PrefixHeader.pch
+ * @brief KanVerse_App prefix header for precompiled files
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+// To remove documentation warning
+#pragma clang diagnostic ignored "-Wdocumentation"
+#pragma clang diagnostic ignored "-Wformat-security"
+// C++ Files
+#include <iostream>
+// Engine Files
+#include <KanVerse_Headers.h>
+// FILE: KanVerse_App/Factories/EntityFactory.cpp
+
+// FILE: KanVerse_App/Factories/EntityFactory.hpp
+
+// FILE: KanVerse_App/Factories/MaterialFactory.cpp
+
+// FILE: KanVerse_App/Factories/MaterialFactory.hpp
+
+// FILE: KanVerse_App/Layers/KanVerseLayer.hpp
+
+// FILE: KanVerse_App/Layers/KanVerseLayer.mm
+
+// FILE: KanVerse_App/Shaders/Bloom.metal
+
+// FILE: KanVerse_App/Shaders/DebrisSimulation.metal
+
+// FILE: KanVerse_App/Shaders/Equirectangular.metal
+
+// FILE: KanVerse_App/Shaders/Irradiance.metal
+
+// FILE: KanVerse_App/Shaders/ShadowDepth.metal
+
+// FILE: KanVerse_App/Shaders/Skybox.metal
+
+// FILE: KanVerse_App/Shaders/TexturedMaterial.metal
+
+// FILE: KanVerse_App/Shaders/Tonemap.metal
+
+// FILE: KanVerse_App/Source/EntryPoint.mm
+/*!
+ * @file EntryPoint.mm
+ * @brief Global engine application startup and teardown entry point.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+int main(int argc, char** argv) {
+  KanVerse::Log::Init();
+  KV_CORE_INFO("KanVerse Engine Bootstrap Initiated.");
+  return 0;
+}
+// FILE: KanVerse_App/Source/KanVerseApp.mm
+
+// FILE: KanVerse_App/Source/MetalImpl.cpp
+/*!
+ * @file MetalImpl.mm
+ * @brief Global file to include metal headers from vendors to compile the soruce
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#define NS_PRIVATE_IMPLEMENTATION
+#define MTL_PRIVATE_IMPLEMENTATION
+#define CA_PRIVATE_IMPLEMENTATION
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <QuartzCore/QuartzCore.hpp>
+// FILE: KanVerse_App/Systems/AI/EnemyControllerSystem.cpp
+
+// FILE: KanVerse_App/Systems/AI/EnemyControllerSystem.hpp
+
+// FILE: KanVerse_App/Systems/Gameplay/DoorSystem.cpp
+
+// FILE: KanVerse_App/Systems/Gameplay/DoorSystem.hpp
+
+// FILE: KanVerse_App/Systems/Player/CameraRigSystem.cpp
+
+// FILE: KanVerse_App/Systems/Player/CameraRigSystem.hpp
+
+// FILE: KanVerse_App/Systems/Player/InputBridgeSystem.cpp
+
+// FILE: KanVerse_App/Systems/Player/InputBridgeSystem.hpp
+
+// FILE: KanVerse_App/Systems/Player/PlayerInputIntent.hpp
+
+// FILE: KanVerse_App/World/LevelBuilder.cpp
+
+// FILE: KanVerse_App/World/LevelBuilder.hpp
+
+// FILE: KanVerse_App/World/SceneManager.cpp
+
+// FILE: KanVerse_App/World/SceneManager.hpp
+
+// FILE: KanVerse_App/World/Architecture/House_1_Builder.cpp
+
+// FILE: KanVerse_App/World/Architecture/House_1_Builder.hpp
+
+// FILE: KanVerse_App/World/Builders/DestructibleFloorBuilder.cpp
+
+// FILE: KanVerse_App/World/Builders/DestructibleFloorBuilder.hpp
+
+// FILE: KanVerse_App/World/Builders/DestructibleWallBuilder.cpp
+
+// FILE: KanVerse_App/World/Builders/DestructibleWallBuilder.hpp
+
+// FILE: KanVerse_App/World/Builders/EnemyFactory.cpp
+
+// FILE: KanVerse_App/World/Builders/EnemyFactory.hpp
+
+// FILE: KanVerse_App/World/Builders/FloorBuilder.cpp
+
+// FILE: KanVerse_App/World/Builders/FloorBuilder.hpp
+
+// FILE: KanVerse_App/World/Builders/GroundBuilder.cpp
+
+// FILE: KanVerse_App/World/Builders/GroundBuilder.hpp
+
+// FILE: KanVerse_App/World/Builders/LightBuilder.cpp
+
+// FILE: KanVerse_App/World/Builders/LightBuilder.hpp
+
+// FILE: KanVerse_App/World/Builders/RoofBuilder.cpp
+
+// FILE: KanVerse_App/World/Builders/RoofBuilder.hpp
+
+// FILE: KanVerse_App/World/Builders/StairsBuilder.cpp
+
+// FILE: KanVerse_App/World/Builders/StairsBuilder.hpp
+
+// FILE: KanVerse_App/World/Builders/WallBuilder.cpp
+
+// FILE: KanVerse_App/World/Builders/WallBuilder.hpp
+
+// FILE: KanVerse_App/World/Environment/AtmosphereSystem.cpp
+
+// FILE: KanVerse_App/World/Environment/AtmosphereSystem.hpp
+
