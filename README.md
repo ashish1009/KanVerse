@@ -100,19 +100,19 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Platform/Window/Window.hpp`, `Platform/Window/NativeWindow.hpp`
   - **Concepts:** Platform-independent `Window` contract, `WindowProps`, `EventCallbackFn`, opaque `void*` handles (`m_WindowHandle`, `m_ViewHandle`, `m_DelegateHandle`).
   - **Milestone:** Write `Window.hpp` and `NativeWindow.hpp`.
-- [ ] **Day 17 — Custom `KanVerseMetalView` Subclass**
+- [x] **Day 17 — Custom `KanVerseMetalView` Subclass**
   - **Files:** `Platform/Window/NativeWindow.mm` (Part 1)
   - **Concepts:** Subclassing `MTKView`, `NSTrackingArea` for mouse movement, overriding `keyDown:`, `keyUp:`, `flagsChanged:`, `mouseDown:`, `mouseMoved:`, `scrollWheel:`.
   - **Milestone:** Implement `@interface KanVerseMetalView : MTKView` and connect OS input callbacks.
-- [ ] **Day 18 — Cocoa Window & Application Lifecycle Delegate**
+- [x] **Day 18 — Cocoa Window & Application Lifecycle Delegate**
   - **Files:** `Platform/Window/NativeWindow.mm` (Part 2)
   - **Concepts:** `NSWindowDelegate` & `NSApplicationDelegate`, intercepting `applicationShouldTerminate:` and returning `NSTerminateCancel` so C++ destructors run, Retina backing conversion (`convertRectToBacking:`).
   - **Milestone:** Implement `@interface KanVerseWindowDelegate`.
-- [ ] **Day 19 — Programmatic Cocoa Window Creation & Event Pump**
+- [x] **Day 19 — Programmatic Cocoa Window Creation & Event Pump**
   - **Files:** `Platform/Window/NativeWindow.mm` (Part 3)
   - **Concepts:** Storyboard-less `NSApp` setup, P-Core QoS pinning (`pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0)`), `__bridge_retained` vs `__bridge_transfer` ARC lifetimes, draining `nextEventMatchingMask:`.
   - **Milestone:** Complete `NativeWindow::Init`, `Shutdown`, `OnUpdate`, `SetVSync`, and `Maximize`.
-- [ ] **Day 20 — Dual-Partitioned Layer Stack**
+- [x] **Day 20 — Dual-Partitioned Layer Stack**
   - **Files:** `Core/Layers/Layer.hpp`, `Core/Layers/LayerStack.hpp`, `Core/Layers/LayerStack.cpp`
   - **Concepts:** Partitioning standard layers vs overlays using `m_LayerInsertIndex`, reverse event iteration (`rbegin()`) so overlays consume events first.
   - **Milestone:** Implement `Layer` and `LayerStack`.

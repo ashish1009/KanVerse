@@ -30,6 +30,8 @@
 
 #include "Core/Math/Math.hpp"
 
+#include "Core/Layers/LayerStack.hpp"
+
 // Audio
 #include "Audio/AudioSystem.hpp"
 
