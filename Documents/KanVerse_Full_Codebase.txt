@@ -23,6 +23,8 @@
 #include "Core/Time/TimeStep.hpp"
 #include "Core/Time/Clock.hpp"
 #include "Core/Math/Math.hpp"
+#include "Core/Layers/LayerStack.hpp"
+#include "Core/Application/Application.hpp"
 // Audio
 #include "Audio/AudioSystem.hpp"
 // Renderer
@@ -156,9 +158,198 @@ namespace KanVerse {
   }
 } // namespace KanVerse
 // FILE: KanVerse_Engine/Core/Application/Application.hpp
-
+/*!
+ * @file Application.hpp
+ * @brief Master application singleton orchestrating engine subsystems.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Layers/Layer.hpp"
+#include "Core/Layers/LayerStack.hpp"
+#include "Core/Time/Clock.hpp"
+#include "Core/Time/TimeStep.hpp"
+#include "Platform/Events/Event.hpp"
+#include "Platform/Events/WindowEvents.hpp"
+#include "Platform/Window/Window.hpp"
+#include "Renderer/Context/RenderContext.hpp"
+namespace KanVerse {
+  /*!
+   * @struct ApplicationProps
+   * @brief High-level boot configuration options for the application instance.
+   */
+  struct ApplicationProps {
+    std::string Name{"KanVerse Application"}; ///< Window and application display title.
+    uint32_t    WindowWidth{1280};             ///< Initial window viewport width.
+    uint32_t    WindowHeight{720};             ///< Initial window viewport height.
+    bool        VSync{true};                   ///< Vertical synchronization toggle.
+    bool        Maximized{true};               ///< Maimized window.
+  };
+  /*!
+   * @class Application
+   * @brief Singleton orchestrator controlling windowing, event routing, and layer stacks.
+   */
+  class Application {
+  public:
+    /*!
+     * @brief Initializes engine core subsystems, platform window, and render context.
+     * @param props Startup properties defining window size and title.
+     */
+    explicit Application(const ApplicationProps& props = ApplicationProps());
+    /*!
+     * @brief Orderly teardown of layers, renderer context, and native window.
+     */
+    virtual ~Application();
+    Application(const Application&) = delete;
+    Application& operator=(const Application&) = delete;
+    Application(Application&&) noexcept = delete;
+    Application& operator=(Application&&) noexcept = delete;
+    /*!
+     * @brief Starts the application event loop.
+     */
+    void Run();
+    /*!
+     * @brief Signals the application loop to terminate cleanly.
+     */
+    void Close();
+    /*!
+     * @brief Internal event handler routing incoming window and platform events to layers.
+     * @param e Dispatched event reference.
+     */
+    void OnEvent(Event& e);
+    /*!
+     * @brief Appends a standard gameplay layer to the active layer stack.
+     * @param layer Heap-allocated unique pointer owning the layer instance.
+     */
+    void PushLayer(std::unique_ptr<Layer> layer);
+    /*!
+     * @brief Appends an overlay layer to the top-most position of the stack.
+     * @param overlay Heap-allocated unique pointer owning the overlay instance.
+     */
+    void PushOverlay(std::unique_ptr<Layer> overlay);
+    /*!
+     * @brief Accesses the native window abstraction.
+     * @return Const reference to the Window interface.
+     */
+    [[nodiscard]] const Window& GetWindow() const noexcept { return *m_Window; }
+    /*!
+     * @brief Accesses the active render context.
+     * @return Raw pointer to RenderContext.
+     */
+    [[nodiscard]] RenderContext* GetRenderContext() const noexcept { return m_RenderContext.get(); }
+    /*!
+     * @brief Queries the static global Application singleton instance.
+     * @return Reference to the active Application.
+     */
+    [[nodiscard]] static Application& Get() noexcept { return *s_Instance; }
+  private:
+    bool OnWindowClose(WindowCloseEvent& e);
+    bool OnWindowResize(WindowResizeEvent& e);
+    // Member Variables
+    static Application* s_Instance;
+    std::unique_ptr<RenderContext> m_RenderContext;
+    std::unique_ptr<Window>        m_Window;
+    LayerStack                     m_LayerStack;
+    Clock                          m_Clock;
+    bool                           m_Running{true};
+    bool                           m_Minimized{false};
+  };
+  /*!
+   * @brief Client entry point factory implemented by the game application.
+   * @return Unique pointer owning the client-derived Application instance.
+   */
+  std::unique_ptr<Application> CreateApplication();
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Core/Application/Application.mm
-
+/*!
+ * @file Application.mm
+ * @brief Implementation of the Application lifecycle runner with Renderer initialization.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Application/Application.hpp"
+#include "Platform/Window/NativeWindow.hpp"
+#include "Renderer/Renderer/Renderer.hpp"
+#import <AppKit/AppKit.h>
+#import <cassert>
+namespace KanVerse {
+  Application* Application::s_Instance = nullptr;
+  Application::Application(const ApplicationProps& props) {
+    KV_CORE_ASSERT(!s_Instance, "Application singleton already exists!");
+    s_Instance = this;
+    Log::Init();
+    KV_CORE_INFO("KanVerse Engine initializing: '{}'", props.Name);
+    m_RenderContext = RenderContext::Create();
+    WindowProps winProps{
+      .Title = props.Name,
+      .Width = props.WindowWidth,
+      .Height = props.WindowHeight,
+      .VSync = props.VSync,
+      .Maximized = props.Maximized
+    };
+    m_Window = Window::Create(winProps);
+    m_Window->SetEventCallback([this](Event& e) {
+      OnEvent(e);
+    });
+    m_Clock.Reset();
+  }
+  Application::~Application() {
+    s_Instance = nullptr;
+    KV_CORE_INFO("=== Application Destructor Finished ===");
+  }
+  void Application::Close() {
+    m_Running = false;
+  }
+  void Application::PushLayer(std::unique_ptr<Layer> layer) {
+    m_LayerStack.PushLayer(std::move(layer));
+  }
+  void Application::PushOverlay(std::unique_ptr<Layer> overlay) {
+    m_LayerStack.PushOverlay(std::move(overlay));
+  }
+  void Application::OnEvent(Event& e) {
+    EventDispatcher dispatcher(e);
+    dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent& event) {
+      return OnWindowClose(event);
+    });
+    dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& event) {
+      return OnWindowResize(event);
+    });
+    m_LayerStack.OnEvent(e);
+  }
+  bool Application::OnWindowClose(WindowCloseEvent& e) {
+    Close();
+    return true;
+  }
+  bool Application::OnWindowResize(WindowResizeEvent& e) {
+    if (e.GetWidth() == 0 || e.GetHeight() == 0) {
+      m_Minimized = true;
+      return false;
+    }
+    m_Minimized = false;
+    return false;
+  }
+  void Application::Run() {
+    while (m_Running) {
+      m_Window->OnUpdate();
+      if (!m_Running) {
+        KV_CORE_INFO("Run loop break triggered: exiting while(m_Running)...");
+        break;
+      }
+      if (!m_Minimized) {
+        TimeStep dt = m_Clock.Tick();
+        for (auto& layer : m_LayerStack) {
+          layer->OnUpdate(dt);
+        }
+        for (auto& layer : m_LayerStack) {
+          layer->OnRender();
+        }
+      }
+    }
+    KV_CORE_INFO("Application::Run() completed normally.");
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Core/Diagnostics/Assert.hpp
 /*!
  * @file Assert.hpp
@@ -366,11 +557,230 @@ namespace KanVerse {
 #define KV_ERROR(...)      ::KanVerse::Log::ClientPrint(::KanVerse::LogLevel::Error, __VA_ARGS__)
 #define KV_FATAL(...)      ::KanVerse::Log::ClientPrint(::KanVerse::LogLevel::Fatal, __VA_ARGS__)
 // FILE: KanVerse_Engine/Core/Layers/Layer.hpp
-
+/*!
+ * @file Layer.hpp
+ * @brief Base polymorphic layer contract for KanVerse application lifecycle.
+ * @details Establishes the foundational interface for modular application components.
+ *          Layers can be attached to the engine's LayerStack to receive deterministic
+ *          per-frame simulation ticks, render callbacks, and routed platform events.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Time/TimeStep.hpp"
+#include "Platform/Events/Event.hpp"
+#include <string>
+#include <string_view>
+namespace KanVerse {
+  /*!
+   * @class Layer
+   * @brief Abstract base class representing an isolated update, render, and event slice.
+   * @details Subclasses override lifecycle methods to implement gameplay logic, scene
+   *          graphs, debug diagnostics, or user interfaces without coupling directly
+   *          to the platform application runner.
+   */
+  class Layer {
+  public:
+    /*!
+     * @brief Constructs a Layer with an identifying debug name.
+     * @param debugName Descriptive tag used for engine profiling, diagnostics, and logging.
+     */
+    explicit Layer(std::string_view debugName = "Layer")
+    : m_DebugName(debugName) {}
+    /*!
+     * @brief Virtual destructor ensuring clean polymorphic destruction of derived layers.
+     */
+    virtual ~Layer() = default;
+    /*!
+     * @brief Invoked immediately after the layer is added to the active LayerStack.
+     * @details Ideal initialization point for allocating GPU resources, registering event
+     *          listeners, or bootstrapping layer-specific data structures.
+     */
+    virtual void OnAttach() {}
+    /*!
+     * @brief Invoked immediately before the layer is removed from the active LayerStack
+     *        or during engine teardown.
+     * @details Guarantees an orderly release point for hardware buffers, shaders,
+     *          and dynamically allocated memory.
+     */
+    virtual void OnDetach() {}
+    /*!
+     * @brief Per-frame simulation, physics, and gameplay logic update hook.
+     * @param ts Discrete high-resolution delta time elapsed since the preceding frame tick.
+     */
+    virtual void OnUpdate(TimeStep ts) {}
+    /*!
+     * @brief Per-frame hardware rendering dispatch hook.
+     * @details Invoked during the active swapchain render pass after simulation ticks complete.
+     */
+    virtual void OnRender() {}
+    /*!
+     * @brief Platform, window, and user input event dispatch handler.
+     * @param event Reference to the dispatched event instance. Can be flagged as handled
+     *              via event.SetHandled() to halt propagation to underlying layers.
+     */
+    virtual void OnEvent(Event& event) {}
+    /*!
+     * @brief Queries the layer's descriptive debug name.
+     * @return Const reference to the internal identifier string.
+     */
+    [[nodiscard]] const std::string& GetName() const noexcept { return m_DebugName; }
+  protected:
+    std::string m_DebugName; ///< Descriptive label for engine tracing and diagnostics.
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Core/Layers/LayerStack.cpp
-
+/*!
+ * @file LayerStack.cpp
+ * @brief Implementation of the LayerStack container and lifecycle management.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Core/Layers/LayerStack.hpp"
+#include <algorithm>
+namespace KanVerse {
+  LayerStack::LayerStack() = default;
+  LayerStack::~LayerStack() {
+    // Detach in reverse order: Overlays first, then gameplay layers
+    for (auto it = m_Layers.rbegin(); it != m_Layers.rend(); ++it) {
+      (*it)->OnDetach();
+    }
+  }
+  LayerStack::LayerStack(LayerStack&&) noexcept = default;
+  LayerStack& LayerStack::operator=(LayerStack&&) noexcept = default;
+  void LayerStack::PushLayer(std::unique_ptr<Layer> layer) {
+    if (!layer) return;
+    layer->OnAttach();
+    m_Layers.emplace(m_Layers.begin() + m_LayerInsertIndex, std::move(layer));
+    ++m_LayerInsertIndex;
+  }
+  void LayerStack::PushOverlay(std::unique_ptr<Layer> overlay) {
+    if (!overlay) return;
+    overlay->OnAttach();
+    m_Layers.emplace_back(std::move(overlay));
+  }
+  void LayerStack::PopLayer(Layer* layer) {
+    const auto boundary = m_Layers.begin() + m_LayerInsertIndex;
+    const auto it = std::find_if(m_Layers.begin(), boundary,
+                                 [layer](const std::unique_ptr<Layer>& ptr) {
+      return ptr.get() == layer;
+    });
+    if (it != boundary) {
+      (*it)->OnDetach();
+      m_Layers.erase(it);
+      --m_LayerInsertIndex;
+    }
+  }
+  void LayerStack::PopOverlay(Layer* overlay) {
+    const auto boundary = m_Layers.begin() + m_LayerInsertIndex;
+    const auto it = std::find_if(boundary, m_Layers.end(),
+                                 [overlay](const std::unique_ptr<Layer>& ptr) {
+      return ptr.get() == overlay;
+    });
+    if (it != m_Layers.end()) {
+      (*it)->OnDetach();
+      m_Layers.erase(it);
+    }
+  }
+  void LayerStack::OnEvent(Event& event) {
+    // Reverse iteration: Overlays handle events before underlying gameplay layers
+    for (auto it = m_Layers.rbegin(); it != m_Layers.rend(); ++it) {
+      if (event.IsHandled()) {
+        break;
+      }
+      (*it)->OnEvent(event);
+    }
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Core/Layers/LayerStack.hpp
-
+/*!
+ * @file LayerStack.hpp
+ * @brief Container interface managing ordered ownership of application and overlay layers.
+ * @details Implements a dual-partition contiguous container where standard gameplay layers
+ *          occupy the lower partition (executing forward) and overlay layers occupy the upper
+ *          partition (guaranteed top-most rendering and highest event priority).
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Layers/Layer.hpp"
+#include <vector>
+#include <memory>
+namespace KanVerse {
+  /*!
+   * @class LayerStack
+   * @brief Dual-partitioned container orchestrating the lifecycle and dispatch order of layers.
+   * @note Standard game layers are pushed at the middle insertion index, preserving insertion
+   *       order while ensuring all overlays remain strictly after regular layers.
+   */
+  class LayerStack {
+  public:
+    /*!
+     * @brief Default constructor initializing an empty layer stack with a zero insertion index.
+     */
+    LayerStack();
+    /*!
+     * @brief Destructor that detaches and deallocates all contained layers in reverse order.
+     * @details Reverse traversal guarantees that dependent layers and overlays are destroyed
+     *          before foundational systems they might depend on.
+     */
+    ~LayerStack();
+    LayerStack(const LayerStack&) = delete;
+    LayerStack& operator=(const LayerStack&) = delete;
+    LayerStack(LayerStack&&) noexcept;
+    LayerStack& operator=(LayerStack&&) noexcept;
+    /*!
+     * @brief Inserts a standard game layer at the current normal layer boundary.
+     * @param layer Unique pointer taking ownership of the heap-allocated Layer instance.
+     * @note Invokes layer->OnAttach() upon insertion.
+     */
+    void PushLayer(std::unique_ptr<Layer> layer);
+    /*!
+     * @brief Appends an overlay layer to the top-most end of the stack.
+     * @param overlay Unique pointer taking ownership of the overlay Layer instance.
+     * @note Invokes overlay->OnAttach() upon insertion. Overlays receive events first
+     *       and render last.
+     */
+    void PushOverlay(std::unique_ptr<Layer> overlay);
+    /*!
+     * @brief Locates and removes a standard game layer by raw pointer reference.
+     * @param layer Raw pointer matching the targeted layer instance.
+     * @note Invokes layer->OnDetach() prior to erasure and decrements the insertion index.
+     */
+    void PopLayer(Layer* layer);
+    /*!
+     * @brief Locates and removes an overlay layer by raw pointer reference.
+     * @param overlay Raw pointer matching the targeted overlay instance.
+     * @note Invokes overlay->OnDetach() prior to erasure from the upper partition.
+     */
+    void PopOverlay(Layer* overlay);
+    /*!
+     * @brief Propagates an event backward through the stack (overlays first, then regular layers).
+     * @param event Reference to the platform or window event being processed.
+     * @details Traversal terminates early if any layer marks the event as handled.
+     */
+    void OnEvent(Event& event);
+    /*!
+     * @brief Returns a forward iterator to the first layer in the stack.
+     */
+    [[nodiscard]] auto begin() noexcept { return m_Layers.begin(); }
+    /*!
+     * @brief Returns a forward iterator to the end of the layer container.
+     */
+    [[nodiscard]] auto end() noexcept { return m_Layers.end(); }
+    /*!
+     * @brief Returns a const forward iterator to the first layer in the stack.
+     */
+    [[nodiscard]] auto begin() const noexcept { return m_Layers.begin(); }
+    /*!
+     * @brief Returns a const forward iterator to the end of the layer container.
+     */
+    [[nodiscard]] auto end() const noexcept { return m_Layers.end(); }
+  private:
+    std::vector<std::unique_ptr<Layer>> m_Layers;       ///< Contiguous storage of polymorphic layers.
+    uint32_t                            m_LayerInsertIndex{0}; ///< Partition index dividing regular layers from overlays.
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Core/Math/Math.hpp
 /*!
  * @file Math.hpp
@@ -681,6 +1091,14 @@ namespace KanVerse {
     size_t m_Size{0}; /*!< Total bytes currently registered by this guard instance. */
   };
 } // namespace KanVerse
+// FILE: KanVerse_Engine/Core/Serialization/AssetSerializer.cpp
+
+// FILE: KanVerse_Engine/Core/Serialization/AssetSerializer.hpp
+
+// FILE: KanVerse_Engine/Core/Serialization/SceneSerializer.cpp
+
+// FILE: KanVerse_Engine/Core/Serialization/SceneSerializer.hpp
+
 // FILE: KanVerse_Engine/Core/Time/Clock.cpp
 /*!
  * @file Clock.cpp
@@ -2221,6 +2639,16 @@ namespace KanVerse {
 
 // FILE: KanVerse_Engine/Renderer/Textures/TextureCube.mm
 
+// FILE: KanVerse_Engine/Renderer/UI/ImGuiLayer.hpp
+
+// FILE: KanVerse_Engine/Renderer/UI/ImGuiLayer.mm
+
+// FILE: KanVerse_Engine/Renderer/UI/ImGuiTheme.cpp
+
+// FILE: KanVerse_Engine/Renderer/UI/ImGuiTheme.hpp
+
+// FILE: KanVerse_Engine/Renderer/UI/UIWidgets.hpp
+
 // FILE: KanVerse_Engine/Scene/Components.hpp
 
 // FILE: KanVerse_Engine/Scene/Entity.hpp
@@ -2250,6 +2678,54 @@ namespace KanVerse {
 #include <iostream>
 // Engine Files
 #include <KanVerse_Headers.h>
+// FILE: KanVerse_App/Editor/Commands/EditorCommand.hpp
+
+// FILE: KanVerse_App/Editor/Commands/UndoRedoStack.hpp
+
+// FILE: KanVerse_App/Editor/Gizmos/GizmoController.cpp
+
+// FILE: KanVerse_App/Editor/Gizmos/GizmoController.hpp
+
+// FILE: KanVerse_App/Editor/Panels/ConsolePanel.cpp
+
+// FILE: KanVerse_App/Editor/Panels/ConsolePanel.hpp
+
+// FILE: KanVerse_App/Editor/Panels/ContentBrowserPanel.cpp
+
+// FILE: KanVerse_App/Editor/Panels/ContentBrowserPanel.hpp
+
+// FILE: KanVerse_App/Editor/Panels/InspectorPanel.cpp
+
+// FILE: KanVerse_App/Editor/Panels/InspectorPanel.hpp
+
+// FILE: KanVerse_App/Editor/Panels/LevelBuilderPanel.cpp
+
+// FILE: KanVerse_App/Editor/Panels/LevelBuilderPanel.hpp
+
+// FILE: KanVerse_App/Editor/Panels/MaterialEditorPanel.cpp
+
+// FILE: KanVerse_App/Editor/Panels/MaterialEditorPanel.hpp
+
+// FILE: KanVerse_App/Editor/Panels/ProfilerPanel.cpp
+
+// FILE: KanVerse_App/Editor/Panels/ProfilerPanel.hpp
+
+// FILE: KanVerse_App/Editor/Panels/SceneHierarchyPanel.cpp
+
+// FILE: KanVerse_App/Editor/Panels/SceneHierarchyPanel.hpp
+
+// FILE: KanVerse_App/Editor/Panels/WorldSettingsPanel.cpp
+
+// FILE: KanVerse_App/Editor/Panels/WorldSettingsPanel.hpp
+
+// FILE: KanVerse_App/Editor/Viewport/EditorCamera.cpp
+
+// FILE: KanVerse_App/Editor/Viewport/EditorCamera.hpp
+
+// FILE: KanVerse_App/Editor/Viewport/ViewportPicker.hpp
+
+// FILE: KanVerse_App/Editor/Viewport/ViewportPicker.mm
+
 // FILE: KanVerse_App/Factories/EntityFactory.cpp
 
 // FILE: KanVerse_App/Factories/EntityFactory.hpp
@@ -2257,6 +2733,10 @@ namespace KanVerse {
 // FILE: KanVerse_App/Factories/MaterialFactory.cpp
 
 // FILE: KanVerse_App/Factories/MaterialFactory.hpp
+
+// FILE: KanVerse_App/Layers/EditorLayer.hpp
+
+// FILE: KanVerse_App/Layers/EditorLayer.mm
 
 // FILE: KanVerse_App/Layers/KanVerseLayer.hpp
 
@@ -2269,6 +2749,8 @@ namespace KanVerse {
 // FILE: KanVerse_App/Shaders/Equirectangular.metal
 
 // FILE: KanVerse_App/Shaders/Irradiance.metal
+
+// FILE: KanVerse_App/Shaders/MousePicking.metal
 
 // FILE: KanVerse_App/Shaders/ShadowDepth.metal
 
@@ -2289,9 +2771,32 @@ namespace KanVerse {
 #if UNIT_TESTING
 #include "UnitTests/Phase1Test.hpp"
 #endif
+/*!
+ * @brief Client-implemented application factory.
+ * @return Dynamically created unique pointer to the Application subclass.
+ */
+extern std::unique_ptr<KanVerse::Application> KanVerse::CreateApplication();
 int main(int argc, char** argv) {
   KanVerse::Log::Init();
-  KV_CORE_INFO("KanVerse Engine Bootstrap Initiated.");
+  KV_INFO("KanVerse Engine Bootstrap Initiated.");
+  // Creating core application and run the game loop
+  {
+    std::unique_ptr<KanVerse::Application> app = KanVerse::CreateApplication();
+    if (!app) {
+      KV_FATAL("Failed to instantiate KanVerse Application subclass!");
+      return -1;
+    }
+    app->Run();
+  }
+  // At this point, app, its layers, buffers, and all destructors have completed
+  auto stats = KanVerse::MemoryTracker::GetStats();
+  if (stats.CurrentUsage > 0) {
+    KV_WARN("Memory leak detected! {} bytes remaining in memory tracker.", stats.CurrentUsage);
+  } else {
+    KV_INFO("Teardown clean: 0 bytes leaked. Peak memory: {:.2f} MB",
+                 static_cast<double>(stats.PeakUsage) / (1024.0 * 1024.0));
+  }
+  KV_INFO("KanVerse Engine Terminated Cleanly: All destructors executed.");
 #if DEBUG
   KanVerse::Testing::RunPhase1Tests();
 #endif
@@ -2299,7 +2804,44 @@ int main(int argc, char** argv) {
   return 0;
 }
 // FILE: KanVerse_App/Source/KanVerseApp.mm
-
+/*!
+ * @file Main.mm
+ * @brief KanVerse client application bootstrap and entry point harness.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+/*!
+ * @class KanVerseKanVerseApp
+ * @brief Concrete client specialization of the core engine application.
+ */
+class KanVerseKanVerseApp : public KanVerse::Application {
+public:
+  /*!
+   * @brief Configures application properties and registers runtime layers.
+   */
+  KanVerseKanVerseApp()
+  : Application(KanVerse::ApplicationProps{
+    .Name = "KanVerse",
+    .WindowWidth = 1280,
+    .WindowHeight = 720,
+    .VSync = true,
+    .Maximized = true
+  }) {
+  }
+  /*!
+   * @brief Destructor for client application harness.
+   */
+  ~KanVerseKanVerseApp() override = default;
+};
+namespace KanVerse {
+  /*!
+   * @brief Factory implementation declared in Core/EntryPoint.hpp.
+   * @return Unique pointer owning the initialized Application instance.
+   */
+  std::unique_ptr<Application> CreateApplication() {
+    return std::make_unique<KanVerseKanVerseApp>();
+  }
+} // namespace KanVerse
 // FILE: KanVerse_App/Source/MetalImpl.cpp
 /*!
  * @file MetalImpl.mm
@@ -2346,44 +2888,44 @@ namespace KanVerse::Testing {
    * @brief Exercises all Phase 1 subsystems and validates correctness and memory safety.
    */
   void RunPhase1Tests() {
-    KV_CORE_INFO("==================================================");
-    KV_CORE_INFO("       STARTING KANVERSE PHASE 1 TEST SUITE       ");
-    KV_CORE_INFO("==================================================");
+    KV_INFO("==================================================");
+    KV_INFO("       STARTING KANVERSE PHASE 1 TEST SUITE       ");
+    KV_INFO("==================================================");
     // ---------------------------------------------------------------------
     // Test 1: Diagnostics & Logging (All 5 Severities)
     // ---------------------------------------------------------------------
-    KV_CORE_TRACE("Phase1Test: Testing Trace level logging (Value: {:.4f})", 3.14159);
-    KV_CORE_INFO("Phase1Test: Testing Info level logging.");
-    KV_CORE_WARN("Phase1Test: Testing Warn level logging.");
-    KV_CORE_ERROR("Phase1Test: Testing Error level logging.");
+    KV_TRACE("Phase1Test: Testing Trace level logging (Value: {:.4f})", 3.14159);
+    KV_INFO("Phase1Test: Testing Info level logging.");
+    KV_WARN("Phase1Test: Testing Warn level logging.");
+    KV_ERROR("Phase1Test: Testing Error level logging.");
     // Note: We skip Fatal here as it triggers assertions/faults.
-    KV_CORE_INFO("[PASS] Test 1: Diagnostics & Logging verified.");
+    KV_INFO("[PASS] Test 1: Diagnostics & Logging verified.");
     // ---------------------------------------------------------------------
     // Test 2: Branch-Predicted Assertions
     // ---------------------------------------------------------------------
     int dummyValue = 42;
-    KV_CORE_ASSERT(dummyValue == 42, "Dummy value must equal 42!");
-    KV_CORE_INFO("[PASS] Test 2: Assertions verified.");
+    KV_ASSERT(dummyValue == 42, "Dummy value must equal 42!");
+    KV_INFO("[PASS] Test 2: Assertions verified.");
     // ---------------------------------------------------------------------
     // Test 3: Thread-Safe Memory Tracking & RAII Scoped Allocation Guards
     // ---------------------------------------------------------------------
     {
       MemoryStats initialStats = MemoryTracker::GetStats();
-      KV_CORE_INFO("Initial Heap Usage: {} bytes", initialStats.CurrentUsage);
+      KV_INFO("Initial Heap Usage: {} bytes", initialStats.CurrentUsage);
       // Scope block to test RAII ScopedMemoryAllocation
       {
         ScopedMemoryAllocation testGuard(2048); // Simulate tracking 2 KB
         MemoryStats midStats = MemoryTracker::GetStats();
-        KV_CORE_ASSERT(midStats.CurrentUsage >= 2048, "Memory tracker failed to record allocation!");
-        KV_CORE_INFO("Inside Scope - Current Usage: {} bytes | Peak: {} bytes",
+        KV_ASSERT(midStats.CurrentUsage >= 2048, "Memory tracker failed to record allocation!");
+        KV_INFO("Inside Scope - Current Usage: {} bytes | Peak: {} bytes",
                      midStats.CurrentUsage, midStats.PeakUsage);
       } // Destructor automatically fires here, releasing 2048 bytes
       MemoryStats finalStats = MemoryTracker::GetStats();
-      KV_CORE_INFO("Outside Scope - Current Usage: {} bytes", finalStats.CurrentUsage);
-      KV_CORE_ASSERT(finalStats.CurrentUsage == initialStats.CurrentUsage,
+      KV_INFO("Outside Scope - Current Usage: {} bytes", finalStats.CurrentUsage);
+      KV_ASSERT(finalStats.CurrentUsage == initialStats.CurrentUsage,
                      "ScopedMemoryAllocation failed to unwind memory cleanly!");
     }
-    KV_CORE_INFO("[PASS] Test 3: Memory Tracking & RAII Guards verified.");
+    KV_INFO("[PASS] Test 3: Memory Tracking & RAII Guards verified.");
     // ---------------------------------------------------------------------
     // Test 4: High-Resolution Monotonic Clock & TimeStep
     // ---------------------------------------------------------------------
@@ -2393,13 +2935,13 @@ namespace KanVerse::Testing {
       // Sleep briefly to simulate frame delta
       std::this_thread::sleep_for(std::chrono::milliseconds(16));
       TimeStep dt = testClock.Tick();
-      KV_CORE_INFO("Clock Tick Delta - Seconds: {:.4f}s | Milliseconds: {:.2f}ms",
+      KV_INFO("Clock Tick Delta - Seconds: {:.4f}s | Milliseconds: {:.2f}ms",
                    dt.GetSeconds(), dt.GetMilliseconds());
-      KV_CORE_ASSERT(dt.GetSeconds() > 0.0f, "TimeStep delta must be greater than zero!");
+      KV_ASSERT(dt.GetSeconds() > 0.0f, "TimeStep delta must be greater than zero!");
       float elapsed = testClock.GetElapsedSeconds();
-      KV_CORE_INFO("Total Elapsed Wall Time: {:.4f}s", elapsed);
+      KV_INFO("Total Elapsed Wall Time: {:.4f}s", elapsed);
     }
-    KV_CORE_INFO("[PASS] Test 4: Clock & TimeStep verified.");
+    KV_INFO("[PASS] Test 4: Clock & TimeStep verified.");
     // ---------------------------------------------------------------------
     // Test 5: SIMD Linear Algebra & Matrix Transformations
     // ---------------------------------------------------------------------
@@ -2408,23 +2950,23 @@ namespace KanVerse::Testing {
       Math::Vec3 v1 = Math::MakeVec3(1.0f, 2.0f, 3.0f);
       Math::Vec3 v2 = Math::MakeVec3(4.0f, 5.0f, 6.0f);
       Math::Vec3 vSum = v1 + v2;
-      KV_CORE_ASSERT(vSum.x == 5.0f && vSum.y == 7.0f && vSum.z == 9.0f, "SIMD Vector addition incorrect!");
+      KV_ASSERT(vSum.x == 5.0f && vSum.y == 7.0f && vSum.z == 9.0f, "SIMD Vector addition incorrect!");
       // Matrix Identity & Multiplication
       Math::Mat4 identityMat = Math::Identity();
       Math::Mat4 translationMat = identityMat;
       translationMat.columns[3] = Math::MakeVec4(10.0f, 20.0f, 30.0f, 1.0f);
       Math::Mat4 multResult = Math::Multiply(identityMat, translationMat);
-      KV_CORE_ASSERT(multResult.columns[3].x == 10.0f, "Matrix multiplication identity property failed!");
+      KV_ASSERT(multResult.columns[3].x == 10.0f, "Matrix multiplication identity property failed!");
       // Projection Matrix Test (Metal [0, 1] Depth Space)
       float fov = 1.57079f; // ~90 degrees
       float aspect = 16.0f / 9.0f;
       Math::Mat4 projMat = Math::Perspective(fov, aspect, 0.1f, 100.0f);
       // Transform a point down the -Z axis to verify projection behavior
       Math::Vec4 testPoint = Math::MakeVec4(0.0f, 0.0f, -10.0f, 1.0f);
-      Math::Vec4 projected = projMat * testPoint;
-      KV_CORE_INFO("SIMD Perspective Projection matrix computed successfully.");
+      [[maybe_unused]] Math::Vec4 projected = projMat * testPoint;
+      KV_INFO("SIMD Perspective Projection matrix computed successfully.");
     }
-    KV_CORE_INFO("[PASS] Test 5: SIMD Math & Matrices verified.");
+    KV_INFO("[PASS] Test 5: SIMD Math & Matrices verified.");
     // ---------------------------------------------------------------------
     // Test 6: Metal Hardware RenderContext Verification
     // ---------------------------------------------------------------------
@@ -2433,11 +2975,11 @@ namespace KanVerse::Testing {
       // If testing outside Application::Run(), ensure MTLCreateSystemDefaultDevice() is valid.
       auto context = RenderContext::Create();
       if (context && context->GetDevice()) {
-        KV_CORE_INFO("Metal Device Verified: %s", context->GetDevice()->name()->utf8String());
-        KV_CORE_ASSERT(context->GetCommandQueue() != nullptr, "Primary command queue is null!");
-        KV_CORE_INFO("[PASS] Test 6: Metal RenderContext verified.");
+        KV_INFO("Metal Device Verified: %s", context->GetDevice()->name()->utf8String());
+        KV_ASSERT(context->GetCommandQueue() != nullptr, "Primary command queue is null!");
+        KV_INFO("[PASS] Test 6: Metal RenderContext verified.");
       } else {
-        KV_CORE_WARN("[SKIP] Test 6: Metal device not available in headless environment.");
+        KV_WARN("[SKIP] Test 6: Metal device not available in headless environment.");
       }
     }
     // ---------------------------------------------------------------------
@@ -2449,10 +2991,10 @@ namespace KanVerse::Testing {
       AudioSystem::LoadSound(SoundEffect::Jump, "NonExistentSoundCue.wav");
       AudioSystem::Shutdown();
     }
-    KV_CORE_INFO("[PASS] Test 7: AudioSystem lifecycle verified.");
-    KV_CORE_INFO("==================================================");
-    KV_CORE_INFO("     ALL PHASE 1 TESTS COMPLETED SUCCESSFULLY     ");
-    KV_CORE_INFO("==================================================");
+    KV_INFO("[PASS] Test 7: AudioSystem lifecycle verified.");
+    KV_INFO("==================================================");
+    KV_INFO("     ALL PHASE 1 TESTS COMPLETED SUCCESSFULLY     ");
+    KV_INFO("==================================================");
   }
 } // namespace KanVerse::Testing
 // FILE: KanVerse_App/World/LevelBuilder.cpp

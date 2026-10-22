@@ -7,37 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B2BA37183089161D006439E3 /* CameraRigSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36F43089161D006439E3 /* CameraRigSystem.cpp */; };
-		B2BA37193089161D006439E3 /* EnemyControllerSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36EC3089161D006439E3 /* EnemyControllerSystem.cpp */; };
-		B2BA371A3089161D006439E3 /* LightBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA37083089161D006439E3 /* LightBuilder.cpp */; };
-		B2BA371B3089161D006439E3 /* EntityFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36D63089161D006439E3 /* EntityFactory.cpp */; };
-		B2BA371C3089161D006439E3 /* DestructibleFloorBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36FE3089161D006439E3 /* DestructibleFloorBuilder.cpp */; };
-		B2BA371D3089161D006439E3 /* ShadowDepth.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36E23089161D006439E3 /* ShadowDepth.metal */; };
-		B2BA371E3089161D006439E3 /* DebrisSimulation.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36DF3089161D006439E3 /* DebrisSimulation.metal */; };
-		B2BA371F3089161D006439E3 /* Bloom.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36DE3089161D006439E3 /* Bloom.metal */; };
-		B2BA37203089161D006439E3 /* House_1_Builder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36FB3089161D006439E3 /* House_1_Builder.cpp */; };
-		B2BA37213089161D006439E3 /* FloorBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA37043089161D006439E3 /* FloorBuilder.cpp */; };
-		B2BA37223089161D006439E3 /* TexturedMaterial.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36E43089161D006439E3 /* TexturedMaterial.metal */; };
-		B2BA37233089161D006439E3 /* KanVerseLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36DC3089161D006439E3 /* KanVerseLayer.mm */; };
-		B2BA37243089161D006439E3 /* Irradiance.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36E13089161D006439E3 /* Irradiance.metal */; };
-		B2BA37253089161D006439E3 /* EntryPoint.mm in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36E73089161D006439E3 /* EntryPoint.mm */; };
-		B2BA37263089161D006439E3 /* RoofBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA370A3089161D006439E3 /* RoofBuilder.cpp */; };
-		B2BA37273089161D006439E3 /* StairsBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA370C3089161D006439E3 /* StairsBuilder.cpp */; };
-		B2BA37283089161D006439E3 /* MetalImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36E93089161D006439E3 /* MetalImpl.cpp */; };
-		B2BA37293089161D006439E3 /* InputBridgeSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36F63089161D006439E3 /* InputBridgeSystem.cpp */; };
-		B2BA372A3089161D006439E3 /* Equirectangular.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36E03089161D006439E3 /* Equirectangular.metal */; };
-		B2BA372B3089161D006439E3 /* SceneManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA37163089161D006439E3 /* SceneManager.cpp */; };
-		B2BA372C3089161D006439E3 /* KanVerseApp.mm in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36E83089161D006439E3 /* KanVerseApp.mm */; };
-		B2BA372D3089161D006439E3 /* EnemyFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA37023089161D006439E3 /* EnemyFactory.cpp */; };
-		B2BA372E3089161D006439E3 /* MaterialFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36D83089161D006439E3 /* MaterialFactory.cpp */; };
-		B2BA372F3089161D006439E3 /* DoorSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36F13089161D006439E3 /* DoorSystem.cpp */; };
-		B2BA37303089161D006439E3 /* WallBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA370E3089161D006439E3 /* WallBuilder.cpp */; };
-		B2BA37313089161D006439E3 /* Tonemap.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36E53089161D006439E3 /* Tonemap.metal */; };
-		B2BA37323089161D006439E3 /* Skybox.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA36E33089161D006439E3 /* Skybox.metal */; };
-		B2BA37333089161D006439E3 /* LevelBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA37143089161D006439E3 /* LevelBuilder.cpp */; };
-		B2BA37343089161D006439E3 /* DestructibleWallBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA37003089161D006439E3 /* DestructibleWallBuilder.cpp */; };
-		B2BA37353089161D006439E3 /* GroundBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA37063089161D006439E3 /* GroundBuilder.cpp */; };
-		B2BA37363089161D006439E3 /* AtmosphereSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA37113089161D006439E3 /* AtmosphereSystem.cpp */; };
 		B2BA38123089D154006439E3 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA38113089D154006439E3 /* MetalKit.framework */; };
 		B2BA38143089D160006439E3 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA38133089D160006439E3 /* Quartz.framework */; };
 		B2BA38163089D167006439E3 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA38153089D167006439E3 /* QuartzCore.framework */; };
@@ -46,7 +15,50 @@
 		B2BA381C3089D184006439E3 /* AVFAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA381B3089D184006439E3 /* AVFAudio.framework */; };
 		B2BA381E3089D19E006439E3 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA381D3089D19E006439E3 /* AppKit.framework */; };
 		B2BA38E73089D717006439E3 /* libKanVerse_Engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BA38E63089D717006439E3 /* libKanVerse_Engine.a */; };
-		B2BA38EB3089E0B7006439E3 /* Phase1Test.hpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA38EA3089E0B7006439E3 /* Phase1Test.hpp */; };
+		B2BA39503089F27A006439E3 /* InputBridgeSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA392C3089F27A006439E3 /* InputBridgeSystem.cpp */; };
+		B2BA39513089F27A006439E3 /* StairsBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39443089F27A006439E3 /* StairsBuilder.cpp */; };
+		B2BA39523089F27A006439E3 /* MaterialFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA390E3089F27A006439E3 /* MaterialFactory.cpp */; };
+		B2BA39533089F27A006439E3 /* DoorSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39273089F27A006439E3 /* DoorSystem.cpp */; };
+		B2BA39543089F27A006439E3 /* AtmosphereSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39493089F27A006439E3 /* AtmosphereSystem.cpp */; };
+		B2BA39553089F27A006439E3 /* LightBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39403089F27A006439E3 /* LightBuilder.cpp */; };
+		B2BA39563089F27A006439E3 /* LevelBuilderPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA38FB3089F27A006439E3 /* LevelBuilderPanel.cpp */; };
+		B2BA39573089F27A006439E3 /* EntityFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA390C3089F27A006439E3 /* EntityFactory.cpp */; };
+		B2BA39583089F27A006439E3 /* DestructibleFloorBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39363089F27A006439E3 /* DestructibleFloorBuilder.cpp */; };
+		B2BA39593089F27A006439E3 /* MousePicking.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39193089F27A006439E3 /* MousePicking.metal */; };
+		B2BA395A3089F27A006439E3 /* SceneManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA394E3089F27A006439E3 /* SceneManager.cpp */; };
+		B2BA395B3089F27A006439E3 /* EntryPoint.mm in Sources */ = {isa = PBXBuildFile; fileRef = B2BA391F3089F27A006439E3 /* EntryPoint.mm */; };
+		B2BA395C3089F27A006439E3 /* MetalImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39213089F27A006439E3 /* MetalImpl.cpp */; };
+		B2BA395D3089F27A006439E3 /* CameraRigSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA392A3089F27A006439E3 /* CameraRigSystem.cpp */; };
+		B2BA395E3089F27A006439E3 /* ViewportPicker.mm in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39083089F27A006439E3 /* ViewportPicker.mm */; };
+		B2BA395F3089F27A006439E3 /* House_1_Builder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39333089F27A006439E3 /* House_1_Builder.cpp */; };
+		B2BA39603089F27A006439E3 /* LevelBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA394C3089F27A006439E3 /* LevelBuilder.cpp */; };
+		B2BA39613089F27A006439E3 /* Equirectangular.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39173089F27A006439E3 /* Equirectangular.metal */; };
+		B2BA39623089F27A006439E3 /* ConsolePanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA38F53089F27A006439E3 /* ConsolePanel.cpp */; };
+		B2BA39633089F27A006439E3 /* EditorLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39113089F27A006439E3 /* EditorLayer.mm */; };
+		B2BA39643089F27A006439E3 /* EnemyFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA393A3089F27A006439E3 /* EnemyFactory.cpp */; };
+		B2BA39653089F27A006439E3 /* Tonemap.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA391D3089F27A006439E3 /* Tonemap.metal */; };
+		B2BA39663089F27A006439E3 /* Bloom.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39153089F27A006439E3 /* Bloom.metal */; };
+		B2BA39673089F27A006439E3 /* WorldSettingsPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39033089F27A006439E3 /* WorldSettingsPanel.cpp */; };
+		B2BA39683089F27A006439E3 /* SceneHierarchyPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39013089F27A006439E3 /* SceneHierarchyPanel.cpp */; };
+		B2BA39693089F27A006439E3 /* Irradiance.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39183089F27A006439E3 /* Irradiance.metal */; };
+		B2BA396A3089F27A006439E3 /* GroundBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA393E3089F27A006439E3 /* GroundBuilder.cpp */; };
+		B2BA396B3089F27A006439E3 /* DebrisSimulation.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39163089F27A006439E3 /* DebrisSimulation.metal */; };
+		B2BA396C3089F27A006439E3 /* EditorCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39063089F27A006439E3 /* EditorCamera.cpp */; };
+		B2BA396D3089F27A006439E3 /* KanVerseLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39133089F27A006439E3 /* KanVerseLayer.mm */; };
+		B2BA396E3089F27A006439E3 /* TexturedMaterial.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA391C3089F27A006439E3 /* TexturedMaterial.metal */; };
+		B2BA396F3089F27A006439E3 /* RoofBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39423089F27A006439E3 /* RoofBuilder.cpp */; };
+		B2BA39703089F27A006439E3 /* MaterialEditorPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA38FD3089F27A006439E3 /* MaterialEditorPanel.cpp */; };
+		B2BA39713089F27A006439E3 /* ShadowDepth.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA391A3089F27A006439E3 /* ShadowDepth.metal */; };
+		B2BA39723089F27A006439E3 /* DestructibleWallBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39383089F27A006439E3 /* DestructibleWallBuilder.cpp */; };
+		B2BA39733089F27A006439E3 /* KanVerseApp.mm in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39203089F27A006439E3 /* KanVerseApp.mm */; };
+		B2BA39743089F27A006439E3 /* GizmoController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA38F23089F27A006439E3 /* GizmoController.cpp */; };
+		B2BA39753089F27A006439E3 /* ProfilerPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA38FF3089F27A006439E3 /* ProfilerPanel.cpp */; };
+		B2BA39763089F27A006439E3 /* ContentBrowserPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA38F73089F27A006439E3 /* ContentBrowserPanel.cpp */; };
+		B2BA39773089F27A006439E3 /* FloorBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA393C3089F27A006439E3 /* FloorBuilder.cpp */; };
+		B2BA39783089F27A006439E3 /* Skybox.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2BA391B3089F27A006439E3 /* Skybox.metal */; };
+		B2BA39793089F27A006439E3 /* WallBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39463089F27A006439E3 /* WallBuilder.cpp */; };
+		B2BA397A3089F27A006439E3 /* EnemyControllerSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA39243089F27A006439E3 /* EnemyControllerSystem.cpp */; };
+		B2BA397B3089F27A006439E3 /* InspectorPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2BA38F93089F27A006439E3 /* InspectorPanel.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -64,58 +76,6 @@
 /* Begin PBXFileReference section */
 		B2BA36B930890C5C006439E3 /* KanVerse_App */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KanVerse_App; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2BA36C730891009006439E3 /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
-		B2BA36D53089161D006439E3 /* EntityFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EntityFactory.hpp; sourceTree = "<group>"; };
-		B2BA36D63089161D006439E3 /* EntityFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntityFactory.cpp; sourceTree = "<group>"; };
-		B2BA36D73089161D006439E3 /* MaterialFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MaterialFactory.hpp; sourceTree = "<group>"; };
-		B2BA36D83089161D006439E3 /* MaterialFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MaterialFactory.cpp; sourceTree = "<group>"; };
-		B2BA36DB3089161D006439E3 /* KanVerseLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KanVerseLayer.hpp; sourceTree = "<group>"; };
-		B2BA36DC3089161D006439E3 /* KanVerseLayer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = KanVerseLayer.mm; sourceTree = "<group>"; };
-		B2BA36DE3089161D006439E3 /* Bloom.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Bloom.metal; sourceTree = "<group>"; };
-		B2BA36DF3089161D006439E3 /* DebrisSimulation.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DebrisSimulation.metal; sourceTree = "<group>"; };
-		B2BA36E03089161D006439E3 /* Equirectangular.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Equirectangular.metal; sourceTree = "<group>"; };
-		B2BA36E13089161D006439E3 /* Irradiance.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Irradiance.metal; sourceTree = "<group>"; };
-		B2BA36E23089161D006439E3 /* ShadowDepth.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ShadowDepth.metal; sourceTree = "<group>"; };
-		B2BA36E33089161D006439E3 /* Skybox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Skybox.metal; sourceTree = "<group>"; };
-		B2BA36E43089161D006439E3 /* TexturedMaterial.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TexturedMaterial.metal; sourceTree = "<group>"; };
-		B2BA36E53089161D006439E3 /* Tonemap.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Tonemap.metal; sourceTree = "<group>"; };
-		B2BA36E73089161D006439E3 /* EntryPoint.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = EntryPoint.mm; sourceTree = "<group>"; };
-		B2BA36E83089161D006439E3 /* KanVerseApp.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = KanVerseApp.mm; sourceTree = "<group>"; };
-		B2BA36E93089161D006439E3 /* MetalImpl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MetalImpl.cpp; sourceTree = "<group>"; };
-		B2BA36EB3089161D006439E3 /* EnemyControllerSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EnemyControllerSystem.hpp; sourceTree = "<group>"; };
-		B2BA36EC3089161D006439E3 /* EnemyControllerSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EnemyControllerSystem.cpp; sourceTree = "<group>"; };
-		B2BA36F03089161D006439E3 /* DoorSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DoorSystem.hpp; sourceTree = "<group>"; };
-		B2BA36F13089161D006439E3 /* DoorSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DoorSystem.cpp; sourceTree = "<group>"; };
-		B2BA36F33089161D006439E3 /* CameraRigSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CameraRigSystem.hpp; sourceTree = "<group>"; };
-		B2BA36F43089161D006439E3 /* CameraRigSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CameraRigSystem.cpp; sourceTree = "<group>"; };
-		B2BA36F53089161D006439E3 /* InputBridgeSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = InputBridgeSystem.hpp; sourceTree = "<group>"; };
-		B2BA36F63089161D006439E3 /* InputBridgeSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = InputBridgeSystem.cpp; sourceTree = "<group>"; };
-		B2BA36F73089161D006439E3 /* PlayerInputIntent.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlayerInputIntent.hpp; sourceTree = "<group>"; };
-		B2BA36FA3089161D006439E3 /* House_1_Builder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = House_1_Builder.hpp; sourceTree = "<group>"; };
-		B2BA36FB3089161D006439E3 /* House_1_Builder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = House_1_Builder.cpp; sourceTree = "<group>"; };
-		B2BA36FD3089161D006439E3 /* DestructibleFloorBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DestructibleFloorBuilder.hpp; sourceTree = "<group>"; };
-		B2BA36FE3089161D006439E3 /* DestructibleFloorBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DestructibleFloorBuilder.cpp; sourceTree = "<group>"; };
-		B2BA36FF3089161D006439E3 /* DestructibleWallBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DestructibleWallBuilder.hpp; sourceTree = "<group>"; };
-		B2BA37003089161D006439E3 /* DestructibleWallBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DestructibleWallBuilder.cpp; sourceTree = "<group>"; };
-		B2BA37013089161D006439E3 /* EnemyFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EnemyFactory.hpp; sourceTree = "<group>"; };
-		B2BA37023089161D006439E3 /* EnemyFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EnemyFactory.cpp; sourceTree = "<group>"; };
-		B2BA37033089161D006439E3 /* FloorBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FloorBuilder.hpp; sourceTree = "<group>"; };
-		B2BA37043089161D006439E3 /* FloorBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FloorBuilder.cpp; sourceTree = "<group>"; };
-		B2BA37053089161D006439E3 /* GroundBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GroundBuilder.hpp; sourceTree = "<group>"; };
-		B2BA37063089161D006439E3 /* GroundBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GroundBuilder.cpp; sourceTree = "<group>"; };
-		B2BA37073089161D006439E3 /* LightBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LightBuilder.hpp; sourceTree = "<group>"; };
-		B2BA37083089161D006439E3 /* LightBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LightBuilder.cpp; sourceTree = "<group>"; };
-		B2BA37093089161D006439E3 /* RoofBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RoofBuilder.hpp; sourceTree = "<group>"; };
-		B2BA370A3089161D006439E3 /* RoofBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RoofBuilder.cpp; sourceTree = "<group>"; };
-		B2BA370B3089161D006439E3 /* StairsBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StairsBuilder.hpp; sourceTree = "<group>"; };
-		B2BA370C3089161D006439E3 /* StairsBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StairsBuilder.cpp; sourceTree = "<group>"; };
-		B2BA370D3089161D006439E3 /* WallBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = WallBuilder.hpp; sourceTree = "<group>"; };
-		B2BA370E3089161D006439E3 /* WallBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WallBuilder.cpp; sourceTree = "<group>"; };
-		B2BA37103089161D006439E3 /* AtmosphereSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AtmosphereSystem.hpp; sourceTree = "<group>"; };
-		B2BA37113089161D006439E3 /* AtmosphereSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AtmosphereSystem.cpp; sourceTree = "<group>"; };
-		B2BA37133089161D006439E3 /* LevelBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LevelBuilder.hpp; sourceTree = "<group>"; };
-		B2BA37143089161D006439E3 /* LevelBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LevelBuilder.cpp; sourceTree = "<group>"; };
-		B2BA37153089161D006439E3 /* SceneManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SceneManager.hpp; sourceTree = "<group>"; };
-		B2BA37163089161D006439E3 /* SceneManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SceneManager.cpp; sourceTree = "<group>"; };
 		B2BA38113089D154006439E3 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		B2BA38133089D160006439E3 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		B2BA38153089D167006439E3 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -124,7 +84,86 @@
 		B2BA381B3089D184006439E3 /* AVFAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFAudio.framework; path = System/Library/Frameworks/AVFAudio.framework; sourceTree = SDKROOT; };
 		B2BA381D3089D19E006439E3 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		B2BA38E63089D717006439E3 /* libKanVerse_Engine.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libKanVerse_Engine.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		B2BA38EA3089E0B7006439E3 /* Phase1Test.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Phase1Test.hpp; sourceTree = "<group>"; };
+		B2BA38EE3089F27A006439E3 /* EditorCommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EditorCommand.hpp; sourceTree = "<group>"; };
+		B2BA38EF3089F27A006439E3 /* UndoRedoStack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UndoRedoStack.hpp; sourceTree = "<group>"; };
+		B2BA38F13089F27A006439E3 /* GizmoController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GizmoController.hpp; sourceTree = "<group>"; };
+		B2BA38F23089F27A006439E3 /* GizmoController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GizmoController.cpp; sourceTree = "<group>"; };
+		B2BA38F43089F27A006439E3 /* ConsolePanel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConsolePanel.hpp; sourceTree = "<group>"; };
+		B2BA38F53089F27A006439E3 /* ConsolePanel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConsolePanel.cpp; sourceTree = "<group>"; };
+		B2BA38F63089F27A006439E3 /* ContentBrowserPanel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ContentBrowserPanel.hpp; sourceTree = "<group>"; };
+		B2BA38F73089F27A006439E3 /* ContentBrowserPanel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ContentBrowserPanel.cpp; sourceTree = "<group>"; };
+		B2BA38F83089F27A006439E3 /* InspectorPanel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = InspectorPanel.hpp; sourceTree = "<group>"; };
+		B2BA38F93089F27A006439E3 /* InspectorPanel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = InspectorPanel.cpp; sourceTree = "<group>"; };
+		B2BA38FA3089F27A006439E3 /* LevelBuilderPanel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LevelBuilderPanel.hpp; sourceTree = "<group>"; };
+		B2BA38FB3089F27A006439E3 /* LevelBuilderPanel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LevelBuilderPanel.cpp; sourceTree = "<group>"; };
+		B2BA38FC3089F27A006439E3 /* MaterialEditorPanel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MaterialEditorPanel.hpp; sourceTree = "<group>"; };
+		B2BA38FD3089F27A006439E3 /* MaterialEditorPanel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MaterialEditorPanel.cpp; sourceTree = "<group>"; };
+		B2BA38FE3089F27A006439E3 /* ProfilerPanel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ProfilerPanel.hpp; sourceTree = "<group>"; };
+		B2BA38FF3089F27A006439E3 /* ProfilerPanel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ProfilerPanel.cpp; sourceTree = "<group>"; };
+		B2BA39003089F27A006439E3 /* SceneHierarchyPanel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SceneHierarchyPanel.hpp; sourceTree = "<group>"; };
+		B2BA39013089F27A006439E3 /* SceneHierarchyPanel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SceneHierarchyPanel.cpp; sourceTree = "<group>"; };
+		B2BA39023089F27A006439E3 /* WorldSettingsPanel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = WorldSettingsPanel.hpp; sourceTree = "<group>"; };
+		B2BA39033089F27A006439E3 /* WorldSettingsPanel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WorldSettingsPanel.cpp; sourceTree = "<group>"; };
+		B2BA39053089F27A006439E3 /* EditorCamera.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EditorCamera.hpp; sourceTree = "<group>"; };
+		B2BA39063089F27A006439E3 /* EditorCamera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EditorCamera.cpp; sourceTree = "<group>"; };
+		B2BA39073089F27A006439E3 /* ViewportPicker.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ViewportPicker.hpp; sourceTree = "<group>"; };
+		B2BA39083089F27A006439E3 /* ViewportPicker.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewportPicker.mm; sourceTree = "<group>"; };
+		B2BA390B3089F27A006439E3 /* EntityFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EntityFactory.hpp; sourceTree = "<group>"; };
+		B2BA390C3089F27A006439E3 /* EntityFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EntityFactory.cpp; sourceTree = "<group>"; };
+		B2BA390D3089F27A006439E3 /* MaterialFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MaterialFactory.hpp; sourceTree = "<group>"; };
+		B2BA390E3089F27A006439E3 /* MaterialFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MaterialFactory.cpp; sourceTree = "<group>"; };
+		B2BA39103089F27A006439E3 /* EditorLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EditorLayer.hpp; sourceTree = "<group>"; };
+		B2BA39113089F27A006439E3 /* EditorLayer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = EditorLayer.mm; sourceTree = "<group>"; };
+		B2BA39123089F27A006439E3 /* KanVerseLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KanVerseLayer.hpp; sourceTree = "<group>"; };
+		B2BA39133089F27A006439E3 /* KanVerseLayer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = KanVerseLayer.mm; sourceTree = "<group>"; };
+		B2BA39153089F27A006439E3 /* Bloom.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Bloom.metal; sourceTree = "<group>"; };
+		B2BA39163089F27A006439E3 /* DebrisSimulation.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DebrisSimulation.metal; sourceTree = "<group>"; };
+		B2BA39173089F27A006439E3 /* Equirectangular.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Equirectangular.metal; sourceTree = "<group>"; };
+		B2BA39183089F27A006439E3 /* Irradiance.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Irradiance.metal; sourceTree = "<group>"; };
+		B2BA39193089F27A006439E3 /* MousePicking.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MousePicking.metal; sourceTree = "<group>"; };
+		B2BA391A3089F27A006439E3 /* ShadowDepth.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ShadowDepth.metal; sourceTree = "<group>"; };
+		B2BA391B3089F27A006439E3 /* Skybox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Skybox.metal; sourceTree = "<group>"; };
+		B2BA391C3089F27A006439E3 /* TexturedMaterial.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = TexturedMaterial.metal; sourceTree = "<group>"; };
+		B2BA391D3089F27A006439E3 /* Tonemap.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Tonemap.metal; sourceTree = "<group>"; };
+		B2BA391F3089F27A006439E3 /* EntryPoint.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = EntryPoint.mm; sourceTree = "<group>"; };
+		B2BA39203089F27A006439E3 /* KanVerseApp.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = KanVerseApp.mm; sourceTree = "<group>"; };
+		B2BA39213089F27A006439E3 /* MetalImpl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MetalImpl.cpp; sourceTree = "<group>"; };
+		B2BA39233089F27A006439E3 /* EnemyControllerSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EnemyControllerSystem.hpp; sourceTree = "<group>"; };
+		B2BA39243089F27A006439E3 /* EnemyControllerSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EnemyControllerSystem.cpp; sourceTree = "<group>"; };
+		B2BA39263089F27A006439E3 /* DoorSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DoorSystem.hpp; sourceTree = "<group>"; };
+		B2BA39273089F27A006439E3 /* DoorSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DoorSystem.cpp; sourceTree = "<group>"; };
+		B2BA39293089F27A006439E3 /* CameraRigSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CameraRigSystem.hpp; sourceTree = "<group>"; };
+		B2BA392A3089F27A006439E3 /* CameraRigSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CameraRigSystem.cpp; sourceTree = "<group>"; };
+		B2BA392B3089F27A006439E3 /* InputBridgeSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = InputBridgeSystem.hpp; sourceTree = "<group>"; };
+		B2BA392C3089F27A006439E3 /* InputBridgeSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = InputBridgeSystem.cpp; sourceTree = "<group>"; };
+		B2BA392D3089F27A006439E3 /* PlayerInputIntent.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlayerInputIntent.hpp; sourceTree = "<group>"; };
+		B2BA39303089F27A006439E3 /* Phase1Test.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Phase1Test.hpp; sourceTree = "<group>"; };
+		B2BA39323089F27A006439E3 /* House_1_Builder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = House_1_Builder.hpp; sourceTree = "<group>"; };
+		B2BA39333089F27A006439E3 /* House_1_Builder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = House_1_Builder.cpp; sourceTree = "<group>"; };
+		B2BA39353089F27A006439E3 /* DestructibleFloorBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DestructibleFloorBuilder.hpp; sourceTree = "<group>"; };
+		B2BA39363089F27A006439E3 /* DestructibleFloorBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DestructibleFloorBuilder.cpp; sourceTree = "<group>"; };
+		B2BA39373089F27A006439E3 /* DestructibleWallBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DestructibleWallBuilder.hpp; sourceTree = "<group>"; };
+		B2BA39383089F27A006439E3 /* DestructibleWallBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DestructibleWallBuilder.cpp; sourceTree = "<group>"; };
+		B2BA39393089F27A006439E3 /* EnemyFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EnemyFactory.hpp; sourceTree = "<group>"; };
+		B2BA393A3089F27A006439E3 /* EnemyFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EnemyFactory.cpp; sourceTree = "<group>"; };
+		B2BA393B3089F27A006439E3 /* FloorBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FloorBuilder.hpp; sourceTree = "<group>"; };
+		B2BA393C3089F27A006439E3 /* FloorBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FloorBuilder.cpp; sourceTree = "<group>"; };
+		B2BA393D3089F27A006439E3 /* GroundBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GroundBuilder.hpp; sourceTree = "<group>"; };
+		B2BA393E3089F27A006439E3 /* GroundBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GroundBuilder.cpp; sourceTree = "<group>"; };
+		B2BA393F3089F27A006439E3 /* LightBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LightBuilder.hpp; sourceTree = "<group>"; };
+		B2BA39403089F27A006439E3 /* LightBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LightBuilder.cpp; sourceTree = "<group>"; };
+		B2BA39413089F27A006439E3 /* RoofBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RoofBuilder.hpp; sourceTree = "<group>"; };
+		B2BA39423089F27A006439E3 /* RoofBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RoofBuilder.cpp; sourceTree = "<group>"; };
+		B2BA39433089F27A006439E3 /* StairsBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StairsBuilder.hpp; sourceTree = "<group>"; };
+		B2BA39443089F27A006439E3 /* StairsBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StairsBuilder.cpp; sourceTree = "<group>"; };
+		B2BA39453089F27A006439E3 /* WallBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = WallBuilder.hpp; sourceTree = "<group>"; };
+		B2BA39463089F27A006439E3 /* WallBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WallBuilder.cpp; sourceTree = "<group>"; };
+		B2BA39483089F27A006439E3 /* AtmosphereSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AtmosphereSystem.hpp; sourceTree = "<group>"; };
+		B2BA39493089F27A006439E3 /* AtmosphereSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AtmosphereSystem.cpp; sourceTree = "<group>"; };
+		B2BA394B3089F27A006439E3 /* LevelBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LevelBuilder.hpp; sourceTree = "<group>"; };
+		B2BA394C3089F27A006439E3 /* LevelBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LevelBuilder.cpp; sourceTree = "<group>"; };
+		B2BA394D3089F27A006439E3 /* SceneManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SceneManager.hpp; sourceTree = "<group>"; };
+		B2BA394E3089F27A006439E3 /* SceneManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SceneManager.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,14 +189,14 @@
 			isa = PBXGroup;
 			children = (
 				B2BA36C730891009006439E3 /* PrefixHeader.pch */,
-				B2BA38E83089E09C006439E3 /* UnitTests */,
-				B2BA36EA3089161D006439E3 /* Source */,
-				B2BA36D43089161D006439E3 /* Assets */,
-				B2BA36D93089161D006439E3 /* Factories */,
-				B2BA36DD3089161D006439E3 /* Layers */,
-				B2BA36E63089161D006439E3 /* Shaders */,
-				B2BA36F93089161D006439E3 /* Systems */,
-				B2BA37173089161D006439E3 /* World */,
+				B2BA39223089F27A006439E3 /* Source */,
+				B2BA390A3089F27A006439E3 /* Editor */,
+				B2BA390F3089F27A006439E3 /* Factories */,
+				B2BA39143089F27A006439E3 /* Layers */,
+				B2BA391E3089F27A006439E3 /* Shaders */,
+				B2BA392F3089F27A006439E3 /* Systems */,
+				B2BA39313089F27A006439E3 /* UnitTests */,
+				B2BA394F3089F27A006439E3 /* World */,
 				B2BA38103089D153006439E3 /* Frameworks */,
 				B2BA36BA30890C5C006439E3 /* Products */,
 			);
@@ -169,275 +208,6 @@
 				B2BA36B930890C5C006439E3 /* KanVerse_App */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		B2BA36C83089161D006439E3 /* Audio */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Audio;
-			sourceTree = "<group>";
-		};
-		B2BA36C93089161D006439E3 /* Meshes */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Meshes;
-			sourceTree = "<group>";
-		};
-		B2BA36CA3089161D006439E3 /* Scenes */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Scenes;
-			sourceTree = "<group>";
-		};
-		B2BA36CB3089161D006439E3 /* HDR */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = HDR;
-			sourceTree = "<group>";
-		};
-		B2BA36CC3089161D006439E3 /* Floor */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Floor;
-			sourceTree = "<group>";
-		};
-		B2BA36CD3089161D006439E3 /* Ground */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Ground;
-			sourceTree = "<group>";
-		};
-		B2BA36CE3089161D006439E3 /* Metal */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Metal;
-			sourceTree = "<group>";
-		};
-		B2BA36CF3089161D006439E3 /* Roof */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Roof;
-			sourceTree = "<group>";
-		};
-		B2BA36D03089161D006439E3 /* Wall */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Wall;
-			sourceTree = "<group>";
-		};
-		B2BA36D13089161D006439E3 /* Wood */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Wood;
-			sourceTree = "<group>";
-		};
-		B2BA36D23089161D006439E3 /* PBR */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36CC3089161D006439E3 /* Floor */,
-				B2BA36CD3089161D006439E3 /* Ground */,
-				B2BA36CE3089161D006439E3 /* Metal */,
-				B2BA36CF3089161D006439E3 /* Roof */,
-				B2BA36D03089161D006439E3 /* Wall */,
-				B2BA36D13089161D006439E3 /* Wood */,
-			);
-			path = PBR;
-			sourceTree = "<group>";
-		};
-		B2BA36D33089161D006439E3 /* Textures */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36CB3089161D006439E3 /* HDR */,
-				B2BA36D23089161D006439E3 /* PBR */,
-			);
-			path = Textures;
-			sourceTree = "<group>";
-		};
-		B2BA36D43089161D006439E3 /* Assets */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36C83089161D006439E3 /* Audio */,
-				B2BA36C93089161D006439E3 /* Meshes */,
-				B2BA36CA3089161D006439E3 /* Scenes */,
-				B2BA36D33089161D006439E3 /* Textures */,
-			);
-			path = Assets;
-			sourceTree = "<group>";
-		};
-		B2BA36D93089161D006439E3 /* Factories */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36D53089161D006439E3 /* EntityFactory.hpp */,
-				B2BA36D63089161D006439E3 /* EntityFactory.cpp */,
-				B2BA36D73089161D006439E3 /* MaterialFactory.hpp */,
-				B2BA36D83089161D006439E3 /* MaterialFactory.cpp */,
-			);
-			path = Factories;
-			sourceTree = "<group>";
-		};
-		B2BA36DA3089161D006439E3 /* DebugOverlayLayer */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = DebugOverlayLayer;
-			sourceTree = "<group>";
-		};
-		B2BA36DD3089161D006439E3 /* Layers */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36DA3089161D006439E3 /* DebugOverlayLayer */,
-				B2BA36DB3089161D006439E3 /* KanVerseLayer.hpp */,
-				B2BA36DC3089161D006439E3 /* KanVerseLayer.mm */,
-			);
-			path = Layers;
-			sourceTree = "<group>";
-		};
-		B2BA36E63089161D006439E3 /* Shaders */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36DE3089161D006439E3 /* Bloom.metal */,
-				B2BA36DF3089161D006439E3 /* DebrisSimulation.metal */,
-				B2BA36E03089161D006439E3 /* Equirectangular.metal */,
-				B2BA36E13089161D006439E3 /* Irradiance.metal */,
-				B2BA36E23089161D006439E3 /* ShadowDepth.metal */,
-				B2BA36E33089161D006439E3 /* Skybox.metal */,
-				B2BA36E43089161D006439E3 /* TexturedMaterial.metal */,
-				B2BA36E53089161D006439E3 /* Tonemap.metal */,
-			);
-			path = Shaders;
-			sourceTree = "<group>";
-		};
-		B2BA36EA3089161D006439E3 /* Source */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36E73089161D006439E3 /* EntryPoint.mm */,
-				B2BA36E93089161D006439E3 /* MetalImpl.cpp */,
-				B2BA36E83089161D006439E3 /* KanVerseApp.mm */,
-			);
-			path = Source;
-			sourceTree = "<group>";
-		};
-		B2BA36ED3089161D006439E3 /* AI */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36EB3089161D006439E3 /* EnemyControllerSystem.hpp */,
-				B2BA36EC3089161D006439E3 /* EnemyControllerSystem.cpp */,
-			);
-			path = AI;
-			sourceTree = "<group>";
-		};
-		B2BA36EE3089161D006439E3 /* Combat */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Combat;
-			sourceTree = "<group>";
-		};
-		B2BA36EF3089161D006439E3 /* Inventory */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Inventory;
-			sourceTree = "<group>";
-		};
-		B2BA36F23089161D006439E3 /* Gameplay */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36EE3089161D006439E3 /* Combat */,
-				B2BA36EF3089161D006439E3 /* Inventory */,
-				B2BA36F03089161D006439E3 /* DoorSystem.hpp */,
-				B2BA36F13089161D006439E3 /* DoorSystem.cpp */,
-			);
-			path = Gameplay;
-			sourceTree = "<group>";
-		};
-		B2BA36F83089161D006439E3 /* Player */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36F33089161D006439E3 /* CameraRigSystem.hpp */,
-				B2BA36F43089161D006439E3 /* CameraRigSystem.cpp */,
-				B2BA36F53089161D006439E3 /* InputBridgeSystem.hpp */,
-				B2BA36F63089161D006439E3 /* InputBridgeSystem.cpp */,
-				B2BA36F73089161D006439E3 /* PlayerInputIntent.hpp */,
-			);
-			path = Player;
-			sourceTree = "<group>";
-		};
-		B2BA36F93089161D006439E3 /* Systems */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36ED3089161D006439E3 /* AI */,
-				B2BA36F23089161D006439E3 /* Gameplay */,
-				B2BA36F83089161D006439E3 /* Player */,
-			);
-			path = Systems;
-			sourceTree = "<group>";
-		};
-		B2BA36FC3089161D006439E3 /* Architecture */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36FA3089161D006439E3 /* House_1_Builder.hpp */,
-				B2BA36FB3089161D006439E3 /* House_1_Builder.cpp */,
-			);
-			path = Architecture;
-			sourceTree = "<group>";
-		};
-		B2BA370F3089161D006439E3 /* Builders */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36FD3089161D006439E3 /* DestructibleFloorBuilder.hpp */,
-				B2BA36FE3089161D006439E3 /* DestructibleFloorBuilder.cpp */,
-				B2BA36FF3089161D006439E3 /* DestructibleWallBuilder.hpp */,
-				B2BA37003089161D006439E3 /* DestructibleWallBuilder.cpp */,
-				B2BA37013089161D006439E3 /* EnemyFactory.hpp */,
-				B2BA37023089161D006439E3 /* EnemyFactory.cpp */,
-				B2BA37033089161D006439E3 /* FloorBuilder.hpp */,
-				B2BA37043089161D006439E3 /* FloorBuilder.cpp */,
-				B2BA37053089161D006439E3 /* GroundBuilder.hpp */,
-				B2BA37063089161D006439E3 /* GroundBuilder.cpp */,
-				B2BA37073089161D006439E3 /* LightBuilder.hpp */,
-				B2BA37083089161D006439E3 /* LightBuilder.cpp */,
-				B2BA37093089161D006439E3 /* RoofBuilder.hpp */,
-				B2BA370A3089161D006439E3 /* RoofBuilder.cpp */,
-				B2BA370B3089161D006439E3 /* StairsBuilder.hpp */,
-				B2BA370C3089161D006439E3 /* StairsBuilder.cpp */,
-				B2BA370D3089161D006439E3 /* WallBuilder.hpp */,
-				B2BA370E3089161D006439E3 /* WallBuilder.cpp */,
-			);
-			path = Builders;
-			sourceTree = "<group>";
-		};
-		B2BA37123089161D006439E3 /* Environment */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA37103089161D006439E3 /* AtmosphereSystem.hpp */,
-				B2BA37113089161D006439E3 /* AtmosphereSystem.cpp */,
-			);
-			path = Environment;
-			sourceTree = "<group>";
-		};
-		B2BA37173089161D006439E3 /* World */ = {
-			isa = PBXGroup;
-			children = (
-				B2BA36FC3089161D006439E3 /* Architecture */,
-				B2BA370F3089161D006439E3 /* Builders */,
-				B2BA37123089161D006439E3 /* Environment */,
-				B2BA37133089161D006439E3 /* LevelBuilder.hpp */,
-				B2BA37143089161D006439E3 /* LevelBuilder.cpp */,
-				B2BA37153089161D006439E3 /* SceneManager.hpp */,
-				B2BA37163089161D006439E3 /* SceneManager.cpp */,
-			);
-			path = World;
 			sourceTree = "<group>";
 		};
 		B2BA38103089D153006439E3 /* Frameworks */ = {
@@ -455,12 +225,220 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		B2BA38E83089E09C006439E3 /* UnitTests */ = {
+		B2BA38F03089F27A006439E3 /* Commands */ = {
 			isa = PBXGroup;
 			children = (
-				B2BA38EA3089E0B7006439E3 /* Phase1Test.hpp */,
+				B2BA38EE3089F27A006439E3 /* EditorCommand.hpp */,
+				B2BA38EF3089F27A006439E3 /* UndoRedoStack.hpp */,
+			);
+			path = Commands;
+			sourceTree = "<group>";
+		};
+		B2BA38F33089F27A006439E3 /* Gizmos */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA38F13089F27A006439E3 /* GizmoController.hpp */,
+				B2BA38F23089F27A006439E3 /* GizmoController.cpp */,
+			);
+			path = Gizmos;
+			sourceTree = "<group>";
+		};
+		B2BA39043089F27A006439E3 /* Panels */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA38F43089F27A006439E3 /* ConsolePanel.hpp */,
+				B2BA38F53089F27A006439E3 /* ConsolePanel.cpp */,
+				B2BA38F63089F27A006439E3 /* ContentBrowserPanel.hpp */,
+				B2BA38F73089F27A006439E3 /* ContentBrowserPanel.cpp */,
+				B2BA38F83089F27A006439E3 /* InspectorPanel.hpp */,
+				B2BA38F93089F27A006439E3 /* InspectorPanel.cpp */,
+				B2BA38FA3089F27A006439E3 /* LevelBuilderPanel.hpp */,
+				B2BA38FB3089F27A006439E3 /* LevelBuilderPanel.cpp */,
+				B2BA38FC3089F27A006439E3 /* MaterialEditorPanel.hpp */,
+				B2BA38FD3089F27A006439E3 /* MaterialEditorPanel.cpp */,
+				B2BA38FE3089F27A006439E3 /* ProfilerPanel.hpp */,
+				B2BA38FF3089F27A006439E3 /* ProfilerPanel.cpp */,
+				B2BA39003089F27A006439E3 /* SceneHierarchyPanel.hpp */,
+				B2BA39013089F27A006439E3 /* SceneHierarchyPanel.cpp */,
+				B2BA39023089F27A006439E3 /* WorldSettingsPanel.hpp */,
+				B2BA39033089F27A006439E3 /* WorldSettingsPanel.cpp */,
+			);
+			path = Panels;
+			sourceTree = "<group>";
+		};
+		B2BA39093089F27A006439E3 /* Viewport */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39053089F27A006439E3 /* EditorCamera.hpp */,
+				B2BA39063089F27A006439E3 /* EditorCamera.cpp */,
+				B2BA39073089F27A006439E3 /* ViewportPicker.hpp */,
+				B2BA39083089F27A006439E3 /* ViewportPicker.mm */,
+			);
+			path = Viewport;
+			sourceTree = "<group>";
+		};
+		B2BA390A3089F27A006439E3 /* Editor */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA38F03089F27A006439E3 /* Commands */,
+				B2BA38F33089F27A006439E3 /* Gizmos */,
+				B2BA39043089F27A006439E3 /* Panels */,
+				B2BA39093089F27A006439E3 /* Viewport */,
+			);
+			path = Editor;
+			sourceTree = "<group>";
+		};
+		B2BA390F3089F27A006439E3 /* Factories */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA390B3089F27A006439E3 /* EntityFactory.hpp */,
+				B2BA390C3089F27A006439E3 /* EntityFactory.cpp */,
+				B2BA390D3089F27A006439E3 /* MaterialFactory.hpp */,
+				B2BA390E3089F27A006439E3 /* MaterialFactory.cpp */,
+			);
+			path = Factories;
+			sourceTree = "<group>";
+		};
+		B2BA39143089F27A006439E3 /* Layers */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39103089F27A006439E3 /* EditorLayer.hpp */,
+				B2BA39113089F27A006439E3 /* EditorLayer.mm */,
+				B2BA39123089F27A006439E3 /* KanVerseLayer.hpp */,
+				B2BA39133089F27A006439E3 /* KanVerseLayer.mm */,
+			);
+			path = Layers;
+			sourceTree = "<group>";
+		};
+		B2BA391E3089F27A006439E3 /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39153089F27A006439E3 /* Bloom.metal */,
+				B2BA39163089F27A006439E3 /* DebrisSimulation.metal */,
+				B2BA39173089F27A006439E3 /* Equirectangular.metal */,
+				B2BA39183089F27A006439E3 /* Irradiance.metal */,
+				B2BA39193089F27A006439E3 /* MousePicking.metal */,
+				B2BA391A3089F27A006439E3 /* ShadowDepth.metal */,
+				B2BA391B3089F27A006439E3 /* Skybox.metal */,
+				B2BA391C3089F27A006439E3 /* TexturedMaterial.metal */,
+				B2BA391D3089F27A006439E3 /* Tonemap.metal */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
+		B2BA39223089F27A006439E3 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA391F3089F27A006439E3 /* EntryPoint.mm */,
+				B2BA39203089F27A006439E3 /* KanVerseApp.mm */,
+				B2BA39213089F27A006439E3 /* MetalImpl.cpp */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
+		B2BA39253089F27A006439E3 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39233089F27A006439E3 /* EnemyControllerSystem.hpp */,
+				B2BA39243089F27A006439E3 /* EnemyControllerSystem.cpp */,
+			);
+			path = AI;
+			sourceTree = "<group>";
+		};
+		B2BA39283089F27A006439E3 /* Gameplay */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39263089F27A006439E3 /* DoorSystem.hpp */,
+				B2BA39273089F27A006439E3 /* DoorSystem.cpp */,
+			);
+			path = Gameplay;
+			sourceTree = "<group>";
+		};
+		B2BA392E3089F27A006439E3 /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39293089F27A006439E3 /* CameraRigSystem.hpp */,
+				B2BA392A3089F27A006439E3 /* CameraRigSystem.cpp */,
+				B2BA392B3089F27A006439E3 /* InputBridgeSystem.hpp */,
+				B2BA392C3089F27A006439E3 /* InputBridgeSystem.cpp */,
+				B2BA392D3089F27A006439E3 /* PlayerInputIntent.hpp */,
+			);
+			path = Player;
+			sourceTree = "<group>";
+		};
+		B2BA392F3089F27A006439E3 /* Systems */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39253089F27A006439E3 /* AI */,
+				B2BA39283089F27A006439E3 /* Gameplay */,
+				B2BA392E3089F27A006439E3 /* Player */,
+			);
+			path = Systems;
+			sourceTree = "<group>";
+		};
+		B2BA39313089F27A006439E3 /* UnitTests */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39303089F27A006439E3 /* Phase1Test.hpp */,
 			);
 			path = UnitTests;
+			sourceTree = "<group>";
+		};
+		B2BA39343089F27A006439E3 /* Architecture */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39323089F27A006439E3 /* House_1_Builder.hpp */,
+				B2BA39333089F27A006439E3 /* House_1_Builder.cpp */,
+			);
+			path = Architecture;
+			sourceTree = "<group>";
+		};
+		B2BA39473089F27A006439E3 /* Builders */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39353089F27A006439E3 /* DestructibleFloorBuilder.hpp */,
+				B2BA39363089F27A006439E3 /* DestructibleFloorBuilder.cpp */,
+				B2BA39373089F27A006439E3 /* DestructibleWallBuilder.hpp */,
+				B2BA39383089F27A006439E3 /* DestructibleWallBuilder.cpp */,
+				B2BA39393089F27A006439E3 /* EnemyFactory.hpp */,
+				B2BA393A3089F27A006439E3 /* EnemyFactory.cpp */,
+				B2BA393B3089F27A006439E3 /* FloorBuilder.hpp */,
+				B2BA393C3089F27A006439E3 /* FloorBuilder.cpp */,
+				B2BA393D3089F27A006439E3 /* GroundBuilder.hpp */,
+				B2BA393E3089F27A006439E3 /* GroundBuilder.cpp */,
+				B2BA393F3089F27A006439E3 /* LightBuilder.hpp */,
+				B2BA39403089F27A006439E3 /* LightBuilder.cpp */,
+				B2BA39413089F27A006439E3 /* RoofBuilder.hpp */,
+				B2BA39423089F27A006439E3 /* RoofBuilder.cpp */,
+				B2BA39433089F27A006439E3 /* StairsBuilder.hpp */,
+				B2BA39443089F27A006439E3 /* StairsBuilder.cpp */,
+				B2BA39453089F27A006439E3 /* WallBuilder.hpp */,
+				B2BA39463089F27A006439E3 /* WallBuilder.cpp */,
+			);
+			path = Builders;
+			sourceTree = "<group>";
+		};
+		B2BA394A3089F27A006439E3 /* Environment */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39483089F27A006439E3 /* AtmosphereSystem.hpp */,
+				B2BA39493089F27A006439E3 /* AtmosphereSystem.cpp */,
+			);
+			path = Environment;
+			sourceTree = "<group>";
+		};
+		B2BA394F3089F27A006439E3 /* World */ = {
+			isa = PBXGroup;
+			children = (
+				B2BA39343089F27A006439E3 /* Architecture */,
+				B2BA39473089F27A006439E3 /* Builders */,
+				B2BA394A3089F27A006439E3 /* Environment */,
+				B2BA394B3089F27A006439E3 /* LevelBuilder.hpp */,
+				B2BA394C3089F27A006439E3 /* LevelBuilder.cpp */,
+				B2BA394D3089F27A006439E3 /* SceneManager.hpp */,
+				B2BA394E3089F27A006439E3 /* SceneManager.cpp */,
+			);
+			path = World;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -523,38 +501,50 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B2BA37183089161D006439E3 /* CameraRigSystem.cpp in Sources */,
-				B2BA38EB3089E0B7006439E3 /* Phase1Test.hpp in Sources */,
-				B2BA37193089161D006439E3 /* EnemyControllerSystem.cpp in Sources */,
-				B2BA371A3089161D006439E3 /* LightBuilder.cpp in Sources */,
-				B2BA371B3089161D006439E3 /* EntityFactory.cpp in Sources */,
-				B2BA371C3089161D006439E3 /* DestructibleFloorBuilder.cpp in Sources */,
-				B2BA371D3089161D006439E3 /* ShadowDepth.metal in Sources */,
-				B2BA371E3089161D006439E3 /* DebrisSimulation.metal in Sources */,
-				B2BA371F3089161D006439E3 /* Bloom.metal in Sources */,
-				B2BA37203089161D006439E3 /* House_1_Builder.cpp in Sources */,
-				B2BA37213089161D006439E3 /* FloorBuilder.cpp in Sources */,
-				B2BA37223089161D006439E3 /* TexturedMaterial.metal in Sources */,
-				B2BA37233089161D006439E3 /* KanVerseLayer.mm in Sources */,
-				B2BA37243089161D006439E3 /* Irradiance.metal in Sources */,
-				B2BA37253089161D006439E3 /* EntryPoint.mm in Sources */,
-				B2BA37263089161D006439E3 /* RoofBuilder.cpp in Sources */,
-				B2BA37273089161D006439E3 /* StairsBuilder.cpp in Sources */,
-				B2BA37283089161D006439E3 /* MetalImpl.cpp in Sources */,
-				B2BA37293089161D006439E3 /* InputBridgeSystem.cpp in Sources */,
-				B2BA372A3089161D006439E3 /* Equirectangular.metal in Sources */,
-				B2BA372B3089161D006439E3 /* SceneManager.cpp in Sources */,
-				B2BA372C3089161D006439E3 /* KanVerseApp.mm in Sources */,
-				B2BA372D3089161D006439E3 /* EnemyFactory.cpp in Sources */,
-				B2BA372E3089161D006439E3 /* MaterialFactory.cpp in Sources */,
-				B2BA372F3089161D006439E3 /* DoorSystem.cpp in Sources */,
-				B2BA37303089161D006439E3 /* WallBuilder.cpp in Sources */,
-				B2BA37313089161D006439E3 /* Tonemap.metal in Sources */,
-				B2BA37323089161D006439E3 /* Skybox.metal in Sources */,
-				B2BA37333089161D006439E3 /* LevelBuilder.cpp in Sources */,
-				B2BA37343089161D006439E3 /* DestructibleWallBuilder.cpp in Sources */,
-				B2BA37353089161D006439E3 /* GroundBuilder.cpp in Sources */,
-				B2BA37363089161D006439E3 /* AtmosphereSystem.cpp in Sources */,
+				B2BA39503089F27A006439E3 /* InputBridgeSystem.cpp in Sources */,
+				B2BA39513089F27A006439E3 /* StairsBuilder.cpp in Sources */,
+				B2BA39523089F27A006439E3 /* MaterialFactory.cpp in Sources */,
+				B2BA39533089F27A006439E3 /* DoorSystem.cpp in Sources */,
+				B2BA39543089F27A006439E3 /* AtmosphereSystem.cpp in Sources */,
+				B2BA39553089F27A006439E3 /* LightBuilder.cpp in Sources */,
+				B2BA39563089F27A006439E3 /* LevelBuilderPanel.cpp in Sources */,
+				B2BA39573089F27A006439E3 /* EntityFactory.cpp in Sources */,
+				B2BA39583089F27A006439E3 /* DestructibleFloorBuilder.cpp in Sources */,
+				B2BA39593089F27A006439E3 /* MousePicking.metal in Sources */,
+				B2BA395A3089F27A006439E3 /* SceneManager.cpp in Sources */,
+				B2BA395B3089F27A006439E3 /* EntryPoint.mm in Sources */,
+				B2BA395C3089F27A006439E3 /* MetalImpl.cpp in Sources */,
+				B2BA395D3089F27A006439E3 /* CameraRigSystem.cpp in Sources */,
+				B2BA395E3089F27A006439E3 /* ViewportPicker.mm in Sources */,
+				B2BA395F3089F27A006439E3 /* House_1_Builder.cpp in Sources */,
+				B2BA39603089F27A006439E3 /* LevelBuilder.cpp in Sources */,
+				B2BA39613089F27A006439E3 /* Equirectangular.metal in Sources */,
+				B2BA39623089F27A006439E3 /* ConsolePanel.cpp in Sources */,
+				B2BA39633089F27A006439E3 /* EditorLayer.mm in Sources */,
+				B2BA39643089F27A006439E3 /* EnemyFactory.cpp in Sources */,
+				B2BA39653089F27A006439E3 /* Tonemap.metal in Sources */,
+				B2BA39663089F27A006439E3 /* Bloom.metal in Sources */,
+				B2BA39673089F27A006439E3 /* WorldSettingsPanel.cpp in Sources */,
+				B2BA39683089F27A006439E3 /* SceneHierarchyPanel.cpp in Sources */,
+				B2BA39693089F27A006439E3 /* Irradiance.metal in Sources */,
+				B2BA396A3089F27A006439E3 /* GroundBuilder.cpp in Sources */,
+				B2BA396B3089F27A006439E3 /* DebrisSimulation.metal in Sources */,
+				B2BA396C3089F27A006439E3 /* EditorCamera.cpp in Sources */,
+				B2BA396D3089F27A006439E3 /* KanVerseLayer.mm in Sources */,
+				B2BA396E3089F27A006439E3 /* TexturedMaterial.metal in Sources */,
+				B2BA396F3089F27A006439E3 /* RoofBuilder.cpp in Sources */,
+				B2BA39703089F27A006439E3 /* MaterialEditorPanel.cpp in Sources */,
+				B2BA39713089F27A006439E3 /* ShadowDepth.metal in Sources */,
+				B2BA39723089F27A006439E3 /* DestructibleWallBuilder.cpp in Sources */,
+				B2BA39733089F27A006439E3 /* KanVerseApp.mm in Sources */,
+				B2BA39743089F27A006439E3 /* GizmoController.cpp in Sources */,
+				B2BA39753089F27A006439E3 /* ProfilerPanel.cpp in Sources */,
+				B2BA39763089F27A006439E3 /* ContentBrowserPanel.cpp in Sources */,
+				B2BA39773089F27A006439E3 /* FloorBuilder.cpp in Sources */,
+				B2BA39783089F27A006439E3 /* Skybox.metal in Sources */,
+				B2BA39793089F27A006439E3 /* WallBuilder.cpp in Sources */,
+				B2BA397A3089F27A006439E3 /* EnemyControllerSystem.cpp in Sources */,
+				B2BA397B3089F27A006439E3 /* InspectorPanel.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
