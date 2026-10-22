@@ -833,9 +833,9 @@
 		B2BA39D23089F28B006439E3 /* Lighting */ = {
 			isa = PBXGroup;
 			children = (
+				B2BA39CF3089F28B006439E3 /* Light.hpp */,
 				B2BA39CD3089F28B006439E3 /* DirectionalLight.hpp */,
 				B2BA39CE3089F28B006439E3 /* EnvironmentLighting.hpp */,
-				B2BA39CF3089F28B006439E3 /* Light.hpp */,
 				B2BA39D03089F28B006439E3 /* PointLight.hpp */,
 				B2BA39D13089F28B006439E3 /* PointLight.cpp */,
 			);
@@ -939,10 +939,10 @@
 				B2BA39E53089F28B006439E3 /* Procedural */,
 				B2BA39CC3089F28B006439E3 /* Geometry */,
 				B2BA39C23089F28B006439E3 /* Camera */,
+				B2BA39D23089F28B006439E3 /* Lighting */,
 				B2BA39B13089F28B006439E3 /* Animation */,
 				B2BA39B43089F28B006439E3 /* Asset */,
 				B2BA39C83089F28B006439E3 /* Framebuffer */,
-				B2BA39D23089F28B006439E3 /* Lighting */,
 				B2BA39E03089F28B006439E3 /* PostProcess */,
 				B2BA39F63089F28B006439E3 /* UI */,
 			);

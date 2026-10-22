@@ -187,7 +187,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/Camera/CameraController.hpp`, `Renderer/Camera/CameraController.mm`
   - **Concepts:** Spherical orbit angles (`m_Yaw`, `m_Pitch`, `m_Distance`), mouse arcball pan/zoom, non-linear quadratic screen-shake trauma (`m_Trauma * m_Trauma`).
   - **Milestone:** Implement `CameraController`.
-- [ ] **Day 37 — Photometric Directional, Point & Environment Lights**
+- [x] **Day 37 — Photometric Directional, Point & Environment Lights**
   - **Files:** `Renderer/Lighting/Light.hpp`, `Renderer/Lighting/DirectionalLight.hpp`, `Renderer/Lighting/PointLight.hpp`, `Renderer/Lighting/PointLight.cpp`, `Renderer/Lighting/EnvironmentLighting.hpp`
   - **Concepts:** Orthographic shadow frustum matrix (`DirectionalLight::RecalculateMatrices`), constant-linear-quadratic point light attenuation, ambient scaling.
   - **Milestone:** Implement all files in `Renderer/Lighting/`.
