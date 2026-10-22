@@ -155,11 +155,11 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/Pipeline/Pipeline.hpp`, `Renderer/Pipeline/Pipeline.mm`
   - **Concepts:** `MTL::VertexDescriptor` (16-byte aligned stride), `MTL::RenderPipelineDescriptor` (HDR `RGBA16Float` vs SDR `BGRA8Unorm_sRGB`, alpha blending), `MTL::DepthStencilState`, shadow depth bias.
   - **Milestone:** Implement `MetalPipeline`.
-- [ ] **Day 29 — Low-Level Render Command Dispatcher**
+- [x] **Day 29 — Low-Level Render Command Dispatcher**
   - **Files:** `Renderer/Renderer/RenderCommand.hpp`, `Renderer/Renderer/RenderCommand.mm`
   - **Concepts:** Binding pipeline states and vertex streams, encoding indexed and hardware-instanced draw calls (`drawIndexedPrimitives` with `instanceCount`).
   - **Milestone:** Implement `RenderCommand`.
-- [ ] **Day 30 — 2D Texture Loader (ImageIO / CoreGraphics & sRGB vs Linear)**
+- [x] **Day 30 — 2D Texture Loader (ImageIO / CoreGraphics & sRGB vs Linear)**
   - **Files:** `Renderer/Textures/Texture.hpp`, `Renderer/Textures/Texture2D.hpp`, `Renderer/Textures/Texture2D.mm`
   - **Concepts:** Decoding PNG/JPG via `CGImageSourceCreateWithURL` and `CGBitmapContextCreate`, `RGBA8Unorm_sRGB` (Albedo) vs `RGBA8Unorm` (Data maps), procedural checkerboard fallback.
   - **Milestone:** Implement `Texture.hpp`, `Texture2D.hpp`, and `MetalTexture2D`.
