@@ -120,7 +120,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Core/Application/Application.hpp`, `Core/Application/Application.mm`
   - **Concepts:** Singleton orchestrator (`Application::Get()`), coordinating `RenderContext`, `Window`, `LayerStack`, and `Clock` inside `Application::Run()`.
   - **Milestone:** Implement `Application`.
-- [ ] **Day 22 — Client Application Bootstrap & Entry Point**
+- [x] **Day 22 — Client Application Bootstrap & Entry Point**
   - **Files:** `Source/EntryPoint.mm`, `Source/KanVerseApp.mm`
   - **Concepts:** Engine `main()` vs Client `CreateApplication()`, scoped lifetime block for post-teardown `MemoryTracker::GetStats()` verification.
   - **Milestone:** Implement `EntryPoint.mm` and `KanVerseApp.mm`.
