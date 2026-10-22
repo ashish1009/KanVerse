@@ -32,6 +32,8 @@
 
 #include "Core/Layers/LayerStack.hpp"
 
+#include "Core/Application/Application.hpp"
+
 // Audio
 #include "Audio/AudioSystem.hpp"
 

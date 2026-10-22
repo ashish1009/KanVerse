@@ -106,7 +106,7 @@ namespace KanVerse::Testing {
       
       // Transform a point down the -Z axis to verify projection behavior
       Math::Vec4 testPoint = Math::MakeVec4(0.0f, 0.0f, -10.0f, 1.0f);
-      Math::Vec4 projected = projMat * testPoint;
+      [[maybe_unused]] Math::Vec4 projected = projMat * testPoint;
       
       KV_CORE_INFO("SIMD Perspective Projection matrix computed successfully.");
     }

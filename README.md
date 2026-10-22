@@ -116,7 +116,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Core/Layers/Layer.hpp`, `Core/Layers/LayerStack.hpp`, `Core/Layers/LayerStack.cpp`
   - **Concepts:** Partitioning standard layers vs overlays using `m_LayerInsertIndex`, reverse event iteration (`rbegin()`) so overlays consume events first.
   - **Milestone:** Implement `Layer` and `LayerStack`.
-- [ ] **Day 21 — Master Application Singleton & Run Loop**
+- [x] **Day 21 — Master Application Singleton & Run Loop**
   - **Files:** `Core/Application/Application.hpp`, `Core/Application/Application.mm`
   - **Concepts:** Singleton orchestrator (`Application::Get()`), coordinating `RenderContext`, `Window`, `LayerStack`, and `Clock` inside `Application::Run()`.
   - **Milestone:** Implement `Application`.
