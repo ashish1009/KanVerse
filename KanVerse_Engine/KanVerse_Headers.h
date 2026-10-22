@@ -41,3 +41,6 @@
 #include "Platform/Events/WindowEvents.hpp"
 #include "Platform/Events/KeyEvents.hpp"
 #include "Platform/Events/MouseEvents.hpp"
+
+#include "Platform/Input/GameControllerBridge.hpp"
+#include "Platform/Input/KeyCodes.hpp"
