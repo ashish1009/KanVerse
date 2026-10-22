@@ -54,15 +54,15 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Core/Time/TimeStep.hpp`, `Core/Time/Clock.hpp`, `Core/Time/Clock.cpp`
   - **Concepts:** `std::chrono::steady_clock`, floating-point duration casting, `constexpr` and `[[nodiscard]]` attributes, implicit `operator float()`.
   - **Milestone:** Run a 60-iteration loop with `usleep(16666)` and log `dt.GetMilliseconds()`.
-- [ ] **Day 7 — Apple Silicon SIMD Vector & Matrix Types**
+- [x] **Day 7 — Apple Silicon SIMD Vector & Matrix Types**
   - **Files:** `Core/Math/Math.hpp` (Part 1)
   - **Concepts:** `<simd/simd.h>` register types (`simd::float2`, `float3`, `float4`, `float4x4`), 16-byte alignment rules (`sizeof(simd::float3) == 16`), column-major layout.
   - **Milestone:** Implement vector aliases, `MakeVec*` helpers, `Identity()`, `Multiply()`, `Inverse()`, and `Transpose()`.
-- [ ] **Day 8 — Metal [0, 1] Clip-Space Projection Matrices**
+- [x] **Day 8 — Metal [0, 1] Clip-Space Projection Matrices**
   - **Files:** `Core/Math/Math.hpp` (Part 2)
   - **Concepts:** Right-handed coordinate systems, Metal's `[0, 1]` NDC Z-depth, Rodrigues' rotation formula, `LookAt` view matrix derivation.
   - **Milestone:** Implement `Perspective()`, `Ortho()`, `LookAt()`, and `Rotate()`; verify `-nearZ` maps to `0.0f` and `-farZ` maps to `1.0f`.
-- [ ] **Day 9 — Engine Precompiled Header**
+- [x] **Day 9 — Engine Precompiled Header**
   - **Files:** `KanVerse_Engine/PrefixHeader.pch`
   - **Concepts:** Precompiled header mechanics, accelerating `.cpp` and `.mm` compilation, suppressing clang warnings (`-Wdocumentation`, `-Wformat-security`).
   - **Milestone:** Populate `PrefixHeader.pch` and enable precompilation in Xcode.
