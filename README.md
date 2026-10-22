@@ -191,7 +191,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/Lighting/Light.hpp`, `Renderer/Lighting/DirectionalLight.hpp`, `Renderer/Lighting/PointLight.hpp`, `Renderer/Lighting/PointLight.cpp`, `Renderer/Lighting/EnvironmentLighting.hpp`
   - **Concepts:** Orthographic shadow frustum matrix (`DirectionalLight::RecalculateMatrices`), constant-linear-quadratic point light attenuation, ambient scaling.
   - **Milestone:** Implement all files in `Renderer/Lighting/`.
-- [ ] **Day 38 — Basic Forward Vertex & Fragment Shader**
+- [x] **Day 38 — Basic Forward Vertex & Fragment Shader**
   - **Files:** `KanVerse_App/Shaders/TexturedMaterial.metal` (Initial Forward Pass)
   - **Concepts:** Writing `vertex_main` (instanced `modelMatrix` & `normalMatrix`) and a basic Lambertian + Blinn-Phong `fragment_main` to test our RHI before full PBR.
   - **Milestone:** Compile `TexturedMaterial.metal` into `default.metallib`.
