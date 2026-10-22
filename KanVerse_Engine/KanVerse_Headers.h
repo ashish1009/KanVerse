@@ -13,4 +13,7 @@
 
 // Core/Diagnostics
 #include "Core/Diagnostics/Assert.hpp"
+#include "Core/Diagnostics/Log.hpp"
 
+// Core
+#include "Core/Memory/MemoryTracking.hpp"

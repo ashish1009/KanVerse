@@ -6,6 +6,7 @@
  */
 
 int main(int argc, char** argv) {
-  std::cout << " Welcome to KanVerse ";
+  KanVerse::Log::Init();
+  KV_CORE_INFO("KanVerse Engine Bootstrap Initiated.");
   return 0;
 }

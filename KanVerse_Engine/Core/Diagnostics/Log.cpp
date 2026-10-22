@@ -90,8 +90,10 @@ namespace KanVerse {
       s_FileLogger.flush(); // Force write to disk immediately to capture crash data
     }
     
+#if 0 // Be default we see logs on console
     // 3. Apple Unified Logging Sink (integrates with macOS Console.app)
     os_log_with_type(log, osType, "%{public}s", message.c_str());
+#endif
   }
   
 } // namespace KanVerse

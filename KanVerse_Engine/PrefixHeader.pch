@@ -15,5 +15,9 @@
 #include <iostream>
 
 // Core/Diagnostics
-  #include "Core/Diagnostics/Assert.hpp"
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+
+// Core/Memory
+#include "Core/Memory/MemoryTracking.hpp"
 

@@ -42,11 +42,11 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Core/Diagnostics/Log.hpp`, `Core/Diagnostics/Log.cpp`
   - **Concepts:** C++23 `std::vformat` and `std::make_format_args`, variadic templates, triple-sink routing (`std::cout`, `std::ofstream`, and Apple Unified Logging `<os/log.h>`).
   - **Milestone:** Log all 5 severity levels (`Trace` to `Fatal`) and verify `KanVerse_Runtime.log` is created on disk.
-- [-] **Day 4 — Lock-Free Atomic Memory Tracker**
+- [x] **Day 4 — Lock-Free Atomic Memory Tracker**
   - **Files:** `Core/Memory/MemoryTracking.hpp` (Part 1)
   - **Concepts:** Lock-free concurrency with `std::atomic`, `std::memory_order_relaxed`, Compare-And-Swap (`compare_exchange_weak`) loop for high-water mark (`PeakUsage`).
   - **Milestone:** Implement `MemoryStats` and `MemoryTracker` (`RecordAllocation`, `RecordDeallocation`, `GetStats`).
-- [ ] **Day 5 — Automated RAII Memory Guards**
+- [-] **Day 5 — Automated RAII Memory Guards**
   - **Files:** `Core/Memory/MemoryTracking.hpp` (Part 2)
   - **Concepts:** Strict RAII design, deleting copy constructors/assignments, move semantics (`&& noexcept`) without double-counting bytes.
   - **Milestone:** Implement `ScopedMemoryAllocation`; verify `CurrentUsage` returns to `0` upon exiting a test scope.
