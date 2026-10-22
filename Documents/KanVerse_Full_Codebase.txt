@@ -20,9 +20,9 @@
 #include "Core/Diagnostics/Log.hpp"
 // Core
 #include "Core/Memory/MemoryTracking.hpp"
-#include "Core/Time/TimeStep.hpp"
-#include "Core/Time/Clock.hpp"
 #include "Core/Math/Math.hpp"
+#include "Core/Time/TimeStep.hpp"
+#include "Core/Layers/Layer.hpp"
 #include "Core/Layers/LayerStack.hpp"
 #include "Core/Application/Application.hpp"
 // Audio
@@ -35,7 +35,17 @@
 #include "Platform/Input/GameControllerBridge.hpp"
 #include "Platform/Input/KeyCodes.hpp"
 // Renderer
-#include "Renderer/Context/RenderContext.hpp"
+#include "Renderer/Renderer/Renderer.hpp"
+#include "Renderer/Camera/CameraController.hpp"
+#include "Renderer/Camera/SpringArm.hpp"
+#include "Renderer/Framebuffer/Framebuffer.hpp"
+#include "Renderer/Geometry/Mesh.hpp"
+#include "Renderer/Materials/Material.hpp"
+#include "Renderer/Pipeline/Pipeline.hpp"
+#include "Renderer/Pipeline/Shader.hpp"
+#include "Renderer/Textures/Texture2D.hpp"
+#include "Renderer/Textures/TextureCube.hpp"
+#include "Renderer/Asset/AssetManager.hpp"
 // FILE: KanVerse_Engine/PrefixHeader.pch
 /*!
  * @file PrefixHeader.pch
@@ -2780,15 +2790,368 @@ namespace KanVerse {
   }
 } // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Camera/Camera.hpp
-
+/*!
+ * @file Camera.hpp
+ * @brief Base camera contract holding primary projection properties.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Math/Math.hpp"
+namespace KanVerse {
+  /*!
+   * @class Camera
+   * @brief Abstract foundation representing an optical projection matrix.
+   */
+  class Camera {
+  public:
+    virtual ~Camera() = default;
+    Camera() = default;
+    explicit Camera(const Math::Mat4& projection) : m_Projection(projection) {}
+    /*!
+     * @brief Queries the computed projection matrix.
+     * @return Const reference to internal Mat4.
+     */
+    [[nodiscard]] const Math::Mat4& GetProjection() const noexcept { return m_Projection; }
+  protected:
+    Math::Mat4 m_Projection{Math::Identity()};
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Camera/CameraController.hpp
-
+/*!
+ * @file CameraController.hpp
+ * @brief Interactive orbit camera controller handling mouse dragging, zoom, and screen shake trauma.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Renderer/Camera/PerspectiveCamera.hpp"
+#include "Core/Time/TimeStep.hpp"
+#include "Platform/Events/Event.hpp"
+#include "Platform/Events/WindowEvents.hpp"
+#include "Platform/Events/MouseEvents.hpp"
+namespace KanVerse {
+  /*!
+   * @class CameraController
+   * @brief Orbit/Arcball camera controller responding to mouse interactions, focal tracking, and trauma impulses.
+   */
+  class CameraController {
+  public:
+    /*!
+     * @brief Constructs an orbit camera controller with specified vertical FOV and aspect ratio.
+     * @param fovDegrees Vertical field of view in degrees.
+     * @param aspectRatio Viewport aspect ratio (width / height).
+     */
+    CameraController(float fovDegrees, float aspectRatio);
+    /*!
+     * @brief Frame-level update evaluating screen shake trauma decay and orientation.
+     * @param ts Discrete delta time interval.
+     */
+    void OnUpdate(TimeStep ts);
+    /*!
+     * @brief Event routing callback processing mouse gestures and window resizes.
+     * @param e Dispatched polymorphic event.
+     */
+    void OnEvent(Event& e);
+    /*!
+     * @brief Modifies camera orbit angles by applying mouse delta offsets.
+     */
+    void OnMousePan(float deltaX, float deltaY);
+    /*!
+     * @brief Zooms camera toward or away from focal target.
+     */
+    void OnMouseZoom(float deltaZoom);
+    /*!
+     * @brief Sets the radial distance from the focal tracking center.
+     */
+    void SetDistance(float distance) noexcept;
+    [[nodiscard]] float GetDistance() const noexcept { return m_Distance; }
+    /*!
+     * @brief Sets the focal look-at center point in world space.
+     * @param target Center point coordinates.
+     */
+    void SetTarget(const simd::float3& target);
+    [[nodiscard]] const simd::float3& GetTarget() const noexcept { return m_FocalTarget; }
+    /*!
+     * @brief Queries current horizontal orbit yaw angle in radians.
+     */
+    [[nodiscard]] float GetYaw() const noexcept { return m_Yaw; }
+    /*!
+     * @brief Queries current vertical orbit pitch angle in radians.
+     */
+    [[nodiscard]] float GetPitch() const noexcept { return m_Pitch; }
+    /*!
+     * @brief Injects high-frequency camera trauma (clamped between 0.0 and 1.0).
+     * @param amount Trauma value to accumulate.
+     */
+    void AddTrauma(float amount) noexcept;
+    [[nodiscard]] PerspectiveCamera& GetCamera() noexcept { return m_Camera; }
+    [[nodiscard]] const PerspectiveCamera& GetCamera() const noexcept { return m_Camera; }
+  private:
+    bool OnWindowResized(WindowResizeEvent& e);
+    bool OnMouseMoved(MouseMovedEvent& e);
+    bool OnMouseScrolled(MouseScrolledEvent& e);
+    bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
+    bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
+    /*!
+     * @brief Recomputes eye position in Cartesian coordinates incorporating orbital angles and screen shake.
+     */
+    void UpdateCameraPosition();
+    PerspectiveCamera m_Camera;                       ///< Underlying camera projection matrix manager.
+    simd::float3      m_FocalTarget{0.0f, 0.0f, 0.0f};///< Target point tracked by the camera.
+    float             m_Distance{32.0f};              ///< Radial orbit distance.
+    float             m_Pitch{0.42f};                 ///< Vertical inclination angle in radians.
+    float             m_Yaw{0.0f};                    ///< Horizontal azimuth angle in radians.
+    // Screen Shake Trauma Metrics
+    float             m_Trauma{0.0f};                 ///< Active trauma scalar [0, 1].
+    float             m_ShakeTime{0.0f};              ///< High-frequency noise counter.
+    float             m_LastMouseX{0.0f};             ///< Mouse baseline coordinate X.
+    float             m_LastMouseY{0.0f};             ///< Mouse baseline coordinate Y.
+    bool              m_IsDragging{false};            ///< Orbit drag state flag.
+    bool              m_FirstClick{true};             ///< Baseline calibration guard.
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Camera/CameraController.mm
-
+/*!
+ * @file CameraController.mm
+ * @brief Implementation of interactive orbit camera controller with non-linear screen shake trauma.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Camera/CameraController.hpp"
+#include <cmath>
+#include <algorithm>
+namespace KanVerse {
+  CameraController::CameraController(float fovDegrees, float aspectRatio)
+  : m_Camera(fovDegrees * (static_cast<float>(M_PI) / 180.0f), aspectRatio, 0.1f, 1000.0f),
+  m_FocalTarget{0.0f, 0.0f, 0.0f},
+  m_Distance(32.0f),
+  m_Pitch(0.42f),
+  m_Yaw(0.0f),
+  m_Trauma(0.0f),
+  m_ShakeTime(0.0f),
+  m_FirstClick(true) {
+    UpdateCameraPosition();
+  }
+  void CameraController::OnUpdate(TimeStep ts) {
+    const float dt = ts.GetSeconds();
+    m_ShakeTime += dt * 45.0f; // High-frequency oscillation step for snappy micro-jitter
+    // Decay trauma non-linearly over time
+    if (m_Trauma > 0.0f) {
+      m_Trauma = std::max(0.0f, m_Trauma - 1.6f * dt);
+      UpdateCameraPosition();
+    }
+  }
+  void CameraController::SetTarget(const simd::float3& target) {
+    m_FocalTarget = target;
+    UpdateCameraPosition();
+  }
+  void CameraController::AddTrauma(float amount) noexcept {
+    // Accumulate trauma and clamp to normalized ceiling
+    m_Trauma = std::clamp(m_Trauma + amount, 0.0f, 1.0f);
+  }
+  void CameraController::OnEvent(Event& e) {
+    EventDispatcher dispatcher(e);
+    dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& event) {
+      return OnWindowResized(event);
+    });
+    dispatcher.Dispatch<MouseMovedEvent>([this](MouseMovedEvent& event) {
+      return OnMouseMoved(event);
+    });
+    dispatcher.Dispatch<MouseScrolledEvent>([this](MouseScrolledEvent& event) {
+      return OnMouseScrolled(event);
+    });
+    dispatcher.Dispatch<MouseButtonPressedEvent>([this](MouseButtonPressedEvent& event) {
+      return OnMouseButtonPressed(event);
+    });
+    dispatcher.Dispatch<MouseButtonReleasedEvent>([this](MouseButtonReleasedEvent& event) {
+      return OnMouseButtonReleased(event);
+    });
+  }
+  bool CameraController::OnWindowResized(WindowResizeEvent& e) {
+    m_Camera.SetViewportSize(e.GetWidth(), e.GetHeight());
+    return false;
+  }
+  bool CameraController::OnMouseButtonPressed(MouseButtonPressedEvent& e) {
+    if (e.GetMouseButton() == 0 || e.GetMouseButton() == 1) {
+      m_IsDragging = true;
+      m_FirstClick = true; // Prevent delta spike from stale coordinates
+    }
+    return false;
+  }
+  bool CameraController::OnMouseButtonReleased(MouseButtonReleasedEvent& e) {
+    if (e.GetMouseButton() == 0 || e.GetMouseButton() == 1) {
+      m_IsDragging = false;
+      m_FirstClick = true;
+    }
+    return false;
+  }
+  bool CameraController::OnMouseMoved(MouseMovedEvent& e) {
+    if (!m_IsDragging) {
+      m_LastMouseX = e.GetX();
+      m_LastMouseY = e.GetY();
+      return false;
+    }
+    if (m_FirstClick) {
+      m_LastMouseX = e.GetX();
+      m_LastMouseY = e.GetY();
+      m_FirstClick = false;
+      return false;
+    }
+    const float deltaX = e.GetX() - m_LastMouseX;
+    const float deltaY = e.GetY() - m_LastMouseY;
+    m_LastMouseX = e.GetX();
+    m_LastMouseY = e.GetY();
+    OnMousePan(deltaX, deltaY);
+    return false;
+  }
+  bool CameraController::OnMouseScrolled(MouseScrolledEvent& e) {
+    const float clampedDelta = std::clamp(e.GetYOffset(), -20.0f, 20.0f);
+    OnMouseZoom(clampedDelta * 0.05f);
+    return false;
+  }
+  void CameraController::OnMousePan(float deltaX, float deltaY) {
+    constexpr float sensitivity = 0.005f;
+    m_Yaw   -= deltaX * sensitivity;
+    m_Pitch += deltaY * sensitivity;
+    // Avoid gimbal lock near polar poles
+    constexpr float maxPitch = 1.50f;
+    constexpr float minPitch = -1.50f;
+    m_Pitch = std::clamp(m_Pitch, minPitch, maxPitch);
+    UpdateCameraPosition();
+  }
+  void CameraController::OnMouseZoom(float deltaZoom) {
+    const float zoomSpeed = std::max(m_Distance * 0.05f, 0.35f);
+    m_Distance -= deltaZoom * zoomSpeed;
+    m_Distance = std::clamp(m_Distance, 2.0f, 75.0f);
+    UpdateCameraPosition();
+  }
+  void CameraController::SetDistance(float distance) noexcept {
+    m_Distance = std::clamp(distance, 2.0f, 75.0f);
+    UpdateCameraPosition();
+  }
+  void CameraController::UpdateCameraPosition() {
+    const float cosPitch = std::cos(m_Pitch);
+    const float sinPitch = std::sin(m_Pitch);
+    const float cosYaw   = std::cos(m_Yaw);
+    const float sinYaw   = std::sin(m_Yaw);
+    // Base orbital position in Cartesian space
+    simd::float3 eyePos = m_FocalTarget + simd_make_float3(
+                                                           m_Distance * cosPitch * sinYaw,
+                                                           m_Distance * sinPitch,
+                                                           m_Distance * cosPitch * cosYaw
+                                                           );
+    // Apply quadratic trauma shake for organic, impactful screen rumble
+    if (m_Trauma > 1e-4f) {
+      const float shakeFactor = m_Trauma * m_Trauma * 0.28f;
+      const float offsetX = std::sin(m_ShakeTime * 1.1f) * shakeFactor;
+      const float offsetY = std::cos(m_ShakeTime * 1.4f) * shakeFactor;
+      const float offsetZ = std::sin(m_ShakeTime * 1.7f) * shakeFactor;
+      eyePos += simd_make_float3(offsetX, offsetY, offsetZ);
+      m_Camera.SetTarget(m_FocalTarget + simd_make_float3(offsetX * 0.5f, offsetY * 0.5f, offsetZ * 0.5f));
+    } else {
+      m_Camera.SetTarget(m_FocalTarget);
+    }
+    m_Camera.SetPosition(eyePos);
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Camera/PerspectiveCamera.cpp
-
+/*!
+ * @file PerspectiveCamera.cpp
+ * @brief Implementation of the 3D perspective camera matrix calculations.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Camera/PerspectiveCamera.hpp"
+namespace KanVerse {
+  PerspectiveCamera::PerspectiveCamera(float fovRadians, float aspectRatio, float nearClip, float farClip)
+  : m_FovRadians(fovRadians),
+  m_AspectRatio(aspectRatio),
+  m_NearClip(nearClip),
+  m_FarClip(farClip) {
+    RecalculateProjectionMatrix();
+    RecalculateViewMatrix();
+  }
+  void PerspectiveCamera::SetViewportSize(uint32_t width, uint32_t height) {
+    if (width == 0 || height == 0) return;
+    m_AspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    RecalculateProjectionMatrix();
+  }
+  void PerspectiveCamera::SetPosition(const Math::Vec3& position) {
+    m_Position = position;
+    RecalculateViewMatrix();
+  }
+  void PerspectiveCamera::SetTarget(const Math::Vec3& target) {
+    m_Target = target;
+    RecalculateViewMatrix();
+  }
+  void PerspectiveCamera::RecalculateProjectionMatrix() {
+    m_Projection = Math::Perspective(m_FovRadians, m_AspectRatio, m_NearClip, m_FarClip);
+    m_ViewProjectionMatrix = Math::Multiply(m_Projection, m_ViewMatrix);
+  }
+  void PerspectiveCamera::RecalculateViewMatrix() {
+    m_ViewMatrix = Math::LookAt(m_Position, m_Target, m_Up);
+    m_ViewProjectionMatrix = Math::Multiply(m_Projection, m_ViewMatrix);
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Camera/PerspectiveCamera.hpp
-
+/*!
+ * @file PerspectiveCamera.hpp
+ * @brief 3D perspective camera computing view and view-projection matrices.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Renderer/Camera/Camera.hpp"
+namespace KanVerse {
+  /*!
+   * @class PerspectiveCamera
+   * @brief 3D perspective camera supporting positional movement, pitch, yaw, and target tracking.
+   */
+  class PerspectiveCamera : public Camera {
+  public:
+    /*!
+     * @brief Constructs a perspective camera.
+     * @param fovRadians Vertical field of view in radians.
+     * @param aspectRatio Viewport width over height.
+     * @param nearClip Near clipping distance.
+     * @param farClip Far clipping distance.
+     */
+    PerspectiveCamera(float fovRadians, float aspectRatio, float nearClip = 0.1f, float farClip = 1000.0f);
+    /*!
+     * @brief Updates projection matrix when viewport dimensions mutate.
+     * @param width Viewport width in logical points.
+     * @param height Viewport height in logical points.
+     */
+    void SetViewportSize(uint32_t width, uint32_t height);
+    /*!
+     * @brief Sets world position and recalculates view and view-projection transforms.
+     * @param position New camera coordinates in world space.
+     */
+    void SetPosition(const Math::Vec3& position);
+    /*!
+     * @brief Sets focal look-at target and recalculates view matrices.
+     * @param target Center point the camera faces.
+     */
+    void SetTarget(const Math::Vec3& target);
+    [[nodiscard]] const Math::Vec3& GetPosition() const noexcept { return m_Position; }
+    [[nodiscard]] const Math::Vec3& GetTarget() const noexcept { return m_Target; }
+    [[nodiscard]] const Math::Mat4& GetViewMatrix() const noexcept { return m_ViewMatrix; }
+    [[nodiscard]] const Math::Mat4& GetViewProjectionMatrix() const noexcept { return m_ViewProjectionMatrix; }
+  private:
+    void RecalculateViewMatrix();
+    void RecalculateProjectionMatrix();
+    float      m_FovRadians;
+    float      m_AspectRatio;
+    float      m_NearClip;
+    float      m_FarClip;
+    Math::Vec3 m_Position{0.0f, 0.0f, 3.0f};
+    Math::Vec3 m_Target{0.0f, 0.0f, 0.0f};
+    Math::Vec3 m_Up{0.0f, 1.0f, 0.0f};
+    Math::Mat4 m_ViewMatrix{Math::Identity()};
+    Math::Mat4 m_ViewProjectionMatrix{Math::Identity()};
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Camera/SpringArm.cpp
 
 // FILE: KanVerse_Engine/Renderer/Camera/SpringArm.hpp
@@ -2918,25 +3281,524 @@ namespace KanVerse {
 // FILE: KanVerse_Engine/Renderer/Framebuffer/Framebuffer.mm
 
 // FILE: KanVerse_Engine/Renderer/Geometry/Mesh.cpp
-
+/*!
+ * @file Mesh.cpp
+ * @brief Implementation of high-level Mesh subsystem.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Geometry/Mesh.hpp"
+#include <algorithm>
+namespace KanVerse {
+  Mesh::Mesh(const Vertex* vertices,
+             size_t vertexCount,
+             const uint16_t* indices,
+             uint32_t indexCount,
+             const BufferLayout& layout) {
+    m_VertexBuffer = VertexBuffer::Create(vertices, vertexCount * sizeof(Vertex));
+    m_VertexBuffer->SetLayout(layout);
+    m_IndexBuffer = IndexBuffer::Create(indices, indexCount);
+    Submesh rootSubmesh;
+    rootSubmesh.NodeName = "RootSubmesh";
+    rootSubmesh.BaseVertex = 0;
+    rootSubmesh.BaseIndex = 0;
+    rootSubmesh.IndexCount = indexCount;
+    rootSubmesh.MaterialIndex = 0;
+    for (size_t i = 0; i < vertexCount; ++i) {
+      rootSubmesh.BoundingBox.Encapsulate(vertices[i].position);
+    }
+    m_Submeshes.push_back(rootSubmesh);
+  }
+  std::shared_ptr<Mesh> Mesh::CreateChamferBox(float size,
+                                               float chamfer,
+                                               const BufferLayout& layout) {
+    MeshData meshData = ChamferBoxGenerator::Generate(size, chamfer);
+    return std::make_shared<Mesh>(
+                                  meshData.vertices.data(),
+                                  meshData.vertices.size(),
+                                  meshData.indices.data(),
+                                  static_cast<uint32_t>(meshData.indices.size()),
+                                  layout
+                                  );
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Geometry/Mesh.hpp
-
+/*!
+ * @file Mesh.hpp
+ * @brief High-level mesh container managing submeshes, vertex streams, and index buffers.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Renderer/Buffers/VertexBuffer.hpp"
+#include "Renderer/Buffers/IndexBuffer.hpp"
+#include "Renderer/Geometry/SubMesh.hpp"
+#include "Renderer/Procedural/ChamferBox.hpp"
+#include <memory>
+#include <vector>
+namespace KanVerse {
+  /*!
+   * @class Mesh
+   * @brief Manages GPU buffer lifecycles and partitioned submesh topologies.
+   */
+  class Mesh {
+  public:
+    /*!
+     * @brief Constructs an empty mesh instance.
+     */
+    Mesh() = default;
+    /*!
+     * @brief Constructs a mesh populated with vertices, indices, and a root submesh.
+     * @param vertices Raw vertex data array.
+     * @param vertexCount Total number of vertices.
+     * @param indices Raw 16-bit indices array.
+     * @param indexCount Total number of indices.
+     * @param layout Vertex attribute layout descriptor.
+     */
+    Mesh(const Vertex* vertices,
+         size_t vertexCount,
+         const uint16_t* indices,
+         uint32_t indexCount,
+         const BufferLayout& layout);
+    /*!
+     * @brief Accesses the bound GPU vertex buffer.
+     */
+    [[nodiscard]] const std::shared_ptr<VertexBuffer>& GetVertexBuffer() const noexcept { return m_VertexBuffer; }
+    /*!
+     * @brief Accesses the bound GPU index buffer.
+     */
+    [[nodiscard]] const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const noexcept { return m_IndexBuffer; }
+    /*!
+     * @brief Accesses the submesh partition collection.
+     */
+    [[nodiscard]] const std::vector<Submesh>& GetSubmeshes() const noexcept { return m_Submeshes; }
+    /*!
+     * @brief Accesses mutable submesh partition collection.
+     */
+    [[nodiscard]] std::vector<Submesh>& GetSubmeshes() noexcept { return m_Submeshes; }
+    /*!
+     * @brief Factory creating a procedural chamfered cube mesh.
+     * @param size Edge length.
+     * @param chamfer Chamfer bevel depth.
+     * @param layout Vertex attribute layout descriptor.
+     * @return Shared pointer to newly constructed Mesh.
+     */
+    [[nodiscard]] static std::shared_ptr<Mesh> CreateChamferBox(float size,
+                                                                float chamfer,
+                                                                const BufferLayout& layout);
+  private:
+    std::shared_ptr<VertexBuffer> m_VertexBuffer;
+    std::shared_ptr<IndexBuffer>  m_IndexBuffer;
+    std::vector<Submesh>          m_Submeshes;
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Geometry/SubMesh.hpp
-
+/*!
+ * @file Submesh.hpp
+ * @brief Discrete submesh draw-call descriptors and local bounds definition.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Math/Math.hpp"
+#include <cstdint>
+#include <string>
+namespace KanVerse {
+  /*!
+   * @struct AABB
+   * @brief Axis-aligned bounding box defined by minimum and maximum extents in 3D space.
+   */
+  struct AABB {
+    Math::Vec3 Min{ 1e30f,  1e30f,  1e30f};
+    Math::Vec3 Max{-1e30f, -1e30f, -1e30f};
+    /*!
+     * @brief Expands bounding extents to encapsulate an arbitrary point.
+     * @param point 3D coordinates.
+     */
+    void Encapsulate(const Math::Vec3& point) {
+      Min = Math::MakeVec3(
+                           std::min(Min.x, point.x),
+                           std::min(Min.y, point.y),
+                           std::min(Min.z, point.z)
+                           );
+      Max = Math::MakeVec3(
+                           std::max(Max.x, point.x),
+                           std::max(Max.y, point.y),
+                           std::max(Max.z, point.z)
+                           );
+    }
+  };
+  /*!
+   * @struct Submesh
+   * @brief Partitioned primitive geometry metadata mapping to a dedicated draw-call.
+   */
+  struct Submesh {
+    std::string NodeName{"Submesh"};      ///< Semantic diagnostic identifier.
+    uint32_t    BaseVertex{0};             ///< Starting vertex offset in primary vertex stream.
+    uint32_t    BaseIndex{0};              ///< Starting byte offset in primary index stream.
+    uint32_t    IndexCount{0};             ///< Number of primitive indices.
+    uint32_t    MaterialIndex{0};          ///< Target surface material index.
+    Math::Mat4  LocalTransform{Math::Identity()}; ///< Hierarchical transformation.
+    AABB        BoundingBox;               ///< Local object space extents.
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Lighting/DirectionalLight.hpp
-
+/*!
+ * @file DirectionalLight.hpp
+ * @brief Directional sun/moon light source with orthographic shadow-map projection matrix generation.
+ * @copyright KanVerse Engine
+ */
+#pragma once
+#include "Renderer/Lighting/Light.hpp"
+#include "Core/Math/Math.hpp"
+#include <algorithm>
+namespace KanVerse {
+  /*!
+   * @brief Represents an infinite directional light source (Sun/Moon) and its orthographic shadow frustum.
+   */
+  class DirectionalLight : public Light {
+  public:
+    /*!
+     * @brief Constructs a DirectionalLight with direction, color, and intensity.
+     * @param direction Normalized or unnormalized light travel direction vector.
+     * @param color Linear RGB color of the light.
+     * @param intensity Luminous intensity multiplier.
+     */
+    explicit DirectionalLight(const Math::Vec3& direction = Math::MakeVec3(-0.6f, -1.0f, -0.4f),
+                              const Math::Vec3& color = Math::MakeVec3(1.0f, 0.95f, 0.88f),
+                              float intensity = 1.2f)
+    : Light(color, intensity),
+    m_Direction(simd_normalize(direction)),
+    m_OrthoExtent(75.0f) {
+      RecalculateMatrices();
+    }
+    /*!
+     * @brief Updates the light direction and recalculates the orthographic light-space matrix.
+     * @param direction New light direction vector.
+     */
+    void SetDirection(const Math::Vec3& direction) noexcept {
+      m_Direction = simd_normalize(direction);
+      RecalculateMatrices();
+    }
+    /*!
+     * @brief Sets the orthographic half-extent for the shadow map frustum.
+     * @param extent Half-width and half-height of the orthographic shadow box.
+     */
+    void SetOrthoExtent(float extent) noexcept {
+      m_OrthoExtent = std::max(extent, 75.0f);
+      RecalculateMatrices();
+    }
+    [[nodiscard]] const Math::Vec3& GetDirection() const noexcept { return m_Direction; }
+    [[nodiscard]] float GetOrthoExtent() const noexcept { return m_OrthoExtent; }
+    [[nodiscard]] const Math::Mat4& GetViewProjectionMatrix() const noexcept { return m_ViewProjectionMatrix; }
+    [[nodiscard]] LightType GetType() const noexcept override { return LightType::Directional; }
+  private:
+    /*!
+     * @brief Recomputes the orthographic View-Projection matrix covering the entire level ground plane.
+     */
+    void RecalculateMatrices() noexcept {
+      const Math::Vec3 lightPos = -m_Direction * 90.0f;
+      const Math::Vec3 target   = Math::MakeVec3(0.0f, 0.0f, 0.0f);
+      const Math::Vec3 up       = Math::MakeVec3(0.0f, 1.0f, 0.0f);
+      const Math::Mat4 lightView = Math::LookAt(lightPos, target, up);
+      const Math::Mat4 lightProj = Math::Ortho(
+                                               -m_OrthoExtent, m_OrthoExtent,
+                                               -m_OrthoExtent, m_OrthoExtent,
+                                               1.0f,           220.0f
+                                               );
+      m_ViewProjectionMatrix = Math::Multiply(lightProj, lightView);
+    }
+    Math::Vec3 m_Direction;                              ///< Normalized light direction vector.
+    float      m_OrthoExtent;                            ///< Half-extent of the orthographic shadow volume.
+    Math::Mat4 m_ViewProjectionMatrix{Math::Identity()}; ///< Combined light-space projection * view matrix.
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Lighting/EnvironmentLighting.hpp
 
 // FILE: KanVerse_Engine/Renderer/Lighting/Light.hpp
-
+/*!
+ * @file Light.hpp
+ * @brief Base lighting descriptors and photometric classifications.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Math/Math.hpp"
+namespace KanVerse {
+  /*!
+   * @enum LightType
+   * @brief Underlying physical emitter geometry category.
+   */
+  enum class LightType : uint8_t {
+    Directional = 0,
+    Point,
+    Spot
+  };
+  /*!
+   * @class Light
+   * @brief Base contract for scene illumination emitters.
+   */
+  class Light {
+  public:
+    virtual ~Light() = default;
+    /*!
+     * @brief Queries the emitter category.
+     * @return LightType classification.
+     */
+    [[nodiscard]] virtual LightType GetType() const noexcept = 0;
+    /*!
+     * @brief Sets emission color.
+     * @param color Normalized linear RGB tint.
+     */
+    void SetColor(const Math::Vec3& color) noexcept { m_Color = color; }
+    /*!
+     * @brief Sets radiant intensity scalar.
+     * @param intensity Positive illuminance factor.
+     */
+    void SetIntensity(float intensity) noexcept { m_Intensity = intensity; }
+    /*!
+     * @brief Queries current color tint.
+     * @return Linear RGB vector.
+     */
+    [[nodiscard]] const Math::Vec3& GetColor() const noexcept { return m_Color; }
+    /*!
+     * @brief Queries current radiant intensity factor.
+     * @return Illuminance scalar.
+     */
+    [[nodiscard]] float GetIntensity() const noexcept { return m_Intensity; }
+  protected:
+    explicit Light(const Math::Vec3& color, float intensity)
+    : m_Color(color), m_Intensity(intensity) {}
+    Math::Vec3 m_Color{1.0f, 1.0f, 1.0f}; ///< Radiated color tint.
+    float      m_Intensity{1.0f};          ///< Energy multiplier.
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Lighting/PointLight.cpp
 
 // FILE: KanVerse_Engine/Renderer/Lighting/PointLight.hpp
 
 // FILE: KanVerse_Engine/Renderer/Materials/Material.hpp
-
+/*!
+ * @file Material.hpp
+ * @brief PBR Material abstraction managing shader uniforms, transparency state, and texture bindings.
+ * @copyright KanVerse Engine
+ */
+#pragma once
+#include "Core/Math/Math.hpp"
+#include "Renderer/Pipeline/Shader.hpp"
+#include "Renderer/Textures/Texture2D.hpp"
+#include <memory>
+#include <string>
+namespace MTL {
+  class Buffer;
+}
+namespace KanVerse {
+  /*!
+   * @brief 256-byte aligned uniform block uploaded per material to fragment shader buffer(2).
+   */
+  struct alignas(256) MaterialUniforms {
+    Math::Vec4 BaseColor{1.0f, 1.0f, 1.0f, 1.0f};     ///< Albedo tint color (RGBA).
+    Math::Vec4 SpecularColor{1.0f, 1.0f, 1.0f, 1.0f}; ///< Specular reflectance tint.
+    Math::Vec4 EmissiveColor{0.0f, 0.0f, 0.0f, 0.0f}; ///< HDR emissive radiance color.
+    Math::Vec3 TilingFactor{1.0f, 1.0f, 1.0f};        ///< Triplanar/UV tiling multiplier.
+    float      Roughness{0.4f};                       ///< Microfacet surface roughness [0.04, 1.0].
+    float      Metallic{0.0f};                        ///< Metalness factor [0.0, 1.0].
+    int32_t    HasAlbedoMap{0};                       ///< Non-zero if Albedo texture is bound.
+    int32_t    HasNormalMap{0};                       ///< Non-zero if Normal texture is bound.
+    int32_t    HasRoughnessMap{0};                    ///< Non-zero if Roughness texture is bound.
+    int32_t    HasMetallicMap{0};                     ///< Non-zero if Metallic texture is bound.
+    int32_t    HasAOMap{0};                           ///< Non-zero if Ambient Occlusion texture is bound.
+    int32_t    HasHeightMap{0};                       ///< Non-zero if Height texture is bound.
+    float      Padding[1]{0.0f};                      ///< Alignment padding.
+  };
+  /*!
+   * @brief Encapsulates PBR surface properties, textures, transparency flags, and triple-buffered Metal uniform buffers.
+   */
+  class Material {
+  public:
+    /*!
+     * @brief Constructs a Material bound to a specific shader program.
+     * @param shader Compiled shader program.
+     * @param name Debug identifier for the material.
+     */
+    explicit Material(std::shared_ptr<Shader> shader, std::string name = "DefaultMaterial");
+    virtual ~Material();
+    /*!
+     * @brief Sets the base albedo color and automatically updates transparency if alpha < 1.0.
+     * @param color RGBA linear base color.
+     */
+    void SetBaseColor(const Math::Vec4& color) noexcept;
+    [[nodiscard]] const Math::Vec4& GetBaseColor() const noexcept { return m_Uniforms.BaseColor; }
+    /*!
+     * @brief Sets the surface microfacet roughness.
+     * @param roughness Roughness value in [0.0, 1.0].
+     */
+    void SetRoughness(float roughness) noexcept;
+    [[nodiscard]] float GetRoughness() const noexcept { return m_Uniforms.Roughness; }
+    /*!
+     * @brief Sets the surface metalness factor.
+     * @param metallic Metallic value in [0.0, 1.0].
+     */
+    void SetMetallic(float metallic) noexcept;
+    [[nodiscard]] float GetMetallic() const noexcept { return m_Uniforms.Metallic; }
+    /*!
+     * @brief Sets the HDR emissive color for glowing surfaces and light fixtures.
+     * @param emissive Emissive RGB radiance.
+     */
+    void SetEmissiveColor(const Math::Vec4& emissive) noexcept;
+    [[nodiscard]] const Math::Vec4& GetEmissiveColor() const noexcept { return m_Uniforms.EmissiveColor; }
+    /*!
+     * @brief Explicitly sets whether this material should be treated as transparent (e.g., skipping shadow caster pass).
+     * @param transparent True if transparent.
+     */
+    void SetTransparent(bool transparent) noexcept { m_IsTransparent = transparent; }
+    [[nodiscard]] bool IsTransparent() const noexcept { return m_IsTransparent; }
+    void SetAlbedoTexture(std::shared_ptr<Texture2D> texture) noexcept;
+    [[nodiscard]] const std::shared_ptr<Texture2D>& GetAlbedoTexture() const noexcept { return m_AlbedoTexture; }
+    void SetNormalTexture(std::shared_ptr<Texture2D> texture) noexcept;
+    [[nodiscard]] const std::shared_ptr<Texture2D>& GetNormalTexture() const noexcept { return m_NormalTexture; }
+    void SetRoughnessTexture(std::shared_ptr<Texture2D> texture) noexcept;
+    [[nodiscard]] const std::shared_ptr<Texture2D>& GetRoughnessTexture() const noexcept { return m_RoughnessTexture; }
+    void SetMetallicTexture(std::shared_ptr<Texture2D> texture) noexcept;
+    [[nodiscard]] const std::shared_ptr<Texture2D>& GetMetallicTexture() const noexcept { return m_MetallicTexture; }
+    void SetAOTexture(std::shared_ptr<Texture2D> texture) noexcept;
+    [[nodiscard]] const std::shared_ptr<Texture2D>& GetAOTexture() const noexcept { return m_AOTexture; }
+    void SetHeightTexture(std::shared_ptr<Texture2D> texture) noexcept;
+    [[nodiscard]] const std::shared_ptr<Texture2D>& GetHeightTexture() const noexcept { return m_HeightTexture; }
+    void SetTilingFactor(const Math::Vec3& tiling) noexcept;
+    [[nodiscard]] const Math::Vec3& GetTilingFactor() const noexcept { return m_Uniforms.TilingFactor; }
+    /*!
+     * @brief Synchronizes CPU material parameters into the GPU buffer for the given frame index.
+     * @param frameIndex In-flight frame index [0, kMaxFramesInFlight - 1].
+     */
+    void Sync(uint32_t frameIndex);
+    [[nodiscard]] MTL::Buffer* GetUniformBuffer(uint32_t frameIndex) const noexcept;
+    [[nodiscard]] const std::shared_ptr<Shader>& GetShader() const noexcept { return m_Shader; }
+    [[nodiscard]] const std::string& GetName() const noexcept { return m_Name; }
+    /*!
+     * @brief Factory method to instantiate a shared Material.
+     * @param shader Associated shader program.
+     * @param name Material identifier.
+     * @return Shared pointer to the newly created Material.
+     */
+    [[nodiscard]] static std::shared_ptr<Material> Create(std::shared_ptr<Shader> shader,
+                                                          std::string name = "Material");
+  private:
+    std::string                m_Name;                                     ///< Material debug name.
+    std::shared_ptr<Shader>    m_Shader;                                   ///< Bound shader program.
+    MaterialUniforms           m_Uniforms;                                 ///< CPU-side uniform data.
+    bool                       m_Dirty{true};                              ///< Dirty flag for uniform sync.
+    bool                       m_IsTransparent{false};                     ///< True if alpha-blended / non-shadow-casting.
+    static constexpr uint32_t  kMaxFramesInFlight = 3;                     ///< Triple buffering count.
+    MTL::Buffer*               m_UniformBuffers[kMaxFramesInFlight]{nullptr}; ///< Per-frame Metal uniform buffers.
+    std::shared_ptr<Texture2D> m_AlbedoTexture;                            ///< Albedo map.
+    std::shared_ptr<Texture2D> m_NormalTexture;                            ///< Normal map.
+    std::shared_ptr<Texture2D> m_RoughnessTexture;                         ///< Roughness map.
+    std::shared_ptr<Texture2D> m_MetallicTexture;                          ///< Metallic map.
+    std::shared_ptr<Texture2D> m_AOTexture;                                ///< Ambient occlusion map.
+    std::shared_ptr<Texture2D> m_HeightTexture;                            ///< Height / displacement map.
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Materials/Material.mm
-
+/*!
+ * @file Material.mm
+ * @brief Metal implementation of the PBR Material class.
+ * @copyright KanVerse Engine
+ */
+#include "Renderer/Materials/Material.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Application/Application.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <cassert>
+#include <cstring>
+namespace KanVerse {
+  Material::Material(std::shared_ptr<Shader> shader, std::string name)
+  : m_Name(std::move(name)), m_Shader(std::move(shader)) {
+    KV_CORE_ASSERT(m_Shader != nullptr, "[KanVerse] Material must be bound to a valid Shader!");
+    MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+    KV_CORE_ASSERT(device != nullptr, "[KanVerse] Active Metal device is null!");
+    for (uint32_t i = 0; i < kMaxFramesInFlight; ++i) {
+      m_UniformBuffers[i] = device->newBuffer(sizeof(MaterialUniforms), MTL::ResourceStorageModeShared);
+      KV_CORE_ASSERT(m_UniformBuffers[i] != nullptr, "[KanVerse] Failed to allocate Material uniform buffer!");
+    }
+    for (uint32_t i = 0; i < kMaxFramesInFlight; ++i) {
+      Sync(i);
+    }
+  }
+  Material::~Material() {
+    for (uint32_t i = 0; i < kMaxFramesInFlight; ++i) {
+      if (m_UniformBuffers[i]) {
+        m_UniformBuffers[i]->release();
+        m_UniformBuffers[i] = nullptr;
+      }
+    }
+  }
+  void Material::SetBaseColor(const Math::Vec4& color) noexcept {
+    m_Uniforms.BaseColor = color;
+    m_IsTransparent = (color.w < 0.99f);
+    m_Dirty = true;
+  }
+  void Material::SetRoughness(float roughness) noexcept {
+    m_Uniforms.Roughness = roughness;
+    m_Dirty = true;
+  }
+  void Material::SetMetallic(float metallic) noexcept {
+    m_Uniforms.Metallic = metallic;
+    m_Dirty = true;
+  }
+  void Material::SetEmissiveColor(const Math::Vec4& emissive) noexcept {
+    m_Uniforms.EmissiveColor = emissive;
+    m_Dirty = true;
+  }
+  void Material::SetAlbedoTexture(std::shared_ptr<Texture2D> texture) noexcept {
+    m_AlbedoTexture = std::move(texture);
+    m_Uniforms.HasAlbedoMap = (m_AlbedoTexture != nullptr) ? 1 : 0;
+    m_Dirty = true;
+  }
+  void Material::SetNormalTexture(std::shared_ptr<Texture2D> texture) noexcept {
+    m_NormalTexture = std::move(texture);
+    m_Uniforms.HasNormalMap = (m_NormalTexture != nullptr) ? 1 : 0;
+    m_Dirty = true;
+  }
+  void Material::SetRoughnessTexture(std::shared_ptr<Texture2D> texture) noexcept {
+    m_RoughnessTexture = std::move(texture);
+    m_Uniforms.HasRoughnessMap = (m_RoughnessTexture != nullptr) ? 1 : 0;
+    m_Dirty = true;
+  }
+  void Material::SetMetallicTexture(std::shared_ptr<Texture2D> texture) noexcept {
+    m_MetallicTexture = std::move(texture);
+    m_Uniforms.HasMetallicMap = (m_MetallicTexture != nullptr) ? 1 : 0;
+    m_Dirty = true;
+  }
+  void Material::SetAOTexture(std::shared_ptr<Texture2D> texture) noexcept {
+    m_AOTexture = std::move(texture);
+    m_Uniforms.HasAOMap = (m_AOTexture != nullptr) ? 1 : 0;
+    m_Dirty = true;
+  }
+  void Material::SetHeightTexture(std::shared_ptr<Texture2D> texture) noexcept {
+    m_HeightTexture = std::move(texture);
+    m_Uniforms.HasHeightMap = (m_HeightTexture != nullptr) ? 1 : 0;
+    m_Dirty = true;
+  }
+  void Material::SetTilingFactor(const Math::Vec3& tiling) noexcept {
+    m_Uniforms.TilingFactor = tiling;
+    m_Dirty = true;
+  }
+  void Material::Sync(uint32_t frameIndex) {
+    KV_CORE_ASSERT(frameIndex < kMaxFramesInFlight, "[KanVerse] Frame index out of flight range!");
+    if (!m_UniformBuffers[frameIndex]) return;
+    uint8_t* dest = static_cast<uint8_t*>(m_UniformBuffers[frameIndex]->contents());
+    std::memcpy(dest, &m_Uniforms, sizeof(MaterialUniforms));
+  }
+  MTL::Buffer* Material::GetUniformBuffer(uint32_t frameIndex) const noexcept {
+    KV_CORE_ASSERT(frameIndex < kMaxFramesInFlight, "[KanVerse] Frame index out of flight range!");
+    return m_UniformBuffers[frameIndex];
+  }
+  std::shared_ptr<Material> Material::Create(std::shared_ptr<Shader> shader, std::string name) {
+    return std::make_shared<Material>(std::move(shader), std::move(name));
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Pipeline/FrameSync.hpp
 /*!
  * @file FrameSync.hpp
@@ -3448,27 +4310,707 @@ namespace KanVerse {
 // FILE: KanVerse_Engine/Renderer/PostProcess/BloomPass.hpp
 
 // FILE: KanVerse_Engine/Renderer/Procedural/Capsule.cpp
-
+/*!
+ * @file Capsule.cpp
+ * @brief Implementation of procedural capsule mesh generator with CCW winding.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Procedural/Capsule.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include <cmath>
+#include <vector>
+namespace KanVerse {
+  std::shared_ptr<Mesh> Capsule::Create(
+                                        float radius,
+                                        float cylinderHeight,
+                                        uint32_t radialSegments,
+                                        uint32_t capRings,
+                                        const BufferLayout& layout
+                                        ) {
+    KV_CORE_ASSERT(radius > 0.0f, "Capsule radius must be greater than zero.");
+    KV_CORE_ASSERT(cylinderHeight >= 0.0f, "Capsule cylinder height cannot be negative.");
+    KV_CORE_ASSERT(radialSegments >= 3, "Radial segments must be at least 3.");
+    KV_CORE_ASSERT(capRings >= 1, "Cap rings must be at least 1.");
+    const float halfHeight = cylinderHeight * 0.5f;
+    const bool hasCylinder = cylinderHeight > 0.001f;
+    // If no cylinder, it's just two hemispheres (a sphere).
+    // If cylinder exists, we add 1 extra ring to duplicate the equator at the bottom.
+    const uint32_t totalRings = (capRings * 2) + (hasCylinder ? 1 : 0);
+    std::vector<Vertex> vertices;
+    std::vector<uint16_t> indices;
+    const size_t estimatedVertices = (totalRings + 1) * (radialSegments + 1);
+    vertices.reserve(estimatedVertices);
+    for (uint32_t ring = 0; ring <= totalRings; ++ring) {
+      float phi = 0.0f;
+      float yOffset = 0.0f;
+      if (ring < capRings) {
+        // Top hemisphere
+        const float t = static_cast<float>(ring) / static_cast<float>(capRings);
+        phi = t * (static_cast<float>(M_PI) * 0.5f);
+        yOffset = halfHeight;
+      } else if (ring == capRings) {
+        // Equator (Top)
+        phi = static_cast<float>(M_PI) * 0.5f;
+        yOffset = halfHeight;
+      } else if (hasCylinder && ring == capRings + 1) {
+        // Equator (Bottom) - Only generated if we actually have a cylinder wall
+        phi = static_cast<float>(M_PI) * 0.5f;
+        yOffset = -halfHeight;
+      } else {
+        // Bottom hemisphere
+        // Adjust the index so `t` sweeps smoothly from 0 to 1 regardless of the cylinder
+        const uint32_t bottomRing = hasCylinder ? (ring - (capRings + 1)) : (ring - capRings);
+        const float t = static_cast<float>(bottomRing) / static_cast<float>(capRings);
+        phi = (static_cast<float>(M_PI) * 0.5f) + (t * static_cast<float>(M_PI) * 0.5f);
+        yOffset = -halfHeight;
+      }
+      const float cosPhi = std::cos(phi);
+      const float sinPhi = std::sin(phi);
+      for (uint32_t seg = 0; seg <= radialSegments; ++seg) {
+        const float theta = static_cast<float>(seg) * (2.0f * static_cast<float>(M_PI) / static_cast<float>(radialSegments));
+        const float cosTheta = std::cos(theta);
+        const float sinTheta = std::sin(theta);
+        const float nx = sinPhi * cosTheta;
+        const float ny = cosPhi;
+        const float nz = sinPhi * sinTheta;
+        const float px = radius * nx;
+        const float py = radius * ny + yOffset;
+        const float pz = radius * nz;
+        const float u = static_cast<float>(seg) / static_cast<float>(radialSegments);
+        const float v = static_cast<float>(ring) / static_cast<float>(totalRings);
+        Vertex vertex{};
+        vertex.position = simd_make_float3(px, py, pz);
+        vertex.normal   = simd_make_float3(nx, ny, nz);
+        vertex.color    = simd_make_float4(1.0f, 1.0f, 1.0f, 1.0f); // Pure white prevents PBR tinting
+        vertex.texCoord = simd_make_float2(u, v);
+        vertex.padding  = simd_make_float2(0.0f, 0.0f);
+        vertices.push_back(vertex);
+      }
+    }
+    for (uint32_t ring = 0; ring < totalRings; ++ring) {
+      for (uint32_t seg = 0; seg < radialSegments; ++seg) {
+        const uint16_t current = static_cast<uint16_t>(ring * (radialSegments + 1) + seg);
+        const uint16_t next    = static_cast<uint16_t>(current + radialSegments + 1);
+        indices.push_back(current);
+        indices.push_back(current + 1);
+        indices.push_back(next);
+        indices.push_back(current + 1);
+        indices.push_back(next + 1);
+        indices.push_back(next);
+      }
+    }
+    return std::make_shared<Mesh>(
+                                  vertices.data(),
+                                  vertices.size(),
+                                  indices.data(),
+                                  static_cast<uint32_t>(indices.size()),
+                                  layout
+                                  );
+  }
+}
 // FILE: KanVerse_Engine/Renderer/Procedural/Capsule.hpp
-
+/*!
+ * @file Capsule.hpp
+ * @brief Procedural UV capsule mesh generator for character bodies.
+ * @details Synthesizes a capped cylindrical hull along the vertical Y-axis
+ *          with configurable radius, central cylinder height, and radial/vertical rings.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Renderer/Geometry/Mesh.hpp"
+#include "Renderer/Buffers/BufferLayout.hpp"
+#include <memory>
+namespace KanVerse {
+  /*!
+   * @class Capsule
+   * @brief Procedural generator for capsule geometry with smooth normals and UV coordinates.
+   */
+  class Capsule {
+  public:
+    /*!
+     * @brief Generates a procedural capsule mesh aligned along the local Y-axis.
+     * @param radius Hemisphere and cylinder radius in world units.
+     * @param cylinderHeight Height of the cylindrical center section excluding hemisphere caps.
+     * @param radialSegments Number of subdivisions around the azimuth perimeter.
+     * @param capRings Number of latitude rings per hemisphere cap.
+     * @param layout Vertex buffer layout specifying interleaved attributes.
+     * @return Shared pointer to the constructed GPU Mesh instance.
+     */
+    [[nodiscard]] static std::shared_ptr<Mesh> Create(
+                                                      float radius,
+                                                      float cylinderHeight,
+                                                      uint32_t radialSegments,
+                                                      uint32_t capRings,
+                                                      const BufferLayout& layout
+                                                      );
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Procedural/ChamferBox.cpp
-
+/*!
+ * @file ChamferBox.cpp
+ * @brief Implementation of chamfered box procedural geometry synthesis with uniform white vertex colors.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Procedural/ChamferBox.hpp"
+#include <cmath>
+namespace KanVerse {
+  MeshData ChamferBoxGenerator::Generate(float size, float chamfer, uint32_t segments) {
+    MeshData data;
+    struct FaceDef {
+      simd::float3 normal;
+      simd::float3 u;
+      simd::float3 v;
+      simd::float4 color;
+    };
+    // Set all face colors to neutral white to prevent unwanted color tinting on edges
+    const FaceDef faces[6] = {
+      // Normal                // u                   // v                   // Color
+      { { 0.0f,  0.0f,  1.0f}, { 1.0f,  0.0f,  0.0f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 1.0f, 1.0f, 1.0f} }, // +Z Front
+      { { 0.0f,  0.0f, -1.0f}, {-1.0f,  0.0f,  0.0f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 1.0f, 1.0f, 1.0f} }, // -Z Back
+      { { 1.0f,  0.0f,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 1.0f, 1.0f, 1.0f} }, // +X Right
+      { {-1.0f,  0.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 1.0f, 1.0f, 1.0f} }, // -X Left
+      { { 0.0f,  1.0f,  0.0f}, { 1.0f,  0.0f,  0.0f}, { 0.0f,  0.0f, -1.0f}, {1.0f, 1.0f, 1.0f, 1.0f} }, // +Y Top
+      { { 0.0f, -1.0f,  0.0f}, { 1.0f,  0.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f, 1.0f, 1.0f} }  // -Y Bottom
+    };
+    const float inner = size - chamfer;
+    // 1. Generate 6 Main Faces
+    for (uint32_t f = 0; f < 6; ++f) {
+      const uint16_t startIndex = static_cast<uint16_t>(data.vertices.size());
+      const auto& face = faces[f];
+      const simd::float3 center = face.normal * size;
+      const simd::float3 p0 = center - face.u * inner - face.v * inner;
+      const simd::float3 p1 = center + face.u * inner - face.v * inner;
+      const simd::float3 p2 = center + face.u * inner + face.v * inner;
+      const simd::float3 p3 = center - face.u * inner + face.v * inner;
+      data.vertices.push_back({ p0, face.normal, face.color, {0.0f, 0.0f}, {0.0f, 0.0f} });
+      data.vertices.push_back({ p1, face.normal, face.color, {1.0f, 0.0f}, {0.0f, 0.0f} });
+      data.vertices.push_back({ p2, face.normal, face.color, {1.0f, 1.0f}, {0.0f, 0.0f} });
+      data.vertices.push_back({ p3, face.normal, face.color, {0.0f, 1.0f}, {0.0f, 0.0f} });
+      data.indices.push_back(startIndex + 0);
+      data.indices.push_back(startIndex + 1);
+      data.indices.push_back(startIndex + 2);
+      data.indices.push_back(startIndex + 2);
+      data.indices.push_back(startIndex + 3);
+      data.indices.push_back(startIndex + 0);
+    }
+    // 2. Generate 12 Curved Bevel Edges
+    struct EdgeDef {
+      simd::float3 dir;
+      simd::float3 nA;
+      simd::float3 nB;
+      simd::float4 color;
+    };
+    // Set all edge bevel colors to neutral white as well
+    const EdgeDef edges[12] = {
+      // Edges parallel to Z
+      { {0, 0, 1}, { 1, 0, 0}, { 0, 1, 0}, {1.0f, 1.0f, 1.0f, 1.0f} },
+      { {0, 0, 1}, { 0, 1, 0}, {-1, 0, 0}, {1.0f, 1.0f, 1.0f, 1.0f} },
+      { {0, 0, 1}, {-1, 0, 0}, { 0,-1, 0}, {1.0f, 1.0f, 1.0f, 1.0f} },
+      { {0, 0, 1}, { 0,-1, 0}, { 1, 0, 0}, {1.0f, 1.0f, 1.0f, 1.0f} },
+      // Edges parallel to X
+      { {1, 0, 0}, { 0, 1, 0}, { 0, 0, 1}, {1.0f, 1.0f, 1.0f, 1.0f} },
+      { {1, 0, 0}, { 0, 0, 1}, { 0,-1, 0}, {1.0f, 1.0f, 1.0f, 1.0f} },
+      { {1, 0, 0}, { 0,-1, 0}, { 0, 0,-1}, {1.0f, 1.0f, 1.0f, 1.0f} },
+      { {1, 0, 0}, { 0, 0,-1}, { 0, 1, 0}, {1.0f, 1.0f, 1.0f, 1.0f} },
+      // Edges parallel to Y
+      { {0, 1, 0}, { 0, 0, 1}, { 1, 0, 0}, {1.0f, 1.0f, 1.0f, 1.0f} },
+      { {0, 1, 0}, { 1, 0, 0}, { 0, 0,-1}, {1.0f, 1.0f, 1.0f, 1.0f} },
+      { {0, 1, 0}, { 0, 0,-1}, {-1, 0, 0}, {1.0f, 1.0f, 1.0f, 1.0f} },
+      { {0, 1, 0}, {-1, 0, 0}, { 0, 0, 1}, {1.0f, 1.0f, 1.0f, 1.0f} }
+    };
+    for (uint32_t e = 0; e < 12; ++e) {
+      const auto& edge = edges[e];
+      const simd::float3 center = (edge.nA + edge.nB) * inner;
+      for (uint32_t s = 0; s < segments; ++s) {
+        const float t0 = static_cast<float>(s) / static_cast<float>(segments);
+        const float t1 = static_cast<float>(s + 1) / static_cast<float>(segments);
+        const float angle0 = t0 * (M_PI * 0.5f);
+        const float angle1 = t1 * (M_PI * 0.5f);
+        const simd::float3 norm0 = simd_normalize(edge.nA * std::cos(angle0) + edge.nB * std::sin(angle0));
+        const simd::float3 norm1 = simd_normalize(edge.nA * std::cos(angle1) + edge.nB * std::sin(angle1));
+        const simd::float3 p0 = center + norm0 * chamfer - edge.dir * inner;
+        const simd::float3 p1 = center + norm1 * chamfer - edge.dir * inner;
+        const simd::float3 p2 = center + norm1 * chamfer + edge.dir * inner;
+        const simd::float3 p3 = center + norm0 * chamfer + edge.dir * inner;
+        const uint16_t startIndex = static_cast<uint16_t>(data.vertices.size());
+        data.vertices.push_back({ p0, norm0, edge.color, {t0, 0.0f}, {0.0f, 0.0f} });
+        data.vertices.push_back({ p1, norm1, edge.color, {t1, 0.0f}, {0.0f, 0.0f} });
+        data.vertices.push_back({ p2, norm1, edge.color, {t1, 1.0f}, {0.0f, 0.0f} });
+        data.vertices.push_back({ p3, norm0, edge.color, {t0, 1.0f}, {0.0f, 0.0f} });
+        data.indices.push_back(startIndex + 0);
+        data.indices.push_back(startIndex + 1);
+        data.indices.push_back(startIndex + 2);
+        data.indices.push_back(startIndex + 2);
+        data.indices.push_back(startIndex + 3);
+        data.indices.push_back(startIndex + 0);
+      }
+    }
+    return data;
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Procedural/ChamferBox.hpp
-
+/*!
+ * @file ChamferBox.hpp
+ * @brief Procedural geometry synthesizer for chamfered box meshes with UV coordinates.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <simd/simd.h>
+#include <vector>
+#include <cstdint>
+namespace KanVerse {
+  /*!
+   * @struct Vertex
+   * @brief Interleaved 64-byte vertex format strictly aligned for Metal SIMD pipelines.
+   */
+  struct alignas(16) Vertex {
+    simd::float3 position;  ///< Local 3D vertex position (offset 0, 16 bytes)
+    simd::float3 normal;    ///< Surface normal vector (offset 16, 16 bytes)
+    simd::float4 color;     ///< Per-vertex diffuse color (offset 32, 16 bytes)
+    simd::float2 texCoord;  ///< Texture coordinates (offset 48, 8 bytes)
+    simd::float2 padding;   ///< Alignment padding to enforce 64-byte stride (offset 56, 8 bytes)
+  };
+  /*!
+   * @struct MeshData
+   * @brief CPU geometry buffer payload holding vertices and element indices.
+   */
+  struct MeshData {
+    std::vector<Vertex>   vertices;
+    std::vector<uint16_t> indices;
+  };
+  /*!
+   * @class ChamferBoxGenerator
+   * @brief Synthesizes chamfered cube geometries with smooth corner normals and UV coordinates.
+   */
+  class ChamferBoxGenerator {
+  public:
+    /*!
+     * @brief Synthesizes a chamfered box mesh with full bevels and face UVs.
+     * @param size Half-extent dimension.
+     * @param chamfer Radius of the beveled corner curves.
+     * @param segments Tessellation resolution along curved edges.
+     * @return Populated MeshData container.
+     */
+    static MeshData Generate(float size = 0.5f, float chamfer = 0.08f, uint32_t segments = 3);
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Renderer/RenderCommand.hpp
-
+/*!
+ * @file RenderCommand.hpp
+ * @brief Low-level immediate rendering commands executing on active render encoders.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Renderer/Buffers/IndexBuffer.hpp"
+#include "Renderer/Buffers/VertexBuffer.hpp"
+#include "Renderer/Pipeline/Pipeline.hpp"
+#include <cstdint>
+#include <memory>
+namespace MTL {
+  class RenderCommandEncoder;
+}
+namespace KanVerse {
+  /*!
+   * @class RenderCommand
+   * @brief Static gateway dispatching low-level GPU drawing and pipeline bind commands via metal-cpp.
+   */
+  class RenderCommand {
+  public:
+    /*!
+     * @brief Binds pipeline, vertex buffer, and executes single-instance indexed primitive drawing.
+     * @param encoder Active Metal render command encoder.
+     * @param pipeline Pipeline state defining shaders, blend states, and depth tests.
+     * @param vertexBuffer Bound vertex buffer holding interleaved vertex streams.
+     * @param indexBuffer Bound index buffer defining primitive topology.
+     */
+    static void DrawIndexed(MTL::RenderCommandEncoder* encoder,
+                            const std::shared_ptr<Pipeline>& pipeline,
+                            const std::shared_ptr<VertexBuffer>& vertexBuffer,
+                            const std::shared_ptr<IndexBuffer>& indexBuffer);
+    /*!
+     * @brief Encodes a hardware-instanced indexed draw call using GPU primitive replication.
+     * @param encoder Active Metal render command encoder.
+     * @param pipeline Pipeline state defining shaders, blend states, and depth tests.
+     * @param vertexBuffer Bound vertex buffer holding interleaved vertex streams.
+     * @param indexBuffer Bound index buffer defining primitive topology.
+     * @param instanceCount Total number of instances to render in parallel on chip.
+     */
+    static void DrawIndexedInstanced(MTL::RenderCommandEncoder* encoder,
+                                     const std::shared_ptr<Pipeline>& pipeline,
+                                     const std::shared_ptr<VertexBuffer>& vertexBuffer,
+                                     const std::shared_ptr<IndexBuffer>& indexBuffer,
+                                     uint32_t instanceCount);
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Renderer/RenderCommand.mm
-
+/*!
+ * @file RenderCommand.mm
+ * @brief Implementation of low-level GPU render commands using metal-cpp.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Renderer/RenderCommand.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <QuartzCore/QuartzCore.hpp>
+namespace KanVerse {
+  void RenderCommand::DrawIndexed(MTL::RenderCommandEncoder* encoder,
+                                  const std::shared_ptr<Pipeline>& pipeline,
+                                  const std::shared_ptr<VertexBuffer>& vertexBuffer,
+                                  const std::shared_ptr<IndexBuffer>& indexBuffer) {
+    KV_CORE_ASSERT(encoder != nullptr,      "[KanVerse RenderCommand] Active MTL::RenderCommandEncoder is null!");
+    KV_CORE_ASSERT(pipeline != nullptr,     "[KanVerse RenderCommand] Pipeline is null!");
+    KV_CORE_ASSERT(vertexBuffer != nullptr, "[KanVerse RenderCommand] VertexBuffer is null!");
+    KV_CORE_ASSERT(indexBuffer != nullptr,  "[KanVerse RenderCommand] IndexBuffer is null!");
+    // 1. Bind raster and depth pipeline state
+    pipeline->Bind(encoder);
+    // 2. Bind vertex stream at buffer index 0
+    encoder->setVertexBuffer(vertexBuffer->GetNativeBuffer(), 0, 0);
+    // 3. Resolve index precision format
+    const MTL::IndexType indexType = (indexBuffer->GetIndexType() == IndexType::UInt16)
+    ? MTL::IndexTypeUInt16
+    : MTL::IndexTypeUInt32;
+    // 4. Encode non-instanced indexed primitive draw call
+    encoder->drawIndexedPrimitives(MTL::PrimitiveTypeTriangle,
+                                   indexBuffer->GetCount(),
+                                   indexType,
+                                   indexBuffer->GetNativeBuffer(),
+                                   0);
+  }
+  void RenderCommand::DrawIndexedInstanced(MTL::RenderCommandEncoder* encoder,
+                                           const std::shared_ptr<Pipeline>& pipeline,
+                                           const std::shared_ptr<VertexBuffer>& vertexBuffer,
+                                           const std::shared_ptr<IndexBuffer>& indexBuffer,
+                                           uint32_t instanceCount) {
+    KV_CORE_ASSERT(encoder != nullptr,      "[KanVerse RenderCommand] Active MTL::RenderCommandEncoder is null!");
+    KV_CORE_ASSERT(pipeline != nullptr,     "[KanVerse RenderCommand] Pipeline is null!");
+    KV_CORE_ASSERT(vertexBuffer != nullptr, "[KanVerse RenderCommand] VertexBuffer is null!");
+    KV_CORE_ASSERT(indexBuffer != nullptr,  "[KanVerse RenderCommand] IndexBuffer is null!");
+    if (instanceCount == 0) return;
+    // 1. Bind raster and depth pipeline state
+    pipeline->Bind(encoder);
+    // 2. Bind vertex stream at buffer index 0 (CRITICAL!)
+    encoder->setVertexBuffer(vertexBuffer->GetNativeBuffer(), 0, 0);
+    // 3. Resolve index precision format
+    const MTL::IndexType indexType = (indexBuffer->GetIndexType() == IndexType::UInt16)
+    ? MTL::IndexTypeUInt16
+    : MTL::IndexTypeUInt32;
+    // 4. Hardware-instanced indexed primitive draw call using the index buffer
+    encoder->drawIndexedPrimitives(MTL::PrimitiveTypeTriangle,
+                                   indexBuffer->GetCount(),
+                                   indexType,
+                                   indexBuffer->GetNativeBuffer(),
+                                   0,
+                                   instanceCount);
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Renderer/Renderer.hpp
 
 // FILE: KanVerse_Engine/Renderer/Renderer/Renderer.mm
 
 // FILE: KanVerse_Engine/Renderer/Textures/Texture.hpp
-
+/*!
+ * @file Texture.hpp
+ * @brief Base abstract contract representing hardware-accelerated GPU textures.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <cstdint>
+#include <string>
+#include <memory>
+namespace MTL {
+  class Texture;
+  class SamplerState;
+  class RenderCommandEncoder;
+}
+namespace KanVerse {
+  /*!
+   * @class Texture
+   * @brief Abstract base class for GPU texture resources.
+   */
+  class Texture {
+  public:
+    virtual ~Texture() = default;
+    /*!
+     * @brief Queries texture width in texels.
+     */
+    [[nodiscard]] virtual uint32_t GetWidth() const noexcept = 0;
+    /*!
+     * @brief Queries texture height in texels.
+     */
+    [[nodiscard]] virtual uint32_t GetHeight() const noexcept = 0;
+    /*!
+     * @brief Binds texture and sampler states to a render encoder at specified binding slots.
+     * @param encoder Active Metal command encoder.
+     * @param textureSlot Fragment shader texture slot index.
+     * @param samplerSlot Fragment shader sampler slot index.
+     */
+    virtual void Bind(MTL::RenderCommandEncoder* encoder, uint32_t textureSlot = 0, uint32_t samplerSlot = 0) const = 0;
+    /*!
+     * @brief Accesses underlying native Metal texture pointer.
+     */
+    [[nodiscard]] virtual MTL::Texture* GetNativeTexture() const noexcept = 0;
+    /*!
+     * @brief Accesses underlying native Metal sampler state pointer.
+     */
+    [[nodiscard]] virtual MTL::SamplerState* GetNativeSampler() const noexcept = 0;
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Textures/Texture2D.hpp
-
+/*!
+ * @file Texture2D.hpp
+ * @brief 2D Texture asset abstraction encapsulating Metal texture objects and samplers.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <string_view>
+namespace MTL {
+  class Texture;
+  class SamplerState;
+  class RenderCommandEncoder;
+}
+namespace KanVerse {
+  /**
+   * @brief Configuration specification for creating a 2D Texture.
+   */
+  struct TextureSpecification {
+    uint32_t Width{1};
+    uint32_t Height{1};
+    bool     GenerateMipmaps{false};
+    /**
+     * @brief Determines the color space of the texture.
+     * True (sRGB) for color textures (Albedo, Emissive).
+     * False (Linear) for data textures (Normal, Roughness, Metallic, AO, Height).
+     */
+    bool     sRGB{true};
+  };
+  /**
+   * @brief Cross-platform interface for an Engine 2D Texture.
+   */
+  class Texture2D {
+  public:
+    virtual ~Texture2D() = default;
+    /**
+     * @brief Creates a 2D texture based on a manual specification.
+     * @param spec The specification dictating dimensions and format.
+     * @return A shared pointer to the created texture.
+     */
+    [[nodiscard]] static std::shared_ptr<Texture2D> Create(const TextureSpecification& spec);
+    /**
+     * @brief Loads and creates a 2D texture from an image file.
+     * @param filepath The absolute or relative path to the image file.
+     * @param sRGB Whether to load the image in sRGB color space.
+     * @return A shared pointer to the created texture, or nullptr if loading failed.
+     */
+    [[nodiscard]] static std::shared_ptr<Texture2D> Create(const std::string& filepath, bool sRGB = true);
+    /**
+     * @brief Generates a default checkerboard texture (useful as a fallback for missing textures).
+     * @param resolution The width and height of the square texture.
+     * @return A shared pointer to the checkerboard texture.
+     */
+    [[nodiscard]] static std::shared_ptr<Texture2D> CreateCheckerboard(uint32_t resolution = 256);
+    /**
+     * @brief Uploads raw pixel data to the GPU texture.
+     * @param data Pointer to the raw pixel buffer.
+     * @param size The size of the buffer in bytes.
+     */
+    virtual void SetData(const void* data, size_t size) = 0;
+    /**
+     * @brief Binds the texture and its sampler to the current render pipeline.
+     * @param encoder The Metal render command encoder.
+     * @param textureSlot The slot index to bind the texture to.
+     * @param samplerSlot The slot index to bind the sampler state to.
+     */
+    virtual void Bind(MTL::RenderCommandEncoder* encoder,
+                      uint32_t textureSlot = 0,
+                      uint32_t samplerSlot = 0) const = 0;
+    [[nodiscard]] virtual uint32_t GetWidth() const noexcept = 0;
+    [[nodiscard]] virtual uint32_t GetHeight() const noexcept = 0;
+    [[nodiscard]] virtual MTL::Texture* GetNativeTexture() const noexcept = 0;
+  };
+}
 // FILE: KanVerse_Engine/Renderer/Textures/Texture2D.mm
-
+/*!
+ * @file Texture2D.mm
+ * @brief Implementation of Metal 2D texture allocation, image loading, and command binding.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Textures/Texture2D.hpp"
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Application/Application.hpp"
+#include "Core/Memory/MemoryTracking.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <QuartzCore/QuartzCore.hpp>
+#import <Metal/Metal.h>
+#import <CoreGraphics/CoreGraphics.h>
+#import <ImageIO/ImageIO.h>
+#import <Foundation/Foundation.h>
+#include <vector>
+namespace KanVerse {
+  /**
+   * @brief Metal API specific implementation of Texture2D.
+   */
+  class MetalTexture2D : public Texture2D {
+  public:
+    explicit MetalTexture2D(const TextureSpecification& spec)
+    : m_Specification(spec), m_Width(spec.Width), m_Height(spec.Height) {
+      KV_CORE_ASSERT(m_Width > 0 && m_Height > 0, "[KanVerse Texture] Texture dimensions must be positive non-zero!");
+      MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+      // Determine correct pixel format based on sRGB flag
+      MTL::PixelFormat pixelFormat = m_Specification.sRGB ?
+      MTL::PixelFormatRGBA8Unorm_sRGB :
+      MTL::PixelFormatRGBA8Unorm;
+      MTL::TextureDescriptor* desc = MTL::TextureDescriptor::texture2DDescriptor(
+                                                                                 pixelFormat,
+                                                                                 m_Width,
+                                                                                 m_Height,
+                                                                                 m_Specification.GenerateMipmaps
+                                                                                 );
+      desc->setUsage(MTL::TextureUsageShaderRead);
+      desc->setStorageMode(MTL::StorageModeShared);
+      m_Texture = device->newTexture(desc);
+      KV_CORE_ASSERT(m_Texture != nullptr, "[KanVerse Texture] Failed to allocate MTL::Texture!");
+      const size_t vramBytes = m_Width * m_Height * 4;
+      m_MemoryGuard.Reset(vramBytes);
+      MTL::SamplerDescriptor* samplerDesc = MTL::SamplerDescriptor::alloc()->init();
+      samplerDesc->setMinFilter(MTL::SamplerMinMagFilterLinear);
+      samplerDesc->setMagFilter(MTL::SamplerMinMagFilterLinear);
+      samplerDesc->setMipFilter(MTL::SamplerMipFilterLinear);
+      samplerDesc->setSAddressMode(MTL::SamplerAddressModeRepeat);
+      samplerDesc->setTAddressMode(MTL::SamplerAddressModeRepeat);
+      m_Sampler = device->newSamplerState(samplerDesc);
+      samplerDesc->release();
+    }
+    ~MetalTexture2D() override {
+      if (m_Sampler) {
+        m_Sampler->release();
+        m_Sampler = nullptr;
+      }
+      if (m_Texture) {
+        m_Texture->release();
+        m_Texture = nullptr;
+      }
+      m_MemoryGuard.Reset(0);
+    }
+    void SetData(const void* data, size_t size) override {
+      const size_t expectedBytes = m_Width * m_Height * 4;
+      KV_CORE_ASSERT(size == expectedBytes, "[KanVerse Texture] Upload buffer byte size mismatch!");
+      const MTL::Region region = MTL::Region(0, 0, 0, m_Width, m_Height, 1);
+      const NSUInteger bytesPerRow = m_Width * 4;
+      m_Texture->replaceRegion(region, 0, data, bytesPerRow);
+    }
+    void Bind(MTL::RenderCommandEncoder* encoder, uint32_t textureSlot, uint32_t samplerSlot) const override {
+      KV_CORE_ASSERT(encoder != nullptr, "[KanVerse Texture] Command encoder cannot be null during bind!");
+      encoder->setFragmentTexture(m_Texture, textureSlot);
+      encoder->setFragmentSamplerState(m_Sampler, samplerSlot);
+    }
+    [[nodiscard]] uint32_t GetWidth() const noexcept override { return m_Width; }
+    [[nodiscard]] uint32_t GetHeight() const noexcept override { return m_Height; }
+    [[nodiscard]] MTL::Texture* GetNativeTexture() const noexcept override { return m_Texture; }
+  private:
+    TextureSpecification   m_Specification;
+    uint32_t               m_Width{0};
+    uint32_t               m_Height{0};
+    MTL::Texture*          m_Texture{nullptr};
+    MTL::SamplerState*     m_Sampler{nullptr};
+    ScopedMemoryAllocation m_MemoryGuard{};
+  };
+  std::shared_ptr<Texture2D> Texture2D::Create(const TextureSpecification& spec) {
+    return std::make_shared<MetalTexture2D>(spec);
+  }
+  std::shared_ptr<Texture2D> Texture2D::Create(const std::string& filepath, bool sRGB) {
+    std::vector<uint8_t> rawPixels;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    @autoreleasepool {
+      NSString* pathString = [NSString stringWithUTF8String:filepath.c_str()];
+      NSURL* fileURL = [NSURL fileURLWithPath:pathString];
+      CGImageSourceRef imageSource = CGImageSourceCreateWithURL((__bridge CFURLRef)fileURL, NULL);
+      if (!imageSource) {
+        KV_CORE_ERROR("Texture2D: Failed to open image file at path: '{}'", filepath);
+        return nullptr;
+      }
+      CGImageRef image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+      CFRelease(imageSource);
+      if (!image) {
+        KV_CORE_ERROR("Texture2D: Failed to decode image data from file: '{}'", filepath);
+        return nullptr;
+      }
+      width  = static_cast<uint32_t>(CGImageGetWidth(image));
+      height = static_cast<uint32_t>(CGImageGetHeight(image));
+      rawPixels.resize(width * height * 4);
+      CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+      CGContextRef context = CGBitmapContextCreate(
+                                                   rawPixels.data(),
+                                                   width,
+                                                   height,
+                                                   8,
+                                                   width * 4,
+                                                   colorSpace,
+                                                   static_cast<uint32_t>(kCGImageAlphaPremultipliedLast) | static_cast<uint32_t>(kCGBitmapByteOrder32Big)
+                                                   );
+      CGColorSpaceRelease(colorSpace);
+      if (!context) {
+        CGImageRelease(image);
+        KV_CORE_ERROR("Texture2D: Failed to create CGBitmapContext for '{}'", filepath);
+        return nullptr;
+      }
+      CGRect rect = CGRectMake(0, 0, width, height);
+      CGContextDrawImage(context, rect, image);
+      CGContextRelease(context);
+      CGImageRelease(image);
+    }
+    if (rawPixels.empty() || width == 0 || height == 0) {
+      return nullptr;
+    }
+    // Pass the format flag down to the specification
+    TextureSpecification spec{
+      .Width = width,
+      .Height = height,
+      .GenerateMipmaps = false,
+      .sRGB = sRGB
+    };
+    auto texture = std::make_shared<MetalTexture2D>(spec);
+    texture->SetData(rawPixels.data(), rawPixels.size());
+    KV_CORE_INFO("Texture2D: Successfully loaded '{}' ({}x{} RGBA, sRGB: {}, {:.2f} MB)",
+                 filepath, width, height, sRGB,
+                 static_cast<double>(rawPixels.size()) / (1024.0 * 1024.0));
+    return texture;
+  }
+  std::shared_ptr<Texture2D> Texture2D::CreateCheckerboard(uint32_t resolution) {
+    TextureSpecification spec{
+      .Width = resolution,
+      .Height = resolution,
+      .GenerateMipmaps = false,
+      .sRGB = true // Checkerboard acts as a color texture
+    };
+    auto texture = std::make_shared<MetalTexture2D>(spec);
+    std::vector<uint32_t> pixels(resolution * resolution);
+    constexpr uint32_t TileSize = 16;
+    for (uint32_t y = 0; y < resolution; ++y) {
+      for (uint32_t x = 0; x < resolution; ++x) {
+        const bool isWhite = ((x / TileSize) % 2) == ((y / TileSize) % 2);
+        pixels[y * resolution + x] = isWhite ? 0xFFFFFFFF : 0xFF222222;
+      }
+    }
+    texture->SetData(pixels.data(), pixels.size() * sizeof(uint32_t));
+    return texture;
+  }
+}
 // FILE: KanVerse_Engine/Renderer/Textures/TextureCube.hpp
 
 // FILE: KanVerse_Engine/Renderer/Textures/TextureCube.mm
