@@ -163,7 +163,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/Textures/Texture.hpp`, `Renderer/Textures/Texture2D.hpp`, `Renderer/Textures/Texture2D.mm`
   - **Concepts:** Decoding PNG/JPG via `CGImageSourceCreateWithURL` and `CGBitmapContextCreate`, `RGBA8Unorm_sRGB` (Albedo) vs `RGBA8Unorm` (Data maps), procedural checkerboard fallback.
   - **Milestone:** Implement `Texture.hpp`, `Texture2D.hpp`, and `MetalTexture2D`.
-- [ ] **Day 31 — PBR Material System & Triple-Buffered Uniforms**
+- [x] **Day 31 — PBR Material System & Triple-Buffered Uniforms**
   - **Files:** `Renderer/Materials/Material.hpp`, `Renderer/Materials/Material.mm`
   - **Concepts:** 256-byte aligned `MaterialUniforms`, 6 PBR texture bindings, automatic transparency flagging (`color.w < 0.99f`), `Sync(frameIndex)`.
   - **Milestone:** Implement `Material`.
