@@ -823,9 +823,9 @@
 		B2BA39CC3089F28B006439E3 /* Geometry */ = {
 			isa = PBXGroup;
 			children = (
+				B2BA39CB3089F28B006439E3 /* SubMesh.hpp */,
 				B2BA39C93089F28B006439E3 /* Mesh.hpp */,
 				B2BA39CA3089F28B006439E3 /* Mesh.cpp */,
-				B2BA39CB3089F28B006439E3 /* SubMesh.hpp */,
 			);
 			path = Geometry;
 			sourceTree = "<group>";
@@ -937,11 +937,11 @@
 				B2BA39F03089F28B006439E3 /* Textures */,
 				B2BA39D53089F28B006439E3 /* Materials */,
 				B2BA39E53089F28B006439E3 /* Procedural */,
+				B2BA39CC3089F28B006439E3 /* Geometry */,
 				B2BA39B13089F28B006439E3 /* Animation */,
 				B2BA39B43089F28B006439E3 /* Asset */,
 				B2BA39C23089F28B006439E3 /* Camera */,
 				B2BA39C83089F28B006439E3 /* Framebuffer */,
-				B2BA39CC3089F28B006439E3 /* Geometry */,
 				B2BA39D23089F28B006439E3 /* Lighting */,
 				B2BA39E03089F28B006439E3 /* PostProcess */,
 				B2BA39F63089F28B006439E3 /* UI */,

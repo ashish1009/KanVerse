@@ -171,11 +171,11 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/Procedural/ChamferBox.hpp`, `Renderer/Procedural/ChamferBox.cpp`
   - **Concepts:** 64-byte SIMD-aligned `Vertex` struct, 6 inner faces + 12 curved bevel edges with smooth normal interpolation.
   - **Milestone:** Implement `ChamferBoxGenerator::Generate`.
-- [ ] **Day 33 — Procedural UV Capsule Generator**
+- [x] **Day 33 — Procedural UV Capsule Generator**
   - **Files:** `Renderer/Procedural/Capsule.hpp`, `Renderer/Procedural/Capsule.cpp`
   - **Concepts:** Spherical-to-Cartesian UV mesh generation (`phi`, `theta`), splitting top and bottom hemispheres around a cylindrical equator, CCW winding.
   - **Milestone:** Implement `Capsule::Create`.
-- [ ] **Day 34 — High-Level Mesh Container & SubMesh Bounds**
+- [x] **Day 34 — High-Level Mesh Container & SubMesh Bounds**
   - **Files:** `Renderer/Geometry/SubMesh.hpp`, `Renderer/Geometry/Mesh.hpp`, `Renderer/Geometry/Mesh.cpp`
   - **Concepts:** `Submesh` partitioning and local AABB encapsulation, binding `VertexBuffer` and `IndexBuffer` into `Mesh`.
   - **Milestone:** Implement `SubMesh.hpp` and `Mesh`.
