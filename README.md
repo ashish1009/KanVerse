@@ -143,7 +143,7 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/Buffers/VertexBuffer.hpp`, `Renderer/Buffers/VertexBuffer.mm`, `Renderer/Buffers/IndexBuffer.hpp`, `Renderer/Buffers/IndexBuffer.mm`
   - **Concepts:** `MTL::ResourceStorageModeShared` zero-copy unified memory buffers on Apple Silicon, 16-bit vs 32-bit index buffers, `ScopedMemoryAllocation`.
   - **Milestone:** Implement `MetalVertexBuffer` and `MetalIndexBuffer`.
-- [ ] **Day 26 — Triple-Buffered GCD Semaphore Synchronizer**
+- [x] **Day 26 — Triple-Buffered GCD Semaphore Synchronizer**
   - **Files:** `Renderer/Pipeline/FrameSync.hpp`, `Renderer/Pipeline/FrameSync.mm`
   - **Concepts:** Triple buffering (`kMaxFramesInFlight = 3`), `dispatch_semaphore_create(3)`, `dispatch_semaphore_wait`, `cmdBuffer->addCompletedHandler` signaling.
   - **Milestone:** Implement `FrameSynchronizer`.
