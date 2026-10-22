@@ -318,8 +318,8 @@
 			isa = PBXGroup;
 			children = (
 				B2BA36E73089161D006439E3 /* EntryPoint.mm */,
-				B2BA36E83089161D006439E3 /* KanVerseApp.mm */,
 				B2BA36E93089161D006439E3 /* MetalImpl.cpp */,
+				B2BA36E83089161D006439E3 /* KanVerseApp.mm */,
 			);
 			path = Source;
 			sourceTree = "<group>";
