@@ -7,6 +7,42 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B22A91E6308B909F00C1E24F /* builders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91AE308B909F00C1E24F /* builders.cpp */; };
+		B22A91E8308B909F00C1E24F /* ImSequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91D9308B909F00C1E24F /* ImSequencer.cpp */; };
+		B22A91F0308B909F00C1E24F /* imgui_node_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91BD308B909F00C1E24F /* imgui_node_editor.cpp */; };
+		B22A91F2308B909F00C1E24F /* ImGuizmo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91D7308B909F00C1E24F /* ImGuizmo.cpp */; };
+		B22A9201308B909F00C1E24F /* imgui_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91B9308B909F00C1E24F /* imgui_canvas.cpp */; };
+		B22A9204308B909F00C1E24F /* imgui_node_editor_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91BE308B909F00C1E24F /* imgui_node_editor_api.cpp */; };
+		B22A9206308B909F00C1E24F /* ImCurveEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91D3308B909F00C1E24F /* ImCurveEdit.cpp */; };
+		B22A9208308B909F00C1E24F /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91A3308B909F00C1E24F /* imgui_demo.cpp */; };
+		B22A9209308B909F00C1E24F /* widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91B2308B909F00C1E24F /* widgets.cpp */; };
+		B22A920C308B909F00C1E24F /* imgui_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91A6308B909F00C1E24F /* imgui_tables.cpp */; };
+		B22A9210308B909F00C1E24F /* ImGradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91D5308B909F00C1E24F /* ImGradient.cpp */; };
+		B22A9212308B909F00C1E24F /* drawing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91B0308B909F00C1E24F /* drawing.cpp */; };
+		B22A9219308B909F00C1E24F /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91A4308B909F00C1E24F /* imgui_draw.cpp */; };
+		B22A921C308B909F00C1E24F /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91A7308B909F00C1E24F /* imgui_widgets.cpp */; };
+		B22A9221308B909F00C1E24F /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91A2308B909F00C1E24F /* imgui.cpp */; };
+		B22A9224308B909F00C1E24F /* crude_json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22A91B5308B909F00C1E24F /* crude_json.cpp */; };
+		B22A9238308B90A000C1E24F /* drawing.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91AF308B909F00C1E24F /* drawing.h */; };
+		B22A9239308B90A000C1E24F /* ImGradient.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91D4308B909F00C1E24F /* ImGradient.h */; };
+		B22A923B308B90A000C1E24F /* widgets.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91B1308B909F00C1E24F /* widgets.h */; };
+		B22A923D308B90A000C1E24F /* ImCurveEdit.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91D2308B909F00C1E24F /* ImCurveEdit.h */; };
+		B22A923F308B90A000C1E24F /* builders.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91AD308B909F00C1E24F /* builders.h */; };
+		B22A9240308B90A000C1E24F /* imgui_node_editor.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91BC308B909F00C1E24F /* imgui_node_editor.h */; };
+		B22A9243308B90A000C1E24F /* imstb_rectpack.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91A8308B909F00C1E24F /* imstb_rectpack.h */; };
+		B22A9244308B90A000C1E24F /* crude_json.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91B4308B909F00C1E24F /* crude_json.h */; };
+		B22A924A308B90A000C1E24F /* imstb_textedit.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91A9308B909F00C1E24F /* imstb_textedit.h */; };
+		B22A9251308B90A000C1E24F /* imgui.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91A1308B909F00C1E24F /* imgui.h */; };
+		B22A9254308B90A000C1E24F /* imgui_extra_math.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91BA308B909F00C1E24F /* imgui_extra_math.h */; };
+		B22A9255308B90A000C1E24F /* ImZoomSlider.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91DA308B909F00C1E24F /* ImZoomSlider.h */; };
+		B22A9256308B90A000C1E24F /* ImGuizmo.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91D6308B909F00C1E24F /* ImGuizmo.h */; };
+		B22A9258308B90A000C1E24F /* imgui_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91A5308B909F00C1E24F /* imgui_internal.h */; };
+		B22A925A308B90A000C1E24F /* imgui_node_editor_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91BF308B909F00C1E24F /* imgui_node_editor_internal.h */; };
+		B22A925C308B90A000C1E24F /* imconfig.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91A0308B909F00C1E24F /* imconfig.h */; };
+		B22A925D308B90A000C1E24F /* ImSequencer.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91D8308B909F00C1E24F /* ImSequencer.h */; };
+		B22A925E308B90A000C1E24F /* imgui_canvas.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91B8308B909F00C1E24F /* imgui_canvas.h */; };
+		B22A925F308B90A000C1E24F /* imstb_truetype.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91AA308B909F00C1E24F /* imstb_truetype.h */; };
+		B22A9263308B90A000C1E24F /* imgui_bezier_math.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91B6308B909F00C1E24F /* imgui_bezier_math.h */; };
 		B2BA37C030891629006439E3 /* KanVerse_Headers.h in Headers */ = {isa = PBXBuildFile; fileRef = B2BA375030891629006439E3 /* KanVerse_Headers.h */; };
 		B2BA37C530891629006439E3 /* PrefixHeader.pch in Headers */ = {isa = PBXBuildFile; fileRef = B2BA376930891629006439E3 /* PrefixHeader.pch */; };
 		B2BA38883089D1F7006439E3 /* MTLRenderPipeline.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B2BA38673089D1F7006439E3 /* MTLRenderPipeline.hpp */; };
@@ -203,6 +239,48 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B22A91A0308B909F00C1E24F /* imconfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imconfig.h; sourceTree = "<group>"; };
+		B22A91A1308B909F00C1E24F /* imgui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui.h; sourceTree = "<group>"; };
+		B22A91A2308B909F00C1E24F /* imgui.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui.cpp; sourceTree = "<group>"; };
+		B22A91A3308B909F00C1E24F /* imgui_demo.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_demo.cpp; sourceTree = "<group>"; };
+		B22A91A4308B909F00C1E24F /* imgui_draw.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_draw.cpp; sourceTree = "<group>"; };
+		B22A91A5308B909F00C1E24F /* imgui_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_internal.h; sourceTree = "<group>"; };
+		B22A91A6308B909F00C1E24F /* imgui_tables.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_tables.cpp; sourceTree = "<group>"; };
+		B22A91A7308B909F00C1E24F /* imgui_widgets.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_widgets.cpp; sourceTree = "<group>"; };
+		B22A91A8308B909F00C1E24F /* imstb_rectpack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imstb_rectpack.h; sourceTree = "<group>"; };
+		B22A91A9308B909F00C1E24F /* imstb_textedit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imstb_textedit.h; sourceTree = "<group>"; };
+		B22A91AA308B909F00C1E24F /* imstb_truetype.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imstb_truetype.h; sourceTree = "<group>"; };
+		B22A91AB308B909F00C1E24F /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		B22A91AD308B909F00C1E24F /* builders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = builders.h; sourceTree = "<group>"; };
+		B22A91AE308B909F00C1E24F /* builders.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = builders.cpp; sourceTree = "<group>"; };
+		B22A91AF308B909F00C1E24F /* drawing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = drawing.h; sourceTree = "<group>"; };
+		B22A91B0308B909F00C1E24F /* drawing.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = drawing.cpp; sourceTree = "<group>"; };
+		B22A91B1308B909F00C1E24F /* widgets.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = widgets.h; sourceTree = "<group>"; };
+		B22A91B2308B909F00C1E24F /* widgets.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = widgets.cpp; sourceTree = "<group>"; };
+		B22A91B4308B909F00C1E24F /* crude_json.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = crude_json.h; sourceTree = "<group>"; };
+		B22A91B5308B909F00C1E24F /* crude_json.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = crude_json.cpp; sourceTree = "<group>"; };
+		B22A91B6308B909F00C1E24F /* imgui_bezier_math.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_bezier_math.h; sourceTree = "<group>"; };
+		B22A91B7308B909F00C1E24F /* imgui_bezier_math.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = imgui_bezier_math.inl; sourceTree = "<group>"; };
+		B22A91B8308B909F00C1E24F /* imgui_canvas.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_canvas.h; sourceTree = "<group>"; };
+		B22A91B9308B909F00C1E24F /* imgui_canvas.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_canvas.cpp; sourceTree = "<group>"; };
+		B22A91BA308B909F00C1E24F /* imgui_extra_math.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_extra_math.h; sourceTree = "<group>"; };
+		B22A91BB308B909F00C1E24F /* imgui_extra_math.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = imgui_extra_math.inl; sourceTree = "<group>"; };
+		B22A91BC308B909F00C1E24F /* imgui_node_editor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_node_editor.h; sourceTree = "<group>"; };
+		B22A91BD308B909F00C1E24F /* imgui_node_editor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_node_editor.cpp; sourceTree = "<group>"; };
+		B22A91BE308B909F00C1E24F /* imgui_node_editor_api.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_node_editor_api.cpp; sourceTree = "<group>"; };
+		B22A91BF308B909F00C1E24F /* imgui_node_editor_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_node_editor_internal.h; sourceTree = "<group>"; };
+		B22A91C0308B909F00C1E24F /* imgui_node_editor_internal.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = imgui_node_editor_internal.inl; sourceTree = "<group>"; };
+		B22A91D2308B909F00C1E24F /* ImCurveEdit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImCurveEdit.h; sourceTree = "<group>"; };
+		B22A91D3308B909F00C1E24F /* ImCurveEdit.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImCurveEdit.cpp; sourceTree = "<group>"; };
+		B22A91D4308B909F00C1E24F /* ImGradient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImGradient.h; sourceTree = "<group>"; };
+		B22A91D5308B909F00C1E24F /* ImGradient.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImGradient.cpp; sourceTree = "<group>"; };
+		B22A91D6308B909F00C1E24F /* ImGuizmo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImGuizmo.h; sourceTree = "<group>"; };
+		B22A91D7308B909F00C1E24F /* ImGuizmo.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImGuizmo.cpp; sourceTree = "<group>"; };
+		B22A91D8308B909F00C1E24F /* ImSequencer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImSequencer.h; sourceTree = "<group>"; };
+		B22A91D9308B909F00C1E24F /* ImSequencer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImSequencer.cpp; sourceTree = "<group>"; };
+		B22A91DA308B909F00C1E24F /* ImZoomSlider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImZoomSlider.h; sourceTree = "<group>"; };
+		B22A91DB308B909F00C1E24F /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		B22A91DC308B909F00C1E24F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B2BA36A230890C4F006439E3 /* libKanVerse_Engine.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libKanVerse_Engine.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2BA375030891629006439E3 /* KanVerse_Headers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KanVerse_Headers.h; sourceTree = "<group>"; };
 		B2BA376930891629006439E3 /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -413,6 +491,77 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B22A91AC308B909F00C1E24F /* ImGui */ = {
+			isa = PBXGroup;
+			children = (
+				B22A91A0308B909F00C1E24F /* imconfig.h */,
+				B22A91A1308B909F00C1E24F /* imgui.h */,
+				B22A91A2308B909F00C1E24F /* imgui.cpp */,
+				B22A91A3308B909F00C1E24F /* imgui_demo.cpp */,
+				B22A91A4308B909F00C1E24F /* imgui_draw.cpp */,
+				B22A91A5308B909F00C1E24F /* imgui_internal.h */,
+				B22A91A6308B909F00C1E24F /* imgui_tables.cpp */,
+				B22A91A7308B909F00C1E24F /* imgui_widgets.cpp */,
+				B22A91A8308B909F00C1E24F /* imstb_rectpack.h */,
+				B22A91A9308B909F00C1E24F /* imstb_textedit.h */,
+				B22A91AA308B909F00C1E24F /* imstb_truetype.h */,
+				B22A91AB308B909F00C1E24F /* LICENSE.txt */,
+			);
+			path = ImGui;
+			sourceTree = "<group>";
+		};
+		B22A91B3308B909F00C1E24F /* utilities */ = {
+			isa = PBXGroup;
+			children = (
+				B22A91AD308B909F00C1E24F /* builders.h */,
+				B22A91AE308B909F00C1E24F /* builders.cpp */,
+				B22A91AF308B909F00C1E24F /* drawing.h */,
+				B22A91B0308B909F00C1E24F /* drawing.cpp */,
+				B22A91B1308B909F00C1E24F /* widgets.h */,
+				B22A91B2308B909F00C1E24F /* widgets.cpp */,
+			);
+			path = utilities;
+			sourceTree = "<group>";
+		};
+		B22A91C1308B909F00C1E24F /* ImGuiNode */ = {
+			isa = PBXGroup;
+			children = (
+				B22A91B3308B909F00C1E24F /* utilities */,
+				B22A91B4308B909F00C1E24F /* crude_json.h */,
+				B22A91B5308B909F00C1E24F /* crude_json.cpp */,
+				B22A91B6308B909F00C1E24F /* imgui_bezier_math.h */,
+				B22A91B7308B909F00C1E24F /* imgui_bezier_math.inl */,
+				B22A91B8308B909F00C1E24F /* imgui_canvas.h */,
+				B22A91B9308B909F00C1E24F /* imgui_canvas.cpp */,
+				B22A91BA308B909F00C1E24F /* imgui_extra_math.h */,
+				B22A91BB308B909F00C1E24F /* imgui_extra_math.inl */,
+				B22A91BC308B909F00C1E24F /* imgui_node_editor.h */,
+				B22A91BD308B909F00C1E24F /* imgui_node_editor.cpp */,
+				B22A91BE308B909F00C1E24F /* imgui_node_editor_api.cpp */,
+				B22A91BF308B909F00C1E24F /* imgui_node_editor_internal.h */,
+				B22A91C0308B909F00C1E24F /* imgui_node_editor_internal.inl */,
+			);
+			path = ImGuiNode;
+			sourceTree = "<group>";
+		};
+		B22A91DD308B909F00C1E24F /* ImGuizmo */ = {
+			isa = PBXGroup;
+			children = (
+				B22A91D2308B909F00C1E24F /* ImCurveEdit.h */,
+				B22A91D3308B909F00C1E24F /* ImCurveEdit.cpp */,
+				B22A91D4308B909F00C1E24F /* ImGradient.h */,
+				B22A91D5308B909F00C1E24F /* ImGradient.cpp */,
+				B22A91D6308B909F00C1E24F /* ImGuizmo.h */,
+				B22A91D7308B909F00C1E24F /* ImGuizmo.cpp */,
+				B22A91D8308B909F00C1E24F /* ImSequencer.h */,
+				B22A91D9308B909F00C1E24F /* ImSequencer.cpp */,
+				B22A91DA308B909F00C1E24F /* ImZoomSlider.h */,
+				B22A91DB308B909F00C1E24F /* LICENSE */,
+				B22A91DC308B909F00C1E24F /* README.md */,
+			);
+			path = ImGuizmo;
+			sourceTree = "<group>";
+		};
 		B2BA369930890C4F006439E3 = {
 			isa = PBXGroup;
 			children = (
@@ -591,6 +740,9 @@
 		B2BA38873089D1F7006439E3 /* Vendors */ = {
 			isa = PBXGroup;
 			children = (
+				B22A91AC308B909F00C1E24F /* ImGui */,
+				B22A91C1308B909F00C1E24F /* ImGuiNode */,
+				B22A91DD308B909F00C1E24F /* ImGuizmo */,
 				B2BA38833089D1F7006439E3 /* metal-cpp */,
 				B2BA38863089D1F7006439E3 /* stbimage */,
 			);
@@ -1119,6 +1271,26 @@
 				B2BA38D63089D1F7006439E3 /* NSObject.hpp in Headers */,
 				B2BA38D73089D1F7006439E3 /* NSProcessInfo.hpp in Headers */,
 				B2BA38D83089D1F7006439E3 /* MTLIntersectionFunctionTable.hpp in Headers */,
+				B22A9238308B90A000C1E24F /* drawing.h in Headers */,
+				B22A9239308B90A000C1E24F /* ImGradient.h in Headers */,
+				B22A923B308B90A000C1E24F /* widgets.h in Headers */,
+				B22A923D308B90A000C1E24F /* ImCurveEdit.h in Headers */,
+				B22A923F308B90A000C1E24F /* builders.h in Headers */,
+				B22A9240308B90A000C1E24F /* imgui_node_editor.h in Headers */,
+				B22A9243308B90A000C1E24F /* imstb_rectpack.h in Headers */,
+				B22A9244308B90A000C1E24F /* crude_json.h in Headers */,
+				B22A924A308B90A000C1E24F /* imstb_textedit.h in Headers */,
+				B22A9251308B90A000C1E24F /* imgui.h in Headers */,
+				B22A9254308B90A000C1E24F /* imgui_extra_math.h in Headers */,
+				B22A9255308B90A000C1E24F /* ImZoomSlider.h in Headers */,
+				B22A9256308B90A000C1E24F /* ImGuizmo.h in Headers */,
+				B22A9258308B90A000C1E24F /* imgui_internal.h in Headers */,
+				B22A925A308B90A000C1E24F /* imgui_node_editor_internal.h in Headers */,
+				B22A925C308B90A000C1E24F /* imconfig.h in Headers */,
+				B22A925D308B90A000C1E24F /* ImSequencer.h in Headers */,
+				B22A925E308B90A000C1E24F /* imgui_canvas.h in Headers */,
+				B22A925F308B90A000C1E24F /* imstb_truetype.h in Headers */,
+				B22A9263308B90A000C1E24F /* imgui_bezier_math.h in Headers */,
 				B2BA38D93089D1F7006439E3 /* MTLBuffer.hpp in Headers */,
 				B2BA38DA3089D1F7006439E3 /* MTLCommandBuffer.hpp in Headers */,
 				B2BA38DB3089D1F7006439E3 /* MTLComputePass.hpp in Headers */,
@@ -1224,6 +1396,22 @@
 				B2BA3A593089F28B006439E3 /* CameraController.mm in Sources */,
 				B2BA3A5A3089F28B006439E3 /* Clock.cpp in Sources */,
 				B2BA3A5B3089F28B006439E3 /* PBDSolver.cpp in Sources */,
+				B22A91E6308B909F00C1E24F /* builders.cpp in Sources */,
+				B22A91E8308B909F00C1E24F /* ImSequencer.cpp in Sources */,
+				B22A91F0308B909F00C1E24F /* imgui_node_editor.cpp in Sources */,
+				B22A91F2308B909F00C1E24F /* ImGuizmo.cpp in Sources */,
+				B22A9201308B909F00C1E24F /* imgui_canvas.cpp in Sources */,
+				B22A9204308B909F00C1E24F /* imgui_node_editor_api.cpp in Sources */,
+				B22A9206308B909F00C1E24F /* ImCurveEdit.cpp in Sources */,
+				B22A9208308B909F00C1E24F /* imgui_demo.cpp in Sources */,
+				B22A9209308B909F00C1E24F /* widgets.cpp in Sources */,
+				B22A920C308B909F00C1E24F /* imgui_tables.cpp in Sources */,
+				B22A9210308B909F00C1E24F /* ImGradient.cpp in Sources */,
+				B22A9212308B909F00C1E24F /* drawing.cpp in Sources */,
+				B22A9219308B909F00C1E24F /* imgui_draw.cpp in Sources */,
+				B22A921C308B909F00C1E24F /* imgui_widgets.cpp in Sources */,
+				B22A9221308B909F00C1E24F /* imgui.cpp in Sources */,
+				B22A9224308B909F00C1E24F /* crude_json.cpp in Sources */,
 				B2BA3A5C3089F28B006439E3 /* TextureCube.mm in Sources */,
 				B2BA3A5D3089F28B006439E3 /* ChamferBox.cpp in Sources */,
 				B2BA3A5E3089F28B006439E3 /* BoundingBox.cpp in Sources */,
@@ -1361,10 +1549,16 @@
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				HEADER_SEARCH_PATHS = (
 					"${PROJECT_DIR}",
 					"${PROJECT_DIR}/Vendors/stbimage",
 					"${PROJECT_DIR}/Vendors/metal-cpp",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Vendors/ImGui/examples/libs/glfw/lib-vc2010-64",
+					"$(PROJECT_DIR)/Vendors/ImGui/examples/libs/glfw/lib-vc2010-32",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1380,10 +1574,16 @@
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "${PROJECT_DIR}/PrefixHeader.pch";
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				HEADER_SEARCH_PATHS = (
 					"${PROJECT_DIR}",
 					"${PROJECT_DIR}/Vendors/stbimage",
 					"${PROJECT_DIR}/Vendors/metal-cpp",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Vendors/ImGui/examples/libs/glfw/lib-vc2010-64",
+					"$(PROJECT_DIR)/Vendors/ImGui/examples/libs/glfw/lib-vc2010-32",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
