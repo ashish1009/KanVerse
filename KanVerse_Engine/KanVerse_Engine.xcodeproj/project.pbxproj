@@ -1121,13 +1121,13 @@
 			isa = PBXGroup;
 			children = (
 				B2BA39F83089F28B006439E3 /* Prefabs */,
-				B2BA39F93089F28B006439E3 /* Components.hpp */,
 				B2BA39FA3089F28B006439E3 /* Entity.hpp */,
+				B2BA39FF3089F28B006439E3 /* SparseSet.hpp */,
+				B2BA39F93089F28B006439E3 /* Components.hpp */,
 				B2BA39FB3089F28B006439E3 /* EntityID.hpp */,
 				B2BA39FC3089F28B006439E3 /* Registry.hpp */,
 				B2BA39FD3089F28B006439E3 /* Scene.hpp */,
 				B2BA39FE3089F28B006439E3 /* Scene.mm */,
-				B2BA39FF3089F28B006439E3 /* SparseSet.hpp */,
 			);
 			path = Scene;
 			sourceTree = "<group>";
