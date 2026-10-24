@@ -5402,6 +5402,9 @@ namespace KanVerse {
      * @brief Ends the current render pass, executes compute bloom and tonemapping, and presents the drawable.
      */
     static void EndScene();
+    // In KanVerse_Engine/Renderer/Renderer/Renderer.hpp (inside public: of class Renderer)
+    using UIRenderCallbackFn = std::function<void(MTL::CommandBuffer*, MTL::RenderCommandEncoder*, MTL::RenderPassDescriptor*)>;
+    static void SetUIRenderCallback(UIRenderCallbackFn callback);
     static void SetShadowMap(const std::shared_ptr<Framebuffer>& shadowFramebuffer);
     static void SetEnvironmentMap(const std::shared_ptr<TextureCube>& textureCube);
     static void SetIrradianceMap(const std::shared_ptr<TextureCube>& irradianceMap);
@@ -5474,6 +5477,7 @@ namespace KanVerse {
       MTL::RenderCommandEncoder*      ActiveCommandEncoder{nullptr};
       uint32_t                        ActiveFrameIndex{0};
       bool                            IsShadowPass{false};
+      UIRenderCallbackFn              UIRenderCallback{nullptr};
     };
     static std::unique_ptr<RendererStorage> s_Storage;
   };
@@ -5748,6 +5752,10 @@ namespace KanVerse {
     KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
     return s_Storage->CurrentEnvMode;
   }
+  void Renderer::SetUIRenderCallback(UIRenderCallbackFn callback) {
+    KV_CORE_ASSERT(s_Storage != nullptr, "[KanVerse Renderer] Renderer not initialized!");
+    s_Storage->UIRenderCallback = std::move(callback);
+  }
   void Renderer::BeginShadowPass(const DirectionalLight& sun,
                                  const std::shared_ptr<Framebuffer>& shadowTarget) {
     KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
@@ -5982,6 +5990,10 @@ namespace KanVerse {
             tonemapUniforms.Exposure       = s_Storage->Exposure;
             tonemapEncoder->setFragmentBytes(&tonemapUniforms, sizeof(TonemapUniforms), 0);
             tonemapEncoder->drawPrimitives(MTL::PrimitiveTypeTriangle, (NS::UInteger)0, (NS::UInteger)3);
+            // Inside Renderer::EndScene() right after drawing the tonemap triangle, BEFORE tonemapEncoder->endEncoding():
+            if (s_Storage->UIRenderCallback) {
+              s_Storage->UIRenderCallback(s_Storage->ActiveCommandBuffer, tonemapEncoder, displayPassDesc);
+            }
             tonemapEncoder->endEncoding();
           }
         }
@@ -6728,29 +6740,884 @@ namespace KanVerse {
   }
 } // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/UI/ImGuiLayer.hpp
-
+/*!
+ * @file ImGuiLayer.hpp
+ * @brief Dear ImGui overlay layer managing docking, multi-viewports, and event capture.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Layers/Layer.hpp"
+namespace MTL {
+  class CommandBuffer;
+  class RenderCommandEncoder;
+  class RenderPassDescriptor;
+}
+namespace KanVerse {
+  /*!
+   * @class ImGuiLayer
+   * @brief Engine overlay layer managing the Dear ImGui context and Metal/OSX backends.
+   *
+   * @note Thread-safety: Must be initialized and invoked exclusively on the main thread.
+   */
+  class ImGuiLayer : public Layer {
+  public:
+    /*!
+     * @brief Constructs the ImGui overlay layer.
+     */
+    ImGuiLayer();
+    /*!
+     * @brief Destructor ensuring clean shutdown of ImGui resources.
+     */
+    ~ImGuiLayer() override = default;
+    ImGuiLayer(const ImGuiLayer&) = delete;
+    ImGuiLayer& operator=(const ImGuiLayer&) = delete;
+    ImGuiLayer(ImGuiLayer&&) noexcept = delete;
+    ImGuiLayer& operator=(ImGuiLayer&&) noexcept = delete;
+    /*!
+     * @brief Initializes the ImGui context, dark theme, docking flags, and Metal/OSX backends.
+     */
+    void OnAttach() override;
+    /*!
+     * @brief Shuts down the Metal/OSX backends and destroys the ImGui context.
+     */
+    void OnDetach() override;
+    /*!
+     * @brief Filters mouse and keyboard events when `m_BlockEvents` is enabled.
+     * @param event Dispatched platform event.
+     */
+    void OnEvent(Event& event) override;
+    /*!
+     * @brief Starts a new Dear ImGui frame for the given Metal render pass descriptor.
+     * @param passDescriptor Active swapchain render pass descriptor.
+     */
+    void Begin(MTL::RenderPassDescriptor* passDescriptor);
+    /*!
+     * @brief Finalizes ImGui draw data and encodes draw commands into the active Metal pass.
+     * @param commandBuffer Active Metal command buffer.
+     * @param renderEncoder Active swapchain render command encoder.
+     */
+    void End(MTL::CommandBuffer* commandBuffer, MTL::RenderCommandEncoder* renderEncoder);
+    /*!
+     * @brief Controls whether ImGui blocks mouse/keyboard events from reaching underlying layers.
+     * @param block True to block events when hovering UI outside the 3D viewport, false to pass through.
+     */
+    void BlockEvents(bool block) noexcept { m_BlockEvents = block; }
+  private:
+    bool m_BlockEvents{true}; ///< True when UI panels should consume mouse and keyboard events.
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/UI/ImGuiLayer.mm
-
+/*!
+ * @file ImGuiLayer.mm
+ * @brief Objective-C++ implementation of ImGuiLayer bridging metal-cpp and Dear ImGui backends.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/UI/ImGuiLayer.hpp"
+#include "Renderer/UI/ImGuiTheme.hpp"
+#include "Core/Application/Application.hpp"
+#include "Platform/Window/NativeWindow.hpp"
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#import <AppKit/AppKit.h>
+#import <Metal/Metal.h>
+#import <MetalKit/MetalKit.h>
+#import <imgui.h>
+#import <imgui_impl_metal.h>
+#import <imgui_impl_osx.h>
+namespace KanVerse {
+  /*
+   * ImGuiLayer Implementation Notes:
+   * --------------------------------
+   * BridgesKanVerse's C++ `MTL::Device`, `MTL::CommandBuffer`, and `MTL::RenderCommandEncoder`
+   * pointers to Objective-C `id<MTL...>` handles using zero-overhead `__bridge` casts.
+   * `ImGui_ImplOSX_Init(mtkView)` automatically installs an `NSEvent` local monitor in
+   * recent ImGui versions so mouse clicks, scroll wheels, and keystrokes are routed seamlessly.
+   */
+  ImGuiLayer::ImGuiLayer()
+  : Layer("ImGuiLayer") {}
+  void ImGuiLayer::OnAttach() {
+    @autoreleasepool {
+      KV_CORE_INFO("ImGuiLayer: Initializing Dear ImGui Studio context...");
+      IMGUI_CHECKVERSION();
+      ImGui::CreateContext();
+      ImGuiIO& io = ImGui::GetIO();
+      io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+      io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+      io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+      // Apply custom KanVerse Studio charcoal dark theme
+      ImGuiTheme::ApplyDarkTheme();
+      auto& app = Application::Get();
+      auto* nativeWin = static_cast<const NativeWindow*>(&app.GetWindow());
+      MTKView* mtkView = (__bridge MTKView*)nativeWin->GetNativeView();
+      id<MTLDevice> device = (__bridge id<MTLDevice>)app.GetRenderContext()->GetDevice();
+      KV_CORE_ASSERT(mtkView != nil, "[ImGuiLayer] Native MTKView is nil!");
+      KV_CORE_ASSERT(device != nil,  "[ImGuiLayer] Native MTLDevice is nil!");
+      ImGui_ImplOSX_Init(mtkView);
+      ImGui_ImplMetal_Init(device);
+      KV_CORE_INFO("ImGuiLayer: Dear ImGui Metal & OSX backends initialized.");
+    }
+  }
+  void ImGuiLayer::OnDetach() {
+    @autoreleasepool {
+      ImGui_ImplMetal_Shutdown();
+      ImGui_ImplOSX_Shutdown();
+      ImGui::DestroyContext();
+      KV_CORE_INFO("ImGuiLayer: Dear ImGui context destroyed.");
+    }
+  }
+  void ImGuiLayer::OnEvent(Event& event) {
+    if (!m_BlockEvents) {
+      return;
+    }
+    ImGuiIO& io = ImGui::GetIO();
+    if (event.IsInCategory(EventCategoryMouse) && io.WantCaptureMouse) {
+      event.SetHandled(true);
+    }
+    if (event.IsInCategory(EventCategoryKeyboard) && io.WantCaptureKeyboard) {
+      event.SetHandled(true);
+    }
+  }
+  void ImGuiLayer::Begin(MTL::RenderPassDescriptor* passDescriptor) {
+    @autoreleasepool {
+      auto& app = Application::Get();
+      auto* nativeWin = static_cast<const NativeWindow*>(&app.GetWindow());
+      MTKView* mtkView = (__bridge MTKView*)nativeWin->GetNativeView();
+      MTLRenderPassDescriptor* objcPassDesc = (__bridge MTLRenderPassDescriptor*)passDescriptor;
+      if (!objcPassDesc && mtkView) {
+        objcPassDesc = mtkView.currentRenderPassDescriptor;
+      }
+      ImGui_ImplMetal_NewFrame(objcPassDesc);
+      ImGui_ImplOSX_NewFrame(mtkView);
+      ImGui::NewFrame();
+    }
+  }
+  void ImGuiLayer::End(MTL::CommandBuffer* commandBuffer, MTL::RenderCommandEncoder* renderEncoder) {
+    @autoreleasepool {
+      ImGui::Render();
+      if (commandBuffer && renderEncoder) {
+        id<MTLCommandBuffer> objcCmdBuf = (__bridge id<MTLCommandBuffer>)commandBuffer;
+        id<MTLRenderCommandEncoder> objcEncoder = (__bridge id<MTLRenderCommandEncoder>)renderEncoder;
+        ImGui_ImplMetal_RenderDrawData(ImGui::GetDrawData(), objcCmdBuf, objcEncoder);
+      }
+      ImGuiIO& io = ImGui::GetIO();
+      if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+      }
+    }
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/UI/ImGuiTheme.cpp
-
+/*!
+ * @file ImGuiTheme.cpp
+ * @brief Implementation of the KanVerse Studio dark color scheme and layout styling.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/UI/ImGuiTheme.hpp"
+#include <imgui.h>
+namespace KanVerse {
+  /*
+   * ImGuiTheme Implementation Notes:
+   * --------------------------------
+   * Tunes window padding, frame rounding, tab borders, and docking splitter thickness
+   * for high-DPI Retina displays. Uses a neutral charcoal palette so HDR viewport colors
+   * are perceived without chromatic adaptation bias.
+   */
+  void ImGuiTheme::ApplyDarkTheme() noexcept {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowPadding     = ImVec2(8.0f, 8.0f);
+    style.FramePadding      = ImVec2(6.0f, 4.0f);
+    style.ItemSpacing       = ImVec2(6.0f, 6.0f);
+    style.WindowRounding    = 4.0f;
+    style.FrameRounding     = 3.0f;
+    style.PopupRounding     = 4.0f;
+    style.GrabRounding      = 2.0f;
+    style.TabRounding       = 4.0f;
+    style.WindowBorderSize  = 1.0f;
+    style.FrameBorderSize   = 0.0f;
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+      style.WindowRounding = 0.0f;
+    }
+    ImVec4* colors = style.Colors;
+    // Primary backgrounds
+    colors[ImGuiCol_WindowBg]             = ImVec4{ 0.11f, 0.115f, 0.125f, 1.0f };
+    colors[ImGuiCol_ChildBg]              = ImVec4{ 0.10f, 0.105f, 0.115f, 1.0f };
+    colors[ImGuiCol_PopupBg]              = ImVec4{ 0.13f, 0.135f, 0.15f,  0.98f };
+    colors[ImGuiCol_Border]               = ImVec4{ 0.22f, 0.23f,  0.25f,  1.0f };
+    // Headers & Accordions
+    colors[ImGuiCol_Header]               = ImVec4{ 0.20f, 0.21f,  0.23f,  1.0f };
+    colors[ImGuiCol_HeaderHovered]        = ImVec4{ 0.28f, 0.30f,  0.34f,  1.0f };
+    colors[ImGuiCol_HeaderActive]         = ImVec4{ 0.16f, 0.46f,  0.78f,  1.0f };
+    // Buttons
+    colors[ImGuiCol_Button]               = ImVec4{ 0.20f, 0.21f,  0.24f,  1.0f };
+    colors[ImGuiCol_ButtonHovered]        = ImVec4{ 0.28f, 0.31f,  0.36f,  1.0f };
+    colors[ImGuiCol_ButtonActive]         = ImVec4{ 0.16f, 0.46f,  0.78f,  1.0f };
+    // Frame inputs (Sliders, DragFloat, TextInput)
+    colors[ImGuiCol_FrameBg]              = ImVec4{ 0.07f, 0.075f, 0.085f, 1.0f };
+    colors[ImGuiCol_FrameBgHovered]       = ImVec4{ 0.15f, 0.16f,  0.18f,  1.0f };
+    colors[ImGuiCol_FrameBgActive]        = ImVec4{ 0.19f, 0.21f,  0.24f,  1.0f };
+    // Tabs & Docking
+    colors[ImGuiCol_Tab]                  = ImVec4{ 0.13f, 0.14f,  0.155f, 1.0f };
+    colors[ImGuiCol_TabHovered]           = ImVec4{ 0.26f, 0.52f,  0.88f,  0.80f };
+    colors[ImGuiCol_TabActive]            = ImVec4{ 0.20f, 0.42f,  0.72f,  1.0f };
+    colors[ImGuiCol_TabUnfocused]         = ImVec4{ 0.11f, 0.115f, 0.125f, 1.0f };
+    colors[ImGuiCol_TabUnfocusedActive]   = ImVec4{ 0.17f, 0.18f,  0.20f,  1.0f };
+    // Title Bars
+    colors[ImGuiCol_TitleBg]              = ImVec4{ 0.08f, 0.085f, 0.095f, 1.0f };
+    colors[ImGuiCol_TitleBgActive]        = ImVec4{ 0.08f, 0.085f, 0.095f, 1.0f };
+    colors[ImGuiCol_TitleBgCollapsed]     = ImVec4{ 0.08f, 0.085f, 0.095f, 0.75f };
+    // Accent highlights
+    colors[ImGuiCol_CheckMark]            = ImVec4{ 0.26f, 0.59f,  0.98f,  1.0f };
+    colors[ImGuiCol_SliderGrab]           = ImVec4{ 0.26f, 0.59f,  0.98f,  0.85f };
+    colors[ImGuiCol_SliderGrabActive]     = ImVec4{ 0.36f, 0.69f,  1.00f,  1.0f };
+    colors[ImGuiCol_DockingPreview]       = ImVec4{ 0.26f, 0.59f,  0.98f,  0.70f };
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/UI/ImGuiTheme.hpp
-
+/*!
+ * @file ImGuiTheme.hpp
+ * @brief Custom Blender/Unreal-inspired charcoal dark theme for KanVerse Studio.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+namespace KanVerse {
+  /*!
+   * @class ImGuiTheme
+   * @brief Configures global Dear ImGui style variables, padding, rounding, and color palettes.
+   */
+  class ImGuiTheme {
+  public:
+    /*!
+     * @brief Applies the signature KanVerse Studio charcoal dark theme to the active ImGui context.
+     */
+    static void ApplyDarkTheme() noexcept;
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/UI/UIWidgets.hpp
-
+/*!
+ * @file UIWidgets.hpp
+ * @brief Reusable Dear ImGui property widgets (Vec3 X/Y/Z reset controls, labeled sliders).
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Math/Math.hpp"
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <string>
+namespace KanVerse::UI {
+  /*!
+   * @brief Renders an Unreal/Hazel-style 3-axis vector control with colored X/Y/Z reset buttons.
+   *
+   * @param label Property name displayed in the left column.
+   * @param values Mutable reference to the 3D SIMD vector being edited.
+   * @param resetValue Default scalar value applied when an X, Y, or Z button is clicked.
+   * @param columnWidth Width in pixels of the left label column.
+   * @return True if any component of `values` was modified this frame.
+   */
+  inline bool DrawVec3Control(const std::string& label,
+                              Math::Vec3& values,
+                              float resetValue = 0.0f,
+                              float columnWidth = 100.0f) {
+    bool modified = false;
+    ImGui::PushID(label.c_str());
+    ImGui::Columns(2);
+    ImGui::SetColumnWidth(0, columnWidth);
+    ImGui::Text("%s", label.c_str());
+    ImGui::NextColumn();
+    ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
+    const float lineHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
+    const ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+    // Copy into local scalar floats to safely pass pointers to ImGui
+    float valX = values.x;
+    float valY = values.y;
+    float valZ = values.z;
+    // --- X Axis (Red) ---
+    ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4{ 0.75f, 0.15f, 0.15f, 1.0f });
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.88f, 0.25f, 0.25f, 1.0f });
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4{ 0.75f, 0.15f, 0.15f, 1.0f });
+    if (ImGui::Button("X", buttonSize)) {
+      valX = resetValue;
+      modified = true;
+    }
+    ImGui::PopStyleColor(3);
+    ImGui::SameLine();
+    if (ImGui::DragFloat("##X", &valX, 0.1f, 0.0f, 0.0f, "%.2f")) {
+      modified = true;
+    }
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    // --- Y Axis (Green) ---
+    ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4{ 0.20f, 0.65f, 0.20f, 1.0f });
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.30f, 0.78f, 0.30f, 1.0f });
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4{ 0.20f, 0.65f, 0.20f, 1.0f });
+    if (ImGui::Button("Y", buttonSize)) {
+      valY = resetValue;
+      modified = true;
+    }
+    ImGui::PopStyleColor(3);
+    ImGui::SameLine();
+    if (ImGui::DragFloat("##Y", &valY, 0.1f, 0.0f, 0.0f, "%.2f")) {
+      modified = true;
+    }
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    // --- Z Axis (Blue) ---
+    ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4{ 0.15f, 0.35f, 0.80f, 1.0f });
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.25f, 0.48f, 0.92f, 1.0f });
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4{ 0.15f, 0.35f, 0.80f, 1.0f });
+    if (ImGui::Button("Z", buttonSize)) {
+      valZ = resetValue;
+      modified = true;
+    }
+    ImGui::PopStyleColor(3);
+    ImGui::SameLine();
+    if (ImGui::DragFloat("##Z", &valZ, 0.1f, 0.0f, 0.0f, "%.2f")) {
+      modified = true;
+    }
+    ImGui::PopItemWidth();
+    // If modified, write back to the SIMD vector
+    if (modified) {
+      values = Math::MakeVec3(valX, valY, valZ);
+    }
+    ImGui::PopStyleVar();
+    ImGui::Columns(1);
+    ImGui::PopID();
+    return modified;
+  }
+} // namespace KanVerse::UI
 // FILE: KanVerse_Engine/Scene/Components.hpp
 
 // FILE: KanVerse_Engine/Scene/Entity.hpp
-
+/*!
+ * @file EntityID.hpp
+ * @brief Generational 64-bit entity handle representation and bit-packing utilities.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <cstdint>
+namespace KanVerse {
+  /*!
+   * @typedef EntityID
+   * @brief 64-bit packed entity identifier consisting of a 32-bit slot index and a 32-bit generation counter.
+   *
+   * @details
+   * Bit Layout:
+   * - `[ 63 .. 32 ]` : Generation (32 bits) — Incremented whenever a slot is destroyed to detect dangling handles.
+   * - `[ 31 ..  0 ]` : Entity Index (32 bits) — Direct $O(1)$ lookup index into the paged sparse array.
+   */
+  using EntityID = std::uint64_t;
+  namespace ECS {
+    /*!
+     * @brief Sentinel constant denoting an invalid or null entity handle.
+     */
+    inline constexpr EntityID NullEntity = 0xFFFFFFFFFFFFFFFFULL;
+    /*!
+     * @brief Extracts the lower 32-bit slot index from a 64-bit EntityID.
+     * @param entity Target 64-bit entity identifier.
+     * @return 32-bit sparse slot index ($O(1)$ complexity).
+     */
+    [[nodiscard]] constexpr std::uint32_t GetIndex(EntityID entity) noexcept {
+      return static_cast<std::uint32_t>(entity & 0xFFFFFFFFULL);
+    }
+    /*!
+     * @brief Extracts the upper 32-bit generation counter from a 64-bit EntityID.
+     * @param entity Target 64-bit entity identifier.
+     * @return 32-bit generation counter ($O(1)$ complexity).
+     */
+    [[nodiscard]] constexpr std::uint32_t GetGeneration(EntityID entity) noexcept {
+      return static_cast<std::uint32_t>((entity >> 32) & 0xFFFFFFFFULL);
+    }
+    /*!
+     * @brief Packs a 32-bit slot index and 32-bit generation counter into a 64-bit EntityID.
+     * @param index Slot index in the registry's sparse array.
+     * @param generation Generation counter for slot-recycling safety.
+     * @return 64-bit packed EntityID ($O(1)$ complexity).
+     */
+    [[nodiscard]] constexpr EntityID CreateID(std::uint32_t index, std::uint32_t generation) noexcept {
+      return (static_cast<std::uint64_t>(generation) << 32) | static_cast<std::uint64_t>(index);
+    }
+  } // namespace ECS
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Scene/EntityID.hpp
 
 // FILE: KanVerse_Engine/Scene/Registry.hpp
-
+/*!
+ * @file Registry.hpp
+ * @brief Generational entity manager and multi-component query orchestrator.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Scene/EntityID.hpp"
+#include "Scene/SparseSet.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include <algorithm>
+#include <limits>
+#include <memory>
+#include <type_traits>
+#include <typeindex>
+#include <unordered_map>
+#include <vector>
+namespace KanVerse {
+  /*!
+   * @class Registry
+   * @brief Manages generational entity lifecycles, component pools, and cache-friendly query views.
+   */
+  class Registry {
+  public:
+    Registry() = default;
+    ~Registry() noexcept {
+      Clear();
+    }
+    Registry(const Registry&) = delete;
+    Registry& operator=(const Registry&) = delete;
+    Registry(Registry&&) noexcept = default;
+    Registry& operator=(Registry&&) noexcept = default;
+    /*!
+     * @brief Allocates a new entity identifier, recycling freed slots or expanding the generation pool.
+     * @return Valid 64-bit `EntityID` ($O(1)$ complexity).
+     */
+    [[nodiscard]] EntityID Create() {
+      std::uint32_t index = 0;
+      if (!m_FreeList.empty()) {
+        index = m_FreeList.back();
+        m_FreeList.pop_back();
+      } else {
+        index = static_cast<std::uint32_t>(m_Generations.size());
+        m_Generations.push_back(0);
+      }
+      return ECS::CreateID(index, m_Generations[index]);
+    }
+    /*!
+     * @brief Destroys an entity, removes all its attached components, and increments its slot generation.
+     * @param entity Target 64-bit entity handle.
+     */
+    void Destroy(EntityID entity) {
+      if (!IsValid(entity)) {
+        return;
+      }
+      for (auto& [type, pool] : m_Pools) {
+        if (pool->Contains(entity)) {
+          pool->Remove(entity);
+        }
+      }
+      const std::uint32_t index = ECS::GetIndex(entity);
+      ++m_Generations[index];
+      m_FreeList.push_back(index);
+    }
+    /*!
+     * @brief Verifies whether an entity handle points to a live, generation-matched slot.
+     * @param entity Target 64-bit entity handle.
+     * @return True if alive and valid ($O(1)$ complexity).
+     */
+    [[nodiscard]] bool IsValid(EntityID entity) const noexcept {
+      const std::uint32_t index = ECS::GetIndex(entity);
+      if (index >= m_Generations.size()) {
+        return false;
+      }
+      return m_Generations[index] == ECS::GetGeneration(entity);
+    }
+    /*!
+     * @brief Constructs and attaches a component in-place on an entity.
+     * @tparam T Component type.
+     * @tparam Args Constructor argument types for `T`.
+     * @param entity Target 64-bit entity handle.
+     * @param args Forwarded constructor arguments.
+     * @return Mutable reference to the emplaced component.
+     */
+    template <typename T, typename... Args>
+    T& Emplace(EntityID entity, Args&&... args) {
+      KV_CORE_ASSERT(IsValid(entity), "[KanVerse ECS] Attempted to emplace component on invalid EntityID!");
+      return GetPool<T>()->Emplace(entity, std::forward<Args>(args)...);
+    }
+    /*!
+     * @brief Retrieves a mutable reference to an entity's component.
+     * @tparam T Component type.
+     * @param entity Target 64-bit entity handle.
+     * @return Mutable reference to `T`.
+     */
+    template <typename T>
+    [[nodiscard]] T& Get(EntityID entity) noexcept {
+      KV_CORE_ASSERT(IsValid(entity), "[KanVerse ECS] Attempted to get component on invalid EntityID!");
+      return GetPool<T>()->Get(entity);
+    }
+    /*!
+     * @brief Retrieves a const reference to an entity's component.
+     * @tparam T Component type.
+     * @param entity Target 64-bit entity handle.
+     * @return Const reference to `T`.
+     */
+    template <typename T>
+    [[nodiscard]] const T& Get(EntityID entity) const noexcept {
+      KV_CORE_ASSERT(IsValid(entity), "[KanVerse ECS] Attempted to get component on invalid EntityID!");
+      return GetPool<T>()->Get(entity);
+    }
+    /*!
+     * @brief Checks whether an entity currently possesses a specific component.
+     * @tparam T Component type.
+     * @param entity Target 64-bit entity handle.
+     * @return True if the component is attached ($O(1)$ complexity).
+     */
+    template <typename T>
+    [[nodiscard]] bool Has(EntityID entity) const noexcept {
+      if (!IsValid(entity)) {
+        return false;
+      }
+      const auto it = m_Pools.find(std::type_index(typeid(T)));
+      if (it == m_Pools.end()) {
+        return false;
+      }
+      return it->second->Contains(entity);
+    }
+    /*!
+     * @brief Removes a component of type `T` from an entity.
+     * @tparam T Component type.
+     * @param entity Target 64-bit entity handle.
+     */
+    template <typename T>
+    void Remove(EntityID entity) {
+      KV_CORE_ASSERT(IsValid(entity), "[KanVerse ECS] Attempted to remove component from invalid EntityID!");
+      const auto it = m_Pools.find(std::type_index(typeid(T)));
+      if (it != m_Pools.end()) {
+        it->second->Remove(entity);
+      }
+    }
+    /*!
+     * @brief Wipes all entities, generations, free lists, and component pools.
+     */
+    void Clear() noexcept {
+      for (auto& [type, pool] : m_Pools) {
+        pool->Clear();
+      }
+      m_Pools.clear();
+      m_Generations.clear();
+      m_FreeList.clear();
+    }
+    /*!
+     * @class View
+     * @brief High-throughput query view iterating across entities possessing all specified components.
+     * @tparam Components Variadic pack of required component types.
+     */
+    template <typename... Components>
+    class View {
+    public:
+      explicit View(Registry& registry) noexcept
+      : m_Registry(registry), m_LeadingPool(FindSmallestPool()) {}
+      /*!
+       * @brief Iterates across all matching entities invoking `func(EntityID, Components&...)`.
+       * @tparam Func Callable matching `void(EntityID, Components&...)`.
+       */
+      template <typename Func>
+      void Each(Func&& func) {
+        if (m_LeadingPool == nullptr) {
+          return;
+        }
+        const auto& entities = m_LeadingPool->GetEntities();
+        for (const EntityID entity : entities) {
+          if (m_Registry.IsValid(entity) && (m_Registry.Has<Components>(entity) && ...)) {
+            func(entity, m_Registry.Get<Components>(entity)...);
+          }
+        }
+      }
+      /*!
+       * @brief Iterates across matching components invoking `func(Components&...)` without the `EntityID`.
+       * @tparam Func Callable matching `void(Components&...)`.
+       */
+      template <typename Func>
+      void Each(Func&& func) requires(!std::is_invocable_v<Func, EntityID, Components&...>) {
+        if (m_LeadingPool == nullptr) {
+          return;
+        }
+        const auto& entities = m_LeadingPool->GetEntities();
+        for (const EntityID entity : entities) {
+          if (m_Registry.IsValid(entity) && (m_Registry.Has<Components>(entity) && ...)) {
+            func(m_Registry.Get<Components>(entity)...);
+          }
+        }
+      }
+    private:
+      [[nodiscard]] ISparseSet* FindSmallestPool() noexcept {
+        ISparseSet* smallest = nullptr;
+        std::size_t minSize  = std::numeric_limits<std::size_t>::max();
+        auto checkPool = [this, &smallest, &minSize]<typename T>() {
+          const auto it = m_Registry.m_Pools.find(std::type_index(typeid(T)));
+          if (it != m_Registry.m_Pools.end()) {
+            if (it->second->Size() < minSize) {
+              minSize  = it->second->Size();
+              smallest = it->second.get();
+            }
+          } else {
+            minSize  = 0;
+            smallest = nullptr;
+          }
+        };
+        (checkPool.template operator()<Components>(), ...);
+        return smallest;
+      }
+      Registry&   m_Registry;
+      ISparseSet* m_LeadingPool{ nullptr };
+    };
+    /*!
+     * @brief Constructs a multi-component query view over the registry.
+     * @tparam Components Required component types.
+     * @return Configured `View<Components...>` instance.
+     */
+    template <typename... Components>
+    [[nodiscard]] View<Components...> GetView() noexcept {
+      return View<Components...>(*this);
+    }
+  private:
+    template <typename T>
+    [[nodiscard]] SparseSet<T>* GetPool() {
+      const auto typeIdx = std::type_index(typeid(T));
+      const auto it      = m_Pools.find(typeIdx);
+      if (it == m_Pools.end()) {
+        auto newPool         = std::make_unique<SparseSet<T>>();
+        SparseSet<T>* rawPtr = newPool.get();
+        m_Pools.emplace(typeIdx, std::move(newPool));
+        return rawPtr;
+      }
+      return static_cast<SparseSet<T>*>(it->second.get());
+    }
+    template <typename T>
+    [[nodiscard]] const SparseSet<T>* GetPool() const noexcept {
+      const auto typeIdx = std::type_index(typeid(T));
+      const auto it      = m_Pools.find(typeIdx);
+      KV_CORE_ASSERT(it != m_Pools.end(), "[KanVerse ECS] Component pool does not exist!");
+      return static_cast<const SparseSet<T>*>(it->second.get());
+    }
+    std::vector<std::uint32_t>                                      m_Generations;
+    std::vector<std::uint32_t>                                      m_FreeList;
+    std::unordered_map<std::type_index, std::unique_ptr<ISparseSet>> m_Pools;
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Scene/Scene.hpp
 
 // FILE: KanVerse_Engine/Scene/Scene.mm
 
 // FILE: KanVerse_Engine/Scene/SparseSet.hpp
-
+/*!
+ * @file SparseSet.hpp
+ * @brief Paged sparse-set container managing contiguous component pools with automated memory tracking.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Scene/EntityID.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Memory/MemoryTracking.hpp"
+#include <cstdint>
+#include <utility>
+#include <vector>
+namespace KanVerse {
+  /*!
+   * @class ISparseSet
+   * @brief Type-erased base interface enabling polymorphic component pool cleanup and iteration.
+   *
+   * @note Thread-safety: Not thread-safe for concurrent mutations on the same pool.
+   */
+  class ISparseSet {
+  public:
+    virtual ~ISparseSet() noexcept = default;
+    /*!
+     * @brief Queries whether an entity index exists within this component pool.
+     * @param entity Target 64-bit entity handle.
+     * @return True if the component is assigned ($O(1)$ time complexity).
+     */
+    [[nodiscard]] virtual bool Contains(EntityID entity) const noexcept = 0;
+    /*!
+     * @brief Erases an entity's component using swap-and-pop $O(1)$ removal.
+     * @param entity Target 64-bit entity handle.
+     */
+    virtual void Remove(EntityID entity) = 0;
+    /*!
+     * @brief Releases all allocated components and sparse index pages.
+     */
+    virtual void Clear() noexcept = 0;
+    /*!
+     * @brief Queries the active component count in the dense pool.
+     * @return Number of tightly packed components ($O(1)$ time complexity).
+     */
+    [[nodiscard]] virtual std::size_t Size() const noexcept = 0;
+    /*!
+     * @brief Accesses the contiguous dense entity array for cache-friendly linear iteration.
+     * @return Const reference to the dense `EntityID` vector.
+     */
+    [[nodiscard]] virtual const std::vector<EntityID>& GetEntities() const noexcept = 0;
+  };
+  /*!
+   * @class SparseSet
+   * @brief Paged sparse array paired with dense contiguous component buffers.
+   *
+   * @tparam Component Concrete component type stored contiguously in `m_DenseComponents`.
+   * @note Uses 4096-element sparse pages to avoid monolithic sparse array allocations while
+   *       maintaining strict $O(1)$ lookup, insertion, and swap-and-pop deletion.
+   */
+  template <typename Component>
+  class SparseSet final : public ISparseSet {
+  public:
+    static constexpr std::size_t   PageSize     = 4096;
+    static constexpr std::uint32_t InvalidIndex = 0xFFFFFFFFU;
+    SparseSet() = default;
+    ~SparseSet() noexcept override {
+      Clear();
+    }
+    SparseSet(const SparseSet&) = delete;
+    SparseSet& operator=(const SparseSet&) = delete;
+    SparseSet(SparseSet&& other) noexcept
+    : m_SparsePages(std::move(other.m_SparsePages)),
+    m_DenseEntities(std::move(other.m_DenseEntities)),
+    m_DenseComponents(std::move(other.m_DenseComponents)),
+    m_MemoryGuard(std::move(other.m_MemoryGuard)) {}
+    SparseSet& operator=(SparseSet&& other) noexcept {
+      if (this != &other) {
+        Clear();
+        m_SparsePages     = std::move(other.m_SparsePages);
+        m_DenseEntities   = std::move(other.m_DenseEntities);
+        m_DenseComponents = std::move(other.m_DenseComponents);
+        m_MemoryGuard     = std::move(other.m_MemoryGuard);
+      }
+      return *this;
+    }
+    /*!
+     * @brief Constructs and assigns a component in-place for the target entity.
+     * @tparam Args Constructor argument types forwarded to `Component`.
+     * @param entity Target 64-bit entity handle.
+     * @param args Arguments forwarded to the component constructor.
+     * @return Mutable reference to the newly emplaced component ($O(1)$ amortized).
+     */
+    template <typename... Args>
+    Component& Emplace(EntityID entity, Args&&... args) {
+      KV_CORE_ASSERT(!Contains(entity), "[KanVerse ECS] Entity already possesses this component!");
+      const std::uint32_t entityIndex = ECS::GetIndex(entity);
+      AssurePage(entityIndex);
+      const std::size_t pageIndex     = entityIndex / PageSize;
+      const std::size_t offset        = entityIndex % PageSize;
+      const std::uint32_t denseIndex  = static_cast<std::uint32_t>(m_DenseEntities.size());
+      m_SparsePages[pageIndex][offset] = denseIndex;
+      m_DenseEntities.push_back(entity);
+      m_DenseComponents.emplace_back(std::forward<Args>(args)...);
+      UpdateMemoryTracking();
+      return m_DenseComponents.back();
+    }
+    /*!
+     * @brief Retrieves a mutable reference to an entity's component.
+     * @param entity Target 64-bit entity handle.
+     * @return Mutable reference to `Component` ($O(1)$ complexity).
+     */
+    [[nodiscard]] Component& Get(EntityID entity) noexcept {
+      KV_CORE_ASSERT(Contains(entity), "[KanVerse ECS] Attempted to query non-existent component!");
+      const std::uint32_t entityIndex = ECS::GetIndex(entity);
+      const std::size_t pageIndex     = entityIndex / PageSize;
+      const std::size_t offset        = entityIndex % PageSize;
+      return m_DenseComponents[m_SparsePages[pageIndex][offset]];
+    }
+    /*!
+     * @brief Retrieves a const reference to an entity's component.
+     * @param entity Target 64-bit entity handle.
+     * @return Const reference to `Component` ($O(1)$ complexity).
+     */
+    [[nodiscard]] const Component& Get(EntityID entity) const noexcept {
+      KV_CORE_ASSERT(Contains(entity), "[KanVerse ECS] Attempted to query non-existent component!");
+      const std::uint32_t entityIndex = ECS::GetIndex(entity);
+      const std::size_t pageIndex     = entityIndex / PageSize;
+      const std::size_t offset        = entityIndex % PageSize;
+      return m_DenseComponents[m_SparsePages[pageIndex][offset]];
+    }
+    [[nodiscard]] bool Contains(EntityID entity) const noexcept override {
+      const std::uint32_t entityIndex = ECS::GetIndex(entity);
+      const std::size_t pageIndex     = entityIndex / PageSize;
+      const std::size_t offset        = entityIndex % PageSize;
+      if (pageIndex >= m_SparsePages.size() || m_SparsePages[pageIndex] == nullptr) {
+        return false;
+      }
+      return m_SparsePages[pageIndex][offset] != InvalidIndex;
+    }
+    void Remove(EntityID entity) override {
+      if (!Contains(entity)) {
+        return;
+      }
+      const std::uint32_t entityIndex  = ECS::GetIndex(entity);
+      const std::size_t pageIndex      = entityIndex / PageSize;
+      const std::size_t offset         = entityIndex % PageSize;
+      const std::uint32_t removedIndex = m_SparsePages[pageIndex][offset];
+      const std::uint32_t lastIndex    = static_cast<std::uint32_t>(m_DenseEntities.size() - 1);
+      const EntityID lastEntity        = m_DenseEntities.back();
+      const std::uint32_t lastEntityIdx = ECS::GetIndex(lastEntity);
+      // Swap-and-Pop: move the tail element into the removed slot to preserve 100% dense contiguity
+      if (removedIndex != lastIndex) {
+        m_DenseEntities[removedIndex]   = std::move(m_DenseEntities.back());
+        m_DenseComponents[removedIndex] = std::move(m_DenseComponents.back());
+        const std::size_t lastPage   = lastEntityIdx / PageSize;
+        const std::size_t lastOffset = lastEntityIdx % PageSize;
+        m_SparsePages[lastPage][lastOffset] = removedIndex;
+      }
+      m_DenseEntities.pop_back();
+      m_DenseComponents.pop_back();
+      m_SparsePages[pageIndex][offset] = InvalidIndex;
+      UpdateMemoryTracking();
+    }
+    void Clear() noexcept override {
+      for (std::uint32_t* page : m_SparsePages) {
+        delete[] page;
+      }
+      m_SparsePages.clear();
+      m_DenseEntities.clear();
+      m_DenseComponents.clear();
+      m_MemoryGuard.Reset(0);
+    }
+    [[nodiscard]] std::size_t Size() const noexcept override {
+      return m_DenseEntities.size();
+    }
+    [[nodiscard]] const std::vector<EntityID>& GetEntities() const noexcept override {
+      return m_DenseEntities;
+    }
+    [[nodiscard]] const std::vector<Component>& GetComponents() const noexcept {
+      return m_DenseComponents;
+    }
+    [[nodiscard]] std::vector<Component>& GetComponents() noexcept {
+      return m_DenseComponents;
+    }
+  private:
+    void AssurePage(std::uint32_t entityIndex) {
+      const std::size_t pageIndex = entityIndex / PageSize;
+      if (pageIndex >= m_SparsePages.size()) {
+        m_SparsePages.resize(pageIndex + 1, nullptr);
+      }
+      if (m_SparsePages[pageIndex] == nullptr) {
+        m_SparsePages[pageIndex] = new std::uint32_t[PageSize];
+        for (std::size_t i = 0; i < PageSize; ++i) {
+          m_SparsePages[pageIndex][i] = InvalidIndex;
+        }
+      }
+    }
+    void UpdateMemoryTracking() noexcept {
+      std::size_t totalBytes = 0;
+      for (const std::uint32_t* page : m_SparsePages) {
+        if (page != nullptr) {
+          totalBytes += PageSize * sizeof(std::uint32_t);
+        }
+      }
+      totalBytes += m_DenseEntities.capacity() * sizeof(EntityID);
+      totalBytes += m_DenseComponents.capacity() * sizeof(Component);
+      m_MemoryGuard.Reset(totalBytes);
+    }
+    std::vector<std::uint32_t*> m_SparsePages;
+    std::vector<EntityID>       m_DenseEntities;
+    std::vector<Component>      m_DenseComponents;
+    ScopedMemoryAllocation      m_MemoryGuard{};
+  };
+} // namespace KanVerse
 // FILE: KanVerse_App/PrefixHeader.pch
 /*!
  * @file PrefixHeader.pch
@@ -6803,13 +7670,369 @@ namespace KanVerse {
 // FILE: KanVerse_App/Editor/Panels/SceneHierarchyPanel.hpp
 
 // FILE: KanVerse_App/Editor/Panels/WorldSettingsPanel.cpp
-
+/*!
+ * @file WorldSettingsPanel.cpp
+ * @brief Implementation of the WorldSettingsPanel UI controls.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Editor/Panels/WorldSettingsPanel.hpp"
+#include "Renderer/Renderer/Renderer.hpp"
+#include "Renderer/UI/UIWidgets.hpp"
+#include <imgui.h>
+namespace KanVerse {
+  /*
+   * WorldSettingsPanel Implementation Notes:
+   * ----------------------------------------
+   * Directly mutates the active `DirectionalLight`, `EnvironmentLighting`, and `Renderer`
+   * post-processing parameters (`BloomPass` threshold, knee, intensity, and ACES exposure)
+   * so artists can tune lighting and optical glow interactively at 120 FPS.
+   */
+  void WorldSettingsPanel::OnImGuiRender(DirectionalLight& sunLight, EnvironmentLighting& envLighting) {
+    ImGui::Begin("World & Post-Process Settings");
+    // -------------------------------------------------------------------------
+    // 1. Directional Sun / Moon Light
+    // -------------------------------------------------------------------------
+    if (ImGui::CollapsingHeader("Directional Sun Light", ImGuiTreeNodeFlags_DefaultOpen)) {
+      Math::Vec3 dir = sunLight.GetDirection();
+      if (UI::DrawVec3Control("Direction", dir, -0.5f)) {
+        if (simd::length_squared(dir) > 1e-4f) {
+          sunLight.SetDirection(dir);
+        }
+      }
+      float color[3] = {sunLight.GetColor().x, sunLight.GetColor().y, sunLight.GetColor().z};
+      if (ImGui::ColorEdit3("Sun Color", color)) {
+        sunLight.SetColor(Math::MakeVec3(color[0], color[1], color[2]));
+      }
+      float intensity = sunLight.GetIntensity();
+      if (ImGui::SliderFloat("Sun Intensity", &intensity, 0.0f, 10.0f, "%.2f")) {
+        sunLight.SetIntensity(intensity);
+      }
+      float orthoExtent = sunLight.GetOrthoExtent();
+      if (ImGui::SliderFloat("Shadow Bounds", &orthoExtent, 75.0f, 300.0f, "%.1f m")) {
+        sunLight.SetOrthoExtent(orthoExtent);
+      }
+    }
+    // -------------------------------------------------------------------------
+    // 2. Environment & Image-Based Lighting (IBL)
+    // -------------------------------------------------------------------------
+    if (ImGui::CollapsingHeader("Environment & Skybox (IBL)", ImGuiTreeNodeFlags_DefaultOpen)) {
+      bool iblEnabled = Renderer::IsIBLEnabled();
+      if (ImGui::Checkbox("Enable Image-Based Lighting", &iblEnabled)) {
+        Renderer::SetIBLEnabled(iblEnabled);
+      }
+      const char* envModes[] = { "Crisp HDR", "Diffuse Irradiance", "Procedural Sky" };
+      int currentMode = static_cast<int>(Renderer::GetEnvironmentMode());
+      if (ImGui::Combo("Skybox Mode", &currentMode, envModes, IM_ARRAYSIZE(envModes))) {
+        Renderer::SetEnvironmentMode(static_cast<EnvironmentMode>(currentMode));
+      }
+      // Use a temporary float array for ImGui color editing to avoid SIMD address errors
+      float ambientCol[3] = { envLighting.AmbientColor.x, envLighting.AmbientColor.y, envLighting.AmbientColor.z };
+      if (ImGui::ColorEdit3("Ambient Tint", ambientCol)) {
+        envLighting.AmbientColor = Math::MakeVec3(ambientCol[0], ambientCol[1], ambientCol[2]);
+      }
+      ImGui::SliderFloat("Ambient Intensity", &envLighting.AmbientIntensity, 0.0f, 3.0f, "%.2f");
+    }
+    // -------------------------------------------------------------------------
+    // 3. Dual-Kawase Compute Bloom & ACES Filmic Tonemapping
+    // -------------------------------------------------------------------------
+    if (ImGui::CollapsingHeader("Post-Processing (Bloom & ACES)", ImGuiTreeNodeFlags_DefaultOpen)) {
+      auto& bloom = Renderer::GetBloomPass();
+      if (ImGui::SliderFloat("Bloom Threshold", &m_BloomThreshold, 0.1f, 5.0f, "%.2f")) {
+        bloom.SetThreshold(m_BloomThreshold);
+      }
+      if (ImGui::SliderFloat("Bloom Soft Knee", &m_BloomSoftKnee, 0.0f, 1.0f, "%.2f")) {
+        bloom.SetSoftKnee(m_BloomSoftKnee);
+      }
+      float bloomIntensity = bloom.GetIntensity();
+      if (ImGui::SliderFloat("Bloom Intensity", &bloomIntensity, 0.0f, 3.0f, "%.2f")) {
+        bloom.SetIntensity(bloomIntensity);
+      }
+      float exposure = Renderer::GetExposure();
+      if (ImGui::SliderFloat("Camera Exposure", &exposure, 0.1f, 4.0f, "%.2f")) {
+        Renderer::SetExposure(exposure);
+      }
+    }
+    ImGui::End();
+  }
+} // namespace KanVerse
 // FILE: KanVerse_App/Editor/Panels/WorldSettingsPanel.hpp
-
+/*!
+ * @file WorldSettingsPanel.hpp
+ * @brief Dockable ImGui panel for tuning directional sunlight, IBL skyboxes, and Dual-Kawase bloom.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Renderer/Lighting/DirectionalLight.hpp"
+#include "Renderer/Lighting/EnvironmentLighting.hpp"
+namespace KanVerse {
+  /*!
+   * @class WorldSettingsPanel
+   * @brief Exposes real-time sliders for Time-of-Day, Sun vectors, IBL modes, Bloom, and ACES Exposure.
+   */
+  class WorldSettingsPanel {
+  public:
+    WorldSettingsPanel() = default;
+    ~WorldSettingsPanel() = default;
+    /*!
+     * @brief Renders the World Settings & Post-Processing ImGui window.
+     * @param sunLight Mutable reference to the active directional sun light.
+     * @param envLighting Mutable reference to the active ambient environment settings.
+     */
+    void OnImGuiRender(DirectionalLight& sunLight, EnvironmentLighting& envLighting);
+  private:
+    float m_BloomThreshold{ 1.1f };
+    float m_BloomSoftKnee{ 0.5f };
+  };
+} // namespace KanVerse
 // FILE: KanVerse_App/Editor/Viewport/EditorCamera.cpp
-
+/*!
+ * @file EditorCamera.cpp
+ * @brief Implementation of the KanVerse Studio 3D EditorCamera.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Editor/Viewport/EditorCamera.hpp"
+#include "Platform/Input/GameControllerBridge.hpp"
+#include "Platform/Input/KeyCodes.hpp"
+#include <algorithm>
+#include <cmath>
+namespace KanVerse {
+  /*
+   * EditorCamera Implementation Notes:
+   * ----------------------------------
+   * Supports two complementary navigation paradigms:
+   * 1. Orbit/Pan/Zoom: Left-click or Right-click drag orbits around `m_FocalPoint`,
+   *    Shift + Drag pans `m_FocalPoint`, and Scroll Wheel zooms radially.
+   * 2. WASD Fly-through: Holding Right-Click + W/A/S/D/Q/E translates `m_FocalPoint`
+   *    along the camera's basis vectors for rapid level traversal.
+   */
+  EditorCamera::EditorCamera(float fovDegrees, float aspectRatio, float nearClip, float farClip)
+  : m_Camera(fovDegrees * (static_cast<float>(M_PI) / 180.0f), aspectRatio, nearClip, farClip) {
+    UpdateView();
+  }
+  void EditorCamera::SetViewportSize(uint32_t width, uint32_t height) {
+    if (width == 0 || height == 0) return;
+    m_ViewportWidth  = width;
+    m_ViewportHeight = height;
+    m_Camera.SetViewportSize(width, height);
+  }
+  Math::Vec3 EditorCamera::GetForwardDirection() const noexcept {
+    const float cosPitch = std::cos(m_Pitch);
+    return simd::normalize(Math::MakeVec3(
+                                          -std::sin(m_Yaw) * cosPitch,
+                                          -std::sin(m_Pitch),
+                                          -std::cos(m_Yaw) * cosPitch
+                                          ));
+  }
+  Math::Vec3 EditorCamera::GetRightDirection() const noexcept {
+    return simd::normalize(simd::cross(GetForwardDirection(), Math::MakeVec3(0.0f, 1.0f, 0.0f)));
+  }
+  Math::Vec3 EditorCamera::GetUpDirection() const noexcept {
+    return simd::normalize(simd::cross(GetRightDirection(), GetForwardDirection()));
+  }
+  void EditorCamera::UpdateView() {
+    const Math::Vec3 forward = GetForwardDirection();
+    const Math::Vec3 position = m_FocalPoint - forward * m_Distance;
+    m_Camera.SetPosition(position);
+    m_Camera.SetTarget(m_FocalPoint);
+  }
+  void EditorCamera::OnUpdate(TimeStep ts, bool viewportFocused) {
+    if (!viewportFocused) {
+      return;
+    }
+    const float dt = ts.GetSeconds();
+    const float moveSpeed = InputBridge::IsKeyPressed(static_cast<uint16_t>(Key::Shift)) ? 18.0f : 8.0f;
+    bool moved = false;
+    if (InputBridge::IsKeyPressed(static_cast<uint16_t>(Key::W))) {
+      m_FocalPoint += GetForwardDirection() * (moveSpeed * dt);
+      moved = true;
+    }
+    if (InputBridge::IsKeyPressed(static_cast<uint16_t>(Key::S))) {
+      m_FocalPoint -= GetForwardDirection() * (moveSpeed * dt);
+      moved = true;
+    }
+    if (InputBridge::IsKeyPressed(static_cast<uint16_t>(Key::D))) {
+      m_FocalPoint += GetRightDirection() * (moveSpeed * dt);
+      moved = true;
+    }
+    if (InputBridge::IsKeyPressed(static_cast<uint16_t>(Key::A))) {
+      m_FocalPoint -= GetRightDirection() * (moveSpeed * dt);
+      moved = true;
+    }
+    if (InputBridge::IsKeyPressed(static_cast<uint16_t>(Key::E))) {
+      m_FocalPoint.y += moveSpeed * dt;
+      moved = true;
+    }
+    if (InputBridge::IsKeyPressed(static_cast<uint16_t>(Key::Q))) {
+      m_FocalPoint.y -= moveSpeed * dt;
+      moved = true;
+    }
+    if (moved) {
+      UpdateView();
+    }
+  }
+  void EditorCamera::OnEvent(Event& e) {
+    EventDispatcher dispatcher(e);
+    dispatcher.Dispatch<MouseScrolledEvent>([this](MouseScrolledEvent& event) { return OnMouseScroll(event); });
+    dispatcher.Dispatch<MouseMovedEvent>([this](MouseMovedEvent& event) { return OnMouseMoved(event); });
+    dispatcher.Dispatch<MouseButtonPressedEvent>([this](MouseButtonPressedEvent& event) { return OnMouseButtonPressed(event); });
+    dispatcher.Dispatch<MouseButtonReleasedEvent>([this](MouseButtonReleasedEvent& event) { return OnMouseButtonReleased(event); });
+  }
+  bool EditorCamera::OnMouseButtonPressed(MouseButtonPressedEvent& e) {
+    if (e.GetMouseButton() == 1) { // Right-click: Orbit / Look
+      m_IsOrbiting = true;
+      m_FirstClick = true;
+    } else if (e.GetMouseButton() == 0 && InputBridge::IsKeyPressed(static_cast<uint16_t>(Key::Shift))) {
+      m_IsPanning  = true;
+      m_FirstClick = true;
+    }
+    return false;
+  }
+  bool EditorCamera::OnMouseButtonReleased(MouseButtonReleasedEvent& e) {
+    if (e.GetMouseButton() == 1) {
+      m_IsOrbiting = false;
+      m_FirstClick = true;
+    } else if (e.GetMouseButton() == 0) {
+      m_IsPanning  = false;
+      m_FirstClick = true;
+    }
+    return false;
+  }
+  bool EditorCamera::OnMouseMoved(MouseMovedEvent& e) {
+    const Math::Vec2 mousePos = Math::MakeVec2(e.GetX(), e.GetY());
+    if (!m_IsOrbiting && !m_IsPanning) {
+      m_InitialMousePosition = mousePos;
+      return false;
+    }
+    if (m_FirstClick) {
+      m_InitialMousePosition = mousePos;
+      m_FirstClick = false;
+      return false;
+    }
+    const Math::Vec2 delta = (mousePos - m_InitialMousePosition) * 0.004f;
+    m_InitialMousePosition = mousePos;
+    if (m_IsPanning) {
+      MousePan(delta);
+    } else if (m_IsOrbiting) {
+      MouseRotate(delta);
+    }
+    UpdateView();
+    return false;
+  }
+  bool EditorCamera::OnMouseScroll(MouseScrolledEvent& e) {
+    const float delta = std::clamp(e.GetYOffset(), -20.0f, 20.0f) * 0.06f;
+    MouseZoom(delta);
+    UpdateView();
+    return false;
+  }
+  void EditorCamera::MousePan(const Math::Vec2& delta) {
+    const float panSpeed = std::max(m_Distance * 0.6f, 1.0f);
+    m_FocalPoint -= GetRightDirection() * (delta.x * panSpeed);
+    m_FocalPoint -= GetUpDirection() * (delta.y * panSpeed);
+  }
+  void EditorCamera::MouseRotate(const Math::Vec2& delta) {
+    m_Yaw   -= delta.x * 1.2f;
+    m_Pitch += delta.y * 1.2f;
+    m_Pitch  = std::clamp(m_Pitch, -1.48f, 1.48f);
+  }
+  void EditorCamera::MouseZoom(float delta) {
+    const float zoomSpeed = std::max(m_Distance * 0.08f, 0.35f);
+    m_Distance = std::clamp(m_Distance - delta * zoomSpeed, 1.0f, 150.0f);
+  }
+} // namespace KanVerse
 // FILE: KanVerse_App/Editor/Viewport/EditorCamera.hpp
-
+/*!
+ * @file EditorCamera.hpp
+ * @brief Free-fly and Maya/Blender-style orbit/pan/zoom camera for the KanVerse Studio 3D viewport.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Renderer/Camera/PerspectiveCamera.hpp"
+#include "Core/Time/TimeStep.hpp"
+#include "Platform/Events/Event.hpp"
+#include "Platform/Events/MouseEvents.hpp"
+namespace KanVerse {
+  /*!
+   * @class EditorCamera
+   * @brief Interactive 3D viewport camera supporting WASD fly-through and orbital manipulation.
+   */
+  class EditorCamera {
+  public:
+    /*!
+     * @brief Constructs an EditorCamera with specified vertical FOV and aspect ratio.
+     * @param fovDegrees Vertical field of view in degrees.
+     * @param aspectRatio Initial viewport width / height ratio.
+     * @param nearClip Near clipping plane distance.
+     * @param farClip Far clipping plane distance.
+     */
+    EditorCamera(float fovDegrees = 60.0f,
+                 float aspectRatio = 1.778f,
+                 float nearClip = 0.1f,
+                 float farClip = 1000.0f);
+    ~EditorCamera() = default;
+    /*!
+     * @brief Updates camera position and orientation from keyboard/mouse inputs when viewport is active.
+     * @param ts Frame delta time step.
+     * @param viewportFocused True if the 3D viewport panel is focused or hovered.
+     */
+    void OnUpdate(TimeStep ts, bool viewportFocused);
+    /*!
+     * @brief Handles mouse button, movement, and scroll wheel events.
+     * @param e Dispatched platform event.
+     */
+    void OnEvent(Event& e);
+    /*!
+     * @brief Updates the camera's projection matrix when the ImGui viewport panel resizes.
+     * @param width New viewport width in pixels.
+     * @param height New viewport height in pixels.
+     */
+    void SetViewportSize(uint32_t width, uint32_t height);
+    /*!
+     * @brief Accesses the underlying PerspectiveCamera for rendering.
+     * @return Const reference to the PerspectiveCamera.
+     */
+    [[nodiscard]] const PerspectiveCamera& GetCamera() const noexcept { return m_Camera; }
+    /*!
+     * @brief Queries the camera's forward unit vector in world space.
+     */
+    [[nodiscard]] Math::Vec3 GetForwardDirection() const noexcept;
+    /*!
+     * @brief Queries the camera's right unit vector in world space.
+     */
+    [[nodiscard]] Math::Vec3 GetRightDirection() const noexcept;
+    /*!
+     * @brief Queries the camera's up unit vector in world space.
+     */
+    [[nodiscard]] Math::Vec3 GetUpDirection() const noexcept;
+    [[nodiscard]] const Math::Vec3& GetPosition() const noexcept { return m_Camera.GetPosition(); }
+    [[nodiscard]] float GetDistance() const noexcept { return m_Distance; }
+    void SetDistance(float distance) noexcept { m_Distance = distance; UpdateView(); }
+    void SetFocalPoint(const Math::Vec3& focal) noexcept { m_FocalPoint = focal; UpdateView(); }
+  private:
+    void UpdateView();
+    bool OnMouseScroll(MouseScrolledEvent& e);
+    bool OnMouseMoved(MouseMovedEvent& e);
+    bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
+    bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
+    void MousePan(const Math::Vec2& delta);
+    void MouseRotate(const Math::Vec2& delta);
+    void MouseZoom(float delta);
+    PerspectiveCamera m_Camera;
+    Math::Vec3        m_FocalPoint{ 0.0f, 0.0f, 0.0f };
+    Math::Vec2        m_InitialMousePosition{ 0.0f, 0.0f };
+    float             m_Distance{ 12.0f };
+    float             m_Pitch{ 0.35f };
+    float             m_Yaw{ 0.0f };
+    uint32_t          m_ViewportWidth{ 1280 };
+    uint32_t          m_ViewportHeight{ 720 };
+    bool              m_IsOrbiting{ false };
+    bool              m_IsPanning{ false };
+    bool              m_FirstClick{ true };
+  };
+} // namespace KanVerse
 // FILE: KanVerse_App/Editor/Viewport/ViewportPicker.hpp
 
 // FILE: KanVerse_App/Editor/Viewport/ViewportPicker.mm
@@ -6823,9 +8046,271 @@ namespace KanVerse {
 // FILE: KanVerse_App/Factories/MaterialFactory.hpp
 
 // FILE: KanVerse_App/Layers/EditorLayer.hpp
-
+/*!
+ * @file EditorLayer.hpp
+ * @brief Master KanVerse Studio Editor layer hosting the DockSpace, 3D Viewport, and tool panels.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "KanVerse_Headers.h"
+#include "Renderer/UI/ImGuiLayer.hpp"
+#include "Editor/Viewport/EditorCamera.hpp"
+#include "Editor/Panels/WorldSettingsPanel.hpp"
+namespace KanVerse {
+  /*!
+   * @class EditorLayer
+   * @brief Coordinates the 3D scene preview, offscreen viewport framebuffer, and Dear ImGui workspace.
+   */
+  class EditorLayer : public Layer {
+  public:
+    EditorLayer();
+    ~EditorLayer() override = default;
+    void OnAttach() override;
+    void OnDetach() override;
+    void OnUpdate(TimeStep ts) override;
+    void OnRender() override;
+    void OnEvent(Event& event) override;
+  private:
+    void RenderDockSpace();
+    void RenderMenuBar();
+    void RenderViewportPanel();
+    void RenderTelemetryPanel();
+    std::unique_ptr<ImGuiLayer>   m_ImGuiLayer;
+    EditorCamera                  m_EditorCamera{ 60.0f, 1280.0f / 720.0f, 0.1f, 1000.0f };
+    WorldSettingsPanel            m_WorldSettingsPanel;
+    // Preview Scene Resources (before Phase 6 ECS Scene integration)
+    DirectionalLight              m_SunLight;
+    EnvironmentLighting           m_Environment;
+    std::shared_ptr<Mesh>         m_PreviewBoxMesh;
+    std::shared_ptr<Mesh>         m_PreviewGroundMesh;
+    std::shared_ptr<Material>     m_PreviewBoxMaterial;
+    std::shared_ptr<Material>     m_PreviewGroundMaterial;
+    Math::Vec3                    m_BoxPosition{ 0.0f, 0.8f, 0.0f };
+    Math::Vec3                    m_BoxRotation{ 0.0f, 0.0f, 0.0f };
+    Math::Vec3                    m_BoxScale{ 1.0f, 1.0f, 1.0f };
+    Math::Vec2                    m_ViewportSize{ 1280.0f, 720.0f };
+    bool                          m_ViewportFocused{ false };
+    bool                          m_ViewportHovered{ false };
+    bool                          m_ShowDemoWindow{ false };
+    float                         m_LastFrameTimeMs{ 0.0f };
+  };
+} // namespace KanVerse
 // FILE: KanVerse_App/Layers/EditorLayer.mm
-
+/*!
+ * @file EditorLayer.mm
+ * @brief Implementation of the KanVerse Studio Editor workspace, DockSpace, and 3D Viewport.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Layers/EditorLayer.hpp"
+#include "Renderer/UI/UIWidgets.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <imgui.h>
+namespace KanVerse {
+  /*
+   * EditorLayer Implementation Notes:
+   * ---------------------------------
+   * 1. Renders the 3D scene into `Renderer::GetHDRFramebuffer()`.
+   * 2. Registers a UI render callback with `Renderer::SetUIRenderCallback` so that during
+   *    `Renderer::EndScene()`, after Compute Bloom and ACES Tonemapping finish, Dear ImGui
+   *    is encoded directly into the final swapchain command buffer.
+   * 3. Displays the HDR color attachment inside the dockable "3D Viewport" ImGui window
+   *    and automatically resizes the framebuffer when the panel bounds change.
+   */
+  EditorLayer::EditorLayer()
+  : Layer("EditorLayer"),
+  m_SunLight(Math::MakeVec3(-0.45f, -1.0f, -0.35f), Math::MakeVec3(1.0f, 0.96f, 0.90f), 2.6f) {}
+  void EditorLayer::OnAttach() {
+    KV_INFO("EditorLayer: Bootstrapping KanVerse Studio...");
+    m_ImGuiLayer = std::make_unique<ImGuiLayer>();
+    m_ImGuiLayer->OnAttach();
+    // Configure default procedural skybox for Phase 5 preview
+    Renderer::SetEnvironmentMode(EnvironmentMode::Procedural);
+    Renderer::SetIBLEnabled(true);
+    // Create preview meshes and PBR materials to verify the Editor Viewport
+    const BufferLayout layout = Renderer::GetStandardMeshLayout();
+    m_PreviewBoxMesh    = Mesh::CreateChamferBox(0.75f, 0.08f, layout);
+    m_PreviewGroundMesh = Mesh::CreateChamferBox(8.0f,  0.02f, layout);
+    auto shader = Renderer::GetStandardPipeline()->GetSpecification().ShaderProgram;
+    m_PreviewBoxMaterial = Material::Create(shader, "PreviewGoldBox");
+    m_PreviewBoxMaterial->SetBaseColor(Math::MakeVec4(1.0f, 0.78f, 0.34f, 1.0f));
+    m_PreviewBoxMaterial->SetRoughness(0.22f);
+    m_PreviewBoxMaterial->SetMetallic(0.88f);
+    m_PreviewGroundMaterial = Material::Create(shader, "PreviewCheckerGround");
+    m_PreviewGroundMaterial->SetAlbedoTexture(Texture2D::CreateCheckerboard(512));
+    m_PreviewGroundMaterial->SetTilingFactor(Math::MakeVec3(8.0f, 1.0f, 8.0f));
+    m_PreviewGroundMaterial->SetRoughness(0.65f);
+    m_PreviewGroundMaterial->SetMetallic(0.05f);
+    // Register ImGui rendering hook into Renderer's swapchain pass
+    Renderer::SetUIRenderCallback([this](MTL::CommandBuffer* cmdBuf,
+                                         MTL::RenderCommandEncoder* encoder,
+                                         MTL::RenderPassDescriptor* passDesc) {
+      m_ImGuiLayer->Begin(passDesc);
+      RenderDockSpace();
+      m_ImGuiLayer->End(cmdBuf, encoder);
+    });
+  }
+  void EditorLayer::OnDetach() {
+    if (m_ImGuiLayer) {
+      m_ImGuiLayer->OnDetach();
+      m_ImGuiLayer.reset();
+    }
+  }
+  void EditorLayer::OnUpdate(TimeStep ts) {
+    m_LastFrameTimeMs = ts.GetMilliseconds();
+    // Resize offscreen framebuffer and camera projection if the ImGui Viewport tab was resized
+    auto hdrFb = Renderer::GetHDRFramebuffer();
+    if (hdrFb) {
+      const auto& spec = hdrFb->GetSpecification();
+      if (m_ViewportSize.x > 1.0f && m_ViewportSize.y > 1.0f &&
+          (spec.Width != static_cast<uint32_t>(m_ViewportSize.x) ||
+           spec.Height != static_cast<uint32_t>(m_ViewportSize.y))) {
+        hdrFb->Resize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
+        m_EditorCamera.SetViewportSize(static_cast<uint32_t>(m_ViewportSize.x),
+                                       static_cast<uint32_t>(m_ViewportSize.y));
+      }
+    }
+    // Block ImGui from swallowing events when the user is actively navigating inside the 3D Viewport
+    m_ImGuiLayer->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
+    m_EditorCamera.OnUpdate(ts, m_ViewportFocused || m_ViewportHovered);
+  }
+  void EditorLayer::OnRender() {
+    // Build instance transforms for the preview ground and chamfer box
+    Math::Mat4 groundModel = Math::Identity();
+    groundModel.columns[1].y = 0.05f;
+    groundModel.columns[3]   = Math::MakeVec4(0.0f, -0.4f, 0.0f, 1.0f);
+    InstanceData groundInst{
+      .ModelMatrix  = groundModel,
+      .NormalMatrix = Math::Transpose(Math::Inverse(groundModel))
+    };
+    Math::Mat4 boxTrans = Math::Identity();
+    boxTrans.columns[3] = Math::MakeVec4(m_BoxPosition.x, m_BoxPosition.y, m_BoxPosition.z, 1.0f);
+    const Math::Mat4 rotX = Math::Rotate(m_BoxRotation.x, Math::MakeVec3(1.0f, 0.0f, 0.0f));
+    const Math::Mat4 rotY = Math::Rotate(m_BoxRotation.y, Math::MakeVec3(0.0f, 1.0f, 0.0f));
+    const Math::Mat4 rotZ = Math::Rotate(m_BoxRotation.z, Math::MakeVec3(0.0f, 0.0f, 1.0f));
+    Math::Mat4 boxScale = Math::Identity();
+    boxScale.columns[0].x = m_BoxScale.x;
+    boxScale.columns[1].y = m_BoxScale.y;
+    boxScale.columns[2].z = m_BoxScale.z;
+    const Math::Mat4 boxModel = Math::Multiply(boxTrans, Math::Multiply(rotZ, Math::Multiply(rotY, Math::Multiply(rotX, boxScale))));
+    InstanceData boxInst{
+      .ModelMatrix  = boxModel,
+      .NormalMatrix = Math::Transpose(Math::Inverse(boxModel))
+    };
+    // 1. Directional Shadow Pass
+    Renderer::BeginShadowPass(m_SunLight, Renderer::GetShadowMapFramebuffer());
+    Renderer::SubmitInstanced(Renderer::GetShadowPipeline(), nullptr, m_PreviewGroundMesh, std::span(&groundInst, 1));
+    Renderer::SubmitInstanced(Renderer::GetShadowPipeline(), nullptr, m_PreviewBoxMesh,    std::span(&boxInst, 1));
+    Renderer::EndScene();
+    // 2. Main HDR Forward Pass + Compute Bloom + Tonemap + ImGui Overlay
+    Renderer::BeginScene(m_EditorCamera.GetCamera(), m_SunLight, m_Environment, Renderer::GetHDRFramebuffer());
+    Renderer::SubmitInstanced(Renderer::GetStandardPipeline(), m_PreviewGroundMaterial, m_PreviewGroundMesh, std::span(&groundInst, 1));
+    Renderer::SubmitInstanced(Renderer::GetStandardPipeline(), m_PreviewBoxMaterial,    m_PreviewBoxMesh,    std::span(&boxInst, 1));
+    Renderer::EndScene();
+  }
+  void EditorLayer::OnEvent(Event& event) {
+    m_ImGuiLayer->OnEvent(event);
+    if (!event.IsHandled()) {
+      m_EditorCamera.OnEvent(event);
+    }
+  }
+  void EditorLayer::RenderDockSpace() {
+    static bool dockspaceOpen = true;
+    static ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+    ImGuiWindowFlags_NoResize   | ImGuiWindowFlags_NoMove |
+    ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("KanVerseStudioDockSpace", &dockspaceOpen, windowFlags);
+    ImGui::PopStyleVar(3);
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+      const ImGuiID dockspaceId = ImGui::GetID("KanVerseStudioDockSpaceID");
+      ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspaceFlags);
+    }
+    RenderMenuBar();
+    RenderViewportPanel();
+    RenderTelemetryPanel();
+    m_WorldSettingsPanel.OnImGuiRender(m_SunLight, m_Environment);
+    if (m_ShowDemoWindow) {
+      ImGui::ShowDemoWindow(&m_ShowDemoWindow);
+    }
+    ImGui::End();
+  }
+  void EditorLayer::RenderMenuBar() {
+    if (ImGui::BeginMenuBar()) {
+      if (ImGui::BeginMenu("File")) {
+        if (ImGui::MenuItem("Exit", "Cmd+Q")) {
+          Application::Get().Close();
+        }
+        ImGui::EndMenu();
+      }
+      if (ImGui::BeginMenu("Window")) {
+        ImGui::MenuItem("ImGui Demo Window", nullptr, &m_ShowDemoWindow);
+        ImGui::EndMenu();
+      }
+      ImGui::EndMenuBar();
+    }
+  }
+  void EditorLayer::RenderViewportPanel() {
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 0.0f });
+    ImGui::Begin("3D Viewport");
+    m_ViewportFocused = ImGui::IsWindowFocused();
+    m_ViewportHovered = ImGui::IsWindowHovered();
+    const ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+    m_ViewportSize = Math::MakeVec2(viewportPanelSize.x, viewportPanelSize.y);
+    if (auto hdrFb = Renderer::GetHDRFramebuffer()) {
+      MTL::Texture* colorTex = hdrFb->GetColorAttachment(0);
+      if (colorTex) {
+        ImGui::Image(reinterpret_cast<ImTextureID>(colorTex),
+                     ImVec2{ m_ViewportSize.x, m_ViewportSize.y });
+      }
+    }
+    ImGui::End();
+    ImGui::PopStyleVar();
+  }
+  void EditorLayer::RenderTelemetryPanel() {
+    ImGui::Begin("Preview Object & Telemetry");
+    const float fps = (m_LastFrameTimeMs > 0.0001f) ? (1000.0f / m_LastFrameTimeMs) : 0.0f;
+    ImGui::Text("Frame Time: %.2f ms (%.1f FPS)", m_LastFrameTimeMs, fps);
+    const auto mem = MemoryTracker::GetStats();
+    ImGui::Text("Active GPU/Heap Memory: %.2f MB (Peak: %.2f MB)",
+                static_cast<double>(mem.CurrentUsage) / (1024.0 * 1024.0),
+                static_cast<double>(mem.PeakUsage) / (1024.0 * 1024.0));
+    ImGui::Separator();
+    ImGui::Text("Preview ChamferBox Transform");
+    UI::DrawVec3Control("Translation", m_BoxPosition, 0.0f);
+    UI::DrawVec3Control("Rotation",    m_BoxRotation, 0.0f);
+    UI::DrawVec3Control("Scale",       m_BoxScale,    1.0f);
+    if (m_PreviewBoxMaterial) {
+      ImGui::Separator();
+      ImGui::Text("Preview PBR Material");
+      Math::Vec4 baseColor = m_PreviewBoxMaterial->GetBaseColor();
+      float color[3] = {baseColor.x, baseColor.y, baseColor.z};
+      if (ImGui::ColorEdit3("Albedo", color)) {
+        m_PreviewBoxMaterial->SetBaseColor(Math::MakeVec4(color[0], color[1], color[2], 1.0f));
+      }
+      float roughness = m_PreviewBoxMaterial->GetRoughness();
+      if (ImGui::SliderFloat("Roughness", &roughness, 0.05f, 1.0f)) {
+        m_PreviewBoxMaterial->SetRoughness(roughness);
+      }
+      float metallic = m_PreviewBoxMaterial->GetMetallic();
+      if (ImGui::SliderFloat("Metallic", &metallic, 0.0f, 1.0f)) {
+        m_PreviewBoxMaterial->SetMetallic(metallic);
+      }
+    }
+    ImGui::End();
+  }
+} // namespace KanVerse
 // FILE: KanVerse_App/Layers/KanVerseLayer.hpp
 
 // FILE: KanVerse_App/Layers/KanVerseLayer.mm
@@ -7721,6 +9206,7 @@ int main(int argc, char** argv) {
  * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
  * @license MIT License
  */
+#include "Layers/EditorLayer.hpp"
 /*!
  * @class KanVerseApp
  * @brief Concrete client specialization of the core engine application.
@@ -7738,6 +9224,7 @@ public:
     .VSync = true,
     .Maximized = true
   }) {
+    PushLayer(std::make_unique<KanVerse::EditorLayer>());
   }
   /*!
    * @brief Destructor for client application harness.

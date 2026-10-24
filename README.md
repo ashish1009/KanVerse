@@ -273,19 +273,19 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 6: Generational ECS, Components & Asset Manager (Days 49–56)
 *Goal: Build the data-oriented ECS and centralized Asset Manager that power both the Editor and Runtime.*
 
-- [ ] **Day 54 — 64-Bit Generational Entity Handles**
+- [x] **Day 54 — 64-Bit Generational Entity Handles**
   - **Files:** `Scene/EntityID.hpp`
   - **Concepts:** Bit-packing 32-bit slot index (`GetIndex`) and 32-bit generation counter (`GetGeneration`) into `uint64_t`.
   - **Milestone:** Implement `EntityID`, `NullEntity`, `GetIndex`, `GetGeneration`, and `CreateID`.
-- [ ] **Day 55 — Paged Sparse Set Container (Part 1: Allocation & Emplace)**
+- [x] **Day 55 — Paged Sparse Set Container (Part 1: Allocation & Emplace)**
   - **Files:** `Scene/SparseSet.hpp` (Part 1)
   - **Concepts:** Paged Sparse Sets (`PageSize = 4096`) allocating `uint32_t*` pages on demand (`AssurePage`), $O(1)$ `EntityID -> Dense Index` mapping.
   - **Milestone:** Implement `ISparseSet`, `SparseSet` constructors, `AssurePage`, `Contains`, and `Emplace`.
-- [ ] **Day 56 — Paged Sparse Set Container (Part 2: Swap-and-Pop & Memory Guard)**
+- [x] **Day 56 — Paged Sparse Set Container (Part 2: Swap-and-Pop & Memory Guard)**
   - **Files:** `Scene/SparseSet.hpp` (Part 2)
   - **Concepts:** $O(1)$ Swap-and-Pop removal in `Remove()` to keep `m_DenseEntities` and `m_DenseComponents` 100% contiguous, `UpdateMemoryTracking()`.
   - **Milestone:** Implement `Get`, `Remove`, `Clear`, and `UpdateMemoryTracking`.
-- [ ] **Day 57 — Generational Registry & Variadic Query Views**
+- [x] **Day 57 — Generational Registry & Variadic Query Views**
   - **Files:** `Scene/Registry.hpp`
   - **Concepts:** Type-erased component pool map, slot recycling (`m_FreeList`), C++20 fold expressions to find the smallest pool (`FindSmallestPool`) in `Registry::View<Components...>`.
   - **Milestone:** Implement `Registry` and `GetView<...>()` queries.
