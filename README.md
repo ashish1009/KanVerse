@@ -235,11 +235,11 @@ Use the following Markdown checkbox states to track your daily progress:
 ### Phase 5: Dear ImGui Backend, Docking, Offscreen Framebuffers & Editor Viewport (Days 41–48)
 *Goal: Render our 3D scene into an offscreen texture and display it inside a dockable Blender/Unreal-style Dear ImGui Editor window.*
 
-- [ ] **Day 46 — Dear ImGui & ImGuizmo Vendor Integration**
+- [x] **Day 46 — Dear ImGui & ImGuizmo Vendor Integration**
   - **Files:** `Vendor/imgui/`, `Vendor/imguizmo/`
   - **Concepts:** Adding Dear ImGui (`docking` branch) with `imgui_impl_metal.mm` and `imgui_impl_osx.mm`, plus `ImGuizmo.h`/`.cpp` to the build target.
   - **Milestone:** Compile `Vendor/imgui` and `Vendor/imguizmo` with Objective-C++ enabled.
-- [ ] **Day 47 — `ImGuiLayer` Lifecycle & Metal Render Pass Encoding**
+- [x] **Day 47 — `ImGuiLayer` Lifecycle & Metal Render Pass Encoding**
   - **Files:** `Renderer/UI/ImGuiLayer.hpp`, `Renderer/UI/ImGuiLayer.mm`
   - **Concepts:** Initializing `ImGui::CreateContext()`, enabling `ImGuiConfigFlags_DockingEnable` and `ImGuiConfigFlags_ViewportsEnable`, encoding `ImGui_ImplMetal_RenderDrawData` inside a dedicated UI render pass on the swapchain.
   - **Milestone:** Push `ImGuiLayer` as an Overlay (`PushOverlay`) and render `ImGui::ShowDemoWindow()` over your 3D view.

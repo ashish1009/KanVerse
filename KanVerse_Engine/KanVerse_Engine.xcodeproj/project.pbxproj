@@ -43,6 +43,10 @@
 		B22A925E308B90A000C1E24F /* imgui_canvas.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91B8308B909F00C1E24F /* imgui_canvas.h */; };
 		B22A925F308B90A000C1E24F /* imstb_truetype.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91AA308B909F00C1E24F /* imstb_truetype.h */; };
 		B22A9263308B90A000C1E24F /* imgui_bezier_math.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A91B6308B909F00C1E24F /* imgui_bezier_math.h */; };
+		B22A926F308B97E200C1E24F /* imgui_impl_metal.mm in Sources */ = {isa = PBXBuildFile; fileRef = B22A926E308B97E200C1E24F /* imgui_impl_metal.mm */; };
+		B22A9270308B97E200C1E24F /* imgui_impl_metal.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A926D308B97E200C1E24F /* imgui_impl_metal.h */; };
+		B22A9273308B97F200C1E24F /* imgui_impl_osx.mm in Sources */ = {isa = PBXBuildFile; fileRef = B22A9272308B97F200C1E24F /* imgui_impl_osx.mm */; };
+		B22A9274308B97F200C1E24F /* imgui_impl_osx.h in Headers */ = {isa = PBXBuildFile; fileRef = B22A9271308B97F200C1E24F /* imgui_impl_osx.h */; };
 		B2BA37C030891629006439E3 /* KanVerse_Headers.h in Headers */ = {isa = PBXBuildFile; fileRef = B2BA375030891629006439E3 /* KanVerse_Headers.h */; };
 		B2BA37C530891629006439E3 /* PrefixHeader.pch in Headers */ = {isa = PBXBuildFile; fileRef = B2BA376930891629006439E3 /* PrefixHeader.pch */; };
 		B2BA38883089D1F7006439E3 /* MTLRenderPipeline.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B2BA38673089D1F7006439E3 /* MTLRenderPipeline.hpp */; };
@@ -281,6 +285,10 @@
 		B22A91DA308B909F00C1E24F /* ImZoomSlider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImZoomSlider.h; sourceTree = "<group>"; };
 		B22A91DB308B909F00C1E24F /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		B22A91DC308B909F00C1E24F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		B22A926D308B97E200C1E24F /* imgui_impl_metal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_impl_metal.h; sourceTree = "<group>"; };
+		B22A926E308B97E200C1E24F /* imgui_impl_metal.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = imgui_impl_metal.mm; sourceTree = "<group>"; };
+		B22A9271308B97F200C1E24F /* imgui_impl_osx.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_impl_osx.h; sourceTree = "<group>"; };
+		B22A9272308B97F200C1E24F /* imgui_impl_osx.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = imgui_impl_osx.mm; sourceTree = "<group>"; };
 		B2BA36A230890C4F006439E3 /* libKanVerse_Engine.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libKanVerse_Engine.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2BA375030891629006439E3 /* KanVerse_Headers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KanVerse_Headers.h; sourceTree = "<group>"; };
 		B2BA376930891629006439E3 /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
@@ -494,6 +502,10 @@
 		B22A91AC308B909F00C1E24F /* ImGui */ = {
 			isa = PBXGroup;
 			children = (
+				B22A9271308B97F200C1E24F /* imgui_impl_osx.h */,
+				B22A9272308B97F200C1E24F /* imgui_impl_osx.mm */,
+				B22A926D308B97E200C1E24F /* imgui_impl_metal.h */,
+				B22A926E308B97E200C1E24F /* imgui_impl_metal.mm */,
 				B22A91A0308B909F00C1E24F /* imconfig.h */,
 				B22A91A1308B909F00C1E24F /* imgui.h */,
 				B22A91A2308B909F00C1E24F /* imgui.cpp */,
@@ -1090,10 +1102,10 @@
 				B2BA39C23089F28B006439E3 /* Camera */,
 				B2BA39D23089F28B006439E3 /* Lighting */,
 				B2BA39C83089F28B006439E3 /* Framebuffer */,
-				B2BA39B13089F28B006439E3 /* Animation */,
-				B2BA39B43089F28B006439E3 /* Asset */,
 				B2BA39E03089F28B006439E3 /* PostProcess */,
 				B2BA39F63089F28B006439E3 /* UI */,
+				B2BA39B13089F28B006439E3 /* Animation */,
+				B2BA39B43089F28B006439E3 /* Asset */,
 			);
 			path = Renderer;
 			sourceTree = "<group>";
@@ -1259,12 +1271,14 @@
 				B2BA3A333089F28B006439E3 /* Mesh.hpp in Headers */,
 				B2BA3A343089F28B006439E3 /* AssetSerializer.hpp in Headers */,
 				B2BA3A353089F28B006439E3 /* ChamferBox.hpp in Headers */,
+				B22A9270308B97E200C1E24F /* imgui_impl_metal.h in Headers */,
 				B2BA3A363089F28B006439E3 /* KeyEvents.hpp in Headers */,
 				B2BA3A373089F28B006439E3 /* Renderer.hpp in Headers */,
 				B2BA3A383089F28B006439E3 /* Layer.hpp in Headers */,
 				B2BA3A393089F28B006439E3 /* SpringArm.hpp in Headers */,
 				B2BA3A3A3089F28B006439E3 /* MouseEvents.hpp in Headers */,
 				B2BA3A3B3089F28B006439E3 /* PerspectiveCamera.hpp in Headers */,
+				B22A9274308B97F200C1E24F /* imgui_impl_osx.h in Headers */,
 				B2BA3A3C3089F28B006439E3 /* EnvironmentLighting.hpp in Headers */,
 				B2BA3A3D3089F28B006439E3 /* DirectionalLight.hpp in Headers */,
 				B2BA38D53089D1F7006439E3 /* MTLLinkedFunctions.hpp in Headers */,
@@ -1397,6 +1411,7 @@
 				B2BA3A5A3089F28B006439E3 /* Clock.cpp in Sources */,
 				B2BA3A5B3089F28B006439E3 /* PBDSolver.cpp in Sources */,
 				B22A91E6308B909F00C1E24F /* builders.cpp in Sources */,
+				B22A926F308B97E200C1E24F /* imgui_impl_metal.mm in Sources */,
 				B22A91E8308B909F00C1E24F /* ImSequencer.cpp in Sources */,
 				B22A91F0308B909F00C1E24F /* imgui_node_editor.cpp in Sources */,
 				B22A91F2308B909F00C1E24F /* ImGuizmo.cpp in Sources */,
@@ -1410,6 +1425,7 @@
 				B22A9212308B909F00C1E24F /* drawing.cpp in Sources */,
 				B22A9219308B909F00C1E24F /* imgui_draw.cpp in Sources */,
 				B22A921C308B909F00C1E24F /* imgui_widgets.cpp in Sources */,
+				B22A9273308B97F200C1E24F /* imgui_impl_osx.mm in Sources */,
 				B22A9221308B909F00C1E24F /* imgui.cpp in Sources */,
 				B22A9224308B909F00C1E24F /* crude_json.cpp in Sources */,
 				B2BA3A5C3089F28B006439E3 /* TextureCube.mm in Sources */,
@@ -1554,6 +1570,8 @@
 					"${PROJECT_DIR}",
 					"${PROJECT_DIR}/Vendors/stbimage",
 					"${PROJECT_DIR}/Vendors/metal-cpp",
+					"${PROJECT_DIR}/Vendors/ImGui",
+					"${PROJECT_DIR}/Vendors/ImGui/backends",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1579,6 +1597,8 @@
 					"${PROJECT_DIR}",
 					"${PROJECT_DIR}/Vendors/stbimage",
 					"${PROJECT_DIR}/Vendors/metal-cpp",
+					"${PROJECT_DIR}/Vendors/ImGui",
+					"${PROJECT_DIR}/Vendors/ImGui/backends",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

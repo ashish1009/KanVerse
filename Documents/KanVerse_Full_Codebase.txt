@@ -15,6 +15,9 @@
 #include <vector>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
+#include <memory>
+#include <string>
 // Core/Diagnostics
 #include "Core/Diagnostics/Assert.hpp"
 #include "Core/Diagnostics/Log.hpp"
@@ -59,6 +62,9 @@
 #pragma clang diagnostic ignored "-Wformat-security"
 // C++ Files
 #include <iostream>
+#include <span>
+#include <algorithm>
+#include <cstring>
 // Core/Diagnostics
 #include "Core/Diagnostics/Log.hpp"
 #include "Core/Diagnostics/Assert.hpp"
@@ -303,9 +309,11 @@ namespace KanVerse {
     m_Window->SetEventCallback([this](Event& e) {
       OnEvent(e);
     });
+    Renderer::Init();
     m_Clock.Reset();
   }
   Application::~Application() {
+    Renderer::Shutdown();
     s_Instance = nullptr;
     KV_CORE_INFO("=== Application Destructor Finished ===");
   }
@@ -3277,9 +3285,218 @@ namespace KanVerse {
   }
 } // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Framebuffer/Framebuffer.hpp
-
+/*!
+ * @file Framebuffer.hpp
+ * @brief Offscreen render target abstraction managing color and depth textures.
+ * @details Encapsulates GPU color attachments, depth-stencil textures, and preconfigured
+ *          Metal render pass descriptors conforming to HDR floating-point targets.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Memory/MemoryTracking.hpp"
+#include <cstdint>
+#include <memory>
+namespace MTL {
+  class Texture;
+  class RenderPassDescriptor;
+}
+namespace KanVerse {
+  /*!
+   * @enum FramebufferPixelFormat
+   * @brief Supported color attachment pixel formats.
+   */
+  enum class FramebufferPixelFormat : uint8_t {
+    RGBA8 = 0,    ///< Standard 8-bit SDR format.
+    RGBA16Float   ///< Half-precision 16-bit float format for HDR radiance.
+  };
+  /*!
+   * @struct FramebufferSpecification
+   * @brief Configuration properties used to allocate offscreen GPU framebuffer targets.
+   */
+  struct FramebufferSpecification {
+    uint32_t               Width{1280};                                    ///< Viewport pixel width.
+    uint32_t               Height{720};                                   ///< Viewport pixel height.
+    uint32_t               Samples{1};                                    ///< Multi-sample anti-aliasing count.
+    FramebufferPixelFormat Format{FramebufferPixelFormat::RGBA16Float};   ///< Defaults to 16-bit half float HDR target.
+    bool                   SwapChainTarget{false};                        ///< Direct swapchain rendering flag.
+    bool                   DepthOnly{false};                              ///< True if allocating a shadow depth map.
+    float                  ClearColor[4]{0.06f, 0.07f, 0.09f, 1.0f};      ///< Default background clear color (RGBA).
+  };
+  /*!
+   * @class Framebuffer
+   * @brief High-level hardware render target container managing color and depth-stencil textures.
+   */
+  class Framebuffer {
+  public:
+    virtual ~Framebuffer() = default;
+    /*!
+     * @brief Resizes backing GPU textures and reallocates attachment allocations.
+     * @param width New pixel width.
+     * @param height New pixel height.
+     */
+    virtual void Resize(uint32_t width, uint32_t height) = 0;
+    /*!
+     * @brief Queries configuration specification.
+     * @return Const reference to specification.
+     */
+    [[nodiscard]] virtual const FramebufferSpecification& GetSpecification() const noexcept = 0;
+    /*!
+     * @brief Accesses the color attachment texture.
+     * @param index Attachment slot index (defaults to primary target 0).
+     * @return Raw pointer to MTL::Texture (nullptr if DepthOnly is true).
+     */
+    [[nodiscard]] virtual MTL::Texture* GetColorAttachment(uint32_t index = 0) const noexcept = 0;
+    /*!
+     * @brief Accesses the depth-stencil attachment texture.
+     * @return Raw pointer to MTL::Texture.
+     */
+    [[nodiscard]] virtual MTL::Texture* GetDepthAttachment() const noexcept = 0;
+    /*!
+     * @brief Accesses the preconfigured Metal render pass descriptor.
+     * @return Raw pointer to MTL::RenderPassDescriptor.
+     */
+    [[nodiscard]] virtual MTL::RenderPassDescriptor* GetRenderPassDescriptor() const noexcept = 0;
+    /*!
+     * @brief Factory creating an offscreen Framebuffer instance.
+     * @param spec Specification configuration.
+     * @return Shared pointer owning the Framebuffer.
+     */
+    [[nodiscard]] static std::shared_ptr<Framebuffer> Create(const FramebufferSpecification& spec);
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Framebuffer/Framebuffer.mm
-
+/*!
+ * @file Framebuffer.mm
+ * @brief Apple Metal implementation of offscreen Framebuffer supporting HDR textures.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Framebuffer/Framebuffer.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Application/Application.hpp"
+#include "Core/Memory/MemoryTracking.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+namespace KanVerse {
+  class MetalFramebuffer : public Framebuffer {
+  public:
+    explicit MetalFramebuffer(const FramebufferSpecification& spec)
+    : m_Spec(spec) {
+      Invalidate();
+    }
+    ~MetalFramebuffer() override {
+      ReleaseResources();
+    }
+    void Resize(uint32_t width, uint32_t height) override {
+      if (width == 0 || height == 0 || (m_Spec.Width == width && m_Spec.Height == height)) {
+        return;
+      }
+      m_Spec.Width = width;
+      m_Spec.Height = height;
+      Invalidate();
+    }
+    [[nodiscard]] const FramebufferSpecification& GetSpecification() const noexcept override {
+      return m_Spec;
+    }
+    [[nodiscard]] MTL::Texture* GetColorAttachment(uint32_t index) const noexcept override {
+      if (m_Spec.DepthOnly) {
+        return nullptr;
+      }
+      KV_CORE_ASSERT(index == 0, "[KanVerse] Multiple color attachments currently unsupported!");
+      return m_ColorTexture;
+    }
+    [[nodiscard]] MTL::Texture* GetDepthAttachment() const noexcept override {
+      return m_DepthTexture;
+    }
+    [[nodiscard]] MTL::RenderPassDescriptor* GetRenderPassDescriptor() const noexcept override {
+      return m_PassDescriptor;
+    }
+  private:
+    void ReleaseResources() {
+      if (m_PassDescriptor) {
+        m_PassDescriptor->release();
+        m_PassDescriptor = nullptr;
+      }
+      if (m_DepthTexture) {
+        m_DepthTexture->release();
+        m_DepthTexture = nullptr;
+      }
+      if (m_ColorTexture) {
+        m_ColorTexture->release();
+        m_ColorTexture = nullptr;
+      }
+    }
+    void Invalidate() {
+      ReleaseResources();
+      MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+      KV_CORE_ASSERT(device != nullptr, "[KanVerse] Active Metal device is null!");
+      KV_CORE_ASSERT(m_Spec.Width > 0 && m_Spec.Height > 0, "[KanVerse] Viewport dimensions must be non-zero!");
+      size_t totalTextureBytes = 0;
+      // 1. Allocate Color Attachment (RGBA16Float for HDR or BGRA8 for SDR)
+      if (!m_Spec.DepthOnly) {
+        const MTL::PixelFormat colorFormat = (m_Spec.Format == FramebufferPixelFormat::RGBA16Float)
+        ? MTL::PixelFormatRGBA16Float
+        : MTL::PixelFormatBGRA8Unorm_sRGB;
+        const size_t bytesPerPixel = (m_Spec.Format == FramebufferPixelFormat::RGBA16Float) ? 8 : 4;
+        auto colorDesc = MTL::TextureDescriptor::texture2DDescriptor(
+                                                                     colorFormat,
+                                                                     m_Spec.Width,
+                                                                     m_Spec.Height,
+                                                                     false
+                                                                     );
+        colorDesc->setUsage(MTL::TextureUsageRenderTarget | MTL::TextureUsageShaderRead);
+        colorDesc->setStorageMode(MTL::StorageModePrivate);
+        m_ColorTexture = device->newTexture(colorDesc);
+        colorDesc->release();
+        KV_CORE_ASSERT(m_ColorTexture != nullptr, "[KanVerse] Failed to allocate Framebuffer Color Texture!");
+        totalTextureBytes += static_cast<size_t>(m_Spec.Width) * m_Spec.Height * bytesPerPixel;
+      }
+      // 2. Allocate Depth Texture (Depth32Float -> 4 bytes per pixel)
+      auto depthDesc = MTL::TextureDescriptor::texture2DDescriptor(
+                                                                   MTL::PixelFormatDepth32Float,
+                                                                   m_Spec.Width,
+                                                                   m_Spec.Height,
+                                                                   false
+                                                                   );
+      depthDesc->setUsage(MTL::TextureUsageRenderTarget | MTL::TextureUsageShaderRead);
+      depthDesc->setStorageMode(MTL::StorageModePrivate);
+      m_DepthTexture = device->newTexture(depthDesc);
+      depthDesc->release();
+      KV_CORE_ASSERT(m_DepthTexture != nullptr, "[KanVerse] Failed to allocate Framebuffer Depth Texture!");
+      totalTextureBytes += static_cast<size_t>(m_Spec.Width) * m_Spec.Height * 4;
+      m_MemoryGuard.Reset(totalTextureBytes);
+      // 3. Build Reusable MTL::RenderPassDescriptor
+      m_PassDescriptor = MTL::RenderPassDescriptor::renderPassDescriptor();
+      KV_CORE_ASSERT(m_PassDescriptor != nullptr, "[KanVerse] Failed to create MTL::RenderPassDescriptor!");
+      if (!m_Spec.DepthOnly) {
+        auto colorAttachment = m_PassDescriptor->colorAttachments()->object(0);
+        colorAttachment->setTexture(m_ColorTexture);
+        colorAttachment->setLoadAction(MTL::LoadActionClear);
+        colorAttachment->setStoreAction(MTL::StoreActionStore);
+        colorAttachment->setClearColor(MTL::ClearColor::Make(
+                                                             m_Spec.ClearColor[0],
+                                                             m_Spec.ClearColor[1],
+                                                             m_Spec.ClearColor[2],
+                                                             m_Spec.ClearColor[3]
+                                                             ));
+      }
+      auto depthAttachment = m_PassDescriptor->depthAttachment();
+      depthAttachment->setTexture(m_DepthTexture);
+      depthAttachment->setLoadAction(MTL::LoadActionClear);
+      depthAttachment->setStoreAction(MTL::StoreActionStore);
+      depthAttachment->setClearDepth(1.0);
+    }
+    FramebufferSpecification   m_Spec;
+    MTL::Texture*              m_ColorTexture{nullptr};
+    MTL::Texture*              m_DepthTexture{nullptr};
+    MTL::RenderPassDescriptor* m_PassDescriptor{nullptr};
+    ScopedMemoryAllocation     m_MemoryGuard{};
+  };
+  std::shared_ptr<Framebuffer> Framebuffer::Create(const FramebufferSpecification& spec) {
+    return std::make_shared<MetalFramebuffer>(spec);
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Geometry/Mesh.cpp
 /*!
  * @file Mesh.cpp
@@ -4409,9 +4626,271 @@ namespace KanVerse {
   }
 } // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/PostProcess/BloomPass.cpp
-
+/*!
+ * @file BloomPass.mm
+ * @brief Implementation of the multi-mip Dual-Kawase compute bloom pass.
+ * @details Allocates RGBA16Float mip targets and coordinates compute encoders
+ *          for highlight extraction, progressive downsampling, and tent upsampling.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/PostProcess/BloomPass.hpp"
+#include "Core/Application/Application.hpp"
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <algorithm>
+namespace KanVerse {
+  BloomPass::BloomPass() = default;
+  BloomPass::~BloomPass() {
+    ReleaseTextures();
+    if (m_LinearSampler) {
+      m_LinearSampler->release();
+      m_LinearSampler = nullptr;
+    }
+    if (m_DownsamplePipeline) {
+      m_DownsamplePipeline->release();
+      m_DownsamplePipeline = nullptr;
+    }
+    if (m_UpsamplePipeline) {
+      m_UpsamplePipeline->release();
+      m_UpsamplePipeline = nullptr;
+    }
+  }
+  void BloomPass::ReleaseTextures() {
+    for (auto* tex : m_DownsampleMips) {
+      if (tex) tex->release();
+    }
+    m_DownsampleMips.clear();
+    for (auto* tex : m_UpsampleMips) {
+      if (tex) tex->release();
+    }
+    m_UpsampleMips.clear();
+  }
+  void BloomPass::Init() {
+    MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+    KV_CORE_ASSERT(device != nullptr, "[KanVerse Bloom] Metal device is null!");
+    // 1. Bilinear clamp sampler for sub-pixel texture filtering
+    MTL::SamplerDescriptor* samplerDesc = MTL::SamplerDescriptor::alloc()->init();
+    samplerDesc->setMinFilter(MTL::SamplerMinMagFilterLinear);
+    samplerDesc->setMagFilter(MTL::SamplerMinMagFilterLinear);
+    samplerDesc->setMipFilter(MTL::SamplerMipFilterNotMipmapped);
+    samplerDesc->setSAddressMode(MTL::SamplerAddressModeClampToEdge);
+    samplerDesc->setTAddressMode(MTL::SamplerAddressModeClampToEdge);
+    m_LinearSampler = device->newSamplerState(samplerDesc);
+    samplerDesc->release();
+    // 2. Compile compute kernels from application library bundle
+    MTL::Library* defaultLib = device->newDefaultLibrary();
+    KV_CORE_ASSERT(defaultLib != nullptr, "[KanVerse Bloom] Failed to load default library!");
+    auto downName = NS::String::string("bloom_downsample", NS::UTF8StringEncoding);
+    auto upName   = NS::String::string("bloom_upsample",   NS::UTF8StringEncoding);
+    MTL::Function* downFunc = defaultLib->newFunction(downName);
+    MTL::Function* upFunc   = defaultLib->newFunction(upName);
+    downName->release();
+    upName->release();
+    defaultLib->release();
+    KV_CORE_ASSERT(downFunc != nullptr, "[KanVerse Bloom] 'bloom_downsample' kernel not found!");
+    KV_CORE_ASSERT(upFunc != nullptr,   "[KanVerse Bloom] 'bloom_upsample' kernel not found!");
+    NS::Error* error = nullptr;
+    m_DownsamplePipeline = device->newComputePipelineState(downFunc, &error);
+    downFunc->release();
+    KV_CORE_ASSERT(m_DownsamplePipeline != nullptr, "[KanVerse Bloom] Failed to create downsample pipeline!");
+    m_UpsamplePipeline = device->newComputePipelineState(upFunc, &error);
+    upFunc->release();
+    KV_CORE_ASSERT(m_UpsamplePipeline != nullptr, "[KanVerse Bloom] Failed to create upsample pipeline!");
+    KV_CORE_INFO("BloomPass compute pipelines compiled successfully.");
+  }
+  void BloomPass::Resize(uint32_t baseWidth, uint32_t baseHeight) {
+    if (m_BaseWidth == baseWidth && m_BaseHeight == baseHeight && !m_DownsampleMips.empty()) {
+      return;
+    }
+    m_BaseWidth = baseWidth;
+    m_BaseHeight = baseHeight;
+    ReleaseTextures();
+    MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+    uint32_t mipW = std::max(1u, baseWidth / 2);
+    uint32_t mipH = std::max(1u, baseHeight / 2);
+    m_DownsampleMips.resize(kMipLevels, nullptr);
+    m_UpsampleMips.resize(kMipLevels, nullptr);
+    // Allocate RGBA16Float texture pyramid with compute read/write access
+    for (uint32_t i = 0; i < kMipLevels; ++i) {
+      auto desc = MTL::TextureDescriptor::texture2DDescriptor(
+                                                              MTL::PixelFormatRGBA16Float,
+                                                              mipW,
+                                                              mipH,
+                                                              false
+                                                              );
+      desc->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite);
+      desc->setStorageMode(MTL::StorageModePrivate);
+      m_DownsampleMips[i] = device->newTexture(desc);
+      m_UpsampleMips[i]   = device->newTexture(desc);
+      desc->release();
+      mipW = std::max(1u, mipW / 2);
+      mipH = std::max(1u, mipH / 2);
+    }
+  }
+  void BloomPass::Execute(MTL::CommandBuffer* cmdBuffer, MTL::Texture* hdrSource) {
+    if (!hdrSource || m_DownsampleMips.empty() || !m_DownsamplePipeline || !m_UpsamplePipeline) {
+      return;
+    }
+    MTL::ComputeCommandEncoder* encoder = cmdBuffer->computeCommandEncoder();
+    if (!encoder) return;
+    // =========================================================================
+    // Phase 1: Downsampling Pyramid with Threshold Prefiltering
+    // =========================================================================
+    encoder->setComputePipelineState(m_DownsamplePipeline);
+    encoder->setSamplerState(m_LinearSampler, 0);
+    MTL::Texture* currentSrc = hdrSource;
+    for (uint32_t i = 0; i < kMipLevels; ++i) {
+      MTL::Texture* dst = m_DownsampleMips[i];
+      // Normalized UV texel size must be 1.0 / dst->size so (gid + 0.5) * texelSize spans [0.0, 1.0] exactly
+      DownsampleUniforms uniforms;
+      uniforms.TexelSize = Math::MakeVec2(1.0f / static_cast<float>(dst->width()),
+                                          1.0f / static_cast<float>(dst->height()));
+      uniforms.Threshold = m_Threshold;
+      uniforms.SoftKnee  = m_SoftKnee;
+      uniforms.MipLevel  = static_cast<int32_t>(i);
+      encoder->setTexture(currentSrc, 0);
+      encoder->setTexture(dst, 1);
+      encoder->setBytes(&uniforms, sizeof(DownsampleUniforms), 0);
+      const MTL::Size threadgroupSize(16, 16, 1);
+      const MTL::Size threadgroups(
+                                   (dst->width()  + threadgroupSize.width  - 1) / threadgroupSize.width,
+                                   (dst->height() + threadgroupSize.height - 1) / threadgroupSize.height,
+                                   1
+                                   );
+      encoder->dispatchThreadgroups(threadgroups, threadgroupSize);
+      currentSrc = dst; // Next mip downsamples from current destination
+    }
+    // =========================================================================
+    // Phase 2: Upsampling & Progressive Additive Accumulation
+    // =========================================================================
+    encoder->setComputePipelineState(m_UpsamplePipeline);
+    encoder->setSamplerState(m_LinearSampler, 0);
+    // Progressive upsampling starting from the second-lowest mip (kMipLevels - 2) up to mip 0
+    for (int32_t i = static_cast<int32_t>(kMipLevels) - 2; i >= 0; --i) {
+      MTL::Texture* lowerMip  = (i == static_cast<int32_t>(kMipLevels) - 2) ? m_DownsampleMips[i + 1] : m_UpsampleMips[i + 1];
+      MTL::Texture* higherMip = m_DownsampleMips[i];
+      MTL::Texture* dst       = m_UpsampleMips[i];
+      // Normalized UV texel size must be 1.0 / dst->size so (gid + 0.5) * texelSize spans [0.0, 1.0] across dst
+      UpsampleUniforms uniforms;
+      uniforms.TexelSize    = Math::MakeVec2(1.0f / static_cast<float>(dst->width()),
+                                             1.0f / static_cast<float>(dst->height()));
+      uniforms.FilterRadius = 1.0f;
+      encoder->setTexture(lowerMip, 0);
+      encoder->setTexture(higherMip, 1);
+      encoder->setTexture(dst, 2);
+      encoder->setBytes(&uniforms, sizeof(UpsampleUniforms), 0);
+      const MTL::Size threadgroupSize(16, 16, 1);
+      const MTL::Size threadgroups(
+                                   (dst->width()  + threadgroupSize.width  - 1) / threadgroupSize.width,
+                                   (dst->height() + threadgroupSize.height - 1) / threadgroupSize.height,
+                                   1
+                                   );
+      encoder->dispatchThreadgroups(threadgroups, threadgroupSize);
+    }
+    encoder->endEncoding();
+  }
+  MTL::Texture* BloomPass::GetBloomTexture() const noexcept {
+    return m_UpsampleMips.empty() ? nullptr : m_UpsampleMips[0];
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/PostProcess/BloomPass.hpp
-
+/*!
+ * @file BloomPass.hpp
+ * @brief Multi-mip Dual-Kawase compute bloom blur subsystem.
+ * @details Manages downsampling and upsampling mip-pyramid textures, compiles
+ *          compute pipeline states, and executes compute dispatches to generate
+ *          cinematic optical glow around high-radiance fragments.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Math/Math.hpp"
+#include <cstdint>
+#include <vector>
+namespace MTL {
+  class Texture;
+  class ComputePipelineState;
+  class CommandBuffer;
+  class SamplerState;
+}
+namespace KanVerse {
+  /*!
+   * @class BloomPass
+   * @brief Manages a pyramid of downsampled and upsampled textures and executes compute blur dispatches.
+   */
+  class BloomPass {
+  public:
+    static constexpr uint32_t kMipLevels = 4; ///< Number of progressive 2x downsample steps.
+    BloomPass();
+    ~BloomPass();
+    /*!
+     * @brief Allocates compute pipelines and default linear clamp samplers.
+     */
+    void Init();
+    /*!
+     * @brief Reallocates downsample and upsample mip-chain textures when viewport size mutates.
+     * @param baseWidth Primary viewport width in pixels.
+     * @param baseHeight Primary viewport height in pixels.
+     */
+    void Resize(uint32_t baseWidth, uint32_t baseHeight);
+    /*!
+     * @brief Encodes the complete Dual-Kawase downsample and upsample blur pyramid on the GPU.
+     * @param cmdBuffer Active command buffer to append compute dispatches to.
+     * @param hdrSource The offscreen RGBA16Float scene texture to extract highlights from.
+     */
+    void Execute(MTL::CommandBuffer* cmdBuffer, MTL::Texture* hdrSource);
+    /*!
+     * @brief Accesses the final blurred and blended bloom texture (at mip 0 resolution).
+     * @return Native MTL::Texture pointer.
+     */
+    [[nodiscard]] MTL::Texture* GetBloomTexture() const noexcept;
+    /*!
+     * @brief Sets the minimum luminance threshold for bloom extraction.
+     * @param threshold Cutoff scalar (default: 1.1f).
+     */
+    void SetThreshold(float threshold) noexcept { m_Threshold = threshold; }
+    /*!
+     * @brief Sets the soft-knee transition factor avoiding harsh cutoffs.
+     * @param knee Normalized scalar [0, 1].
+     */
+    void SetSoftKnee(float knee) noexcept { m_SoftKnee = knee; }
+    /*!
+     * @brief Sets the additive composite intensity multiplier.
+     * @param intensity Energy scalar.
+     */
+    void SetIntensity(float intensity) noexcept { m_Intensity = intensity; }
+    [[nodiscard]] float GetIntensity() const noexcept { return m_Intensity; }
+  private:
+    // Memory layout matching BloomDownsampleUniforms in Bloom.metal (strictly 32 bytes)
+    struct alignas(16) DownsampleUniforms {
+      Math::Vec2 TexelSize;         ///< 8 bytes (offset 0)
+      float      Threshold{1.1f};   ///< 4 bytes (offset 8)
+      float      SoftKnee{0.5f};    ///< 4 bytes (offset 12)
+      int32_t    MipLevel{0};       ///< 4 bytes (offset 16)
+      float      Padding[3]{0.0f, 0.0f, 0.0f}; ///< 12 bytes (offset 20) -> Total: 32 bytes
+    };
+    // Memory layout matching BloomUpsampleUniforms in Bloom.metal (strictly 16 bytes)
+    struct alignas(16) UpsampleUniforms {
+      Math::Vec2 TexelSize;         ///< 8 bytes (offset 0)
+      float      FilterRadius{1.0f};///< 4 bytes (offset 8)
+      float      Padding{0.0f};     ///< 4 bytes (offset 12) -> Total: 16 bytes
+    };
+    void ReleaseTextures();
+    uint32_t m_BaseWidth{0};
+    uint32_t m_BaseHeight{0};
+    float    m_Threshold{1.1f};
+    float    m_SoftKnee{0.5f};
+    float    m_Intensity{0.8f};
+    MTL::ComputePipelineState* m_DownsamplePipeline{nullptr};
+    MTL::ComputePipelineState* m_UpsamplePipeline{nullptr};
+    MTL::SamplerState*         m_LinearSampler{nullptr};
+    std::vector<MTL::Texture*> m_DownsampleMips; ///< Downsampled textures: [1/2, 1/4, 1/8, 1/16].
+    std::vector<MTL::Texture*> m_UpsampleMips;   ///< Upsampled accumulation textures.
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Procedural/Capsule.cpp
 /*!
  * @file Capsule.cpp
@@ -4814,9 +5293,708 @@ namespace KanVerse {
   }
 } // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Renderer/Renderer.hpp
-
+/*!
+ * @file Renderer.hpp
+ * @brief High-level Metal rendering orchestrator with instancing, shadows, transparency, IBL, point lights, and bloom.
+ * @copyright KanVerse Engine
+ */
+#pragma once
+#include "Core/Math/Math.hpp"
+#include "Renderer/Buffers/IndexBuffer.hpp"
+#include "Renderer/Buffers/VertexBuffer.hpp"
+#include "Renderer/Framebuffer/Framebuffer.hpp"
+#include "Renderer/Geometry/Mesh.hpp"
+#include "Renderer/Lighting/DirectionalLight.hpp"
+#include "Renderer/Lighting/EnvironmentLighting.hpp"
+#include "Renderer/Materials/Material.hpp"
+#include "Renderer/Pipeline/FrameSync.hpp"
+#include "Renderer/Pipeline/Pipeline.hpp"
+#include "Renderer/PostProcess/BloomPass.hpp"
+#include "Renderer/Textures/TextureCube.hpp"
+#include "Renderer/Camera/PerspectiveCamera.hpp"
+#include <span>
+#include <vector>
+namespace MTL {
+  class Buffer;
+  class CommandBuffer;
+  class RenderCommandEncoder;
+  class SamplerState;
+  class RenderPipelineState;
+  class DepthStencilState;
+}
+namespace KanVerse {
+  /*!
+   * @brief Environment lighting source mode.
+   */
+  enum class EnvironmentMode : uint8_t {
+    CrispHDR = 0, ///< High-dynamic-range equirectangular skybox.
+    Irradiance,   ///< Convolved diffuse irradiance skybox.
+    Procedural    ///< Analytic gradient procedural skybox.
+  };
+  /*!
+   * @brief Per-instance transformation matrices uploaded to vertex buffer(3).
+   */
+  struct alignas(16) InstanceData {
+    Math::Mat4 ModelMatrix;  ///< Local-to-world transformation matrix.
+    Math::Mat4 NormalMatrix; ///< Inverse-transpose matrix for normal transformation.
+  };
+  /*!
+   * @brief GPU-aligned point light structure carrying world position, color, intensity, and physical attenuation.
+   */
+  struct alignas(16) GPUPointLight {
+    Math::Vec4 PositionAndRadius;  ///< xyz = World Position, w = Cutoff Radius.
+    Math::Vec4 ColorAndIntensity;  ///< rgb = Linear Color, a = Luminous Intensity.
+    Math::Vec4 Attenuation;        ///< x = Constant, y = Linear, z = Quadratic, w = Unused.
+  };
+  /*!
+   * @brief Per-frame scene parameters cached during BeginScene.
+   */
+  struct SceneData {
+    Math::Mat4          ViewProjectionMatrix;
+    DirectionalLight    SunLight;
+    EnvironmentLighting Environment;
+  };
+  /*!
+   * @brief Static Metal rendering engine managing command buffers, passes, and global GPU state.
+   */
+  class Renderer {
+  public:
+    static constexpr uint32_t kMaxPointLights = 64; ///< Maximum active point lights per frame.
+    /*!
+     * @brief Initializes global Metal buffers, samplers, framebuffers, and pipelines.
+     */
+    static void Init();
+    /*!
+     * @brief Releases all GPU resources owned by the Renderer.
+     */
+    static void Shutdown();
+    /*!
+     * @brief Begins the main HDR forward rendering pass.
+     * @param camera Active perspective camera.
+     * @param sun Primary directional light.
+     * @param env Global environment ambient settings.
+     * @param target Optional target framebuffer (defaults to swapchain if nullptr).
+     * @param pointLights Span of active point lights in the scene.
+     */
+    static void BeginScene(const PerspectiveCamera& camera,
+                           const DirectionalLight& sun,
+                           const EnvironmentLighting& env,
+                           const std::shared_ptr<Framebuffer>& target = nullptr,
+                           std::span<const GPUPointLight> pointLights = {});
+    /*!
+     * @brief Begins the depth-only directional shadow map pass.
+     * @param sun Primary directional light.
+     * @param shadowTarget Depth-only shadow framebuffer.
+     */
+    static void BeginShadowPass(const DirectionalLight& sun, const std::shared_ptr<Framebuffer>& shadowTarget);
+    /*!
+     * @brief Submits an instanced draw call for a mesh and material batch.
+     * @param pipeline Pipeline state to bind.
+     * @param material Surface material (ignored during shadow pass).
+     * @param mesh Geometry mesh to draw.
+     * @param instances Span of world and normal matrices for all instances.
+     */
+    static void SubmitInstanced(const std::shared_ptr<Pipeline>& pipeline,
+                                const std::shared_ptr<Material>& material,
+                                const std::shared_ptr<Mesh>& mesh,
+                                std::span<const InstanceData> instances);
+    /*!
+     * @brief Ends the current render pass, executes compute bloom and tonemapping, and presents the drawable.
+     */
+    static void EndScene();
+    static void SetShadowMap(const std::shared_ptr<Framebuffer>& shadowFramebuffer);
+    static void SetEnvironmentMap(const std::shared_ptr<TextureCube>& textureCube);
+    static void SetIrradianceMap(const std::shared_ptr<TextureCube>& irradianceMap);
+    static void SetSkyboxToIrradiance(bool useIrradiance);
+    static void SetEnvironmentMode(EnvironmentMode mode);
+    [[nodiscard]] static EnvironmentMode GetEnvironmentMode() noexcept;
+    [[nodiscard]] static std::shared_ptr<Pipeline> GetStandardPipeline() noexcept;
+    [[nodiscard]] static std::shared_ptr<Pipeline> GetTransparentPipeline() noexcept;
+    [[nodiscard]] static std::shared_ptr<Pipeline> GetShadowPipeline() noexcept;
+    [[nodiscard]] static std::shared_ptr<Framebuffer> GetHDRFramebuffer() noexcept;
+    [[nodiscard]] static std::shared_ptr<Framebuffer> GetShadowMapFramebuffer() noexcept;
+    [[nodiscard]] static BufferLayout GetStandardMeshLayout() noexcept;
+    static void OnWindowResize(uint32_t width, uint32_t height);
+    [[nodiscard]] static BloomPass& GetBloomPass() noexcept;
+    static void SetExposure(float exposure) noexcept;
+    [[nodiscard]] static float GetExposure() noexcept;
+    static void SetIBLEnabled(bool enabled) noexcept;
+    [[nodiscard]] static bool IsIBLEnabled() noexcept;
+  private:
+    struct alignas(256) GPUUniforms {
+      Math::Mat4    ViewProjectionMatrix;
+      Math::Mat4    LightSpaceMatrix;
+      Math::Vec3    CameraPosition;
+      Math::Vec3    LightDirection;
+      Math::Vec4    DirectionalColor;
+      Math::Vec4    AmbientColor;
+      uint32_t      PointLightCount{0};
+      uint32_t      Padding[3]{0, 0, 0};
+      GPUPointLight PointLights[kMaxPointLights];
+    };
+    struct alignas(256) ShadowUniforms {
+      Math::Mat4 LightViewProjectionMatrix;
+    };
+    struct alignas(16) TonemapUniforms {
+      float BloomIntensity{0.8f};
+      float Exposure{1.0f};
+      float Padding[2]{0.0f, 0.0f};
+    };
+    struct RendererStorage {
+      static constexpr size_t MaxInstancesPerFrame = 16384;
+      static constexpr size_t InstanceBufferSize   = MaxInstancesPerFrame * sizeof(InstanceData);
+      SceneData                       ActiveScene;
+      FrameSynchronizer               Sync{3};
+      std::vector<MTL::Buffer*>       UniformBuffers;
+      std::vector<MTL::Buffer*>       ShadowUniformBuffers;
+      std::vector<MTL::Buffer*>       InstanceBuffers;
+      size_t                          CurrentInstanceOffset{0};
+      MTL::SamplerState*              ShadowSampler{nullptr};
+      MTL::SamplerState*              LinearSampler{nullptr};
+      MTL::RenderPipelineState*       TonemapPipeline{nullptr};
+      MTL::RenderPipelineState*       SkyboxPipeline{nullptr};
+      MTL::DepthStencilState*         SkyboxDepthState{nullptr};
+      std::shared_ptr<Pipeline>       StandardPipeline{nullptr};
+      std::shared_ptr<Pipeline>       TransparentPipeline{nullptr};
+      std::shared_ptr<Pipeline>       ShadowPipeline{nullptr};
+      std::shared_ptr<Framebuffer>    HDRFramebuffer{nullptr};
+      std::shared_ptr<Framebuffer>    ShadowMap{nullptr};
+      std::shared_ptr<Framebuffer>    ActiveShadowMap{nullptr};
+      std::shared_ptr<TextureCube>    ActiveEnvironmentMap{nullptr};
+      std::shared_ptr<TextureCube>    ActiveIrradianceMap{nullptr};
+      std::shared_ptr<TextureCube>    ActiveProceduralMap{nullptr};
+      EnvironmentMode                 CurrentEnvMode{EnvironmentMode::CrispHDR};
+      bool                            EnableIBL{true};
+      std::shared_ptr<Texture2D>      DefaultWhiteTexture{nullptr};
+      bool                            RenderIrradianceSkybox{false};
+      BloomPass                       Bloom;
+      float                           Exposure{1.0f};
+      std::shared_ptr<Framebuffer>    ActiveFramebuffer{nullptr};
+      MTL::CommandBuffer*             ActiveCommandBuffer{nullptr};
+      MTL::RenderCommandEncoder*      ActiveCommandEncoder{nullptr};
+      uint32_t                        ActiveFrameIndex{0};
+      bool                            IsShadowPass{false};
+    };
+    static std::unique_ptr<RendererStorage> s_Storage;
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Renderer/Renderer.mm
-
+/*!
+ * @file Renderer.mm
+ * @brief Metal implementation of the KanVerse Renderer with opaque, transparent, shadow, IBL, and point light support.
+ * @copyright KanVerse Engine
+ */
+#include "Renderer.hpp"
+#include "Renderer/Renderer/RenderCommand.hpp"
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Application/Application.hpp"
+#include "Platform/Window/NativeWindow.hpp"
+#import <MetalKit/MetalKit.h>
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <QuartzCore/QuartzCore.hpp>
+#include <algorithm>
+#include <cstring>
+namespace KanVerse {
+  std::unique_ptr<Renderer::RendererStorage> Renderer::s_Storage = nullptr;
+  /*!
+   * @brief Allocates triple-buffered uniform/instance buffers, samplers, framebuffers, and pipelines.
+   */
+  void Renderer::Init() {
+    KV_CORE_ASSERT(!s_Storage, "[KanVerse Renderer] Renderer already initialized!");
+    s_Storage = std::make_unique<RendererStorage>();
+    MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+    const uint32_t maxFrames = s_Storage->Sync.GetMaxFramesInFlight();
+    s_Storage->UniformBuffers.resize(maxFrames);
+    s_Storage->ShadowUniformBuffers.resize(maxFrames);
+    s_Storage->InstanceBuffers.resize(maxFrames);
+    for (uint32_t i = 0; i < maxFrames; ++i) {
+      s_Storage->UniformBuffers[i] = device->newBuffer(sizeof(GPUUniforms), MTL::ResourceStorageModeShared);
+      KV_CORE_ASSERT(s_Storage->UniformBuffers[i] != nullptr, "[KanVerse Renderer] Failed to allocate uniform buffer!");
+      s_Storage->ShadowUniformBuffers[i] = device->newBuffer(sizeof(ShadowUniforms), MTL::ResourceStorageModeShared);
+      KV_CORE_ASSERT(s_Storage->ShadowUniformBuffers[i] != nullptr, "[KanVerse Renderer] Failed to allocate shadow uniform buffer!");
+      s_Storage->InstanceBuffers[i] = device->newBuffer(RendererStorage::InstanceBufferSize, MTL::ResourceStorageModeShared);
+      KV_CORE_ASSERT(s_Storage->InstanceBuffers[i] != nullptr, "[KanVerse Renderer] Failed to allocate instancing buffer!");
+    }
+    MTL::SamplerDescriptor* shadowSamplerDesc = MTL::SamplerDescriptor::alloc()->init();
+    shadowSamplerDesc->setMinFilter(MTL::SamplerMinMagFilterLinear);
+    shadowSamplerDesc->setMagFilter(MTL::SamplerMinMagFilterLinear);
+    shadowSamplerDesc->setMipFilter(MTL::SamplerMipFilterNotMipmapped);
+    shadowSamplerDesc->setSAddressMode(MTL::SamplerAddressModeClampToEdge);
+    shadowSamplerDesc->setTAddressMode(MTL::SamplerAddressModeClampToEdge);
+    shadowSamplerDesc->setCompareFunction(MTL::CompareFunctionLessEqual);
+    s_Storage->ShadowSampler = device->newSamplerState(shadowSamplerDesc);
+    shadowSamplerDesc->release();
+    MTL::SamplerDescriptor* linearSamplerDesc = MTL::SamplerDescriptor::alloc()->init();
+    linearSamplerDesc->setMinFilter(MTL::SamplerMinMagFilterLinear);
+    linearSamplerDesc->setMagFilter(MTL::SamplerMinMagFilterLinear);
+    linearSamplerDesc->setMipFilter(MTL::SamplerMipFilterLinear);
+    linearSamplerDesc->setSAddressMode(MTL::SamplerAddressModeClampToEdge);
+    linearSamplerDesc->setTAddressMode(MTL::SamplerAddressModeClampToEdge);
+    s_Storage->LinearSampler = device->newSamplerState(linearSamplerDesc);
+    linearSamplerDesc->release();
+    s_Storage->ActiveProceduralMap = TextureCube::CreateProcedural(256);
+    s_Storage->Bloom.Init();
+    TextureSpecification whiteSpec{.Width = 1, .Height = 1, .GenerateMipmaps = false};
+    s_Storage->DefaultWhiteTexture = Texture2D::Create(whiteSpec);
+    uint32_t whitePixel = 0xFFFFFFFF;
+    s_Storage->DefaultWhiteTexture->SetData(&whitePixel, sizeof(uint32_t));
+    MTL::Library* defaultLib = device->newDefaultLibrary();
+    if (defaultLib) {
+      auto vertStr = NS::String::string("tonemap_vertex", NS::UTF8StringEncoding);
+      auto fragStr = NS::String::string("tonemap_fragment", NS::UTF8StringEncoding);
+      MTL::Function* vertFunc = defaultLib->newFunction(vertStr);
+      MTL::Function* fragFunc = defaultLib->newFunction(fragStr);
+      vertStr->release();
+      fragStr->release();
+      if (vertFunc && fragFunc) {
+        auto pipeDesc = MTL::RenderPipelineDescriptor::alloc()->init();
+        pipeDesc->setVertexFunction(vertFunc);
+        pipeDesc->setFragmentFunction(fragFunc);
+        pipeDesc->colorAttachments()->object(0)->setPixelFormat(MTL::PixelFormatBGRA8Unorm_sRGB);
+        pipeDesc->setDepthAttachmentPixelFormat(MTL::PixelFormatDepth32Float);
+        NS::Error* err = nullptr;
+        s_Storage->TonemapPipeline = device->newRenderPipelineState(pipeDesc, &err);
+        pipeDesc->release();
+        if (!s_Storage->TonemapPipeline) {
+          KV_CORE_ERROR("Failed to compile TonemapPipeline: %s",
+                        err ? err->localizedDescription()->utf8String() : "Unknown error");
+        }
+      }
+      if (vertFunc) vertFunc->release();
+      if (fragFunc) fragFunc->release();
+      auto skyVertStr = NS::String::string("skybox_vertex", NS::UTF8StringEncoding);
+      auto skyFragStr = NS::String::string("skybox_fragment", NS::UTF8StringEncoding);
+      MTL::Function* skyVert = defaultLib->newFunction(skyVertStr);
+      MTL::Function* skyFrag = defaultLib->newFunction(skyFragStr);
+      skyVertStr->release();
+      skyFragStr->release();
+      if (skyVert && skyFrag) {
+        auto skyDesc = MTL::RenderPipelineDescriptor::alloc()->init();
+        skyDesc->setVertexFunction(skyVert);
+        skyDesc->setFragmentFunction(skyFrag);
+        skyDesc->colorAttachments()->object(0)->setPixelFormat(MTL::PixelFormatRGBA16Float);
+        skyDesc->setDepthAttachmentPixelFormat(MTL::PixelFormatDepth32Float);
+        NS::Error* err = nullptr;
+        s_Storage->SkyboxPipeline = device->newRenderPipelineState(skyDesc, &err);
+        skyDesc->release();
+        auto depthDesc = MTL::DepthStencilDescriptor::alloc()->init();
+        depthDesc->setDepthCompareFunction(MTL::CompareFunctionLessEqual);
+        depthDesc->setDepthWriteEnabled(false);
+        s_Storage->SkyboxDepthState = device->newDepthStencilState(depthDesc);
+        depthDesc->release();
+      }
+      if (skyVert) skyVert->release();
+      if (skyFrag) skyFrag->release();
+      defaultLib->release();
+    }
+    FramebufferSpecification hdrSpec{
+      .Width = 1280, .Height = 720, .Samples = 1,
+      .Format = FramebufferPixelFormat::RGBA16Float,
+      .SwapChainTarget = false,
+      .DepthOnly = false,
+      .ClearColor = {0.06f, 0.07f, 0.09f, 1.0f}
+    };
+    s_Storage->HDRFramebuffer = Framebuffer::Create(hdrSpec);
+    FramebufferSpecification shadowSpec{
+      .Width = 2048, .Height = 2048, .DepthOnly = true
+    };
+    s_Storage->ShadowMap = Framebuffer::Create(shadowSpec);
+    SetShadowMap(s_Storage->ShadowMap);
+    auto standardShader = Shader::CreateFromDefaultLibrary("vertex_main", "fragment_main");
+    PipelineSpecification pipelineSpec;
+    pipelineSpec.ShaderProgram    = standardShader;
+    pipelineSpec.UseHDRTarget     = true;
+    pipelineSpec.EnableDepthWrite = true;
+    pipelineSpec.EnableCulling    = true;
+    pipelineSpec.Layout           = GetStandardMeshLayout();
+    s_Storage->StandardPipeline   = Pipeline::Create(pipelineSpec);
+    PipelineSpecification transparentSpec;
+    transparentSpec.ShaderProgram    = standardShader;
+    transparentSpec.UseHDRTarget     = true;
+    transparentSpec.EnableDepthWrite = false;
+    transparentSpec.EnableCulling    = false;
+    transparentSpec.Layout           = GetStandardMeshLayout();
+    s_Storage->TransparentPipeline   = Pipeline::Create(transparentSpec);
+    PipelineSpecification shadowSpecPipe;
+    shadowSpecPipe.ShaderProgram = Shader::CreateVertexOnly("shadow_vertex_main");
+    shadowSpecPipe.Layout        = GetStandardMeshLayout();
+    shadowSpecPipe.UseHDRTarget  = false;
+    s_Storage->ShadowPipeline    = Pipeline::Create(shadowSpecPipe);
+    KV_CORE_INFO("Renderer initialized successfully with Compute Bloom, ACES tonemapping, Transparency, Point Lights, and IBL.");
+  }
+  /*!
+   * @brief Tears down all GPU pipelines, buffers, and framebuffers.
+   */
+  void Renderer::Shutdown() {
+    if (!s_Storage) return;
+    if (s_Storage->TonemapPipeline) {
+      s_Storage->TonemapPipeline->release();
+      s_Storage->TonemapPipeline = nullptr;
+    }
+    if (s_Storage->LinearSampler) {
+      s_Storage->LinearSampler->release();
+      s_Storage->LinearSampler = nullptr;
+    }
+    if (s_Storage->ShadowSampler) {
+      s_Storage->ShadowSampler->release();
+      s_Storage->ShadowSampler = nullptr;
+    }
+    if (s_Storage->SkyboxPipeline) {
+      s_Storage->SkyboxPipeline->release();
+      s_Storage->SkyboxPipeline = nullptr;
+    }
+    if (s_Storage->SkyboxDepthState) {
+      s_Storage->SkyboxDepthState->release();
+      s_Storage->SkyboxDepthState = nullptr;
+    }
+    for (auto* buf : s_Storage->UniformBuffers) if (buf) buf->release();
+    for (auto* buf : s_Storage->ShadowUniformBuffers) if (buf) buf->release();
+    for (auto* buf : s_Storage->InstanceBuffers) if (buf) buf->release();
+    s_Storage->UniformBuffers.clear();
+    s_Storage->ShadowUniformBuffers.clear();
+    s_Storage->InstanceBuffers.clear();
+    s_Storage->StandardPipeline.reset();
+    s_Storage->TransparentPipeline.reset();
+    s_Storage->ShadowPipeline.reset();
+    s_Storage->HDRFramebuffer.reset();
+    s_Storage->ShadowMap.reset();
+    s_Storage->ActiveShadowMap.reset();
+    s_Storage.reset();
+  }
+  BufferLayout Renderer::GetStandardMeshLayout() noexcept {
+    return {
+      { ShaderDataType::Float3, "position" },
+      { ShaderDataType::Float3, "normal" },
+      { ShaderDataType::Float4, "color" },
+      { ShaderDataType::Float2, "texCoord" }
+    };
+  }
+  std::shared_ptr<Pipeline> Renderer::GetStandardPipeline() noexcept {
+    return s_Storage->StandardPipeline;
+  }
+  std::shared_ptr<Pipeline> Renderer::GetTransparentPipeline() noexcept {
+    return s_Storage->TransparentPipeline;
+  }
+  std::shared_ptr<Pipeline> Renderer::GetShadowPipeline() noexcept {
+    return s_Storage->ShadowPipeline;
+  }
+  std::shared_ptr<Framebuffer> Renderer::GetHDRFramebuffer() noexcept {
+    return s_Storage->HDRFramebuffer;
+  }
+  std::shared_ptr<Framebuffer> Renderer::GetShadowMapFramebuffer() noexcept {
+    return s_Storage->ShadowMap;
+  }
+  void Renderer::OnWindowResize(uint32_t width, uint32_t height) {
+    if (s_Storage && s_Storage->HDRFramebuffer) {
+      s_Storage->HDRFramebuffer->Resize(width, height);
+    }
+  }
+  BloomPass& Renderer::GetBloomPass() noexcept {
+    KV_CORE_ASSERT(s_Storage != nullptr, "[KanVerse Renderer] Renderer not initialized!");
+    return s_Storage->Bloom;
+  }
+  void Renderer::SetExposure(float exposure) noexcept {
+    KV_CORE_ASSERT(s_Storage != nullptr, "[KanVerse Renderer] Renderer not initialized!");
+    s_Storage->Exposure = exposure;
+  }
+  float Renderer::GetExposure() noexcept {
+    KV_CORE_ASSERT(s_Storage != nullptr, "[KanVerse Renderer] Renderer not initialized!");
+    return s_Storage->Exposure;
+  }
+  void Renderer::SetIBLEnabled(bool enabled) noexcept {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    s_Storage->EnableIBL = enabled;
+    KV_CORE_INFO("Renderer: Image-Based Lighting (IBL) toggled {}", enabled ? "ON" : "OFF");
+  }
+  bool Renderer::IsIBLEnabled() noexcept {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    return s_Storage->EnableIBL;
+  }
+  void Renderer::SetShadowMap(const std::shared_ptr<Framebuffer>& shadowFramebuffer) {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    s_Storage->ActiveShadowMap = shadowFramebuffer;
+  }
+  void Renderer::SetEnvironmentMap(const std::shared_ptr<TextureCube>& textureCube) {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    s_Storage->ActiveEnvironmentMap = textureCube;
+  }
+  void Renderer::SetIrradianceMap(const std::shared_ptr<TextureCube>& irradianceMap) {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    s_Storage->ActiveIrradianceMap = irradianceMap;
+  }
+  void Renderer::SetSkyboxToIrradiance(bool useIrradiance) {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    s_Storage->RenderIrradianceSkybox = useIrradiance;
+  }
+  void Renderer::SetEnvironmentMode(EnvironmentMode mode) {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    s_Storage->CurrentEnvMode = mode;
+    switch (mode) {
+      case EnvironmentMode::CrispHDR:
+        SetSkyboxToIrradiance(false);
+        break;
+      case EnvironmentMode::Irradiance:
+        SetSkyboxToIrradiance(true);
+        break;
+      case EnvironmentMode::Procedural:
+        SetSkyboxToIrradiance(false);
+        break;
+    }
+    KV_CORE_INFO("Renderer: Environment mode updated successfully.");
+  }
+  EnvironmentMode Renderer::GetEnvironmentMode() noexcept {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    return s_Storage->CurrentEnvMode;
+  }
+  void Renderer::BeginShadowPass(const DirectionalLight& sun,
+                                 const std::shared_ptr<Framebuffer>& shadowTarget) {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    KV_CORE_ASSERT(shadowTarget != nullptr, "[KanVerse Renderer] Shadow render target cannot be null!");
+    s_Storage->IsShadowPass = true;
+    s_Storage->ActiveFramebuffer = shadowTarget;
+    s_Storage->ActiveFrameIndex = s_Storage->Sync.BeginFrame();
+    s_Storage->CurrentInstanceOffset = 0;
+    auto& app = Application::Get();
+    s_Storage->ActiveCommandBuffer = app.GetRenderContext()->GetCommandQueue()->commandBuffer();
+    s_Storage->Sync.AttachToCommandBuffer(s_Storage->ActiveCommandBuffer);
+    ShadowUniforms shadowUniforms{};
+    shadowUniforms.LightViewProjectionMatrix = sun.GetViewProjectionMatrix();
+    MTL::Buffer* shadowBuf = s_Storage->ShadowUniformBuffers[s_Storage->ActiveFrameIndex];
+    std::memcpy(shadowBuf->contents(), &shadowUniforms, sizeof(ShadowUniforms));
+    s_Storage->ActiveCommandEncoder = s_Storage->ActiveCommandBuffer->renderCommandEncoder(
+                                                                                           shadowTarget->GetRenderPassDescriptor()
+                                                                                           );
+    if (s_Storage->ActiveCommandEncoder) {
+      s_Storage->ActiveCommandEncoder->setVertexBuffer(shadowBuf, 0, 1);
+    }
+  }
+  /*!
+   * @brief Begins the primary scene forward pass and uploads global lighting & point light uniforms.
+   * @param camera Active perspective camera.
+   * @param sun Primary directional sun light.
+   * @param env Ambient environment lighting settings.
+   * @param target Optional HDR framebuffer target.
+   * @param pointLights Span of active GPU point lights for indoor/local illumination.
+   */
+  void Renderer::BeginScene(const PerspectiveCamera& camera,
+                            const DirectionalLight& sun,
+                            const EnvironmentLighting& env,
+                            const std::shared_ptr<Framebuffer>& target,
+                            std::span<const GPUPointLight> pointLights) {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    s_Storage->IsShadowPass                     = false;
+    s_Storage->ActiveScene.ViewProjectionMatrix = camera.GetViewProjectionMatrix();
+    s_Storage->ActiveScene.SunLight             = sun;
+    s_Storage->ActiveScene.Environment          = env;
+    s_Storage->ActiveFramebuffer                = target;
+    if (!s_Storage->ActiveCommandBuffer) {
+      s_Storage->ActiveFrameIndex = s_Storage->Sync.BeginFrame();
+      s_Storage->CurrentInstanceOffset = 0;
+      auto& app = Application::Get();
+      s_Storage->ActiveCommandBuffer = app.GetRenderContext()->GetCommandQueue()->commandBuffer();
+      s_Storage->Sync.AttachToCommandBuffer(s_Storage->ActiveCommandBuffer);
+    }
+    const auto& sunLight = s_Storage->ActiveScene.SunLight;
+    const Math::Vec4 directionalColor = Math::MakeVec4(
+                                                       sunLight.GetColor().x * sunLight.GetIntensity(),
+                                                       sunLight.GetColor().y * sunLight.GetIntensity(),
+                                                       sunLight.GetColor().z * sunLight.GetIntensity(),
+                                                       1.0f
+                                                       );
+    GPUUniforms uniforms = {};
+    uniforms.ViewProjectionMatrix = camera.GetViewProjectionMatrix();
+    uniforms.LightSpaceMatrix     = sunLight.GetViewProjectionMatrix();
+    uniforms.CameraPosition       = camera.GetPosition();
+    uniforms.LightDirection       = sunLight.GetDirection();
+    uniforms.DirectionalColor     = directionalColor;
+    uniforms.AmbientColor         = env.GetEffectiveAmbient();
+    const uint32_t numPointLights = static_cast<uint32_t>(
+                                                          std::min<size_t>(pointLights.size(), kMaxPointLights)
+                                                          );
+    uniforms.PointLightCount = numPointLights;
+    if (numPointLights > 0) {
+      std::memcpy(uniforms.PointLights, pointLights.data(), numPointLights * sizeof(GPUPointLight));
+    }
+    MTL::Buffer* uniformBuffer = s_Storage->UniformBuffers[s_Storage->ActiveFrameIndex];
+    std::memcpy(uniformBuffer->contents(), &uniforms, sizeof(GPUUniforms));
+    if (target) {
+      s_Storage->ActiveCommandEncoder = s_Storage->ActiveCommandBuffer->renderCommandEncoder(
+                                                                                             target->GetRenderPassDescriptor()
+                                                                                             );
+    } else {
+      auto& app = Application::Get();
+      auto* nativeWin = static_cast<const NativeWindow*>(&app.GetWindow());
+      MTKView* metalView = (__bridge MTKView*)nativeWin->GetNativeView();
+      MTL::RenderPassDescriptor* passDesc = (__bridge MTL::RenderPassDescriptor*)metalView.currentRenderPassDescriptor;
+      s_Storage->ActiveCommandEncoder = passDesc ? s_Storage->ActiveCommandBuffer->renderCommandEncoder(passDesc) : nullptr;
+    }
+    if (s_Storage->ActiveCommandEncoder) {
+      if (!s_Storage->IsShadowPass && s_Storage->SkyboxPipeline) {
+        std::shared_ptr<TextureCube> skyboxTex = nullptr;
+        if (s_Storage->EnableIBL) {
+          if (s_Storage->CurrentEnvMode == EnvironmentMode::Procedural) {
+            skyboxTex = s_Storage->ActiveProceduralMap;
+          } else {
+            skyboxTex = s_Storage->RenderIrradianceSkybox ? s_Storage->ActiveIrradianceMap : s_Storage->ActiveEnvironmentMap;
+          }
+        }
+        if (skyboxTex && s_Storage->LinearSampler) {
+          s_Storage->ActiveCommandEncoder->setRenderPipelineState(s_Storage->SkyboxPipeline);
+          s_Storage->ActiveCommandEncoder->setDepthStencilState(s_Storage->SkyboxDepthState);
+          struct SkyboxUniforms {
+            Math::Mat4 InverseView;
+            Math::Mat4 InverseProjection;
+          };
+          SkyboxUniforms skyUbo{
+            Math::Inverse(camera.GetViewMatrix()),
+            Math::Inverse(camera.GetProjection())
+          };
+          s_Storage->ActiveCommandEncoder->setVertexBytes(&skyUbo, sizeof(SkyboxUniforms), 0);
+          skyboxTex->Bind(s_Storage->ActiveCommandEncoder, 0, 0);
+          s_Storage->ActiveCommandEncoder->drawPrimitives(MTL::PrimitiveTypeTriangle, (NS::UInteger)0, (NS::UInteger)3);
+        }
+      }
+      s_Storage->ActiveCommandEncoder->setVertexBuffer(uniformBuffer, 0, 1);
+      s_Storage->ActiveCommandEncoder->setFragmentBuffer(uniformBuffer, 0, 1);
+      if (s_Storage->ActiveShadowMap && s_Storage->ShadowSampler) {
+        s_Storage->ActiveCommandEncoder->setFragmentTexture(s_Storage->ActiveShadowMap->GetDepthAttachment(), 6);
+        s_Storage->ActiveCommandEncoder->setFragmentSamplerState(s_Storage->ShadowSampler, 1);
+      }
+      if (s_Storage->EnableIBL) {
+        std::shared_ptr<TextureCube> iblMap = s_Storage->ActiveEnvironmentMap;
+        if (s_Storage->CurrentEnvMode == EnvironmentMode::Procedural) {
+          iblMap = s_Storage->ActiveProceduralMap;
+        }
+        if (iblMap && s_Storage->LinearSampler) {
+          iblMap->Bind(s_Storage->ActiveCommandEncoder, 7, 2);
+          iblMap->Bind(s_Storage->ActiveCommandEncoder, 8, 2);
+        } else {
+          if (s_Storage->ActiveEnvironmentMap && s_Storage->LinearSampler) {
+            s_Storage->ActiveEnvironmentMap->Bind(s_Storage->ActiveCommandEncoder, 7, 2);
+          }
+          if (s_Storage->ActiveIrradianceMap && s_Storage->LinearSampler) {
+            s_Storage->ActiveIrradianceMap->Bind(s_Storage->ActiveCommandEncoder, 8, 2);
+          }
+        }
+      }
+    }
+  }
+  void Renderer::SubmitInstanced(const std::shared_ptr<Pipeline>& pipeline,
+                                 const std::shared_ptr<Material>& material,
+                                 const std::shared_ptr<Mesh>& mesh,
+                                 std::span<const InstanceData> instances) {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    if (!s_Storage->ActiveCommandEncoder || instances.empty()) return;
+    KV_CORE_ASSERT(pipeline != nullptr, "[KanVerse Renderer] Pipeline is null!");
+    KV_CORE_ASSERT(mesh != nullptr,     "[KanVerse Renderer] Mesh is null!");
+    const size_t count = instances.size();
+    const size_t bytesRequired = count * sizeof(InstanceData);
+    KV_CORE_ASSERT(s_Storage->CurrentInstanceOffset + bytesRequired <= RendererStorage::InstanceBufferSize,
+                   "[KanVerse Renderer] Exceeded frame instancing buffer capacity!");
+    MTL::Buffer* currentInstanceBuffer = s_Storage->InstanceBuffers[s_Storage->ActiveFrameIndex];
+    const size_t bufferOffset = s_Storage->CurrentInstanceOffset;
+    uint8_t* dest = static_cast<uint8_t*>(currentInstanceBuffer->contents()) + bufferOffset;
+    std::memcpy(dest, instances.data(), bytesRequired);
+    s_Storage->CurrentInstanceOffset += bytesRequired;
+    if (!s_Storage->IsShadowPass && material) {
+      material->Sync(s_Storage->ActiveFrameIndex);
+      s_Storage->ActiveCommandEncoder->setFragmentBuffer(material->GetUniformBuffer(s_Storage->ActiveFrameIndex), 0, 2);
+      if (material->GetAlbedoTexture()) {
+        material->GetAlbedoTexture()->Bind(s_Storage->ActiveCommandEncoder, 0, 0);
+      } else if (s_Storage->DefaultWhiteTexture) {
+        s_Storage->DefaultWhiteTexture->Bind(s_Storage->ActiveCommandEncoder, 0, 0);
+      }
+      if (material->GetNormalTexture()) {
+        material->GetNormalTexture()->Bind(s_Storage->ActiveCommandEncoder, 1, 0);
+      } else if (s_Storage->DefaultWhiteTexture) {
+        s_Storage->DefaultWhiteTexture->Bind(s_Storage->ActiveCommandEncoder, 1, 0);
+      }
+      if (material->GetRoughnessTexture()) {
+        material->GetRoughnessTexture()->Bind(s_Storage->ActiveCommandEncoder, 2, 0);
+      } else if (s_Storage->DefaultWhiteTexture) {
+        s_Storage->DefaultWhiteTexture->Bind(s_Storage->ActiveCommandEncoder, 2, 0);
+      }
+      if (material->GetMetallicTexture()) {
+        material->GetMetallicTexture()->Bind(s_Storage->ActiveCommandEncoder, 3, 0);
+      } else if (s_Storage->DefaultWhiteTexture) {
+        s_Storage->DefaultWhiteTexture->Bind(s_Storage->ActiveCommandEncoder, 3, 0);
+      }
+      if (material->GetAOTexture()) {
+        material->GetAOTexture()->Bind(s_Storage->ActiveCommandEncoder, 4, 0);
+      } else if (s_Storage->DefaultWhiteTexture) {
+        s_Storage->DefaultWhiteTexture->Bind(s_Storage->ActiveCommandEncoder, 4, 0);
+      }
+      if (material->GetHeightTexture()) {
+        material->GetHeightTexture()->Bind(s_Storage->ActiveCommandEncoder, 5, 0);
+      } else if (s_Storage->DefaultWhiteTexture) {
+        s_Storage->DefaultWhiteTexture->Bind(s_Storage->ActiveCommandEncoder, 5, 0);
+      }
+    }
+    s_Storage->ActiveCommandEncoder->setVertexBuffer(currentInstanceBuffer, bufferOffset, 3);
+    for (const auto& submesh : mesh->GetSubmeshes()) {
+      (void)submesh;
+      RenderCommand::DrawIndexedInstanced(
+                                          s_Storage->ActiveCommandEncoder,
+                                          pipeline,
+                                          mesh->GetVertexBuffer(),
+                                          mesh->GetIndexBuffer(),
+                                          static_cast<uint32_t>(count)
+                                          );
+    }
+  }
+  void Renderer::EndScene() {
+    KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
+    if (s_Storage->ActiveCommandEncoder) {
+      s_Storage->ActiveCommandEncoder->endEncoding();
+      s_Storage->ActiveCommandEncoder = nullptr;
+    }
+    if (s_Storage->IsShadowPass) {
+      s_Storage->ActiveFramebuffer = nullptr;
+      return;
+    }
+    auto& app = Application::Get();
+    auto* nativeWin = static_cast<const NativeWindow*>(&app.GetWindow());
+    MTKView* metalView = (__bridge MTKView*)nativeWin->GetNativeView();
+    if (s_Storage->ActiveCommandBuffer) {
+      id<CAMetalDrawable> currentDrawable = nil;
+      if (metalView && metalView.bounds.size.width > 1.0 && metalView.bounds.size.height > 1.0) {
+        currentDrawable = metalView.currentDrawable;
+      }
+      if (s_Storage->ActiveFramebuffer && currentDrawable && s_Storage->TonemapPipeline) {
+        MTL::Texture* hdrColor = s_Storage->ActiveFramebuffer->GetColorAttachment(0);
+        if (hdrColor) {
+          s_Storage->Bloom.Resize(static_cast<uint32_t>(hdrColor->width()),
+                                  static_cast<uint32_t>(hdrColor->height()));
+          s_Storage->Bloom.Execute(s_Storage->ActiveCommandBuffer, hdrColor);
+        }
+        MTL::RenderPassDescriptor* displayPassDesc = (__bridge MTL::RenderPassDescriptor*)metalView.currentRenderPassDescriptor;
+        if (displayPassDesc) {
+          MTL::RenderCommandEncoder* tonemapEncoder = s_Storage->ActiveCommandBuffer->renderCommandEncoder(displayPassDesc);
+          if (tonemapEncoder) {
+            tonemapEncoder->setRenderPipelineState(s_Storage->TonemapPipeline);
+            tonemapEncoder->setFragmentTexture(hdrColor, 0);
+            tonemapEncoder->setFragmentTexture(s_Storage->Bloom.GetBloomTexture(), 1);
+            tonemapEncoder->setFragmentSamplerState(s_Storage->LinearSampler, 0);
+            TonemapUniforms tonemapUniforms;
+            tonemapUniforms.BloomIntensity = s_Storage->Bloom.GetIntensity();
+            tonemapUniforms.Exposure       = s_Storage->Exposure;
+            tonemapEncoder->setFragmentBytes(&tonemapUniforms, sizeof(TonemapUniforms), 0);
+            tonemapEncoder->drawPrimitives(MTL::PrimitiveTypeTriangle, (NS::UInteger)0, (NS::UInteger)3);
+            tonemapEncoder->endEncoding();
+          }
+        }
+      }
+      if (currentDrawable) {
+        s_Storage->ActiveCommandBuffer->presentDrawable((__bridge CA::MetalDrawable*)currentDrawable);
+      }
+      s_Storage->ActiveCommandBuffer->commit();
+      s_Storage->ActiveCommandBuffer = nullptr;
+    }
+    s_Storage->ActiveFramebuffer = nullptr;
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Textures/Texture.hpp
 /*!
  * @file Texture.hpp
@@ -5115,9 +6293,440 @@ namespace KanVerse {
   }
 }
 // FILE: KanVerse_Engine/Renderer/Textures/TextureCube.hpp
-
+/*!
+ * @file TextureCube.hpp
+ * @brief Abstract contract representing hardware-accelerated GPU cubemap textures.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <simd/simd.h>
+namespace MTL {
+  class Texture;
+  class SamplerState;
+  class RenderCommandEncoder;
+}
+namespace KanVerse {
+  /*!
+   * @struct ProceduralSkyParams
+   * @brief Configuration controlling procedural atmospheric gradients and the physical sun disc.
+   */
+  struct ProceduralSkyParams {
+    simd::float3 ZenithColor{0.25f, 0.50f, 0.95f};      ///< Deep sky color overhead
+    simd::float3 HorizonColor{0.70f, 0.82f, 0.98f};     ///< Atmospheric haze along the horizon
+    simd::float3 GroundColor{0.18f, 0.20f, 0.24f};      ///< Ground reflectance below horizon
+    simd::float3 SunDirection{-0.4f, -1.0f, -0.3f};     ///< Incident sunlight vector pointing down
+    simd::float3 SunColor{1.0f, 0.95f, 0.88f};          ///< Radiance tint of the sun disc
+    float        SunIntensity{12.0f};                   ///< High dynamic range intensity for bloom flare
+    float        SunDiscSize{0.035f};                   ///< Angular radius of the sharp core disc
+    float        SunGlowSize{0.32f};                    ///< Soft halo/corona radius around the disc
+  };
+  class TextureCube {
+  public:
+    virtual ~TextureCube() = default;
+    /*!
+     * @brief Factory creating a Cubemap texture from 6 individual image files (+X, -X, +Y, -Y, +Z, -Z).
+     * @param faces Vector of 6 file paths.
+     * @return Shared pointer to initialized TextureCube, or nullptr on failure.
+     */
+    [[nodiscard]] static std::shared_ptr<TextureCube> Create(const std::vector<std::string>& faces);
+    /*!
+     * @brief Factory procedurally synthesizing a default sky-to-ground environment cubemap.
+     * @param resolution Resolution of each square face (e.g., 256 pixels).
+     * @return Shared pointer to initialized procedural TextureCube.
+     */
+    [[nodiscard]] static std::shared_ptr<TextureCube> CreateProcedural(uint32_t resolution = 256);
+    /*!
+     * @brief Factory procedurally synthesizing a sky environment with customizable sun and colors.
+     * @param params Sky colors, sun direction, and intensity.
+     * @param resolution Resolution of each square face (e.g., 256 pixels).
+     * @return Shared pointer to initialized procedural TextureCube.
+     */
+    [[nodiscard]] static std::shared_ptr<TextureCube> CreateProcedural(const ProceduralSkyParams& params, uint32_t resolution = 256);
+    /*!
+     * @brief Factory creating a Cubemap texture from a single equirectangular .hdr image via GPU Compute.
+     * @param filepath Path to the .hdr image file.
+     * @param resolution Target resolution of each cubemap face (default: 512).
+     * @return Shared pointer to initialized HDR TextureCube.
+     */
+    [[nodiscard]] static std::shared_ptr<TextureCube> CreateFromEquirectangular(const std::string& filepath, uint32_t resolution = 512);
+    /*!
+     * @brief Convolutes an existing environment map to generate a diffuse Irradiance map.
+     * @param sourceEnvMap The crisp source cubemap to sample from.
+     * @param resolution Resolution of the output irradiance map (defaults to 32 for extreme blur).
+     * @return Shared pointer to the new blurred TextureCube.
+     */
+    [[nodiscard]] static std::shared_ptr<TextureCube> CreateIrradianceMap(const std::shared_ptr<TextureCube>& sourceEnvMap, uint32_t resolution = 32);
+    virtual void Bind(MTL::RenderCommandEncoder* encoder,
+                      uint32_t textureSlot = 0,
+                      uint32_t samplerSlot = 0) const = 0;
+    [[nodiscard]] virtual uint32_t GetResolution() const noexcept = 0;
+    [[nodiscard]] virtual MTL::Texture* GetNativeTexture() const noexcept = 0;
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/Textures/TextureCube.mm
-
+/*!
+ * @file TextureCube.mm
+ * @brief Implementation of Metal cubemap texture allocation, image decoding, and procedural generation.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Renderer/Textures/TextureCube.hpp"
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Core/Application/Application.hpp"
+#include "Core/Memory/MemoryTracking.hpp"
+#include <stb_image.h>
+#include <Metal/Metal.hpp>
+#import <CoreGraphics/CoreGraphics.h>
+#import <ImageIO/ImageIO.h>
+#import <Foundation/Foundation.h>
+#include <cmath>
+#include <algorithm>
+namespace KanVerse {
+  class MetalTextureCube : public TextureCube {
+  public:
+    explicit MetalTextureCube(const std::vector<std::string>& faces) {
+      KV_CORE_ASSERT(faces.size() == 6, "[KanVerse TextureCube] Cubemap requires exactly 6 face image paths!");
+      MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+      KV_CORE_ASSERT(device != nullptr, "[KanVerse TextureCube] Active Metal device is null!");
+      uint32_t resolution = 0;
+      std::vector<std::vector<uint8_t>> facePixels(6);
+      @autoreleasepool {
+        for (size_t i = 0; i < 6; ++i) {
+          NSString* pathString = [NSString stringWithUTF8String:faces[i].c_str()];
+          NSURL* fileURL = [NSURL fileURLWithPath:pathString];
+          CGImageSourceRef imageSource = CGImageSourceCreateWithURL((__bridge CFURLRef)fileURL, NULL);
+          if (!imageSource) {
+            KV_CORE_ERROR("TextureCube: Failed to open face image at '{}'", faces[i]);
+            return;
+          }
+          CGImageRef image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+          CFRelease(imageSource);
+          if (!image) {
+            KV_CORE_ERROR("TextureCube: Failed to decode face image at '{}'", faces[i]);
+            return;
+          }
+          const uint32_t w = static_cast<uint32_t>(CGImageGetWidth(image));
+          const uint32_t h = static_cast<uint32_t>(CGImageGetHeight(image));
+          if (i == 0) {
+            resolution = w;
+          } else {
+            KV_CORE_ASSERT(w == resolution && h == resolution, "[KanVerse TextureCube] All cubemap faces must be square and matching dimensions!");
+          }
+          facePixels[i].resize(resolution * resolution * 4);
+          CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+          CGContextRef context = CGBitmapContextCreate(
+                                                       facePixels[i].data(),
+                                                       resolution,
+                                                       resolution,
+                                                       8,
+                                                       resolution * 4,
+                                                       colorSpace,
+                                                       static_cast<uint32_t>(kCGImageAlphaPremultipliedLast) | static_cast<uint32_t>(kCGBitmapByteOrder32Big)
+                                                       );
+          CGColorSpaceRelease(colorSpace);
+          if (context) {
+            CGRect rect = CGRectMake(0, 0, resolution, resolution);
+            CGContextDrawImage(context, rect, image);
+            CGContextRelease(context);
+          }
+          CGImageRelease(image);
+        }
+      }
+      m_Resolution = resolution;
+      MTL::TextureDescriptor* desc = MTL::TextureDescriptor::textureCubeDescriptor(
+                                                                                   MTL::PixelFormatRGBA8Unorm_sRGB,
+                                                                                   m_Resolution,
+                                                                                   false
+                                                                                   );
+      desc->setUsage(MTL::TextureUsageShaderRead);
+      desc->setStorageMode(MTL::StorageModeShared);
+      m_Texture = device->newTexture(desc);
+      desc->release();
+      KV_CORE_ASSERT(m_Texture != nullptr, "[KanVerse TextureCube] Failed to allocate MTL::Texture for cubemap!");
+      for (size_t i = 0; i < 6; ++i) {
+        const MTL::Region region = MTL::Region(0, 0, m_Resolution, m_Resolution);
+        const NSUInteger bytesPerRow = m_Resolution * 4;
+        m_Texture->replaceRegion(region, 0, static_cast<NSUInteger>(i), facePixels[i].data(), bytesPerRow, bytesPerRow * m_Resolution);
+      }
+      const size_t vramBytes = m_Resolution * m_Resolution * 4 * 6;
+      m_MemoryGuard.Reset(vramBytes);
+      MTL::SamplerDescriptor* samplerDesc = MTL::SamplerDescriptor::alloc()->init();
+      samplerDesc->setMinFilter(MTL::SamplerMinMagFilterLinear);
+      samplerDesc->setMagFilter(MTL::SamplerMinMagFilterLinear);
+      samplerDesc->setMipFilter(MTL::SamplerMipFilterNotMipmapped);
+      samplerDesc->setSAddressMode(MTL::SamplerAddressModeClampToEdge);
+      samplerDesc->setTAddressMode(MTL::SamplerAddressModeClampToEdge);
+      m_Sampler = device->newSamplerState(samplerDesc);
+      samplerDesc->release();
+      KV_CORE_INFO("TextureCube: Successfully loaded cubemap (Resolution: {}x{}, {:.2f} MB)", m_Resolution, m_Resolution, static_cast<double>(vramBytes) / (1024.0 * 1024.0));
+    }
+    explicit MetalTextureCube(const ProceduralSkyParams& params, uint32_t resolution) {
+      m_Resolution = resolution;
+      MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+      KV_CORE_ASSERT(device != nullptr, "[KanVerse TextureCube] Active Metal device is null!");
+      // Use RGBA16Float to store high-dynamic-range sun radiance without 8-bit clipping
+      MTL::TextureDescriptor* desc = MTL::TextureDescriptor::textureCubeDescriptor(
+                                                                                   MTL::PixelFormatRGBA16Float,
+                                                                                   m_Resolution,
+                                                                                   false
+                                                                                   );
+      desc->setUsage(MTL::TextureUsageShaderRead);
+      desc->setStorageMode(MTL::StorageModeShared);
+      m_Texture = device->newTexture(desc);
+      desc->release();
+      KV_CORE_ASSERT(m_Texture != nullptr, "[KanVerse TextureCube] Failed to allocate procedural MTL::Texture for cubemap!");
+      // Normal direction vectors corresponding to the 6 cube faces (+Y and -Y aligned)
+      const simd::float3 faceDirections[6] = {
+        simd_make_float3( 1.0f,  0.0f,  0.0f), // 0: +X
+        simd_make_float3(-1.0f,  0.0f,  0.0f), // 1: -X
+        simd_make_float3( 0.0f, -1.0f,  0.0f), // 2: -Y (Zenith in Metal view space)
+        simd_make_float3( 0.0f,  1.0f,  0.0f), // 3: +Y (Ground in Metal view space)
+        simd_make_float3( 0.0f,  0.0f,  1.0f), // 4: +Z
+        simd_make_float3( 0.0f,  0.0f, -1.0f)  // 5: -Z
+      };
+      const simd::float3 faceU[6] = {
+        simd_make_float3( 0.0f,  0.0f, -1.0f),
+        simd_make_float3( 0.0f,  0.0f,  1.0f),
+        simd_make_float3( 1.0f,  0.0f,  0.0f),
+        simd_make_float3( 1.0f,  0.0f,  0.0f),
+        simd_make_float3( 1.0f,  0.0f,  0.0f),
+        simd_make_float3(-1.0f,  0.0f,  0.0f)
+      };
+      const simd::float3 faceV[6] = {
+        simd_make_float3( 0.0f,  1.0f,  0.0f),
+        simd_make_float3( 0.0f,  1.0f,  0.0f),
+        simd_make_float3( 0.0f,  0.0f,  1.0f),
+        simd_make_float3( 0.0f,  0.0f, -1.0f),
+        simd_make_float3( 0.0f,  1.0f,  0.0f),
+        simd_make_float3( 0.0f,  1.0f,  0.0f)
+      };
+      // Vector pointing toward the sun position in the sky
+      const simd::float3 sunPosition = simd_normalize(-params.SunDirection);
+      std::vector<uint16_t> facePixelsHalf(m_Resolution * m_Resolution * 4);
+      for (size_t face = 0; face < 6; ++face) {
+        for (uint32_t y = 0; y < m_Resolution; ++y) {
+          float py = (static_cast<float>(y) + 0.5f) / static_cast<float>(m_Resolution);
+          py = py * 2.0f - 1.0f;
+          for (uint32_t x = 0; x < m_Resolution; ++x) {
+            float px = (static_cast<float>(x) + 0.5f) / static_cast<float>(m_Resolution);
+            px = px * 2.0f - 1.0f;
+            simd::float3 dir = simd_normalize(faceDirections[face] + (faceU[face] * px) + (faceV[face] * py));
+            // Atmospheric gradient: above horizon uses zenith blend; below uses ground blend
+            float t = dir.y;
+            simd::float3 skyColor;
+            if (t >= 0.0f) {
+              float factor = std::pow(t, 0.45f);
+              skyColor = params.HorizonColor * (1.0f - factor) + params.ZenithColor * factor;
+            } else {
+              float factor = std::pow(std::clamp(-t, 0.0f, 1.0f), 0.5f);
+              skyColor = params.HorizonColor * (1.0f - factor) + params.GroundColor * factor;
+            }
+            // Calculate directional angular alignment with the sun
+            float sunDot = simd_dot(dir, sunPosition);
+            if (sunDot > 0.0f && sunPosition.y > -0.05f) {
+              // Soft corona halo glow around the sun
+              float glowFactor = std::clamp((sunDot - (1.0f - params.SunGlowSize)) / params.SunGlowSize, 0.0f, 1.0f);
+              glowFactor = std::pow(glowFactor, 3.5f);
+              skyColor += params.SunColor * (glowFactor * params.SunIntensity * 0.25f);
+              // Sharp, high-intensity core sun disc
+              float discFactor = std::clamp((sunDot - (1.0f - params.SunDiscSize)) / (params.SunDiscSize * 0.15f), 0.0f, 1.0f);
+              skyColor += params.SunColor * (discFactor * params.SunIntensity);
+            }
+            size_t idx = (y * m_Resolution + x) * 4;
+            // Store as 16-bit half floats (__fp16) for HDR buffers
+            __fp16 r = static_cast<__fp16>(skyColor.x);
+            __fp16 g = static_cast<__fp16>(skyColor.y);
+            __fp16 b = static_cast<__fp16>(skyColor.z);
+            __fp16 a = static_cast<__fp16>(1.0f);
+            std::memcpy(&facePixelsHalf[idx + 0], &r, sizeof(__fp16));
+            std::memcpy(&facePixelsHalf[idx + 1], &g, sizeof(__fp16));
+            std::memcpy(&facePixelsHalf[idx + 2], &b, sizeof(__fp16));
+            std::memcpy(&facePixelsHalf[idx + 3], &a, sizeof(__fp16));
+          }
+        }
+        const MTL::Region region = MTL::Region(0, 0, m_Resolution, m_Resolution);
+        const NSUInteger bytesPerRow = m_Resolution * 4 * sizeof(uint16_t);
+        m_Texture->replaceRegion(region, 0, static_cast<NSUInteger>(face), facePixelsHalf.data(), bytesPerRow, bytesPerRow * m_Resolution);
+      }
+      const size_t vramBytes = m_Resolution * m_Resolution * 8 * 6;
+      m_MemoryGuard.Reset(vramBytes);
+      MTL::SamplerDescriptor* samplerDesc = MTL::SamplerDescriptor::alloc()->init();
+      samplerDesc->setMinFilter(MTL::SamplerMinMagFilterLinear);
+      samplerDesc->setMagFilter(MTL::SamplerMinMagFilterLinear);
+      samplerDesc->setMipFilter(MTL::SamplerMipFilterNotMipmapped);
+      samplerDesc->setSAddressMode(MTL::SamplerAddressModeClampToEdge);
+      samplerDesc->setTAddressMode(MTL::SamplerAddressModeClampToEdge);
+      m_Sampler = device->newSamplerState(samplerDesc);
+      samplerDesc->release();
+      KV_CORE_INFO("TextureCube: Successfully generated HDR procedural sky with sun disc (Resolution: {}x{}, {:.2f} MB)",
+                   m_Resolution, m_Resolution, static_cast<double>(vramBytes) / (1024.0 * 1024.0));
+    }
+    explicit MetalTextureCube(const std::string& filepath, uint32_t resolution) {
+      m_Resolution = resolution;
+      MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+      KV_CORE_ASSERT(device != nullptr, "[KanVerse TextureCube] Active Metal device is null!");
+      int width, height, channels;
+      float* data = stbi_loadf(filepath.c_str(), &width, &height, &channels, 4);
+      if (!data) {
+        KV_CORE_ERROR("TextureCube: Failed to load HDR image '{0}'. Reason: {1}", filepath, stbi_failure_reason());
+        KV_CORE_ASSERT(false, "Failed to load Equirectangular HDR map!");
+        return;
+      }
+      MTL::TextureDescriptor* hdrDesc = MTL::TextureDescriptor::texture2DDescriptor(
+                                                                                    MTL::PixelFormatRGBA32Float, width, height, false);
+      hdrDesc->setUsage(MTL::TextureUsageShaderRead);
+      hdrDesc->setStorageMode(MTL::StorageModeShared);
+      MTL::Texture* hdrTexture = device->newTexture(hdrDesc);
+      hdrDesc->release();
+      const MTL::Region hdrRegion = MTL::Region(0, 0, width, height);
+      hdrTexture->replaceRegion(hdrRegion, 0, data, width * 4 * sizeof(float));
+      stbi_image_free(data);
+      MTL::TextureDescriptor* cubeDesc = MTL::TextureDescriptor::textureCubeDescriptor(
+                                                                                       MTL::PixelFormatRGBA16Float, m_Resolution, true);
+      cubeDesc->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite);
+      cubeDesc->setStorageMode(MTL::StorageModePrivate);
+      m_Texture = device->newTexture(cubeDesc);
+      cubeDesc->release();
+      MTL::Library* defaultLib = device->newDefaultLibrary();
+      KV_CORE_ASSERT(defaultLib, "[KanVerse TextureCube] Failed to load default Metal library!");
+      auto funcName = NS::String::string("equirectangular_to_cubemap", NS::UTF8StringEncoding);
+      MTL::Function* computeFunc = defaultLib->newFunction(funcName);
+      funcName->release();
+      defaultLib->release();
+      KV_CORE_ASSERT(computeFunc, "[KanVerse TextureCube] Compute kernel 'equirectangular_to_cubemap' not found!");
+      NS::Error* error = nullptr;
+      MTL::ComputePipelineState* computePipeline = device->newComputePipelineState(computeFunc, &error);
+      computeFunc->release();
+      KV_CORE_ASSERT(computePipeline, "[KanVerse TextureCube] Failed to create compute pipeline!");
+      MTL::CommandQueue* queue = Application::Get().GetRenderContext()->GetCommandQueue();
+      MTL::CommandBuffer* cmdBuffer = queue->commandBuffer();
+      MTL::ComputeCommandEncoder* encoder = cmdBuffer->computeCommandEncoder();
+      encoder->setComputePipelineState(computePipeline);
+      MTL::Texture* cubemapArrayView = m_Texture->newTextureView(
+                                                                 MTL::PixelFormatRGBA16Float,
+                                                                 MTL::TextureType2DArray,
+                                                                 NS::Range::Make(0, 1),
+                                                                 NS::Range::Make(0, 6)
+                                                                 );
+      encoder->setTexture(hdrTexture, 0);
+      encoder->setTexture(cubemapArrayView, 1);
+      const MTL::Size threadgroupSize(16, 16, 1);
+      const MTL::Size threadgroups(
+                                   (m_Resolution + threadgroupSize.width - 1) / threadgroupSize.width,
+                                   (m_Resolution + threadgroupSize.height - 1) / threadgroupSize.height,
+                                   6
+                                   );
+      encoder->dispatchThreadgroups(threadgroups, threadgroupSize);
+      encoder->endEncoding();
+      MTL::BlitCommandEncoder* blitEncoder = cmdBuffer->blitCommandEncoder();
+      blitEncoder->generateMipmaps(m_Texture);
+      blitEncoder->endEncoding();
+      cmdBuffer->commit();
+      cmdBuffer->waitUntilCompleted();
+      cubemapArrayView->release();
+      hdrTexture->release();
+      computePipeline->release();
+      MTL::SamplerDescriptor* samplerDesc = MTL::SamplerDescriptor::alloc()->init();
+      samplerDesc->setMinFilter(MTL::SamplerMinMagFilterLinear);
+      samplerDesc->setMagFilter(MTL::SamplerMinMagFilterLinear);
+      samplerDesc->setMipFilter(MTL::SamplerMipFilterLinear);
+      samplerDesc->setSAddressMode(MTL::SamplerAddressModeClampToEdge);
+      samplerDesc->setTAddressMode(MTL::SamplerAddressModeClampToEdge);
+      m_Sampler = device->newSamplerState(samplerDesc);
+      samplerDesc->release();
+      const size_t vramBytes = m_Resolution * m_Resolution * 8 * 6;
+      m_MemoryGuard.Reset(vramBytes);
+      KV_CORE_INFO("TextureCube: Successfully generated HDR Cubemap from '{0}' (Resolution: {1}x{1}, {2:.2f} MB)",
+                   filepath, m_Resolution, static_cast<double>(vramBytes) / (1024.0 * 1024.0));
+    }
+    explicit MetalTextureCube(const std::shared_ptr<TextureCube>& sourceEnvMap, uint32_t resolution) {
+      m_Resolution = resolution;
+      MTL::Device* device = Application::Get().GetRenderContext()->GetDevice();
+      MTL::TextureDescriptor* cubeDesc = MTL::TextureDescriptor::textureCubeDescriptor(
+                                                                                       MTL::PixelFormatRGBA16Float, m_Resolution, false);
+      cubeDesc->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite);
+      cubeDesc->setStorageMode(MTL::StorageModePrivate);
+      m_Texture = device->newTexture(cubeDesc);
+      cubeDesc->release();
+      MTL::Library* defaultLib = device->newDefaultLibrary();
+      auto funcName = NS::String::string("irradiance_convolution", NS::UTF8StringEncoding);
+      MTL::Function* computeFunc = defaultLib->newFunction(funcName);
+      funcName->release();
+      defaultLib->release();
+      NS::Error* error = nullptr;
+      MTL::ComputePipelineState* computePipeline = device->newComputePipelineState(computeFunc, &error);
+      computeFunc->release();
+      MTL::CommandQueue* queue = Application::Get().GetRenderContext()->GetCommandQueue();
+      MTL::CommandBuffer* cmdBuffer = queue->commandBuffer();
+      MTL::ComputeCommandEncoder* encoder = cmdBuffer->computeCommandEncoder();
+      MTL::Texture* cubemapArrayView = m_Texture->newTextureView(
+                                                                 MTL::PixelFormatRGBA16Float,
+                                                                 MTL::TextureType2DArray,
+                                                                 NS::Range::Make(0, 1),
+                                                                 NS::Range::Make(0, 6)
+                                                                 );
+      encoder->setComputePipelineState(computePipeline);
+      encoder->setTexture(sourceEnvMap->GetNativeTexture(), 0);
+      encoder->setTexture(cubemapArrayView, 1);
+      const MTL::Size threadgroupSize(16, 16, 1);
+      const MTL::Size threadgroups(
+                                   (m_Resolution + threadgroupSize.width - 1) / threadgroupSize.width,
+                                   (m_Resolution + threadgroupSize.height - 1) / threadgroupSize.height,
+                                   6
+                                   );
+      encoder->dispatchThreadgroups(threadgroups, threadgroupSize);
+      encoder->endEncoding();
+      cmdBuffer->commit();
+      cmdBuffer->waitUntilCompleted();
+      cubemapArrayView->release();
+      computePipeline->release();
+      MTL::SamplerDescriptor* samplerDesc = MTL::SamplerDescriptor::alloc()->init();
+      samplerDesc->setMinFilter(MTL::SamplerMinMagFilterLinear);
+      samplerDesc->setMagFilter(MTL::SamplerMinMagFilterLinear);
+      samplerDesc->setMipFilter(MTL::SamplerMipFilterNotMipmapped);
+      samplerDesc->setSAddressMode(MTL::SamplerAddressModeClampToEdge);
+      samplerDesc->setTAddressMode(MTL::SamplerAddressModeClampToEdge);
+      m_Sampler = device->newSamplerState(samplerDesc);
+      samplerDesc->release();
+      m_MemoryGuard.Reset(m_Resolution * m_Resolution * 8 * 6);
+      KV_CORE_INFO("TextureCube: Generated Irradiance Map (Resolution: {0}x{0})", m_Resolution);
+    }
+    ~MetalTextureCube() override {
+      if (m_Sampler) { m_Sampler->release(); m_Sampler = nullptr; }
+      if (m_Texture) { m_Texture->release(); m_Texture = nullptr; }
+      m_MemoryGuard.Reset(0);
+    }
+    void Bind(MTL::RenderCommandEncoder* encoder, uint32_t textureSlot, uint32_t samplerSlot) const override {
+      KV_CORE_ASSERT(encoder != nullptr, "[KanVerse TextureCube] Command encoder cannot be null during bind!");
+      encoder->setFragmentTexture(m_Texture, textureSlot);
+      encoder->setFragmentSamplerState(m_Sampler, samplerSlot);
+    }
+    [[nodiscard]] uint32_t GetResolution() const noexcept override { return m_Resolution; }
+    [[nodiscard]] MTL::Texture* GetNativeTexture() const noexcept override { return m_Texture; }
+  private:
+    uint32_t               m_Resolution{0};
+    MTL::Texture*          m_Texture{nullptr};
+    MTL::SamplerState*     m_Sampler{nullptr};
+    ScopedMemoryAllocation m_MemoryGuard{};
+  };
+  std::shared_ptr<TextureCube> TextureCube::Create(const std::vector<std::string>& faces) {
+    return std::make_shared<MetalTextureCube>(faces);
+  }
+  std::shared_ptr<TextureCube> TextureCube::CreateProcedural(uint32_t resolution) {
+    return std::make_shared<MetalTextureCube>(ProceduralSkyParams{}, resolution);
+  }
+  std::shared_ptr<TextureCube> TextureCube::CreateProcedural(const ProceduralSkyParams& params, uint32_t resolution) {
+    return std::make_shared<MetalTextureCube>(params, resolution);
+  }
+  std::shared_ptr<TextureCube> TextureCube::CreateFromEquirectangular(const std::string& filepath, uint32_t resolution) {
+    return std::make_shared<MetalTextureCube>(filepath, resolution);
+  }
+  std::shared_ptr<TextureCube> TextureCube::CreateIrradianceMap(const std::shared_ptr<TextureCube>& sourceEnvMap, uint32_t resolution) {
+    return std::make_shared<MetalTextureCube>(sourceEnvMap, resolution);
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/UI/ImGuiLayer.hpp
 
 // FILE: KanVerse_Engine/Renderer/UI/ImGuiLayer.mm
@@ -5222,23 +6831,846 @@ namespace KanVerse {
 // FILE: KanVerse_App/Layers/KanVerseLayer.mm
 
 // FILE: KanVerse_App/Shaders/Bloom.metal
-
+/*!
+ * @file Bloom.metal
+ * @brief Metal compute kernels for Dual-Kawase HDR bloom downsampling and upsampling.
+ * @details Implements a multi-pass compute blur chain. The downsample stage extracts
+ *          high-luminance pixels using a soft-knee threshold and downsamples with a
+ *          13-tap anti-flicker kernel. The upsample stage expands lower-resolution mips
+ *          using a 9-tap 3x3 tent filter with progressive additive accumulation.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include <metal_stdlib>
+using namespace metal;
+/*!
+ * @struct BloomDownsampleUniforms
+ * @brief Parameters for the compute downsampling pass (strictly 32 bytes).
+ */
+struct BloomDownsampleUniforms {
+  float2 texelSize;   ///< Inverse dimensions of the source texture (8 bytes, offset 0).
+  float  threshold;   ///< Minimum luminance cut-off value (4 bytes, offset 8).
+  float  softKnee;    ///< Soft transition factor [0, 1] (4 bytes, offset 12).
+  int    mipLevel;    ///< Current downsample hierarchy level (4 bytes, offset 16).
+  float  padding[3];  ///< Array of 3 floats for 32-byte total alignment (12 bytes, offset 20).
+};
+/*!
+ * @struct BloomUpsampleUniforms
+ * @brief Parameters for the compute upsampling and additive blending pass (strictly 16 bytes).
+ */
+struct BloomUpsampleUniforms {
+  float2 texelSize;     ///< Inverse dimensions of the lower-resolution mip texture (8 bytes).
+  float  filterRadius;  ///< Blur sample radius expansion scalar (4 bytes).
+  float  padding;       ///< Alignment padding (4 bytes).
+};
+/*!
+ * @brief Computes relative perceived luminance using standard Rec. 709 coefficients.
+ * @param color Linear RGB color vector.
+ * @return Scalar luminance value.
+ */
+float Luminance(float3 color) {
+  return dot(color, float3(0.2126f, 0.7152f, 0.0722f));
+}
+/*!
+ * @brief Applies a quadratic soft-knee threshold curve to extract bright HDR highlights.
+ * @param color Unfiltered source pixel color.
+ * @param threshold Luminance threshold cut-off.
+ * @param softKnee Knee sharpness factor.
+ * @return Highlight color energy exceeding threshold.
+ */
+float3 Prefilter(float3 color, float threshold, float softKnee) {
+  const float brightness = max(color.r, max(color.g, color.b));
+  const float knee = threshold * softKnee;
+  float soft = brightness - threshold + knee;
+  soft = clamp(soft, 0.0f, 2.0f * knee);
+  soft = (soft * soft) / (4.0f * max(knee, 1e-4f));
+  float contribution = max(soft, brightness - threshold);
+  contribution /= max(brightness, 1e-4f);
+  return color * max(contribution, 0.0f);
+}
+// =============================================================================
+// Compute Kernel: Downsample with 13-Tap Anti-Flicker Filter Pattern
+// =============================================================================
+/*!
+ * @brief Downsamples the source texture by 2x using a 13-tap weighted box-and-cross kernel.
+ * @param srcTexture Source input texture (sampled via bilinear clamp).
+ * @param dstTexture Destination downscaled texture (half resolution).
+ * @param uniforms Downsample parameters and thresholding settings.
+ * @param linearSampler Bilinear clamp sampler.
+ * @param gid 2D thread coordinate corresponding to target destination texel.
+ */
+kernel void bloom_downsample(texture2d<float, access::sample> srcTexture     [[texture(0)]],
+                             texture2d<float, access::write>  dstTexture     [[texture(1)]],
+                             constant BloomDownsampleUniforms& uniforms      [[buffer(0)]],
+                             sampler                          linearSampler  [[sampler(0)]],
+                             uint2                            gid            [[thread_position_in_grid]]) {
+  // Boundary check against destination texture dimensions
+  if (gid.x >= dstTexture.get_width() || gid.y >= dstTexture.get_height()) {
+    return;
+  }
+  // Center UV coordinate in destination grid
+  const float2 uv = (float2(gid) + 0.5f) * uniforms.texelSize;
+  const float2 d  = uniforms.texelSize;
+  // Sample 13 taps surrounding the central point to suppress sub-pixel flickering
+  const float3 a = srcTexture.sample(linearSampler, uv + float2(-2.0f * d.x,  2.0f * d.y)).rgb;
+  const float3 b = srcTexture.sample(linearSampler, uv + float2( 0.0f,        2.0f * d.y)).rgb;
+  const float3 c = srcTexture.sample(linearSampler, uv + float2( 2.0f * d.x,  2.0f * d.y)).rgb;
+  const float3 d0 = srcTexture.sample(linearSampler, uv + float2(-2.0f * d.x,  0.0f)).rgb;
+  const float3 e  = srcTexture.sample(linearSampler, uv).rgb;
+  const float3 f  = srcTexture.sample(linearSampler, uv + float2( 2.0f * d.x,  0.0f)).rgb;
+  const float3 g = srcTexture.sample(linearSampler, uv + float2(-2.0f * d.x, -2.0f * d.y)).rgb;
+  const float3 h = srcTexture.sample(linearSampler, uv + float2( 0.0f,       -2.0f * d.y)).rgb;
+  const float3 i = srcTexture.sample(linearSampler, uv + float2( 2.0f * d.x, -2.0f * d.y)).rgb;
+  const float3 j = srcTexture.sample(linearSampler, uv + float2(-d.x,  d.y)).rgb;
+  const float3 k = srcTexture.sample(linearSampler, uv + float2( d.x,  d.y)).rgb;
+  const float3 l = srcTexture.sample(linearSampler, uv + float2(-d.x, -d.y)).rgb;
+  const float3 m = srcTexture.sample(linearSampler, uv + float2( d.x, -d.y)).rgb;
+  // Weighted integration: center (12.5%), corners (12.5%), edges (25%), inner square (50%)
+  float3 sampleSum = (e * 0.125f) +
+  ((a + c + g + i) * 0.03125f) +
+  ((b + d0 + f + h) * 0.0625f) +
+  ((j + k + l + m) * 0.125f);
+  // Apply bright pass prefilter strictly on the base mip (level 0)
+  if (uniforms.mipLevel == 0) {
+    sampleSum = Prefilter(sampleSum, uniforms.threshold, uniforms.softKnee);
+  }
+  dstTexture.write(float4(sampleSum, 1.0f), gid);
+}
+// =============================================================================
+// Compute Kernel: Upsample with 9-Tap 3x3 Tent Filter & Additive Accumulation
+// =============================================================================
+/*!
+ * @brief Upsamples a lower-resolution mip, blurs via a 3x3 tent filter, and adds to the higher mip.
+ * @param srcLowerMip Coarser mip level to upsample.
+ * @param srcHigherMip Finer mip level to blend into.
+ * @param dstTexture Output destination holding the accumulated blur.
+ * @param uniforms Filter radius and texel size configuration.
+ * @param linearSampler Bilinear clamp sampler.
+ * @param gid 2D thread coordinate in the target higher-resolution grid.
+ */
+kernel void bloom_upsample(texture2d<float, access::sample> srcLowerMip   [[texture(0)]],
+                           texture2d<float, access::sample> srcHigherMip  [[texture(1)]],
+                           texture2d<float, access::write>  dstTexture    [[texture(2)]],
+                           constant BloomUpsampleUniforms&  uniforms      [[buffer(0)]],
+                           sampler                          linearSampler [[sampler(0)]],
+                           uint2                            gid           [[thread_position_in_grid]]) {
+  // Boundary check against destination texture dimensions
+  if (gid.x >= dstTexture.get_width() || gid.y >= dstTexture.get_height()) {
+    return;
+  }
+  const float2 uv = (float2(gid) + 0.5f) * uniforms.texelSize;
+  const float2 d  = uniforms.texelSize * uniforms.filterRadius;
+  // 9-tap 3x3 tent filter sampling pattern
+  const float3 a = srcLowerMip.sample(linearSampler, uv + float2(-d.x,  d.y)).rgb;
+  const float3 b = srcLowerMip.sample(linearSampler, uv + float2( 0.0f, d.y)).rgb * 2.0f;
+  const float3 c = srcLowerMip.sample(linearSampler, uv + float2( d.x,  d.y)).rgb;
+  const float3 d0 = srcLowerMip.sample(linearSampler, uv + float2(-d.x,  0.0f)).rgb * 2.0f;
+  const float3 e  = srcLowerMip.sample(linearSampler, uv).rgb * 4.0f;
+  const float3 f  = srcLowerMip.sample(linearSampler, uv + float2( d.x,  0.0f)).rgb * 2.0f;
+  const float3 g = srcLowerMip.sample(linearSampler, uv + float2(-d.x, -d.y)).rgb;
+  const float3 h = srcLowerMip.sample(linearSampler, uv + float2( 0.0f, -d.y)).rgb * 2.0f;
+  const float3 i = srcLowerMip.sample(linearSampler, uv + float2( d.x, -d.y)).rgb;
+  // Normalization factor: 1 + 2 + 1 + 2 + 4 + 2 + 1 + 2 + 1 = 16
+  const float3 upsampled = (a + b + c + d0 + e + f + g + h + i) * (1.0f / 16.0f);
+  // Additive accumulation: blend upsampled blur with current mip's details
+  const float3 current = srcHigherMip.sample(linearSampler, uv).rgb;
+  const float3 accumulated = current + upsampled;
+  dstTexture.write(float4(accumulated, 1.0f), gid);
+}
 // FILE: KanVerse_App/Shaders/DebrisSimulation.metal
 
 // FILE: KanVerse_App/Shaders/Equirectangular.metal
-
+/*!
+ * @file Equirectangular.metal
+ * @brief High-throughput depth-only vertex shader for directional shadow map rasterization.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include <metal_stdlib>
+using namespace metal;
+// Helper function to map a 3D unit direction vector to a 2D Spherical (Equirectangular) UV coordinate
+float2 SampleSphericalMap(float3 v) {
+  // Add clamp to prevent NaN at absolute poles due to float imprecision
+  float2 uv = float2(atan2(v.z, v.x), asin(clamp(v.y, -1.0f, 1.0f)));
+  // Scale by inverse of 2*PI and PI to normalize to [0.0, 1.0]
+  uv *= float2(0.15915494309f, 0.31830988618f);
+  uv += 0.5f;
+  return uv;
+}
+kernel void equirectangular_to_cubemap(
+                                       texture2d<float, access::sample>      equirectangularTexture [[texture(0)]],
+                                       texture2d_array<float, access::write> cubemapTexture         [[texture(1)]],
+                                       uint3                                 tid                    [[thread_position_in_grid]])
+{
+  uint2 size = uint2(cubemapTexture.get_width(), cubemapTexture.get_height());
+  if (tid.x >= size.x || tid.y >= size.y || tid.z >= 6) {
+    return;
+  }
+  float2 uv = float2(tid.xy) / float2(size.x - 1, size.y - 1);
+  uv = uv * 2.0f - 1.0f;
+  uv.y = -uv.y;
+  float3 dir;
+  switch(tid.z) {
+    case 0: dir = float3( 1.0f,  uv.y, -uv.x); break; // +X (Right)
+    case 1: dir = float3(-1.0f,  uv.y,  uv.x); break; // -X (Left)
+    case 2: dir = float3( uv.x,  1.0f, -uv.y); break; // +Y (Top)
+    case 3: dir = float3( uv.x, -1.0f,  uv.y); break; // -Y (Bottom)
+    case 4: dir = float3( uv.x,  uv.y,  1.0f); break; // +Z (Front)
+    case 5: dir = float3(-uv.x,  uv.y, -1.0f); break; // -Z (Back)
+  }
+  dir = normalize(dir);
+  // --- REPLACE YOUR OLD SAMPLER WITH THIS ONE HERE ---
+  constexpr sampler linearSampler(
+                                  coord::normalized,
+                                  min_filter::linear,
+                                  mag_filter::linear,
+                                  mip_filter::none,
+                                  s_address::repeat,
+                                  t_address::clamp_to_edge
+                                  );
+  float4 color = equirectangularTexture.sample(linearSampler, SampleSphericalMap(dir));
+  cubemapTexture.write(color, tid.xy, tid.z);
+}
 // FILE: KanVerse_App/Shaders/Irradiance.metal
-
+/*!
+ * @file Irradiance.metal
+ * @brief High-throughput depth-only vertex shader for directional shadow map rasterization.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include <metal_stdlib>
+using namespace metal;
+constant float PI = 3.14159265359f;
+kernel void irradiance_convolution(
+                                   texturecube<float, access::sample>    envMap        [[texture(0)]],
+                                   texture2d_array<float, access::write> irradianceMap [[texture(1)]],
+                                   uint3                                 tid           [[thread_position_in_grid]])
+{
+  uint2 size = uint2(irradianceMap.get_width(), irradianceMap.get_height());
+  if (tid.x >= size.x || tid.y >= size.y || tid.z >= 6) return;
+  // Map thread ID to [-1.0, 1.0] for the current face
+  float2 uv = float2(tid.xy) / float2(size.x - 1, size.y - 1);
+  uv = uv * 2.0f - 1.0f;
+  uv.y = -uv.y;
+  float3 N;
+  switch(tid.z) {
+    case 0: N = float3( 1.0f,  uv.y, -uv.x); break; // +X
+    case 1: N = float3(-1.0f,  uv.y,  uv.x); break; // -X
+    case 2: N = float3( uv.x,  1.0f, -uv.y); break; // +Y
+    case 3: N = float3( uv.x, -1.0f,  uv.y); break; // -Y
+    case 4: N = float3( uv.x,  uv.y,  1.0f); break; // +Z
+    case 5: N = float3(-uv.x,  uv.y, -1.0f); break; // -Z
+  }
+  N = normalize(N);
+  // Tangent space calculation
+  float3 up    = float3(0.0f, 1.0f, 0.0f);
+  float3 right = normalize(cross(up, N));
+  up           = normalize(cross(N, right));
+  float3 irradiance = float3(0.0f);
+  float sampleDelta = 0.025f;
+  float nrSamples = 0.0f;
+  constexpr sampler linearSampler(min_filter::linear, mag_filter::linear, mip_filter::linear);
+  // Integrate over the hemisphere
+  for(float phi = 0.0f; phi < 2.0f * PI; phi += sampleDelta) {
+    for(float theta = 0.0f; theta < 0.5f * PI; theta += sampleDelta) {
+      // Spherical to cartesian (in tangent space)
+      float3 tangentSample = float3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
+      // Tangent space to world
+      float3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N;
+      irradiance += envMap.sample(linearSampler, sampleVec).rgb * cos(theta) * sin(theta);
+      nrSamples++;
+    }
+  }
+  irradiance = PI * irradiance * (1.0f / nrSamples);
+  // FIX: Tone down and clamp extreme HDR hot-spots so they don't blow out into white splotches
+  irradiance = irradiance / (irradiance + 1.0f); // Simple Reinhard tone operator for ambient term
+  // Write out the smooth, balanced irradiance
+  irradianceMap.write(float4(irradiance, 1.0f), tid.xy, tid.z);
+}
 // FILE: KanVerse_App/Shaders/MousePicking.metal
 
 // FILE: KanVerse_App/Shaders/ShadowDepth.metal
-
+/*!
+ * @file ShadowDepth.metal
+ * @brief High-throughput depth-only vertex shader for directional shadow map rasterization.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include <metal_stdlib>
+using namespace metal;
+struct VertexInput {
+  float3 position [[attribute(0)]];
+};
+struct ShadowUniforms {
+  float4x4 lightViewProjectionMatrix;
+};
+struct InstanceData {
+  float4x4 modelMatrix;
+  float4x4 normalMatrix;
+};
+struct ShadowVertexOutput {
+  float4 clipPosition [[position]];
+};
+vertex ShadowVertexOutput shadow_vertex_main(VertexInput             in            [[stage_in]],
+                                             constant ShadowUniforms& uniforms      [[buffer(1)]],
+                                             constant InstanceData*  instances     [[buffer(3)]],
+                                             uint                    instanceID    [[instance_id]]) {
+  ShadowVertexOutput out;
+  constant InstanceData& instance = instances[instanceID];
+  float4 worldPosition = instance.modelMatrix * float4(in.position, 1.0);
+  out.clipPosition     = uniforms.lightViewProjectionMatrix * worldPosition;
+  return out;
+}
 // FILE: KanVerse_App/Shaders/Skybox.metal
-
+/*!
+ * @file Skybox.metal
+ * @brief High-throughput depth-only vertex shader for directional shadow map rasterization.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include <metal_stdlib>
+using namespace metal;
+struct SkyboxVertexOut {
+  float4 position [[position]];
+  float3 viewDir;
+};
+// We pass the inverse matrices to un-project the screen back into the 3D world
+struct SkyboxUniforms {
+  float4x4 inverseView;
+  float4x4 inverseProjection;
+};
+vertex SkyboxVertexOut skybox_vertex(uint vertexID [[vertex_id]],
+                                     constant SkyboxUniforms& uniforms [[buffer(0)]]) {
+  // Generate a fullscreen triangle without needing a vertex buffer
+  float2 uv = float2((vertexID << 1) & 2, vertexID & 2);
+  float4 clipPos = float4(uv * 2.0f - 1.0f, 1.0f, 1.0f); // Z = 1.0 pushes it to the absolute background
+  SkyboxVertexOut out;
+  out.position = clipPos;
+  // Un-project from 2D screen space to 3D view space
+  float4 viewPos = uniforms.inverseProjection * clipPos;
+  viewPos /= viewPos.w;
+  // Convert to world space direction (w = 0.0 ignores camera translation so the skybox feels infinitely far away)
+  out.viewDir = (uniforms.inverseView * float4(viewPos.xyz, 0.0f)).xyz;
+  // Invert the Y axis to match Metal's texture coordinate system
+  out.viewDir.y = -out.viewDir.y;
+  return out;
+}
+fragment float4 skybox_fragment(SkyboxVertexOut in [[stage_in]],
+                                texturecube<float> envMap [[texture(0)]],
+                                sampler envSampler [[sampler(0)]]) {
+  // Sample the cubemap using the calculated 3D ray direction
+  float3 dir = normalize(in.viewDir);
+  return envMap.sample(envSampler, dir);
+}
 // FILE: KanVerse_App/Shaders/TexturedMaterial.metal
-
+/*!
+ * @file TexturedMaterial.metal
+ * @brief Cook-Torrance PBR shader with seamless reflection sampling, smooth shadow frustum fade, and point lights.
+ * @copyright KanVerse Engine
+ */
+#include <metal_stdlib>
+using namespace metal;
+// Mathematical constant Pi for energy-conserving BRDF normalization
+constant float PI = 3.14159265358979323846f;
+// Maximum number of dynamic point lights evaluated per fragment (matches Renderer::kMaxPointLights in C++)
+constant uint kMaxPointLights = 64;
+/*
+ * ============================================================================
+ * 1. VERTEX STAGE INPUT & OUTPUT STRUCTURES
+ * ============================================================================
+ * VertexInput maps directly to the MTL::VertexDescriptor bound at [[buffer(0)]].
+ * Note that in Metal, [[stage_in]] unpacks attributes from the vertex buffer
+ * using the offsets defined in Renderer::GetStandardMeshLayout().
+ */
+struct VertexInput {
+  float3 position  [[attribute(0)]]; // Offset 0  (16 bytes in C++ simd::float3)
+  float3 normal    [[attribute(1)]]; // Offset 16 (16 bytes in C++ simd::float3)
+  float4 color     [[attribute(2)]]; // Offset 32 (16 bytes in C++ simd::float4)
+  float2 texCoord  [[attribute(3)]]; // Offset 48 (8 bytes in C++ simd::float2)
+};
+/*
+ * Interpolated payload passed from the Vertex Shader to the Rasterizer and Fragment Shader.
+ */
+struct VertexOutput {
+  float4 position [[position]]; // Homogeneous clip-space position (x, y, z, w) for rasterization
+  float3 worldPosition;         // Fragment position in 3D world space (used for lighting & derivatives)
+  float3 worldNormal;           // Geometric surface normal in 3D world space
+  float4 color;                 // Per-vertex color multiplier
+  float2 texCoord;              // Base 2D UV coordinates [0, 1]
+  float4 shadowPosition;        // Fragment position projected into the Sun's orthographic light space
+};
+/*
+ * ============================================================================
+ * 2. CONSTANT BUFFER STRUCTURES (MUST MATCH C++ MEMORY LAYOUT BIT-FOR-BIT)
+ * ============================================================================
+ */
+/*
+ * Matches KanVerse::GPUPointLight (48 bytes total, 16-byte aligned).
+ * Packs scalars into float4s to prevent hidden SIMD padding discrepancies.
+ */
+struct GPUPointLight {
+  float4 positionAndRadius;  // .xyz = World Position, .w = Cutoff Radius in meters
+  float4 colorAndIntensity;  // .rgb = Linear RGB Color, .a = Luminous Intensity multiplier
+  float4 attenuation;        // .x = Constant, .y = Linear, .z = Quadratic falloff, .w = Unused
+};
+/*
+ * Bound at [[buffer(1)]] in both Vertex and Fragment stages.
+ * Matches KanVerse::Renderer::GPUUniforms in Renderer.hpp (256-byte aligned).
+ * Note: In Metal Shading Language, `float3` occupies 16 bytes (same as C++ `simd::float3`).
+ */
+struct GPUUniforms {
+  float4x4      viewProjectionMatrix;             // Camera Projection * View matrix (64 bytes, offset 0)
+  float4x4      lightSpaceMatrix;                 // Sun Orthographic Proj * View matrix (64 bytes, offset 64)
+  float3        cameraPosition;                   // World-space eye coordinates (16 bytes, offset 128)
+  float3        lightDirection;                   // Normalized direction the sun rays travel (16 bytes, offset 144)
+  float4        directionalColor;                 // Sun RGB color * intensity (16 bytes, offset 160)
+  float4        ambientColor;                     // Sky ambient RGB * intensity (16 bytes, offset 176)
+  uint          pointLightCount;                  // Active point lights in the scene [0..64] (4 bytes, offset 192)
+  uint          padding[3];                       // 12-byte padding to align pointLights array to 16-byte boundary (offset 196)
+  GPUPointLight pointLights[kMaxPointLights];     // Array of 64 point lights (64 * 48 = 3072 bytes, offset 208)
+};
+/*
+ * Bound at [[buffer(3)]] in the Vertex stage.
+ * Matches KanVerse::InstanceData in Renderer.hpp (128 bytes per instance).
+ */
+struct InstanceData {
+  float4x4 modelMatrix;  // Local-to-World transformation matrix (64 bytes)
+  float4x4 normalMatrix; // Transpose(Inverse(modelMatrix)) to transform normals under non-uniform scale (64 bytes)
+};
+/*
+ * Bound at [[buffer(2)]] in the Fragment stage.
+ * Matches KanVerse::MaterialUniforms in Material.hpp (256-byte aligned).
+ */
+struct MaterialUniforms {
+  float4   baseColor;        // RGBA Albedo tint (16 bytes, offset 0)
+  float4   specularColor;    // Specular reflectance tint (16 bytes, offset 16)
+  float4   emissiveColor;    // HDR self-illumination radiance for bloom (16 bytes, offset 32)
+  float3   tilingFactor;     // World-axis UV tiling scale (16 bytes in MSL float3, offset 48)
+  float    roughness;        // Microfacet roughness scalar [0.05..1.0] (4 bytes, offset 64)
+  float    metallic;         // Metalness scalar [0.0..1.0] (4 bytes, offset 68)
+  int32_t  hasAlbedoMap;     // 1 if [[texture(0)]] has a valid texture, 0 if using fallback (4 bytes, offset 72)
+  int32_t  hasNormalMap;     // 1 if [[texture(1)]] has a valid normal map (4 bytes, offset 76)
+  int32_t  hasRoughnessMap;  // 1 if [[texture(2)]] has a valid roughness map (4 bytes, offset 80)
+  int32_t  hasMetallicMap;   // 1 if [[texture(3)]] has a valid metallic map (4 bytes, offset 84)
+  int32_t  hasAOMap;         // 1 if [[texture(4)]] has a valid ambient occlusion map (4 bytes, offset 88)
+  int32_t  hasHeightMap;     // 1 if [[texture(5)]] has a valid height map (4 bytes, offset 92)
+  float    padding;          // Trailing alignment padding (4 bytes, offset 96)
+};
+/*
+ * ============================================================================
+ * 3. COOK-TORRANCE MICROFACET BRDF MATHEMATICAL FUNCTIONS
+ * ============================================================================
+ * The Cook-Torrance specular BRDF is defined as:
+ *
+ *               D(N, H, a) * G(N, V, L, k) * F(H, V, F0)
+ *   f_spec = ----------------------------------------------
+ *                    4 * dot(N, V) * dot(N, L)
+ */
+/*
+ * Trowbridge-Reitz GGX Normal Distribution Function (D):
+ * Computes the statistical fraction of microscopic surface facets that are aligned
+ * with the halfway vector H. Lower roughness creates a tiny, blindingly bright highlight;
+ * higher roughness spreads microfacets wide for a chalky appearance.
+ */
+inline float DistributionGGX(float3 N, float3 H, float roughness) {
+  float a      = roughness * roughness; // Disney/Epic perceptual roughness remapping (alpha = roughness^2)
+  float a2     = a * a;
+  float NdotH  = max(dot(N, H), 0.0f);
+  float NdotH2 = NdotH * NdotH;
+  float num   = a2;
+  float denom = (NdotH2 * (a2 - 1.0f) + 1.0f);
+  denom       = PI * denom * denom;
+  return num / max(denom, 1e-4f); // Guard against division by zero when roughness approaches 0
+}
+/*
+ * Schlick-GGX Geometry Shadowing Helper:
+ * Approximates how microfacets self-occlude or overshadow one another along a single vector.
+ */
+inline float GeometrySchlickGGX(float NdotV, float roughness) {
+  // Direct lighting remapping: k = (roughness + 1)^2 / 8
+  float r = (roughness + 1.0f);
+  float k = (r * r) / 8.0f;
+  float num   = NdotV;
+  float denom = NdotV * (1.0f - k) + k;
+  return num / max(denom, 1e-4f);
+}
+/*
+ * Smith's Method for Geometry Attenuation (G):
+ * Combines both view-direction microfacet masking (NdotV) and light-direction
+ * microfacet shadowing (NdotL).
+ */
+inline float GeometrySmith(float3 N, float3 V, float3 L, float roughness) {
+  float NdotV = max(dot(N, V), 0.0f);
+  float NdotL = max(dot(N, L), 0.0f);
+  float ggx2  = GeometrySchlickGGX(NdotV, roughness);
+  float ggx1  = GeometrySchlickGGX(NdotL, roughness);
+  return ggx1 * ggx2;
+}
+/*
+ * Schlick's Approximation for the Fresnel Equation (F):
+ * Computes the ratio of light that reflects at a given viewing angle (cosTheta).
+ * At grazing angles (cosTheta -> 0), all surfaces approach 100% specular reflection.
+ * F0 is the base reflectivity at normal incidence (0.04 for dielectrics, albedo for metals).
+ */
+inline float3 FresnelSchlick(float cosTheta, float3 F0) {
+  return F0 + (1.0f - F0) * pow(clamp(1.0f - cosTheta, 0.0f, 1.0f), 5.0f);
+}
+/*
+ * ============================================================================
+ * 4. VERTEX SHADER STAGE
+ * ============================================================================
+ * Executes once per vertex per instance. Uses hardware instancing ([[instance_id]])
+ * to draw thousands of walls, floor tiles, and debris shards in a single draw call.
+ */
+vertex VertexOutput vertex_main(VertexInput             in         [[stage_in]],
+                                constant GPUUniforms&   uniforms   [[buffer(1)]],
+                                constant InstanceData*  instances  [[buffer(3)]],
+                                uint                    instanceID [[instance_id]]) {
+  VertexOutput out;
+  // 1. Fetch this specific instance's transformation matrices from [[buffer(3)]]
+  constant InstanceData& instance = instances[instanceID];
+  // 2. Transform local vertex position into 3D World Space, then into Clip Space
+  float4 worldPosition = instance.modelMatrix * float4(in.position, 1.0f);
+  out.worldPosition    = worldPosition.xyz;
+  out.position         = uniforms.viewProjectionMatrix * worldPosition;
+  // 3. Transform local surface normal using the Inverse-Transpose normalMatrix
+  //    (w = 0.0f ignores translation; normalMatrix prevents skewing on non-uniformly scaled walls)
+  out.worldNormal = (instance.normalMatrix * float4(in.normal, 0.0f)).xyz;
+  out.color       = in.color;
+  out.texCoord    = in.texCoord;
+  // 4. Normal-Offset Shadow Bias:
+  //    Push the shadow lookup position 3.5 cm outward along the true geometric normal.
+  //    This eliminates "shadow acne" staircase artifacts on flat ground and steep walls
+  //    without causing "peter-panning" (detached shadows).
+  float3 worldGeomNormal = normalize(out.worldNormal);
+  float4 shadowWorldPos  = float4(worldPosition.xyz + worldGeomNormal * 0.035f, 1.0f);
+  out.shadowPosition     = uniforms.lightSpaceMatrix * shadowWorldPos;
+  return out;
+}
+/*
+ * ============================================================================
+ * 5. FRAGMENT SHADER STAGE
+ * ============================================================================
+ * Evaluates full Cook-Torrance PBR + PCF Shadows + 64 Point Lights + IBL per pixel.
+ */
+fragment float4 fragment_main(VertexOutput              in            [[stage_in]],
+                              constant GPUUniforms&     uniforms      [[buffer(1)]],
+                              constant MaterialUniforms& material     [[buffer(2)]],
+                              texture2d<float>          albedoTex     [[texture(0)]],
+                              texture2d<float>          normalTex     [[texture(1)]],
+                              texture2d<float>          roughnessTex  [[texture(2)]],
+                              texture2d<float>          metallicTex   [[texture(3)]],
+                              texture2d<float>          aoTex         [[texture(4)]],
+                              texture2d<float>          heightTex     [[texture(5)]],
+                              depth2d<float>            shadowMap     [[texture(6)]],
+                              texturecube<float>        envMap        [[texture(7)]],
+                              texturecube<float>        irradianceMap [[texture(8)]],
+                              sampler                   texSampler    [[sampler(0)]],
+                              sampler                   shadowSampler [[sampler(1)]]) {
+  // Re-normalize interpolated geometric normal across the triangle face
+  float3 N_geom = normalize(in.worldNormal);
+  float3 N      = N_geom;
+  /*
+   * ------------------------------------------------------------------------
+   * Step A: Box-Aligned Triplanar UV Tiling
+   * ------------------------------------------------------------------------
+   * Scales the [0, 1] UVs based on which world axis the face normal is most aligned with:
+   * - Front/Back walls (|N.z| > 0.5): tile by (Width X, Height Y)
+   * - Left/Right walls (|N.x| > 0.5): tile by (Depth Z, Height Y)
+   * - Floors/Ceilings  (|N.y| > 0.5): tile by (Width X, Depth Z)
+   */
+  float2 tiledUV = in.texCoord;
+  if (abs(N_geom.z) > 0.5f) {
+    tiledUV *= material.tilingFactor.xy;
+  } else if (abs(N_geom.x) > 0.5f) {
+    tiledUV *= material.tilingFactor.zy;
+  } else {
+    tiledUV *= material.tilingFactor.xz;
+  }
+  /*
+   * ------------------------------------------------------------------------
+   * Step B: Sample Albedo, Normal, Roughness, Metallic, and AO Maps
+   * ------------------------------------------------------------------------
+   */
+  float3 texColor = float3(1.0f);
+  if (material.hasAlbedoMap != 0) {
+    // albedoTex is bound as RGBA8Unorm_sRGB, so hardware automatically converts sRGB -> Linear
+    texColor = albedoTex.sample(texSampler, tiledUV).rgb;
+  }
+  float3 albedo = in.color.rgb * material.baseColor.rgb * texColor;
+  /*
+   * Screen-Space Derivative TBN Normal Mapping (Cotangent Frame):
+   * Instead of storing extra float3 Tangent and Bitangent vectors in every Vertex
+   * (which would bloat Vertex size from 64B to 96B), we compute the tangent basis (T, B, N)
+   * on the fly using hardware 2x2 pixel quad partial derivatives (dfdx, dfdy).
+   */
+  if (material.hasNormalMap != 0) {
+    // Unpack tangent-space normal from [0, 1] texture range to [-1, 1] vector range
+    float3 normalPixel = normalTex.sample(texSampler, tiledUV).rgb;
+    float3 localNormal = normalize(normalPixel * 2.0f - 1.0f);
+    // Scale XY perturbation slightly (0.65) so extreme grazing angles on flat ground never invert NdotV
+    localNormal.xy *= 0.65f;
+    localNormal = normalize(localNormal);
+    // Compute rate of change of 3D world position and 2D UVs across the 2x2 pixel quad
+    float3 Q1     = dfdx(in.worldPosition);
+    float3 Q2     = dfdy(in.worldPosition);
+    float2 st1    = dfdx(tiledUV);
+    float2 st2    = dfdy(tiledUV);
+    float  det    = st1.x * st2.y - st2.x * st1.y;
+    float  invDet = (det < 0.0f) ? -1.0f : 1.0f;
+    float3 T_raw  = (Q1 * st2.y - Q2 * st1.y) * invDet;
+    // Gram-Schmidt orthogonalization: project T perpendicular to N_geom
+    float3 T_ortho = T_raw - N_geom * dot(N_geom, T_raw);
+    float  tLenSq  = dot(T_ortho, T_ortho);
+    if (tLenSq > 1e-8f) {
+      float3 T     = T_ortho * rsqrt(tLenSq);
+      float3 B     = cross(N_geom, T);
+      float3x3 TBN = float3x3(T, B, N_geom);
+      N            = normalize(TBN * localNormal);
+    }
+  }
+  // Sample Roughness (clamped to >= 0.05 so GGX denominator never explodes to infinity)
+  float roughness = material.roughness;
+  if (material.hasRoughnessMap != 0) {
+    roughness *= roughnessTex.sample(texSampler, tiledUV).r;
+  }
+  roughness = clamp(roughness, 0.05f, 1.0f);
+  // Sample Metallic [0 = Dielectric (plastic/stone/wood), 1 = Pure Conductor (gold/iron/steel)]
+  float metallic = material.metallic;
+  if (material.hasMetallicMap != 0) {
+    metallic *= metallicTex.sample(texSampler, tiledUV).r;
+  }
+  metallic = clamp(metallic, 0.0f, 1.0f);
+  // Sample Ambient Occlusion (darkens crevices and corners)
+  float ao = 1.0f;
+  if (material.hasAOMap != 0) {
+    ao = aoTex.sample(texSampler, tiledUV).r;
+  }
+  // View vector V pointing from surface fragment toward the camera eye
+  float3 V  = normalize(uniforms.cameraPosition - in.worldPosition);
+  // Base reflectivity F0: non-metals reflect 4% (0.04) monochrome; metals tint reflections with their albedo
+  float3 F0 = mix(float3(0.04f), albedo, metallic);
+  /*
+   * ------------------------------------------------------------------------
+   * 1. Directional Sun/Moon Light + 3x3 PCF Shadow Mapping
+   * ------------------------------------------------------------------------
+   */
+  float3 L = normalize(-uniforms.lightDirection); // Vector pointing toward the sun
+  float3 H = normalize(V + L);                    // Halfway vector between View and Light
+  // Evaluate Cook-Torrance BRDF terms for the Sun
+  float  NDF = DistributionGGX(N, H, roughness);
+  float  G   = GeometrySmith(N, V, L, roughness);
+  float3 F   = FresnelSchlick(max(dot(H, V), 0.0f), F0);
+  float3 numerator   = NDF * G * F;
+  float  denominator = 4.0f * max(dot(N, V), 0.0f) * max(dot(N, L), 0.0f) + 1e-4f;
+  float3 specular    = min(numerator / denominator, float3(1.5f)); // Clamp extreme specular fireflies
+  // Energy Conservation: Diffuse light (kD) is whatever energy was not reflected as Specular (kS = F).
+  // Pure metals (metallic = 1.0) have zero diffuse scattering (kD = 0).
+  float3 kS    = F;
+  float3 kD    = (float3(1.0f) - kS) * (1.0f - metallic);
+  float  NdotL = max(dot(N, L), 0.0f);
+  // Perspective divide to convert light-space position to Normalized Device Coordinates (NDC)
+  float  shadowFactor = 1.0f;
+  float3 projCoords   = in.shadowPosition.xyz / in.shadowPosition.w;
+  // Remap X and Y from NDC [-1, 1] to Metal texture UV coordinates [0, 1].
+  // Note: Y is negated (-0.5f) because Metal texture origin (0,0) is Top-Left, whereas NDC +Y is Up.
+  projCoords.xy = projCoords.xy * float2(0.5f, -0.5f) + float2(0.5f, 0.5f);
+  // Check if fragment lies inside the shadow map frustum (with a 1% inset margin for 3x3 PCF taps)
+  if (projCoords.x >= 0.01f && projCoords.x <= 0.99f &&
+      projCoords.y >= 0.01f && projCoords.y <= 0.99f &&
+      projCoords.z >= 0.0f  && projCoords.z <= 1.0f) {
+    float currentDepth = projCoords.z;
+    // Slope-scaled depth bias: steeper surfaces relative to the sun get slightly more bias
+    float bias      = max(0.0020f * (1.0f - max(dot(N_geom, L), 0.0f)), 0.0008f);
+    float shadowSum = 0.0f;
+    float2 texelSize = 1.0f / float2(shadowMap.get_width(), shadowMap.get_height());
+    // 3x3 Percentage-Closer Filtering (PCF): average 9 depth comparisons for soft shadow penumbras
+    for (int x = -1; x <= 1; ++x) {
+      for (int y = -1; y <= 1; ++y) {
+        float pcfDepth = shadowMap.sample(shadowSampler, projCoords.xy + float2(x, y) * texelSize);
+        shadowSum += (currentDepth - bias > pcfDepth) ? 0.0f : 1.0f;
+      }
+    }
+    float rawShadow = shadowSum / 9.0f;
+    // Smoothly fade shadow out over the outer 8% border of the ortho box so no hard box edge is visible
+    float2 edgeDist = abs(projCoords.xy * 2.0f - 1.0f);
+    float  edgeFade = smoothstep(0.92f, 1.0f, max(edgeDist.x, edgeDist.y));
+    shadowFactor    = mix(rawShadow, 1.0f, edgeFade);
+  } else {
+    // Outside shadow frustum: smoothly blend to 1.0 (fully lit)
+    float2 edgeDist = abs(projCoords.xy * 2.0f - 1.0f);
+    float  outFade  = smoothstep(1.0f, 1.05f, max(edgeDist.x, edgeDist.y));
+    shadowFactor    = mix(0.0f, 1.0f, outFade);
+  }
+  float3 radiance        = uniforms.directionalColor.rgb;
+  float  effectiveShadow = mix(0.12f, 1.0f, shadowFactor); // Keep a subtle 12% bounce light floor in deep shadows
+  float3 directLighting  = (kD * albedo / PI + specular) * radiance * NdotL * effectiveShadow;
+  /*
+   * ------------------------------------------------------------------------
+   * 2. Dynamic Point Lights (Wall Sconces, Ceiling Lights & Street Lamps)
+   * ------------------------------------------------------------------------
+   */
+  float3 pointLighting = float3(0.0f);
+  uint   lightCount    = min(uniforms.pointLightCount, kMaxPointLights);
+  for (uint i = 0; i < lightCount; ++i) {
+    float3 lightPos = uniforms.pointLights[i].positionAndRadius.xyz;
+    float  radius   = max(uniforms.pointLights[i].positionAndRadius.w, 1.0f);
+    float3 lColor   = uniforms.pointLights[i].colorAndIntensity.rgb;
+    float  lInten   = clamp(uniforms.pointLights[i].colorAndIntensity.w, 0.0f, 12.0f);
+    float3 atten    = max(uniforms.pointLights[i].attenuation.xyz, float3(1.0f, 0.22f, 0.045f));
+    float3 toLight  = lightPos - in.worldPosition;
+    float  distSq   = dot(toLight, toLight);
+    float  radiusSq = radius * radius;
+    // Early-out branch: skip BRDF evaluation if fragment is outside the point light's cutoff sphere
+    if (distSq < radiusSq) {
+      float  dist = sqrt(max(distSq, 1e-4f));
+      float3 Lp   = toLight / dist;
+      float3 Hp   = normalize(V + Lp);
+      // Blend perturbed normal with geometric normal so normal maps don't create harsh black self-shadow seams
+      float NdotL_geom = dot(N_geom, Lp);
+      float NdotL_pert = dot(N, Lp);
+      float NdotL_p    = max(mix(NdotL_pert, NdotL_geom, 0.35f), 0.0f);
+      if (NdotL_p > 0.0f) {
+        // Unreal/Frostbite smooth windowing function: forces attenuation to hit 0.0 smoothly at dist == radius
+        float distRatio2 = distSq / radiusSq;
+        float window     = saturate(1.0f - distRatio2 * distRatio2);
+        window          *= window;
+        // Physical Constant-Linear-Quadratic distance falloff
+        float denomAtten  = atten.x + atten.y * dist + atten.z * distSq;
+        float attenuation = (lInten * window) / denomAtten;
+        // Point light Cook-Torrance BRDF
+        float  NDF_p  = DistributionGGX(N, Hp, roughness);
+        float  G_p    = GeometrySmith(N, V, Lp, roughness);
+        float3 F_p    = FresnelSchlick(max(dot(Hp, V), 0.0f), F0);
+        float3 spec_p = min((NDF_p * G_p * F_p) /
+                            (4.0f * max(dot(N, V), 0.0f) * max(NdotL_p, 0.1f) + 1e-4f),
+                            float3(0.8f));
+        float3 kD_p   = (float3(1.0f) - F_p) * (1.0f - metallic);
+        pointLighting += (kD_p * albedo / PI + spec_p) * lColor * attenuation * NdotL_p;
+      }
+    }
+  }
+  pointLighting = min(pointLighting, float3(1.05f)); // Prevent overlapping sconces from blowing out white
+  /*
+   * ------------------------------------------------------------------------
+   * 3. Horizon-Stabilized Image-Based Lighting (Diffuse & Specular IBL)
+   * ------------------------------------------------------------------------
+   */
+  constexpr sampler cubeSampler(coord::normalized, filter::linear, address::clamp_to_edge);
+  // Diffuse IBL: sample pre-convolved irradiance cubemap using inverted Y to match Metal cubemap coordinates
+  float3 sampleN       = normalize(mix(N, N_geom, 0.70f));
+  sampleN.y            = -sampleN.y;
+  float3 rawIrradiance = irradianceMap.sample(cubeSampler, sampleN).rgb;
+  rawIrradiance        = rawIrradiance / (rawIrradiance + 1.0f); // Reinhard compression
+  float  skyOcclusion = mix(0.25f, 1.0f, shadowFactor);
+  float3 ambientTerm  = mix(uniforms.ambientColor.rgb, rawIrradiance * uniforms.ambientColor.rgb * 2.2f, 0.5f) * skyOcclusion;
+  float3 diffuseIBL   = kD * albedo * ambientTerm * ao;
+  // Specular IBL: reflect view ray about surface normal and sample mipmapped environment cubemap.
+  // Smooth surfaces (roughness -> 0) sample sharp Mip 0; rough surfaces sample blurry higher mips.
+  float3 N_refl  = normalize(mix(N, N_geom, 0.75f));
+  float3 R       = reflect(-V, N_refl);
+  float3 sampleR = R;
+  sampleR.y      = -abs(R.y) - 0.05f; // Stabilize horizon lookup to prevent a moving seam line on flat ground
+  sampleR        = normalize(sampleR);
+  float  maxMipLevel = float(max(envMap.get_num_mip_levels(), 1u) - 1u);
+  float  sampleMip   = roughness * maxMipLevel;
+  float3 envColor    = envMap.sample(cubeSampler, sampleR, level(sampleMip)).rgb;
+  envColor           = (envColor / (envColor + 1.0f)) * clamp(length(uniforms.ambientColor.rgb), 0.05f, 0.55f) * skyOcclusion;
+  // Roughness-aware Fresnel for IBL: prevents rough stone/grass from having mirror-like grazing edges
+  float  NdotV       = max(dot(N_geom, V), 0.0f);
+  float3 F_ibl       = F0 + (max(float3(1.0f - roughness), F0) - F0) * pow(clamp(1.0f - NdotV, 0.0f, 1.0f), 5.0f);
+  float3 specularIBL = envColor * F_ibl * (1.0f - roughness) * ao;
+  /*
+   * ------------------------------------------------------------------------
+   * 4. Final Radiance Accumulation & Alpha Output
+   * ------------------------------------------------------------------------
+   */
+  float3 color = directLighting + pointLighting + diffuseIBL + specularIBL + material.emissiveColor.rgb;
+  float finalAlpha = material.baseColor.a;
+  if (material.hasAlbedoMap != 0) {
+    finalAlpha = albedoTex.sample(texSampler, tiledUV).a * material.baseColor.a;
+  }
+  // Output linear HDR RGBA16Float color (Tonemapping + Compute Bloom will resolve this in EndScene)
+  return float4(color, finalAlpha);
+}
 // FILE: KanVerse_App/Shaders/Tonemap.metal
-
+/*!
+ * @file Tonemap.metal
+ * @brief Fullscreen ACES tonemapping and HDR resolve pass with Bloom composite.
+ * @details Generates an oversized viewport-covering triangle in clip space without
+ *          vertex buffers, composites the blurred compute bloom texture with the HDR
+ *          scene buffer, and maps the result to SDR via the ACES filmic curve.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include <metal_stdlib>
+using namespace metal;
+/*!
+ * @struct TonemapVertexOutput
+ * @brief Interpolated vertex stage payload passed into the tonemapping fragment shader.
+ */
+struct TonemapVertexOutput {
+  float4 position [[position]]; ///< Clip-space coordinate covering NDC [-1, 1].
+  float2 texCoord;             ///< UV texture coordinate covering [0, 1].
+};
+/*!
+ * @struct TonemapUniforms
+ * @brief Per-frame exposure and bloom composite parameters.
+ */
+struct TonemapUniforms {
+  float bloomIntensity; ///< Multiplier scaling the additive bloom contribution.
+  float exposure;       ///< Linear exposure multiplier applied to the scene color.
+  float2 padding;       ///< 16-byte alignment padding.
+};
+/*!
+ * @brief Synthesizes an oversized viewport-covering triangle using vertex ID indices.
+ * @param vertexID Hardware generated vertex identifier (0, 1, 2).
+ * @return TonemapVertexOutput with normalized coordinates.
+ */
+vertex TonemapVertexOutput tonemap_vertex(uint vertexID [[vertex_id]]) {
+  TonemapVertexOutput out;
+  // Three vertices: (-1, -1), (3, -1), (-1, 3) covering the full viewport
+  out.texCoord = float2((vertexID << 1) & 2, vertexID & 2);
+  out.position = float4(out.texCoord * 2.0 - 1.0, 0.0, 1.0);
+  out.texCoord.y = 1.0 - out.texCoord.y; // Correct Y orientation for Metal textures
+  return out;
+}
+/*!
+ * @brief Evaluates the Narkowicz 2015 ACES Filmic curve fit for natural highlight compression.
+ * @param x Linear radiant color vector.
+ * @return Tonemapped linear color clamped within [0, 1].
+ */
+float3 ACESFilm(float3 x) {
+  constexpr float a = 2.51f;
+  constexpr float b = 0.03f;
+  constexpr float c = 2.43f;
+  constexpr float d = 0.59f;
+  constexpr float e = 0.14f;
+  return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0f, 1.0f);
+}
+/*!
+ * @brief Resolves HDR scene radiance and bloom into tonemapped SDR output for the swapchain.
+ * @param in Rasterized stage inputs containing UVs.
+ * @param hdrTexture Primary offscreen RGBA16Float HDR color texture.
+ * @param bloomTexture Accumulated compute bloom texture.
+ * @param linearSampler Bilinear clamp sampler.
+ * @param uniforms Composite parameters containing exposure and bloom intensity.
+ * @return 32-bit presentation color.
+ */
+fragment float4 tonemap_fragment(TonemapVertexOutput in             [[stage_in]],
+                                 texture2d<float>    hdrTexture     [[texture(0)]],
+                                 texture2d<float>    bloomTexture   [[texture(1)]],
+                                 sampler             linearSampler  [[sampler(0)]],
+                                 constant TonemapUniforms& uniforms [[buffer(0)]]) {
+  // Sample scene radiance and blurred bloom
+  const float3 hdrColor   = hdrTexture.sample(linearSampler, in.texCoord).rgb;
+  const float3 bloomColor = bloomTexture.sample(linearSampler, in.texCoord).rgb;
+  // Composite scene color with scaled bloom optical glow
+  const float3 combined = (hdrColor * uniforms.exposure) + (bloomColor * uniforms.bloomIntensity);
+  // Compress dynamic range using ACES Filmic curve
+  const float3 finalMapped = ACESFilm(combined);
+  return float4(finalMapped, 1.0f);
+}
 // FILE: KanVerse_App/Source/EntryPoint.mm
 /*!
  * @file EntryPoint.mm
@@ -5284,13 +7716,13 @@ int main(int argc, char** argv) {
 }
 // FILE: KanVerse_App/Source/KanVerseApp.mm
 /*!
- * @file Main.mm
+ * @file KanVerseApp.mm
  * @brief KanVerse client application bootstrap and entry point harness.
  * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
  * @license MIT License
  */
 /*!
- * @class KanVerseKanVerseApp
+ * @class KanVerseApp
  * @brief Concrete client specialization of the core engine application.
  */
 class KanVerseKanVerseApp : public KanVerse::Application {
