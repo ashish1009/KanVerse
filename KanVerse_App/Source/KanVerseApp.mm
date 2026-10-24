@@ -5,6 +5,8 @@
  * @license MIT License
  */
 
+#include "Layers/EditorLayer.hpp"
+
 /*!
  * @class KanVerseApp
  * @brief Concrete client specialization of the core engine application.
@@ -22,7 +24,7 @@ public:
     .VSync = true,
     .Maximized = true
   }) {
-
+    PushLayer(std::make_unique<KanVerse::EditorLayer>());
   }
   
   /*!

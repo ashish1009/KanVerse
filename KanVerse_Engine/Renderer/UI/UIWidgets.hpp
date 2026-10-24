@@ -39,21 +39,26 @@ namespace KanVerse::UI {
     ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0.0f, 0.0f });
     
-    const float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+    const float lineHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
     const ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+    
+    // Copy into local scalar floats to safely pass pointers to ImGui
+    float valX = values.x;
+    float valY = values.y;
+    float valZ = values.z;
     
     // --- X Axis (Red) ---
     ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4{ 0.75f, 0.15f, 0.15f, 1.0f });
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.88f, 0.25f, 0.25f, 1.0f });
     ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4{ 0.75f, 0.15f, 0.15f, 1.0f });
     if (ImGui::Button("X", buttonSize)) {
-      values.x = resetValue;
+      valX = resetValue;
       modified = true;
     }
     ImGui::PopStyleColor(3);
     
     ImGui::SameLine();
-    if (ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f")) {
+    if (ImGui::DragFloat("##X", &valX, 0.1f, 0.0f, 0.0f, "%.2f")) {
       modified = true;
     }
     ImGui::PopItemWidth();
@@ -64,13 +69,13 @@ namespace KanVerse::UI {
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.30f, 0.78f, 0.30f, 1.0f });
     ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4{ 0.20f, 0.65f, 0.20f, 1.0f });
     if (ImGui::Button("Y", buttonSize)) {
-      values.y = resetValue;
+      valY = resetValue;
       modified = true;
     }
     ImGui::PopStyleColor(3);
     
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f")) {
+    if (ImGui::DragFloat("##Y", &valY, 0.1f, 0.0f, 0.0f, "%.2f")) {
       modified = true;
     }
     ImGui::PopItemWidth();
@@ -81,16 +86,21 @@ namespace KanVerse::UI {
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.25f, 0.48f, 0.92f, 1.0f });
     ImGui::PushStyleColor(ImGuiCol_ButtonActive,  ImVec4{ 0.15f, 0.35f, 0.80f, 1.0f });
     if (ImGui::Button("Z", buttonSize)) {
-      values.z = resetValue;
+      valZ = resetValue;
       modified = true;
     }
     ImGui::PopStyleColor(3);
     
     ImGui::SameLine();
-    if (ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f")) {
+    if (ImGui::DragFloat("##Z", &valZ, 0.1f, 0.0f, 0.0f, "%.2f")) {
       modified = true;
     }
     ImGui::PopItemWidth();
+    
+    // If modified, write back to the SIMD vector
+    if (modified) {
+      values = Math::MakeVec3(valX, valY, valZ);
+    }
     
     ImGui::PopStyleVar();
     ImGui::Columns(1);
@@ -100,3 +110,4 @@ namespace KanVerse::UI {
   }
   
 } // namespace KanVerse::UI
+

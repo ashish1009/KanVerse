@@ -121,6 +121,10 @@ namespace KanVerse {
      */
     static void EndScene();
     
+    // In KanVerse_Engine/Renderer/Renderer/Renderer.hpp (inside public: of class Renderer)
+    using UIRenderCallbackFn = std::function<void(MTL::CommandBuffer*, MTL::RenderCommandEncoder*, MTL::RenderPassDescriptor*)>;
+    static void SetUIRenderCallback(UIRenderCallbackFn callback);
+    
     static void SetShadowMap(const std::shared_ptr<Framebuffer>& shadowFramebuffer);
     static void SetEnvironmentMap(const std::shared_ptr<TextureCube>& textureCube);
     static void SetIrradianceMap(const std::shared_ptr<TextureCube>& irradianceMap);
@@ -199,6 +203,8 @@ namespace KanVerse {
       MTL::RenderCommandEncoder*      ActiveCommandEncoder{nullptr};
       uint32_t                        ActiveFrameIndex{0};
       bool                            IsShadowPass{false};
+
+      UIRenderCallbackFn              UIRenderCallback{nullptr};
     };
     
     static std::unique_ptr<RendererStorage> s_Storage;

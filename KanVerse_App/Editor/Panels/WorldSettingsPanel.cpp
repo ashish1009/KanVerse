@@ -33,9 +33,9 @@ namespace KanVerse {
         }
       }
       
-      Math::Vec3 color = sunLight.GetColor();
-      if (ImGui::ColorEdit3("Sun Color", &color.x)) {
-        sunLight.SetColor(color);
+      float color[3] = {sunLight.GetColor().x, sunLight.GetColor().y, sunLight.GetColor().z};
+      if (ImGui::ColorEdit3("Sun Color", color)) {
+        sunLight.SetColor(Math::MakeVec3(color[0], color[1], color[2]));
       }
       
       float intensity = sunLight.GetIntensity();
@@ -64,7 +64,12 @@ namespace KanVerse {
         Renderer::SetEnvironmentMode(static_cast<EnvironmentMode>(currentMode));
       }
       
-      ImGui::ColorEdit3("Ambient Tint", &envLighting.AmbientColor.x);
+      // Use a temporary float array for ImGui color editing to avoid SIMD address errors
+      float ambientCol[3] = { envLighting.AmbientColor.x, envLighting.AmbientColor.y, envLighting.AmbientColor.z };
+      if (ImGui::ColorEdit3("Ambient Tint", ambientCol)) {
+        envLighting.AmbientColor = Math::MakeVec3(ambientCol[0], ambientCol[1], ambientCol[2]);
+      }
+      
       ImGui::SliderFloat("Ambient Intensity", &envLighting.AmbientIntensity, 0.0f, 3.0f, "%.2f");
     }
     

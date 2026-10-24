@@ -191,9 +191,9 @@
 				B2BA36C730891009006439E3 /* PrefixHeader.pch */,
 				B2BA391E3089F27A006439E3 /* Shaders */,
 				B2BA39223089F27A006439E3 /* Source */,
+				B2BA39143089F27A006439E3 /* Layers */,
 				B2BA390A3089F27A006439E3 /* Editor */,
 				B2BA390F3089F27A006439E3 /* Factories */,
-				B2BA39143089F27A006439E3 /* Layers */,
 				B2BA392F3089F27A006439E3 /* Systems */,
 				B2BA39313089F27A006439E3 /* UnitTests */,
 				B2BA394F3089F27A006439E3 /* World */,
@@ -246,6 +246,8 @@
 		B2BA39043089F27A006439E3 /* Panels */ = {
 			isa = PBXGroup;
 			children = (
+				B2BA39023089F27A006439E3 /* WorldSettingsPanel.hpp */,
+				B2BA39033089F27A006439E3 /* WorldSettingsPanel.cpp */,
 				B2BA38F43089F27A006439E3 /* ConsolePanel.hpp */,
 				B2BA38F53089F27A006439E3 /* ConsolePanel.cpp */,
 				B2BA38F63089F27A006439E3 /* ContentBrowserPanel.hpp */,
@@ -260,8 +262,6 @@
 				B2BA38FF3089F27A006439E3 /* ProfilerPanel.cpp */,
 				B2BA39003089F27A006439E3 /* SceneHierarchyPanel.hpp */,
 				B2BA39013089F27A006439E3 /* SceneHierarchyPanel.cpp */,
-				B2BA39023089F27A006439E3 /* WorldSettingsPanel.hpp */,
-				B2BA39033089F27A006439E3 /* WorldSettingsPanel.cpp */,
 			);
 			path = Panels;
 			sourceTree = "<group>";
@@ -676,6 +676,7 @@
 					"${PROJECT_DIR}",
 					"${PROJECT_DIR}/../KanVerse_Engine",
 					"${PROJECT_DIR}/../KanVerse_Engine/Vendors/metal-cpp",
+					"${PROJECT_DIR}/../KanVerse_Engine/Vendors/Imgui",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -691,6 +692,7 @@
 					"${PROJECT_DIR}",
 					"${PROJECT_DIR}/../KanVerse_Engine",
 					"${PROJECT_DIR}/../KanVerse_Engine/Vendors/metal-cpp",
+					"${PROJECT_DIR}/../KanVerse_Engine/Vendors/Imgui",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

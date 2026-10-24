@@ -315,6 +315,11 @@ namespace KanVerse {
     return s_Storage->CurrentEnvMode;
   }
   
+  void Renderer::SetUIRenderCallback(UIRenderCallbackFn callback) {
+    KV_CORE_ASSERT(s_Storage != nullptr, "[KanVerse Renderer] Renderer not initialized!");
+    s_Storage->UIRenderCallback = std::move(callback);
+  }
+  
   void Renderer::BeginShadowPass(const DirectionalLight& sun,
                                  const std::shared_ptr<Framebuffer>& shadowTarget) {
     KV_CORE_ASSERT(s_Storage, "[KanVerse Renderer] Renderer not initialized!");
@@ -582,6 +587,11 @@ namespace KanVerse {
             tonemapUniforms.Exposure       = s_Storage->Exposure;
             tonemapEncoder->setFragmentBytes(&tonemapUniforms, sizeof(TonemapUniforms), 0);
             tonemapEncoder->drawPrimitives(MTL::PrimitiveTypeTriangle, (NS::UInteger)0, (NS::UInteger)3);
+            
+            // Inside Renderer::EndScene() right after drawing the tonemap triangle, BEFORE tonemapEncoder->endEncoding():
+            if (s_Storage->UIRenderCallback) {
+              s_Storage->UIRenderCallback(s_Storage->ActiveCommandBuffer, tonemapEncoder, displayPassDesc);
+            }
             tonemapEncoder->endEncoding();
           }
         }
