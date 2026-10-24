@@ -243,11 +243,11 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/UI/ImGuiLayer.hpp`, `Renderer/UI/ImGuiLayer.mm`
   - **Concepts:** Initializing `ImGui::CreateContext()`, enabling `ImGuiConfigFlags_DockingEnable` and `ImGuiConfigFlags_ViewportsEnable`, encoding `ImGui_ImplMetal_RenderDrawData` inside a dedicated UI render pass on the swapchain.
   - **Milestone:** Push `ImGuiLayer` as an Overlay (`PushOverlay`) and render `ImGui::ShowDemoWindow()` over your 3D view.
-- [ ] **Day 48 — Event Blocking & Input Routing Between ImGui and 3D Viewport**
+- [x] **Day 48 — Event Blocking & Input Routing Between ImGui and 3D Viewport**
   - **Files:** `Renderer/UI/ImGuiLayer.mm`, `Platform/Window/NativeWindow.mm`
   - **Concepts:** Forwarding `NSEvent`s to `ImGui_ImplOSX_HandleEvent`, checking `io.WantCaptureMouse` and `io.WantCaptureKeyboard` so clicking UI buttons doesn't move the 3D camera.
   - **Milestone:** Verify typing in an ImGui text box or dragging a slider blocks underlying gameplay events when hovered outside the 3D viewport.
-- [ ] **Day 49 — Custom Studio Dark Theme, Fonts & Reusable UI Widgets**
+- [x] **Day 49 — Custom Studio Dark Theme, Fonts & Reusable UI Widgets**
   - **Files:** `Renderer/UI/ImGuiTheme.hpp`, `Renderer/UI/ImGuiTheme.cpp`, `Renderer/UI/UIWidgets.hpp`
   - **Concepts:** Designing a sleek Blender/Unreal-inspired charcoal dark theme, loading crisp Retina `.ttf` fonts (Inter / JetBrains Mono), and creating `UI::DrawVec3Control` (with red/green/blue X/Y/Z reset buttons).
   - **Milestone:** Apply `ImGuiTheme::ApplyDarkTheme()` on startup.

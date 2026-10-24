@@ -50,7 +50,7 @@ namespace KanVerse {
       io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
       
       // Apply custom KanVerse Studio charcoal dark theme
-//      ImGuiTheme::ApplyDarkTheme();
+      ImGuiTheme::ApplyDarkTheme();
       
       auto& app = Application::Get();
       auto* nativeWin = static_cast<const NativeWindow*>(&app.GetWindow());
