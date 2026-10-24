@@ -49,6 +49,8 @@
 #include "Renderer/Textures/Texture2D.hpp"
 #include "Renderer/Textures/TextureCube.hpp"
 #include "Renderer/Asset/AssetManager.hpp"
+#include "Renderer/UI/UIWidgets.hpp"
+#include "Renderer/UI/ImGuiTheme.hpp"
 // FILE: KanVerse_Engine/PrefixHeader.pch
 /*!
  * @file PrefixHeader.pch
@@ -1227,13 +1229,369 @@ namespace KanVerse {
   };
 } // namespace KanVerse
 // FILE: KanVerse_Engine/Physics/BoundingBox.cpp
-
+/*!
+ * @file BoundingBox.cpp
+ * @brief Implementation of AABB and OBB spatial queries and raycast projections.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Physics/BoundingBox.hpp"
+#include <algorithm>
+#include <cmath>
+namespace KanVerse::Physics {
+  // --- AABB Implementation ---
+  simd::float3 AABB::ClosestPoint(simd::float3 point) const noexcept {
+    return simd::clamp(point, Min, Max);
+  }
+  bool AABB::Contains(simd::float3 point) const noexcept {
+    return (point.x >= Min.x && point.x <= Max.x) &&
+    (point.y >= Min.y && point.y <= Max.y) &&
+    (point.z >= Min.z && point.z <= Max.z);
+  }
+  bool AABB::Intersects(const AABB& other) const noexcept {
+    return (Min.x <= other.Max.x && Max.x >= other.Min.x) &&
+    (Min.y <= other.Max.y && Max.y >= other.Min.y) &&
+    (Min.z <= other.Max.z && Max.z >= other.Min.z);
+  }
+  std::optional<RaycastHit> AABB::IntersectsRay(const Ray& ray, float maxDistance) const noexcept {
+    float tMin = 0.0f;
+    float tMax = maxDistance;
+    simd::float3 hitNormal{0.0f, 0.0f, 0.0f};
+    for (int i = 0; i < 3; ++i) {
+      const float originVal = ray.Origin[i];
+      const float dirVal = ray.Direction[i];
+      const float minVal = Min[i];
+      const float maxVal = Max[i];
+      if (std::abs(dirVal) < 1e-6f) {
+        // Ray is parallel to slab
+        if (originVal < minVal || originVal > maxVal) {
+          return std::nullopt;
+        }
+      } else {
+        const float invDir = 1.0f / dirVal;
+        float t1 = (minVal - originVal) * invDir;
+        float t2 = (maxVal - originVal) * invDir;
+        simd::float3 normal1{0.0f, 0.0f, 0.0f};
+        simd::float3 normal2{0.0f, 0.0f, 0.0f};
+        normal1[i] = -1.0f;
+        normal2[i] = 1.0f;
+        if (t1 > t2) {
+          std::swap(t1, t2);
+          std::swap(normal1, normal2);
+        }
+        if (t1 > tMin) {
+          tMin = t1;
+          hitNormal = normal1;
+        }
+        tMax = std::min(tMax, t2);
+        if (tMin > tMax) {
+          return std::nullopt;
+        }
+      }
+    }
+    if (tMin < 0.0f || tMin > maxDistance) {
+      return std::nullopt;
+    }
+    RaycastHit hit;
+    hit.Distance = tMin;
+    hit.Point = ray.Origin + ray.Direction * tMin;
+    hit.Normal = hitNormal;
+    return hit;
+  }
+  // --- OBB Implementation ---
+  OBB OBB::FromTransform(simd::float3 center, simd::float3 halfExtents, const simd::float4x4& rotationMatrix) noexcept {
+    OBB obb;
+    obb.Center = center;
+    obb.HalfExtents = halfExtents;
+    obb.Axes[0] = simd::normalize(simd::float3{rotationMatrix.columns[0].x, rotationMatrix.columns[0].y, rotationMatrix.columns[0].z});
+    obb.Axes[1] = simd::normalize(simd::float3{rotationMatrix.columns[1].x, rotationMatrix.columns[1].y, rotationMatrix.columns[1].z});
+    obb.Axes[2] = simd::normalize(simd::float3{rotationMatrix.columns[2].x, rotationMatrix.columns[2].y, rotationMatrix.columns[2].z});
+    return obb;
+  }
+  simd::float3 OBB::ClosestPoint(simd::float3 point) const noexcept {
+    const simd::float3 d = point - Center;
+    simd::float3 closest = Center;
+    for (int i = 0; i < 3; ++i) {
+      const float dist = simd::dot(d, Axes[i]);
+      const float clampedDist = std::clamp(dist, -HalfExtents[i], HalfExtents[i]);
+      closest += Axes[i] * clampedDist;
+    }
+    return closest;
+  }
+  bool OBB::Contains(simd::float3 point) const noexcept {
+    const simd::float3 d = point - Center;
+    for (int i = 0; i < 3; ++i) {
+      const float dist = simd::dot(d, Axes[i]);
+      if (std::abs(dist) > HalfExtents[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  bool OBB::Intersects(const OBB& other) const noexcept {
+    // 15 Separating Axis Theorem (SAT) tests
+    float R[3][3];
+    float AbsR[3][3];
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+        R[i][j] = simd::dot(Axes[i], other.Axes[j]);
+        AbsR[i][j] = std::abs(R[i][j]) + 1e-5f; // Small epsilon against parallel edge cases
+      }
+    }
+    const simd::float3 translation = other.Center - Center;
+    const simd::float3 t{
+      simd::dot(translation, Axes[0]),
+      simd::dot(translation, Axes[1]),
+      simd::dot(translation, Axes[2])
+    };
+    // Test axes L = Axes[0], Axes[1], Axes[2]
+    for (int i = 0; i < 3; ++i) {
+      const float ra = HalfExtents[i];
+      const float rb = other.HalfExtents[0] * AbsR[i][0] + other.HalfExtents[1] * AbsR[i][1] + other.HalfExtents[2] * AbsR[i][2];
+      if (std::abs(t[i]) > ra + rb) return false;
+    }
+    // Test axes L = other.Axes[0], other.Axes[1], other.Axes[2]
+    for (int j = 0; j < 3; ++j) {
+      const float ra = HalfExtents[0] * AbsR[0][j] + HalfExtents[1] * AbsR[1][j] + HalfExtents[2] * AbsR[2][j];
+      const float rb = other.HalfExtents[j];
+      const float proj = std::abs(t[0] * R[0][j] + t[1] * R[1][j] + t[2] * R[2][j]);
+      if (proj > ra + rb) return false;
+    }
+    // Test 9 cross-product axes: Axes[i] x other.Axes[j]
+    // L = Axes[0] x other.Axes[0]
+    if (std::abs(t[2] * R[1][0] - t[1] * R[2][0]) >
+        HalfExtents[1] * AbsR[2][0] + HalfExtents[2] * AbsR[1][0] +
+        other.HalfExtents[1] * AbsR[0][2] + other.HalfExtents[2] * AbsR[0][1]) return false;
+    // L = Axes[0] x other.Axes[1]
+    if (std::abs(t[2] * R[1][1] - t[1] * R[2][1]) >
+        HalfExtents[1] * AbsR[2][1] + HalfExtents[2] * AbsR[1][1] +
+        other.HalfExtents[0] * AbsR[0][2] + other.HalfExtents[2] * AbsR[0][0]) return false;
+    // L = Axes[0] x other.Axes[2]
+    if (std::abs(t[2] * R[1][2] - t[1] * R[2][2]) >
+        HalfExtents[1] * AbsR[2][2] + HalfExtents[2] * AbsR[1][2] +
+        other.HalfExtents[0] * AbsR[0][1] + other.HalfExtents[1] * AbsR[0][0]) return false;
+    // L = Axes[1] x other.Axes[0]
+    if (std::abs(t[0] * R[2][0] - t[2] * R[0][0]) >
+        HalfExtents[0] * AbsR[2][0] + HalfExtents[2] * AbsR[0][0] +
+        other.HalfExtents[1] * AbsR[1][2] + other.HalfExtents[2] * AbsR[1][1]) return false;
+    // L = Axes[1] x other.Axes[1]
+    if (std::abs(t[0] * R[2][1] - t[2] * R[0][1]) >
+        HalfExtents[0] * AbsR[2][1] + HalfExtents[2] * AbsR[0][1] +
+        other.HalfExtents[0] * AbsR[1][2] + other.HalfExtents[2] * AbsR[1][0]) return false;
+    // L = Axes[1] x other.Axes[2]
+    if (std::abs(t[0] * R[2][2] - t[2] * R[0][2]) >
+        HalfExtents[0] * AbsR[2][2] + HalfExtents[2] * AbsR[0][2] +
+        other.HalfExtents[0] * AbsR[1][1] + other.HalfExtents[1] * AbsR[1][0]) return false;
+    // L = Axes[2] x other.Axes[0]
+    if (std::abs(t[1] * R[0][0] - t[0] * R[1][0]) >
+        HalfExtents[0] * AbsR[1][0] + HalfExtents[1] * AbsR[0][0] +
+        other.HalfExtents[1] * AbsR[2][2] + other.HalfExtents[2] * AbsR[2][1]) return false;
+    // L = Axes[2] x other.Axes[1]
+    if (std::abs(t[1] * R[0][1] - t[0] * R[1][1]) >
+        HalfExtents[0] * AbsR[1][1] + HalfExtents[1] * AbsR[0][1] +
+        other.HalfExtents[0] * AbsR[2][2] + other.HalfExtents[2] * AbsR[2][0]) return false;
+    // L = Axes[2] x other.Axes[2]
+    if (std::abs(t[1] * R[0][2] - t[0] * R[1][2]) >
+        HalfExtents[0] * AbsR[1][2] + HalfExtents[1] * AbsR[0][2] +
+        other.HalfExtents[0] * AbsR[2][1] + other.HalfExtents[1] * AbsR[2][0]) return false;
+    return true;
+  }
+  std::optional<RaycastHit> OBB::IntersectsRay(const Ray& ray, float maxDistance) const noexcept {
+    // Transform ray into OBB's local coordinate frame
+    const simd::float3 d = ray.Origin - Center;
+    Ray localRay;
+    localRay.Origin = simd::float3{
+      simd::dot(d, Axes[0]),
+      simd::dot(d, Axes[1]),
+      simd::dot(d, Axes[2])
+    };
+    localRay.Direction = simd::float3{
+      simd::dot(ray.Direction, Axes[0]),
+      simd::dot(ray.Direction, Axes[1]),
+      simd::dot(ray.Direction, Axes[2])
+    };
+    const AABB localAABB{-HalfExtents, HalfExtents};
+    auto hit = localAABB.IntersectsRay(localRay, maxDistance);
+    if (!hit) {
+      return std::nullopt;
+    }
+    // Transform normal back to world coordinates
+    const simd::float3 localNormal = hit->Normal;
+    hit->Normal = Axes[0] * localNormal.x + Axes[1] * localNormal.y + Axes[2] * localNormal.z;
+    hit->Point = ray.Origin + ray.Direction * hit->Distance;
+    return hit;
+  }
+} // namespace KanVerse::Physics
 // FILE: KanVerse_Engine/Physics/BoundingBox.hpp
-
+/*!
+ * @file BoundingBox.hpp
+ * @brief Axis-Aligned (AABB) and Oriented Bounding Box (OBB) geometric primitives.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include <simd/simd.h>
+#include <optional>
+namespace KanVerse::Physics {
+  struct Ray {
+    simd::float3 Origin{ 0.0f, 0.0f, 0.0f };
+    simd::float3 Direction{ 0.0f, 0.0f, -1.0f };
+  };
+  struct RaycastHit {
+    float        Distance{ 0.0f };
+    simd::float3 Point{ 0.0f, 0.0f, 0.0f };
+    simd::float3 Normal{ 0.0f, 1.0f, 0.0f };
+  };
+  struct AABB {
+    simd::float3 Min{ -0.5f, -0.5f, -0.5f };
+    simd::float3 Max{  0.5f,  0.5f,  0.5f };
+    [[nodiscard]] constexpr simd::float3 GetCenter() const noexcept { return (Min + Max) * 0.5f; }
+    [[nodiscard]] constexpr simd::float3 GetExtents() const noexcept { return (Max - Min) * 0.5f; }
+    [[nodiscard]] simd::float3 ClosestPoint(simd::float3 point) const noexcept;
+    [[nodiscard]] bool Contains(simd::float3 point) const noexcept;
+    [[nodiscard]] bool Intersects(const AABB& other) const noexcept;
+    [[nodiscard]] std::optional<RaycastHit> IntersectsRay(const Ray& ray, float maxDistance = 1000.0f) const noexcept;
+  };
+  struct OBB {
+    simd::float3 Center{ 0.0f, 0.0f, 0.0f };
+    simd::float3 HalfExtents{ 0.5f, 0.5f, 0.5f };
+    simd::float3 Axes[3]{
+      { 1.0f, 0.0f, 0.0f },
+      { 0.0f, 1.0f, 0.0f },
+      { 0.0f, 0.0f, 1.0f }
+    };
+    [[nodiscard]] static OBB FromTransform(simd::float3 center, simd::float3 halfExtents, const simd::float4x4& rotationMatrix) noexcept;
+    [[nodiscard]] simd::float3 ClosestPoint(simd::float3 point) const noexcept;
+    [[nodiscard]] bool Contains(simd::float3 point) const noexcept;
+    [[nodiscard]] bool Intersects(const OBB& other) const noexcept;
+    [[nodiscard]] std::optional<RaycastHit> IntersectsRay(const Ray& ray, float maxDistance = 1000.0f) const noexcept;
+  };
+} // namespace KanVerse::Physics
 // FILE: KanVerse_Engine/Physics/ColliderPrimitives.cpp
-
+/*!
+ * @file ColliderPrimitives.cpp
+ * @brief Implementation of capsule and cylinder narrowphase contact generation.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Physics/ColliderPrimitives.hpp"
+#include <algorithm>
+#include <cmath>
+namespace KanVerse::Physics {
+  // --- CapsuleCollider Implementation ---
+  simd::float3 CapsuleCollider::ClosestPointOnSegment(simd::float3 point) const noexcept {
+    const simd::float3 ab = TipPoint - BasePoint;
+    const float abLenSq = simd::length_squared(ab);
+    if (abLenSq < 1e-6f) {
+      return BasePoint;
+    }
+    const float t = std::clamp(simd::dot(point - BasePoint, ab) / abLenSq, 0.0f, 1.0f);
+    return BasePoint + ab * t;
+  }
+  ContactManifold CapsuleCollider::IntersectsOBB(const OBB& obb) const noexcept {
+    ContactManifold manifold;
+    // Transform capsule segment into OBB's local coordinate frame
+    const simd::float3 dBase = BasePoint - obb.Center;
+    const simd::float3 dTip  = TipPoint - obb.Center;
+    const simd::float3 localBase{
+      simd::dot(dBase, obb.Axes[0]),
+      simd::dot(dBase, obb.Axes[1]),
+      simd::dot(dBase, obb.Axes[2])
+    };
+    const simd::float3 localTip{
+      simd::dot(dTip, obb.Axes[0]),
+      simd::dot(dTip, obb.Axes[1]),
+      simd::dot(dTip, obb.Axes[2])
+    };
+    const AABB localAABB{-obb.HalfExtents, obb.HalfExtents};
+    // Iteratively find closest points between the line segment and the box
+    simd::float3 segPoint = (localBase + localTip) * 0.5f;
+    simd::float3 boxPoint = localAABB.ClosestPoint(segPoint);
+    // Refine segment point towards closest box point
+    const simd::float3 localAB = localTip - localBase;
+    const float abLenSq = simd::length_squared(localAB);
+    if (abLenSq > 1e-6f) {
+      const float t = std::clamp(simd::dot(boxPoint - localBase, localAB) / abLenSq, 0.0f, 1.0f);
+      segPoint = localBase + localAB * t;
+      boxPoint = localAABB.ClosestPoint(segPoint);
+    }
+    const simd::float3 localDelta = segPoint - boxPoint;
+    const float distSq = simd::length_squared(localDelta);
+    if (distSq < Radius * Radius) {
+      const float dist = std::sqrt(std::max(distSq, 1e-8f));
+      const simd::float3 localNormal = (dist > 1e-4f) ? (localDelta / dist) : simd::float3{0.0f, 1.0f, 0.0f};
+      // Convert normal and contact point back to world space
+      manifold.Normal = obb.Axes[0] * localNormal.x +
+      obb.Axes[1] * localNormal.y +
+      obb.Axes[2] * localNormal.z;
+      manifold.Point = obb.Center +
+      obb.Axes[0] * boxPoint.x +
+      obb.Axes[1] * boxPoint.y +
+      obb.Axes[2] * boxPoint.z;
+      manifold.PenetrationDepth = Radius - dist;
+      manifold.HasContact = true;
+    }
+    return manifold;
+  }
+  ContactManifold CapsuleCollider::IntersectsAABB(const AABB& aabb) const noexcept {
+    OBB obb;
+    obb.Center = aabb.GetCenter();
+    obb.HalfExtents = aabb.GetExtents();
+    obb.Axes[0] = simd::float3{1.0f, 0.0f, 0.0f};
+    obb.Axes[1] = simd::float3{0.0f, 1.0f, 0.0f};
+    obb.Axes[2] = simd::float3{0.0f, 0.0f, 1.0f};
+    return IntersectsOBB(obb);
+  }
+  // --- CylinderCollider Implementation ---
+  ContactManifold CylinderCollider::IntersectsOBB(const OBB& obb) const noexcept {
+    [[maybe_unused]] ContactManifold manifold;
+    // Approximate cylinder core segment
+    const simd::float3 tip  = Center + Axis * HalfHeight;
+    const simd::float3 base = Center - Axis * HalfHeight;
+    CapsuleCollider proxyCapsule{
+      .BasePoint = base,
+      .TipPoint = tip,
+      .Radius = Radius
+    };
+    return proxyCapsule.IntersectsOBB(obb);
+  }
+} // namespace KanVerse::Physics
 // FILE: KanVerse_Engine/Physics/ColliderPrimitives.hpp
-
+// FILE: KanVerse_Engine/Physics/ColliderPrimitives.hpp
+/*!
+ * @file ColliderPrimitives.hpp
+ * @brief Mathematical collision volumes (Capsule, Cylinder, ContactManifold) for physical queries.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Physics/BoundingBox.hpp"
+#include <simd/simd.h>
+namespace KanVerse::Physics {
+  struct ContactManifold {
+    simd::float3 Normal{ 0.0f, 1.0f, 0.0f };
+    simd::float3 Point{ 0.0f, 0.0f, 0.0f };
+    float        PenetrationDepth{ 0.0f };
+    bool         HasContact{ false };
+  };
+  struct CapsuleCollider {
+    simd::float3 BasePoint{ 0.0f, 0.5f, 0.0f };
+    simd::float3 TipPoint{ 0.0f, 1.5f, 0.0f };
+    float        Radius{ 0.4f };
+    [[nodiscard]] constexpr simd::float3 GetCenter() const noexcept { return (BasePoint + TipPoint) * 0.5f; }
+    [[nodiscard]] constexpr float GetCylinderHeight() const noexcept { return simd::distance(TipPoint, BasePoint); }
+    [[nodiscard]] simd::float3 ClosestPointOnSegment(simd::float3 point) const noexcept;
+    [[nodiscard]] ContactManifold IntersectsOBB(const OBB& obb) const noexcept;
+    [[nodiscard]] ContactManifold IntersectsAABB(const AABB& aabb) const noexcept;
+  };
+  struct CylinderCollider {
+    simd::float3 Center{ 0.0f, 0.0f, 0.0f };
+    simd::float3 Axis{ 0.0f, 1.0f, 0.0f };
+    float        HalfHeight{ 0.5f };
+    float        Radius{ 0.5f };
+    [[nodiscard]] ContactManifold IntersectsOBB(const OBB& obb) const noexcept;
+  };
+} // namespace KanVerse::Physics
 // FILE: KanVerse_Engine/Physics/PBDSolver.cpp
 
 // FILE: KanVerse_Engine/Physics/PBDSolver.hpp
@@ -6848,7 +7206,9 @@ namespace KanVerse {
       io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
       io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
       io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-      // Apply custom KanVerse Studio charcoal dark theme
+      // 1. Load custom OpenSans, HfMonorita, and Headers fonts from KanVerse_App/Assets/Fonts/
+      ImGuiTheme::LoadStudioFonts(15.5f);
+      // 2. Apply custom KanVerse Studio charcoal dark theme
       ImGuiTheme::ApplyDarkTheme();
       auto& app = Application::Get();
       auto* nativeWin = static_cast<const NativeWindow*>(&app.GetWindow());
@@ -6914,21 +7274,166 @@ namespace KanVerse {
 // FILE: KanVerse_Engine/Renderer/UI/ImGuiTheme.cpp
 /*!
  * @file ImGuiTheme.cpp
- * @brief Implementation of the KanVerse Studio dark color scheme and layout styling.
+ * @brief Implementation of multi-theme palettes, dynamic highlighter colors, and custom font loading.
  * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
  * @license MIT License
  */
 #include "Renderer/UI/ImGuiTheme.hpp"
+#include "Core/Diagnostics/Log.hpp"
 #include <imgui.h>
+#include <algorithm>
 namespace KanVerse {
   /*
    * ImGuiTheme Implementation Notes:
    * --------------------------------
-   * Tunes window padding, frame rounding, tab borders, and docking splitter thickness
-   * for high-DPI Retina displays. Uses a neutral charcoal palette so HDR viewport colors
-   * are perceived without chromatic adaptation bias.
+   * 1. Portable Asset Path Resolution (Option 2):
+   *    `__FILE__` is `.../KanVerse/KanVerse_Engine/Renderer/UI/ImGuiTheme.cpp`.
+   *    Navigating up 4 parent directories reaches the repository root `.../KanVerse/`,
+   *    from which `KanVerse_App/Assets` is resolved automatically on any Mac.
+   *
+   * 2. Font Atlas Discovery:
+   *    Scans `Assets/Fonts/Opensans`, `Assets/Fonts/HfMonorita`, and `Assets/Fonts/Headers`
+   *    for `.ttf` and `.otf` files, rasterizing them with 3x horizontal/vertical oversampling
+   *    for razor-sharp Retina typography.
    */
+  std::filesystem::path ImGuiTheme::GetAssetsDirectory() noexcept {
+    // ImGuiTheme.cpp is at: KanVerse/KanVerse_Engine/Renderer/UI/ImGuiTheme.cpp
+    // parent_path() x4 -> KanVerse/
+    const std::filesystem::path repoRoot = std::filesystem::path(__FILE__)
+      .parent_path() // UI
+      .parent_path() // Renderer
+      .parent_path() // KanVerse_Engine
+      .parent_path(); // KanVerse
+    return repoRoot / "KanVerse_App" / "Assets";
+  }
+  void ImGuiTheme::LoadStudioFonts(float baseFontSizePx) {
+    ImGuiIO& io = ImGui::GetIO();
+    s_LoadedFonts.clear();
+    const std::filesystem::path fontsRoot = GetAssetsDirectory() / "Fonts";
+    if (!std::filesystem::exists(fontsRoot)) {
+      KV_CORE_WARN("ImGuiTheme: Fonts directory not found at '{}'. Falling back to default ImGui font.",
+                   fontsRoot.string());
+      io.Fonts->AddFontDefault();
+      return;
+    }
+    ImFontConfig fontCfg{};
+    fontCfg.OversampleH = 3;
+    fontCfg.OversampleV = 2;
+    fontCfg.PixelSnapH  = true;
+    const std::vector<std::filesystem::path> fontFolders = {
+      fontsRoot / "Opensans",
+      fontsRoot / "HfMonorita",
+      fontsRoot / "Headers"
+    };
+    // Collect and sort all .ttf and .otf files across your 3 font folders
+    std::vector<std::filesystem::path> discoveredFiles;
+    for (const auto& folder : fontFolders) {
+      if (!std::filesystem::exists(folder)) {
+        continue;
+      }
+      for (const auto& entry : std::filesystem::directory_iterator(folder)) {
+        if (!entry.is_regular_file()) continue;
+        const auto ext = entry.path().extension().string();
+        if (ext == ".ttf" || ext == ".TTF" || ext == ".otf" || ext == ".OTF") {
+          discoveredFiles.push_back(entry.path());
+        }
+      }
+    }
+    std::sort(discoveredFiles.begin(), discoveredFiles.end());
+    for (const auto& filePath : discoveredFiles) {
+      const std::string stem      = filePath.stem().string();
+      const std::string folderTag = filePath.parent_path().filename().string();
+      const std::string label     = folderTag + " / " + stem;
+      // Render Headers slightly larger (17.5px) for distinct section titles
+      const float targetSize = (folderTag == "Headers") ? (baseFontSizePx + 2.0f) : baseFontSizePx;
+      ImFont* loadedFont = io.Fonts->AddFontFromFileTTF(filePath.string().c_str(), targetSize, &fontCfg);
+      if (loadedFont) {
+        s_LoadedFonts.push_back(EditorFontEntry{
+          .Name     = label,
+          .Filepath = filePath.string(),
+          .Font     = loadedFont
+        });
+        // Auto-assign semantic roles based on filename/folder
+        if (stem.find("Regular") != std::string::npos && folderTag == "Opensans") {
+          s_RegularFont     = loadedFont;
+          io.FontDefault    = loadedFont;
+          s_ActiveFontIndex = static_cast<int>(s_LoadedFonts.size() - 1);
+        } else if ((stem.find("SemiBold") != std::string::npos || stem == "OpenSans-Bold") && !s_BoldFont) {
+          s_BoldFont = loadedFont;
+        } else if (folderTag == "Headers" && !s_HeaderFont) {
+          s_HeaderFont = loadedFont;
+        } else if (folderTag == "HfMonorita" && !s_MonoFont) {
+          s_MonoFont = loadedFont;
+        }
+        KV_CORE_INFO("ImGuiTheme: Loaded Studio Font '{}' ({:.1f} px)", label, targetSize);
+      } else {
+        KV_CORE_WARN("ImGuiTheme: Failed to load font file '{}'", filePath.string());
+      }
+    }
+    if (s_LoadedFonts.empty()) {
+      io.Fonts->AddFontDefault();
+    } else if (!io.FontDefault) {
+      io.FontDefault    = s_LoadedFonts.front().Font;
+      s_RegularFont     = io.FontDefault;
+      s_ActiveFontIndex = 0;
+    }
+    if (!s_BoldFont)   s_BoldFont   = io.FontDefault;
+    if (!s_HeaderFont) s_HeaderFont = s_BoldFont;
+    if (!s_MonoFont)   s_MonoFont   = io.FontDefault;
+  }
+  static ImVec4 ScaleColor(const Math::Vec3& c, float multiplier, float alpha = 1.0f) noexcept {
+    return ImVec4{
+      std::clamp(c.x * multiplier, 0.0f, 1.0f),
+      std::clamp(c.y * multiplier, 0.0f, 1.0f),
+      std::clamp(c.z * multiplier, 0.0f, 1.0f),
+      alpha
+    };
+  }
   void ImGuiTheme::ApplyDarkTheme() noexcept {
+    s_CurrentMode   = EditorThemeMode::DarkCharcoal;
+    s_CurrentPreset = EditorAccentPreset::AzureBlue;
+    s_AccentColor   = Math::MakeVec3(0.20f, 0.52f, 0.95f);
+    RefreshStyleAndColors();
+  }
+  void ImGuiTheme::SetThemeMode(EditorThemeMode mode) noexcept {
+    s_CurrentMode = mode;
+    RefreshStyleAndColors();
+  }
+  void ImGuiTheme::SetAccentPreset(EditorAccentPreset preset) noexcept {
+    s_CurrentPreset = preset;
+    switch (preset) {
+      case EditorAccentPreset::AzureBlue:
+        s_AccentColor = Math::MakeVec3(0.20f, 0.52f, 0.95f);
+        break;
+      case EditorAccentPreset::BlenderOrange:
+        s_AccentColor = Math::MakeVec3(0.92f, 0.48f, 0.12f);
+        break;
+      case EditorAccentPreset::EmeraldGreen:
+        s_AccentColor = Math::MakeVec3(0.15f, 0.78f, 0.45f);
+        break;
+      case EditorAccentPreset::CrimsonRed:
+        s_AccentColor = Math::MakeVec3(0.88f, 0.20f, 0.26f);
+        break;
+      case EditorAccentPreset::AmethystPurple:
+        s_AccentColor = Math::MakeVec3(0.62f, 0.32f, 0.92f);
+        break;
+      case EditorAccentPreset::CyberNeonCyan:
+        s_AccentColor = Math::MakeVec3(0.05f, 0.82f, 0.90f);
+        break;
+      case EditorAccentPreset::Goldenrod:
+        s_AccentColor = Math::MakeVec3(0.92f, 0.70f, 0.14f);
+        break;
+      case EditorAccentPreset::Custom:
+        break;
+    }
+    RefreshStyleAndColors();
+  }
+  void ImGuiTheme::SetCustomAccentColor(const Math::Vec3& rgb) noexcept {
+    s_CurrentPreset = EditorAccentPreset::Custom;
+    s_AccentColor   = rgb;
+    RefreshStyleAndColors();
+  }
+  void ImGuiTheme::RefreshStyleAndColors() noexcept {
     ImGuiStyle& style = ImGui::GetStyle();
     style.WindowPadding     = ImVec2(8.0f, 8.0f);
     style.FramePadding      = ImVec2(6.0f, 4.0f);
@@ -6939,65 +7444,320 @@ namespace KanVerse {
     style.GrabRounding      = 2.0f;
     style.TabRounding       = 4.0f;
     style.WindowBorderSize  = 1.0f;
-    style.FrameBorderSize   = 0.0f;
+    style.FrameBorderSize   = 1.0f;
     ImGuiIO& io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
       style.WindowRounding = 0.0f;
     }
+    if (s_CurrentMode == EditorThemeMode::ClassicImGui) {
+      ImGui::StyleColorsClassic();
+    } else if (s_CurrentMode == EditorThemeMode::LightStudio) {
+      ImGui::StyleColorsLight();
+    } else {
+      ImGui::StyleColorsDark();
+    }
     ImVec4* colors = style.Colors;
-    // Primary backgrounds
-    colors[ImGuiCol_WindowBg]             = ImVec4{ 0.11f, 0.115f, 0.125f, 1.0f };
-    colors[ImGuiCol_ChildBg]              = ImVec4{ 0.10f, 0.105f, 0.115f, 1.0f };
-    colors[ImGuiCol_PopupBg]              = ImVec4{ 0.13f, 0.135f, 0.15f,  0.98f };
-    colors[ImGuiCol_Border]               = ImVec4{ 0.22f, 0.23f,  0.25f,  1.0f };
-    // Headers & Accordions
-    colors[ImGuiCol_Header]               = ImVec4{ 0.20f, 0.21f,  0.23f,  1.0f };
-    colors[ImGuiCol_HeaderHovered]        = ImVec4{ 0.28f, 0.30f,  0.34f,  1.0f };
-    colors[ImGuiCol_HeaderActive]         = ImVec4{ 0.16f, 0.46f,  0.78f,  1.0f };
-    // Buttons
-    colors[ImGuiCol_Button]               = ImVec4{ 0.20f, 0.21f,  0.24f,  1.0f };
-    colors[ImGuiCol_ButtonHovered]        = ImVec4{ 0.28f, 0.31f,  0.36f,  1.0f };
-    colors[ImGuiCol_ButtonActive]         = ImVec4{ 0.16f, 0.46f,  0.78f,  1.0f };
-    // Frame inputs (Sliders, DragFloat, TextInput)
-    colors[ImGuiCol_FrameBg]              = ImVec4{ 0.07f, 0.075f, 0.085f, 1.0f };
-    colors[ImGuiCol_FrameBgHovered]       = ImVec4{ 0.15f, 0.16f,  0.18f,  1.0f };
-    colors[ImGuiCol_FrameBgActive]        = ImVec4{ 0.19f, 0.21f,  0.24f,  1.0f };
-    // Tabs & Docking
-    colors[ImGuiCol_Tab]                  = ImVec4{ 0.13f, 0.14f,  0.155f, 1.0f };
-    colors[ImGuiCol_TabHovered]           = ImVec4{ 0.26f, 0.52f,  0.88f,  0.80f };
-    colors[ImGuiCol_TabActive]            = ImVec4{ 0.20f, 0.42f,  0.72f,  1.0f };
-    colors[ImGuiCol_TabUnfocused]         = ImVec4{ 0.11f, 0.115f, 0.125f, 1.0f };
-    colors[ImGuiCol_TabUnfocusedActive]   = ImVec4{ 0.17f, 0.18f,  0.20f,  1.0f };
-    // Title Bars
-    colors[ImGuiCol_TitleBg]              = ImVec4{ 0.08f, 0.085f, 0.095f, 1.0f };
-    colors[ImGuiCol_TitleBgActive]        = ImVec4{ 0.08f, 0.085f, 0.095f, 1.0f };
-    colors[ImGuiCol_TitleBgCollapsed]     = ImVec4{ 0.08f, 0.085f, 0.095f, 0.75f };
-    // Accent highlights
-    colors[ImGuiCol_CheckMark]            = ImVec4{ 0.26f, 0.59f,  0.98f,  1.0f };
-    colors[ImGuiCol_SliderGrab]           = ImVec4{ 0.26f, 0.59f,  0.98f,  0.85f };
-    colors[ImGuiCol_SliderGrabActive]     = ImVec4{ 0.36f, 0.69f,  1.00f,  1.0f };
-    colors[ImGuiCol_DockingPreview]       = ImVec4{ 0.26f, 0.59f,  0.98f,  0.70f };
+    switch (s_CurrentMode) {
+      case EditorThemeMode::DarkCharcoal: {
+        colors[ImGuiCol_Text]                 = ImVec4{ 0.92f, 0.93f, 0.95f, 1.0f };
+        colors[ImGuiCol_TextDisabled]         = ImVec4{ 0.50f, 0.52f, 0.55f, 1.0f };
+        colors[ImGuiCol_WindowBg]             = ImVec4{ 0.11f, 0.115f, 0.125f, 1.0f };
+        colors[ImGuiCol_ChildBg]              = ImVec4{ 0.10f, 0.105f, 0.115f, 1.0f };
+        colors[ImGuiCol_PopupBg]              = ImVec4{ 0.13f, 0.135f, 0.15f,  0.98f };
+        colors[ImGuiCol_Border]               = ImVec4{ 0.22f, 0.23f,  0.25f,  1.0f };
+        colors[ImGuiCol_FrameBg]              = ImVec4{ 0.07f, 0.075f, 0.085f, 1.0f };
+        colors[ImGuiCol_FrameBgHovered]       = ImVec4{ 0.15f, 0.16f,  0.18f,  1.0f };
+        colors[ImGuiCol_FrameBgActive]        = ImVec4{ 0.19f, 0.21f,  0.24f,  1.0f };
+        colors[ImGuiCol_TitleBg]              = ImVec4{ 0.08f, 0.085f, 0.095f, 1.0f };
+        colors[ImGuiCol_TitleBgActive]        = ImVec4{ 0.09f, 0.095f, 0.11f,  1.0f };
+        colors[ImGuiCol_TitleBgCollapsed]     = ImVec4{ 0.08f, 0.085f, 0.095f, 0.75f };
+        colors[ImGuiCol_MenuBarBg]            = ImVec4{ 0.10f, 0.105f, 0.115f, 1.0f };
+        colors[ImGuiCol_Button]               = ImVec4{ 0.20f, 0.21f,  0.24f,  1.0f };
+        colors[ImGuiCol_Header]               = ImVec4{ 0.20f, 0.21f,  0.23f,  1.0f };
+        colors[ImGuiCol_Tab]                  = ImVec4{ 0.13f, 0.14f,  0.155f, 1.0f };
+        colors[ImGuiCol_TabUnfocused]         = ImVec4{ 0.11f, 0.115f, 0.125f, 1.0f };
+        colors[ImGuiCol_TabUnfocusedActive]   = ImVec4{ 0.17f, 0.18f,  0.20f,  1.0f };
+        break;
+      }
+      case EditorThemeMode::LightStudio: {
+        colors[ImGuiCol_Text]                 = ImVec4{ 0.10f, 0.11f, 0.13f, 1.0f };
+        colors[ImGuiCol_TextDisabled]         = ImVec4{ 0.52f, 0.54f, 0.58f, 1.0f };
+        colors[ImGuiCol_WindowBg]             = ImVec4{ 0.93f, 0.94f, 0.95f, 1.0f };
+        colors[ImGuiCol_ChildBg]              = ImVec4{ 0.90f, 0.91f, 0.93f, 1.0f };
+        colors[ImGuiCol_PopupBg]              = ImVec4{ 0.96f, 0.97f, 0.98f, 0.98f };
+        colors[ImGuiCol_Border]               = ImVec4{ 0.76f, 0.78f, 0.81f, 1.0f };
+        colors[ImGuiCol_FrameBg]              = ImVec4{ 1.00f, 1.00f, 1.00f, 1.0f };
+        colors[ImGuiCol_FrameBgHovered]       = ImVec4{ 0.86f, 0.88f, 0.91f, 1.0f };
+        colors[ImGuiCol_FrameBgActive]        = ImVec4{ 0.80f, 0.83f, 0.87f, 1.0f };
+        colors[ImGuiCol_TitleBg]              = ImVec4{ 0.84f, 0.85f, 0.88f, 1.0f };
+        colors[ImGuiCol_TitleBgActive]        = ImVec4{ 0.80f, 0.82f, 0.85f, 1.0f };
+        colors[ImGuiCol_TitleBgCollapsed]     = ImVec4{ 0.84f, 0.85f, 0.88f, 0.75f };
+        colors[ImGuiCol_MenuBarBg]            = ImVec4{ 0.88f, 0.89f, 0.91f, 1.0f };
+        colors[ImGuiCol_Button]               = ImVec4{ 0.82f, 0.84f, 0.87f, 1.0f };
+        colors[ImGuiCol_Header]               = ImVec4{ 0.82f, 0.84f, 0.87f, 1.0f };
+        colors[ImGuiCol_Tab]                  = ImVec4{ 0.84f, 0.86f, 0.89f, 1.0f };
+        colors[ImGuiCol_TabUnfocused]         = ImVec4{ 0.86f, 0.87f, 0.90f, 1.0f };
+        colors[ImGuiCol_TabUnfocusedActive]   = ImVec4{ 0.78f, 0.80f, 0.84f, 1.0f };
+        break;
+      }
+      case EditorThemeMode::MidnightOLED: {
+        colors[ImGuiCol_Text]                 = ImVec4{ 0.95f, 0.96f, 0.98f, 1.0f };
+        colors[ImGuiCol_TextDisabled]         = ImVec4{ 0.45f, 0.47f, 0.50f, 1.0f };
+        colors[ImGuiCol_WindowBg]             = ImVec4{ 0.03f, 0.03f, 0.035f, 1.0f };
+        colors[ImGuiCol_ChildBg]              = ImVec4{ 0.02f, 0.02f, 0.025f, 1.0f };
+        colors[ImGuiCol_PopupBg]              = ImVec4{ 0.05f, 0.05f, 0.06f,  0.98f };
+        colors[ImGuiCol_Border]               = ImVec4{ 0.16f, 0.17f, 0.19f,  1.0f };
+        colors[ImGuiCol_FrameBg]              = ImVec4{ 0.08f, 0.085f, 0.095f, 1.0f };
+        colors[ImGuiCol_FrameBgHovered]       = ImVec4{ 0.13f, 0.14f,  0.16f,  1.0f };
+        colors[ImGuiCol_FrameBgActive]        = ImVec4{ 0.17f, 0.18f,  0.21f,  1.0f };
+        colors[ImGuiCol_TitleBg]              = ImVec4{ 0.01f, 0.01f,  0.015f, 1.0f };
+        colors[ImGuiCol_TitleBgActive]        = ImVec4{ 0.02f, 0.02f,  0.03f,  1.0f };
+        colors[ImGuiCol_TitleBgCollapsed]     = ImVec4{ 0.01f, 0.01f,  0.015f, 0.75f };
+        colors[ImGuiCol_MenuBarBg]            = ImVec4{ 0.04f, 0.04f,  0.05f,  1.0f };
+        colors[ImGuiCol_Button]               = ImVec4{ 0.12f, 0.13f,  0.15f,  1.0f };
+        colors[ImGuiCol_Header]               = ImVec4{ 0.12f, 0.13f,  0.15f,  1.0f };
+        colors[ImGuiCol_Tab]                  = ImVec4{ 0.07f, 0.075f, 0.09f,  1.0f };
+        colors[ImGuiCol_TabUnfocused]         = ImVec4{ 0.04f, 0.04f,  0.05f,  1.0f };
+        colors[ImGuiCol_TabUnfocusedActive]   = ImVec4{ 0.11f, 0.12f,  0.14f,  1.0f };
+        break;
+      }
+      case EditorThemeMode::CyberpunkSlate: {
+        colors[ImGuiCol_Text]                 = ImVec4{ 0.90f, 0.94f, 1.00f, 1.0f };
+        colors[ImGuiCol_TextDisabled]         = ImVec4{ 0.48f, 0.52f, 0.65f, 1.0f };
+        colors[ImGuiCol_WindowBg]             = ImVec4{ 0.08f, 0.09f, 0.15f, 1.0f };
+        colors[ImGuiCol_ChildBg]              = ImVec4{ 0.07f, 0.08f, 0.13f, 1.0f };
+        colors[ImGuiCol_PopupBg]              = ImVec4{ 0.10f, 0.11f, 0.18f, 0.98f };
+        colors[ImGuiCol_Border]               = ImVec4{ 0.22f, 0.25f, 0.38f, 1.0f };
+        colors[ImGuiCol_FrameBg]              = ImVec4{ 0.05f, 0.06f, 0.10f, 1.0f };
+        colors[ImGuiCol_FrameBgHovered]       = ImVec4{ 0.13f, 0.15f, 0.24f, 1.0f };
+        colors[ImGuiCol_FrameBgActive]        = ImVec4{ 0.17f, 0.20f, 0.32f, 1.0f };
+        colors[ImGuiCol_TitleBg]              = ImVec4{ 0.05f, 0.06f, 0.11f, 1.0f };
+        colors[ImGuiCol_TitleBgActive]        = ImVec4{ 0.07f, 0.08f, 0.14f, 1.0f };
+        colors[ImGuiCol_TitleBgCollapsed]     = ImVec4{ 0.05f, 0.06f, 0.11f, 0.75f };
+        colors[ImGuiCol_MenuBarBg]            = ImVec4{ 0.07f, 0.08f, 0.14f, 1.0f };
+        colors[ImGuiCol_Button]               = ImVec4{ 0.15f, 0.17f, 0.28f, 1.0f };
+        colors[ImGuiCol_Header]               = ImVec4{ 0.15f, 0.17f, 0.28f, 1.0f };
+        colors[ImGuiCol_Tab]                  = ImVec4{ 0.11f, 0.13f, 0.22f, 1.0f };
+        colors[ImGuiCol_TabUnfocused]         = ImVec4{ 0.08f, 0.09f, 0.16f, 1.0f };
+        colors[ImGuiCol_TabUnfocusedActive]   = ImVec4{ 0.15f, 0.18f, 0.29f, 1.0f };
+        break;
+      }
+      case EditorThemeMode::ClassicImGui:
+        break;
+    }
+    const ImVec4 accentBase    = ScaleColor(s_AccentColor, 1.00f, 1.00f);
+    const ImVec4 accentHovered = ScaleColor(s_AccentColor, 1.18f, 1.00f);
+    const ImVec4 accentActive  = ScaleColor(s_AccentColor, 0.85f, 1.00f);
+    colors[ImGuiCol_CheckMark]            = accentBase;
+    colors[ImGuiCol_SliderGrab]           = accentBase;
+    colors[ImGuiCol_SliderGrabActive]     = accentHovered;
+    colors[ImGuiCol_ButtonHovered]        = accentHovered;
+    colors[ImGuiCol_ButtonActive]         = accentActive;
+    colors[ImGuiCol_HeaderHovered]        = ScaleColor(s_AccentColor, 0.95f, 0.80f);
+    colors[ImGuiCol_HeaderActive]         = accentBase;
+    colors[ImGuiCol_SeparatorHovered]     = accentHovered;
+    colors[ImGuiCol_SeparatorActive]      = accentBase;
+    colors[ImGuiCol_ResizeGrip]           = ScaleColor(s_AccentColor, 0.80f, 0.25f);
+    colors[ImGuiCol_ResizeGripHovered]    = accentHovered;
+    colors[ImGuiCol_ResizeGripActive]     = accentBase;
+    colors[ImGuiCol_TabHovered]           = accentHovered;
+    colors[ImGuiCol_TabActive]            = accentBase;
+    colors[ImGuiCol_DockingPreview]       = ScaleColor(s_AccentColor, 1.00f, 0.70f);
+    colors[ImGuiCol_TextSelectedBg]       = ScaleColor(s_AccentColor, 1.00f, 0.38f);
+    colors[ImGuiCol_NavHighlight]         = accentBase;
+    colors[ImGuiCol_PlotLinesHovered]     = accentHovered;
+    colors[ImGuiCol_PlotHistogram]        = accentBase;
+    colors[ImGuiCol_PlotHistogramHovered] = accentHovered;
+  }
+  void ImGuiTheme::DrawThemeSelectorUI() noexcept {
+    if (ImGui::CollapsingHeader("Studio Theme, Highlighter & Fonts", ImGuiTreeNodeFlags_DefaultOpen)) {
+      const char* themeNames[] = {
+        "Dark Charcoal (Default)",
+        "Light Studio (Daylight)",
+        "Midnight OLED (True Black)",
+        "Cyberpunk Slate",
+        "Classic ImGui"
+      };
+      int currentTheme = static_cast<int>(s_CurrentMode);
+      if (ImGui::Combo("UI Theme", &currentTheme, themeNames, IM_ARRAYSIZE(themeNames))) {
+        SetThemeMode(static_cast<EditorThemeMode>(currentTheme));
+      }
+      const char* presetNames[] = {
+        "Azure Blue",
+        "Blender Orange",
+        "Emerald Green",
+        "Crimson Red",
+        "Amethyst Purple",
+        "Cyber Neon Cyan",
+        "Goldenrod",
+        "Custom Color..."
+      };
+      int currentPreset = static_cast<int>(s_CurrentPreset);
+      if (ImGui::Combo("Highlighter Preset", &currentPreset, presetNames, IM_ARRAYSIZE(presetNames))) {
+        SetAccentPreset(static_cast<EditorAccentPreset>(currentPreset));
+      }
+      float accentRGB[3] = { s_AccentColor.x, s_AccentColor.y, s_AccentColor.z };
+      if (ImGui::ColorEdit3("Highlighter Color", accentRGB)) {
+        SetCustomAccentColor(Math::MakeVec3(accentRGB[0], accentRGB[1], accentRGB[2]));
+      }
+      // --- Live Custom Font Selector ---
+      if (!s_LoadedFonts.empty()) {
+        ImGui::Separator();
+        const char* previewName = s_LoadedFonts[s_ActiveFontIndex].Name.c_str();
+        if (ImGui::BeginCombo("Studio UI Font", previewName)) {
+          for (int i = 0; i < static_cast<int>(s_LoadedFonts.size()); ++i) {
+            const bool isSelected = (s_ActiveFontIndex == i);
+            ImGui::PushFont(s_LoadedFonts[i].Font);
+            if (ImGui::Selectable(s_LoadedFonts[i].Name.c_str(), isSelected)) {
+              s_ActiveFontIndex         = i;
+              ImGui::GetIO().FontDefault = s_LoadedFonts[i].Font;
+            }
+            if (isSelected) {
+              ImGui::SetItemDefaultFocus();
+            }
+            ImGui::PopFont();
+          }
+          ImGui::EndCombo();
+        }
+        if (ImGui::SliderFloat("Font Scale", &s_GlobalFontScale, 0.75f, 1.50f, "%.2fx")) {
+          ImGui::GetIO().FontGlobalScale = s_GlobalFontScale;
+        }
+      }
+    }
   }
 } // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/UI/ImGuiTheme.hpp
 /*!
  * @file ImGuiTheme.hpp
- * @brief Custom Blender/Unreal-inspired charcoal dark theme for KanVerse Studio.
+ * @brief Multi-theme, dynamic highlighter, and custom font manager for KanVerse Studio.
  * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
  * @license MIT License
  */
 #pragma once
+#include "Core/Math/Math.hpp"
+#include <cstdint>
+#include <filesystem>
+#include <string>
+#include <vector>
+struct ImFont;
 namespace KanVerse {
   /*!
+   * @enum EditorThemeMode
+   * @brief Base surface color palettes for the KanVerse Studio interface.
+   */
+  enum class EditorThemeMode : std::uint8_t {
+    DarkCharcoal = 0, ///< Default Blender/Unreal neutral charcoal dark theme.
+    LightStudio,      ///< High-contrast daylight studio theme with soft alabaster backgrounds.
+    MidnightOLED,     ///< True-black OLED theme for maximum HDR viewport contrast.
+    CyberpunkSlate,   ///< Deep navy-violet slate theme.
+    ClassicImGui      ///< Standard Dear ImGui classic styling.
+  };
+  /*!
+   * @enum EditorAccentPreset
+   * @brief Quick-select highlighter / accent color presets.
+   */
+  enum class EditorAccentPreset : std::uint8_t {
+    AzureBlue = 0,    ///< Default Studio Azure Blue (0.20, 0.52, 0.95)
+    BlenderOrange,    ///< Blender 3D Amber Orange (0.92, 0.48, 0.12)
+    EmeraldGreen,     ///< Vitality Emerald Green (0.15, 0.78, 0.45)
+    CrimsonRed,       ///< High-energy Crimson Red (0.88, 0.20, 0.26)
+    AmethystPurple,   ///< Royal Amethyst Purple (0.62, 0.32, 0.92)
+    CyberNeonCyan,    ///< Electric Cyan Highlighter (0.05, 0.82, 0.90)
+    Goldenrod,        ///< Warm Gold Highlighter (0.92, 0.70, 0.14)
+    Custom            ///< User-defined custom RGB color picker value
+  };
+  /*!
+   * @struct EditorFontEntry
+   * @brief Metadata and ImGui handle for a loaded custom `.ttf`/`.otf` font.
+   */
+  struct EditorFontEntry {
+    std::string Name;           ///< Display name (e.g., "OpenSans-Regular", "HfMonorita", "Headers").
+    std::string Filepath;       ///< Absolute path on disk.
+    ImFont*     Font{ nullptr };///< Compiled ImGui font atlas handle.
+  };
+  /*!
    * @class ImGuiTheme
-   * @brief Configures global Dear ImGui style variables, padding, rounding, and color palettes.
+   * @brief Manages global Dear ImGui themes, dynamic accent highlights, and custom Studio fonts.
+   *
+   * @note Thread-safety: Must be called on the main UI thread with an active ImGuiContext.
    */
   class ImGuiTheme {
   public:
     /*!
-     * @brief Applies the signature KanVerse Studio charcoal dark theme to the active ImGui context.
+     * @brief Resolves the portable `KanVerse_App/Assets` directory path relative to the repository root.
+     * @return Resolved `std::filesystem::path` pointing to `KanVerse_App/Assets`.
+     */
+    [[nodiscard]] static std::filesystem::path GetAssetsDirectory() noexcept;
+    /*!
+     * @brief Scans `KanVerse_App/Assets/Fonts/{Opensans, HfMonorita, Headers}` and loads all `.ttf`/`.otf` fonts.
+     * @param baseFontSizePx Default pixel size for primary UI text (default: 15.5f for Retina clarity).
+     */
+    static void LoadStudioFonts(float baseFontSizePx = 15.5f);
+    /*!
+     * @brief Applies the default Dark Charcoal theme with Azure Blue highlights.
      */
     static void ApplyDarkTheme() noexcept;
+    /*!
+     * @brief Applies a specific base theme mode while preserving the current accent highlight color.
+     * @param mode Target base theme mode.
+     */
+    static void SetThemeMode(EditorThemeMode mode) noexcept;
+    /*!
+     * @brief Queries the currently active base theme mode.
+     * @return Active EditorThemeMode enum.
+     */
+    [[nodiscard]] static EditorThemeMode GetThemeMode() noexcept { return s_CurrentMode; }
+    /*!
+     * @brief Applies a predefined highlighter preset and updates all active ImGui accent slots.
+     * @param preset Target accent preset.
+     */
+    static void SetAccentPreset(EditorAccentPreset preset) noexcept;
+    /*!
+     * @brief Queries the currently selected highlighter preset.
+     * @return Active EditorAccentPreset enum.
+     */
+    [[nodiscard]] static EditorAccentPreset GetAccentPreset() noexcept { return s_CurrentPreset; }
+    /*!
+     * @brief Sets a custom RGB highlighter color and dynamically recomputes hover/active/dim shades.
+     * @param rgb Linear or sRGB color vector in [0.0, 1.0].
+     */
+    static void SetCustomAccentColor(const Math::Vec3& rgb) noexcept;
+    /*!
+     * @brief Queries the current primary highlighter RGB color.
+     * @return Current 3D color vector.
+     */
+    [[nodiscard]] static const Math::Vec3& GetAccentColor() noexcept { return s_AccentColor; }
+    /*!
+     * @brief Accesses the bold/header font handle (used for panel titles and section headers).
+     * @return Pointer to the header `ImFont`, or the default font if unavailable.
+     */
+    [[nodiscard]] static ImFont* GetHeaderFont() noexcept { return s_HeaderFont; }
+    /*!
+     * @brief Accesses the monospace font handle (`HfMonorita` for console logs and numeric telemetry).
+     * @return Pointer to the monospace `ImFont`, or the default font if unavailable.
+     */
+    [[nodiscard]] static ImFont* GetMonospaceFont() noexcept { return s_MonoFont; }
+    /*!
+     * @brief Accesses the bold OpenSans font handle.
+     * @return Pointer to the bold `ImFont`, or the default font if unavailable.
+     */
+    [[nodiscard]] static ImFont* GetBoldFont() noexcept { return s_BoldFont; }
+    /*!
+     * @brief Renders an interactive "Studio Theme, Highlighter & Fonts" configuration section inside any ImGui panel.
+     */
+    static void DrawThemeSelectorUI() noexcept;
+  private:
+    static void RefreshStyleAndColors() noexcept;
+    inline static EditorThemeMode              s_CurrentMode{ EditorThemeMode::DarkCharcoal };
+    inline static EditorAccentPreset           s_CurrentPreset{ EditorAccentPreset::AzureBlue };
+    inline static Math::Vec3                   s_AccentColor{ 0.20f, 0.52f, 0.95f };
+    inline static std::vector<EditorFontEntry> s_LoadedFonts;
+    inline static int                          s_ActiveFontIndex{ 0 };
+    inline static float                        s_GlobalFontScale{ 1.0f };
+    inline static ImFont*                      s_RegularFont{ nullptr };
+    inline static ImFont*                      s_BoldFont{ nullptr };
+    inline static ImFont*                      s_HeaderFont{ nullptr };
+    inline static ImFont*                      s_MonoFont{ nullptr };
   };
 } // namespace KanVerse
 // FILE: KanVerse_Engine/Renderer/UI/UIWidgets.hpp
@@ -7095,8 +7855,363 @@ namespace KanVerse::UI {
   }
 } // namespace KanVerse::UI
 // FILE: KanVerse_Engine/Scene/Components.hpp
-
+/*!
+ * @file Components.hpp
+ * @brief Data-oriented ECS components for spatial transforms, rendering, lighting, physics, and AI.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Core/Math/Math.hpp"
+#include "Renderer/Geometry/Mesh.hpp"
+#include "Renderer/Materials/Material.hpp"
+#include "Renderer/Camera/PerspectiveCamera.hpp"
+#include "Renderer/Lighting/DirectionalLight.hpp"
+#include "Renderer/Lighting/PointLight.hpp"
+#include "Renderer/Lighting/EnvironmentLighting.hpp"
+#include "Physics/BoundingBox.hpp"
+#include "Physics/ColliderPrimitives.hpp"
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <string_view>
+namespace KanVerse {
+  /*!
+   * @struct TagComponent
+   * @brief Stores a human-readable string identifier for an entity.
+   */
+  struct TagComponent {
+    std::string Tag{ "Entity" };
+    TagComponent() = default;
+    TagComponent(const TagComponent&) = default;
+    explicit TagComponent(std::string_view tag) : Tag(tag) {}
+  };
+  /*!
+   * @struct TransformComponent
+   * @brief Represents 3D world translation, Euler rotation (radians), and local scale.
+   */
+  struct TransformComponent {
+    Math::Vec3 Translation{ 0.0f, 0.0f, 0.0f };
+    Math::Vec3 Rotation{ 0.0f, 0.0f, 0.0f };
+    Math::Vec3 Scale{ 1.0f, 1.0f, 1.0f };
+    TransformComponent() = default;
+    TransformComponent(const TransformComponent&) = default;
+    explicit TransformComponent(const Math::Vec3& translation) noexcept
+    : Translation(translation) {}
+    /*!
+     * @brief Computes the $4 \times 4$ TRS model matrix ($T \cdot R_z \cdot R_y \cdot R_x \cdot S$).
+     * @return Column-major $4 \times 4$ transformation matrix.
+     */
+    [[nodiscard]] Math::Mat4 GetTransform() const noexcept {
+      Math::Mat4 translationMatrix = Math::Identity();
+      translationMatrix.columns[3] = Math::MakeVec4(Translation.x, Translation.y, Translation.z, 1.0f);
+      const Math::Mat4 rotX = Math::Rotate(Rotation.x, Math::MakeVec3(1.0f, 0.0f, 0.0f));
+      const Math::Mat4 rotY = Math::Rotate(Rotation.y, Math::MakeVec3(0.0f, 1.0f, 0.0f));
+      const Math::Mat4 rotZ = Math::Rotate(Rotation.z, Math::MakeVec3(0.0f, 0.0f, 1.0f));
+      const Math::Mat4 rotationMatrix = Math::Multiply(rotZ, Math::Multiply(rotY, rotX));
+      Math::Mat4 scaleMatrix = Math::Identity();
+      scaleMatrix.columns[0].x = Scale.x;
+      scaleMatrix.columns[1].y = Scale.y;
+      scaleMatrix.columns[2].z = Scale.z;
+      return Math::Multiply(translationMatrix, Math::Multiply(rotationMatrix, scaleMatrix));
+    }
+    [[nodiscard]] operator Math::Mat4() const noexcept {
+      return GetTransform();
+    }
+  };
+  /*!
+   * @struct MeshComponent
+   * @brief Holds a shared reference to a GPU-backed 3D `Mesh`.
+   */
+  struct MeshComponent {
+    std::shared_ptr<Mesh> MeshGeometry{ nullptr };
+    MeshComponent() = default;
+    MeshComponent(const MeshComponent&) = default;
+    explicit MeshComponent(std::shared_ptr<Mesh> mesh) noexcept
+    : MeshGeometry(std::move(mesh)) {}
+  };
+  /*!
+   * @struct MaterialComponent
+   * @brief Holds a shared reference to a PBR surface `Material`.
+   */
+  struct MaterialComponent {
+    std::shared_ptr<Material> SurfaceMaterial{ nullptr };
+    MaterialComponent() = default;
+    MaterialComponent(const MaterialComponent&) = default;
+    explicit MaterialComponent(std::shared_ptr<Material> material) noexcept
+    : SurfaceMaterial(std::move(material)) {}
+  };
+  /*!
+   * @struct CameraComponent
+   * @brief Attaches an optical `PerspectiveCamera` lens to an entity.
+   */
+  struct CameraComponent {
+    PerspectiveCamera CameraInstance{ 60.0f * (3.14159265f / 180.0f), 1280.0f / 720.0f, 0.1f, 1000.0f };
+    bool              Primary{ true };
+    CameraComponent() = default;
+    CameraComponent(const CameraComponent&) = default;
+    explicit CameraComponent(const PerspectiveCamera& camera, bool isPrimary = true) noexcept
+    : CameraInstance(camera), Primary(isPrimary) {}
+  };
+  /*!
+   * @struct DirectionalLightComponent
+   * @brief Represents the primary directional sun/moon light and its shadow frustum.
+   */
+  struct DirectionalLightComponent {
+    DirectionalLight LightInstance{ Math::MakeVec3(-0.6f, -1.0f, -0.4f), Math::MakeVec3(1.0f, 0.95f, 0.88f), 1.2f };
+    bool             Primary{ true };
+    DirectionalLightComponent() = default;
+    DirectionalLightComponent(const DirectionalLightComponent&) = default;
+    explicit DirectionalLightComponent(const DirectionalLight& light, bool isPrimary = true) noexcept
+    : LightInstance(light), Primary(isPrimary) {}
+  };
+  /*!
+   * @struct PointLightComponent
+   * @brief Wraps a local omni-directional `PointLight` emitter.
+   */
+  struct PointLightComponent {
+    PointLight LightInstance{};
+    PointLightComponent() = default;
+    PointLightComponent(const PointLightComponent&) = default;
+    explicit PointLightComponent(const PointLight& light) noexcept
+    : LightInstance(light) {}
+    PointLightComponent(const Math::Vec3& color, float intensity, float radius = 15.0f) noexcept
+    : LightInstance(color, intensity, radius) {}
+  };
+  /*!
+   * @struct EnvironmentLightComponent
+   * @brief Stores global ambient environment illumination parameters.
+   */
+  struct EnvironmentLightComponent {
+    EnvironmentLighting Environment{
+      .AmbientColor     = Math::MakeVec3(0.18f, 0.20f, 0.24f),
+      .AmbientIntensity = 1.0f
+    };
+    EnvironmentLightComponent() = default;
+    EnvironmentLightComponent(const EnvironmentLightComponent&) = default;
+    explicit EnvironmentLightComponent(const EnvironmentLighting& env) noexcept
+    : Environment(env) {}
+  };
+  /*!
+   * @struct ColliderComponent
+   * @brief Defines physical collision bounds (`Box`, `Capsule`, or `Cylinder`) for an entity.
+   */
+  struct ColliderComponent {
+    enum class ShapeType : std::uint8_t { Box = 0, Capsule, Cylinder };
+    ShapeType                 Type{ ShapeType::Box };
+    Physics::OBB              BoxCollider{};
+    Physics::CapsuleCollider  Capsule{};
+    Physics::CylinderCollider Cylinder{};
+    bool                      IsTrigger{ false };
+    ColliderComponent() = default;
+    [[nodiscard]] static ColliderComponent MakeBox(simd::float3 halfExtents) noexcept {
+      ColliderComponent comp;
+      comp.Type                    = ShapeType::Box;
+      comp.BoxCollider.HalfExtents = halfExtents;
+      return comp;
+    }
+    [[nodiscard]] static ColliderComponent MakeCapsule(float radius, float height) noexcept {
+      ColliderComponent comp;
+      comp.Type              = ShapeType::Capsule;
+      comp.Capsule.Radius    = radius;
+      comp.Capsule.BasePoint = simd_make_float3(0.0f, radius, 0.0f);
+      comp.Capsule.TipPoint  = simd_make_float3(0.0f, radius + height, 0.0f);
+      return comp;
+    }
+  };
+  enum class PlayerState : std::uint8_t {
+    Grounded = 0,
+    Airborne,
+    Sliding,
+    GroundSlamming
+  };
+  /*!
+   * @struct CharacterControllerComponent
+   * @brief Kinematic character locomotion, jump/slam state, and procedural squash-and-stretch spring parameters.
+   */
+  struct CharacterControllerComponent {
+    PlayerState   State{ PlayerState::Airborne };
+    simd::float3  Velocity{ 0.0f, 0.0f, 0.0f };
+    float         MoveSpeed{ 9.5f };
+    float         JumpImpulse{ 14.0f };
+    float         Gravity{ -28.0f };
+    float         SlamVelocity{ -32.0f };
+    std::uint32_t JumpsRemaining{ 2 };
+    bool          IsGrounded{ false };
+    bool          IsSliding{ false };
+    float         SlideTimer{ 0.0f };
+    bool          IsSlamming{ false };
+    float         FacingYaw{ 0.0f };
+    bool          TriggerSlamImpact{ false };
+    simd::float3  ImpactPosition{ 0.0f, 0.0f, 0.0f };
+    float         RollAngle{ 0.0f };
+    float         PitchAngle{ 0.0f };
+    simd::float3  VisualScale{ 1.0f, 1.0f, 1.0f };
+    float         SquashVelocity{ 0.0f };
+  };
+  /*!
+   * @struct DebrisComponent
+   * @brief Rigid shard kinematics and restitution parameters for shattered blocks.
+   */
+  struct DebrisComponent {
+    simd::float3 LinearVelocity{ 0.0f, 0.0f, 0.0f };
+    simd::float3 AngularVelocity{ 0.0f, 0.0f, 0.0f };
+    float        Lifetime{ 4.0f };
+    float        Bounciness{ 0.35f };
+    float        Friction{ 0.82f };
+  };
+  /*!
+   * @struct FracturableComponent
+   * @brief Marks an entity as breakable when struck by a ground-slam shockwave.
+   */
+  struct FracturableComponent {
+    float BlastResistance{ 1.0f };
+    bool  PersistDebris{ false };
+  };
+  enum class DoorType : std::uint8_t {
+    Angular = 0,
+    Sliding
+  };
+  /*!
+   * @struct DoorComponent
+   * @brief State and hinge/slide parameters for proximity-activated doors.
+   */
+  struct DoorComponent {
+    DoorType    Type{ DoorType::Angular };
+    bool        IsXAligned{ true };
+    float       CurrentAngle{ 0.0f };
+    float       TargetAngle{ 2.18166156f };
+    float       CurrentSlide{ 0.0f };
+    float       TargetSlide{ 0.0f };
+    float       OpenSpeed{ 8.0f };
+    bool        IsOpen{ false };
+    float       InteractionRadius{ 2.2f };
+    Math::Vec3  HingePosition{ 0.0f, 0.0f, 0.0f };
+    float       Width{ 1.5f };
+    bool        IsLocked{ false };
+    std::string RequiredKeyID{ "" };
+  };
+  enum class EnemyAIState : std::uint8_t {
+    Sleep = 0,
+    Idle,
+    Patrol,
+    Walk,
+    Sprint,
+    Jump,
+    Fly,
+    Attack
+  };
+  /*!
+   * @struct AIControllerComponent
+   * @brief Autonomous enemy state machine, agro sensing, and locomotion velocity.
+   */
+  struct AIControllerComponent {
+    EnemyAIState State{ EnemyAIState::Sleep };
+    simd::float3 Velocity{ 0.0f, 0.0f, 0.0f };
+    simd::float3 HomePosition{ 0.0f, 0.0f, 0.0f };
+    float        AgroRange{ 14.0f };
+    float        AttackRange{ 4.5f };
+    float        MoveSpeed{ 5.0f };
+    float        StateTimer{ 0.0f };
+    bool         IsGrounded{ false };
+  };
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Scene/Entity.hpp
+/*!
+ * @file Entity.hpp
+ * @brief Ergonomic high-level wrapper around a 64-bit EntityID and parent Scene.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Scene/EntityID.hpp"
+#include "Scene/Registry.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+namespace KanVerse {
+  class Scene;
+  /*!
+   * @class Entity
+   * @brief Lightweight handle binding a 64-bit EntityID to its parent Scene registry.
+   */
+  class Entity {
+  public:
+    Entity() = default;
+    /*!
+     * @brief Constructs an entity handle bound to a scene.
+     * @param handle 64-bit entity identifier.
+     * @param scene Pointer to the owning scene instance.
+     */
+    Entity(EntityID handle, Scene* scene)
+    : m_EntityHandle(handle), m_Scene(scene) {}
+    Entity(const Entity&) = default;
+    Entity& operator=(const Entity&) = default;
+    Entity(Entity&&) noexcept = default;
+    Entity& operator=(Entity&&) noexcept = default;
+    /*!
+     * @brief Constructs and attaches a component in-place on this entity.
+     * @tparam T Component type.
+     * @tparam Args Forwarded constructor argument types.
+     * @param args Arguments forwarded to component constructor.
+     * @return Reference to the newly constructed component.
+     */
+    template <typename T, typename... Args>
+    T& AddComponent(Args&&... args);
+    /*!
+     * @brief Retrieves mutable reference to the entity's component.
+     * @tparam T Component type.
+     * @return Reference to component.
+     */
+    template <typename T>
+    [[nodiscard]] T& GetComponent();
+    /*!
+     * @brief Retrieves const reference to the entity's component.
+     * @tparam T Component type.
+     * @return Const reference to component.
+     */
+    template <typename T>
+    [[nodiscard]] const T& GetComponent() const;
+    /*!
+     * @brief Queries whether the entity currently holds the specified component.
+     * @tparam T Component type.
+     * @return True if component exists on entity.
+     */
+    template <typename T>
+    [[nodiscard]] bool HasComponent() const;
+    /*!
+     * @brief Removes a component from this entity.
+     * @tparam T Component type.
+     */
+    template <typename T>
+    void RemoveComponent();
+    /*!
+     * @brief Queries whether this handle refers to a live entity in the parent scene.
+     * @return True if entity exists and is valid.
+     */
+    [[nodiscard]] bool IsValid() const;
+    /*!
+     * @brief Accesses the raw 64-bit entity handle.
+     */
+    [[nodiscard]] EntityID GetID() const noexcept { return m_EntityHandle; }
+    /*!
+     * @brief Implicit conversion operator to EntityID.
+     */
+    [[nodiscard]] operator EntityID() const noexcept { return m_EntityHandle; }
+    /*!
+     * @brief Explicit boolean conversion checking entity validity.
+     */
+    [[nodiscard]] explicit operator bool() const noexcept { return IsValid(); }
+    [[nodiscard]] bool operator==(const Entity& other) const noexcept {
+      return m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene;
+    }
+    [[nodiscard]] bool operator!=(const Entity& other) const noexcept {
+      return !(*this == other);
+    }
+  private:
+    EntityID m_EntityHandle{ECS::NullEntity};
+    Scene*   m_Scene{nullptr};
+  };
+} // namespace KanVerse
+// FILE: KanVerse_Engine/Scene/EntityID.hpp
 /*!
  * @file EntityID.hpp
  * @brief Generational 64-bit entity handle representation and bit-packing utilities.
@@ -7148,8 +8263,6 @@ namespace KanVerse {
     }
   } // namespace ECS
 } // namespace KanVerse
-// FILE: KanVerse_Engine/Scene/EntityID.hpp
-
 // FILE: KanVerse_Engine/Scene/Registry.hpp
 /*!
  * @file Registry.hpp
@@ -7402,9 +8515,450 @@ namespace KanVerse {
   };
 } // namespace KanVerse
 // FILE: KanVerse_Engine/Scene/Scene.hpp
-
+/*!
+ * @file Scene.hpp
+ * @brief Master scene graph and ECS coordinator for simulation, shadows, rendering, and destruction mechanics.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#pragma once
+#include "Scene/Registry.hpp"
+#include "Scene/Entity.hpp"
+#include "Scene/Components.hpp"
+#include "Core/Time/TimeStep.hpp"
+#include "Renderer/Framebuffer/Framebuffer.hpp"
+#include "Renderer/Lighting/DirectionalLight.hpp"
+#include "Renderer/Lighting/EnvironmentLighting.hpp"
+#include "Renderer/Pipeline/Pipeline.hpp"
+#include <string>
+#include <string_view>
+#include <memory>
+namespace KanVerse {
+  /*!
+   * @class Scene
+   * @brief Top-level container managing entity lifecycles, simulation updates, destruction, and render passes.
+   */
+  class Scene {
+  public:
+    explicit Scene(std::string_view debugName = "Scene");
+    virtual ~Scene();
+    Scene(const Scene&) = delete;
+    Scene& operator=(const Scene&) = delete;
+    Scene(Scene&&) noexcept = default;
+    Scene& operator=(Scene&&) noexcept = default;
+    [[nodiscard]] static std::shared_ptr<Scene> Create(std::string_view debugName = "Scene");
+    Entity CreateEntity(std::string_view name = "Entity");
+    void DestroyEntity(Entity entity);
+    /*!
+     * @brief Updates scene simulation, debris physics, and destruction triggers.
+     * @param ts Delta time step.
+     */
+    void OnUpdate(TimeStep ts);
+    /*!
+     * @brief Fractures a breakable block or floor tile into tumbling debris shards upon ground slam.
+     * @param blockEntity Target entity to destroy.
+     * @param impactOrigin Shockwave origin point in world coordinates.
+     */
+    void ShatterBlock(Entity blockEntity, const simd::float3& impactOrigin);
+    /*!
+     * @brief Sets the shared shard mesh used when spawning debris particles.
+     * @param shardMesh Mesh reference.
+     */
+    void SetShardMesh(std::shared_ptr<Mesh> shardMesh) { m_ShardMesh = std::move(shardMesh); }
+    /*!
+     * @brief Renders all instanced geometry into an offscreen depth-only shadow framebuffer.
+     * @param shadowPipeline Depth-only pipeline state utilizing ShadowDepth.metal.
+     * @param shadowFramebuffer Target depth-only framebuffer.
+     */
+    virtual void OnRenderShadowPass(const std::shared_ptr<Pipeline>& shadowPipeline,
+                                    const std::shared_ptr<Framebuffer>& shadowFramebuffer);
+    /*!
+     * @brief Finds the primary CameraComponent and renders all entities possessing MeshComponent and MaterialComponent.
+     * @param defaultPipeline Main lighting pipeline state.
+     * @param target Optional custom offscreen framebuffer target (defaults to swapchain if null).
+     */
+    virtual void OnRenderRuntime(const std::shared_ptr<Pipeline>& defaultPipeline,
+                                 const std::shared_ptr<Framebuffer>& target = nullptr);
+    void OnViewportResize(uint32_t width, uint32_t height);
+    void SetDirectionalLight(const DirectionalLight& light) noexcept { m_SunLight = light; }
+    void SetEnvironmentLighting(const EnvironmentLighting& env) noexcept { m_Environment = env; }
+    [[nodiscard]] Registry& GetRegistry() noexcept { return m_Registry; }
+    [[nodiscard]] const Registry& GetRegistry() const noexcept { return m_Registry; }
+    [[nodiscard]] const std::string& GetName() const noexcept { return m_DebugName; }
+  private:
+    void UpdateDebris(TimeStep ts);
+    std::string         m_DebugName;
+    Registry            m_Registry;
+    DirectionalLight    m_SunLight;
+    EnvironmentLighting m_Environment;
+    std::shared_ptr<Mesh> m_ShardMesh{nullptr}; ///< Shared mesh for debris shards.
+    uint32_t            m_ViewportWidth{1280};
+    uint32_t            m_ViewportHeight{720};
+    friend class Entity;
+  };
+  template <typename T, typename... Args>
+  inline T& Entity::AddComponent(Args&&... args) {
+    KV_CORE_ASSERT(IsValid(), "[KanVerse Entity] Cannot add component to invalid entity!");
+    return m_Scene->m_Registry.Emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+  }
+  template <typename T>
+  inline T& Entity::GetComponent() {
+    KV_CORE_ASSERT(IsValid(), "[KanVerse Entity] Cannot get component from invalid entity!");
+    return m_Scene->m_Registry.Get<T>(m_EntityHandle);
+  }
+  template <typename T>
+  inline const T& Entity::GetComponent() const {
+    KV_CORE_ASSERT(IsValid(), "[KanVerse Entity] Cannot get component from invalid entity!");
+    return m_Scene->m_Registry.Get<T>(m_EntityHandle);
+  }
+  template <typename T>
+  inline bool Entity::HasComponent() const {
+    if (!IsValid()) return false;
+    return m_Scene->m_Registry.Has<T>(m_EntityHandle);
+  }
+  template <typename T>
+  inline void Entity::RemoveComponent() {
+    KV_CORE_ASSERT(IsValid(), "[KanVerse Entity] Cannot remove component from invalid entity!");
+    m_Scene->m_Registry.Remove<T>(m_EntityHandle);
+  }
+  inline bool Entity::IsValid() const {
+    return m_Scene != nullptr && m_Scene->m_Registry.IsValid(m_EntityHandle);
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Scene/Scene.mm
-
+/*!
+ * @file Scene.mm
+ * @brief Implementation of Scene lifecycle, destruction mechanics, dynamic floor-aware debris physics, and PBR batch rendering.
+ * @copyright Copyright (c) 2026 KanVerse Contributors. All rights reserved.
+ * @license MIT License
+ */
+#include "Scene/Scene.hpp"
+#include "Core/Diagnostics/Log.hpp"
+#include "Core/Diagnostics/Assert.hpp"
+#include "Renderer/Renderer/Renderer.hpp"
+#include "Audio/AudioSystem.hpp"
+#include <map>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+namespace KanVerse {
+  Scene::Scene(std::string_view debugName)
+  : m_DebugName(debugName),
+  m_SunLight(Math::MakeVec3(-0.6f, -1.0f, -0.4f), Math::MakeVec3(1.0f, 0.95f, 0.88f), 1.2f),
+  m_Environment{
+    .AmbientColor = Math::MakeVec3(0.18f, 0.20f, 0.24f),
+    .AmbientIntensity = 1.0f
+  } {
+    KV_CORE_INFO("Scene instantiated: '{}'", m_DebugName);
+  }
+  Scene::~Scene() {
+    m_Registry.Clear();
+    KV_CORE_INFO("Scene destroyed and registry cleared: '{}'", m_DebugName);
+  }
+  std::shared_ptr<Scene> Scene::Create(std::string_view debugName) {
+    return std::make_shared<Scene>(debugName);
+  }
+  Entity Scene::CreateEntity(std::string_view name) {
+    EntityID id = m_Registry.Create();
+    Entity entity(id, this);
+    entity.AddComponent<TagComponent>(name);
+    entity.AddComponent<TransformComponent>();
+    return entity;
+  }
+  void Scene::DestroyEntity(Entity entity) {
+    KV_CORE_ASSERT(entity.IsValid(), "[KanVerse Scene] Attempted to destroy an invalid entity!");
+    m_Registry.Destroy(entity.GetID());
+  }
+  void Scene::ShatterBlock(Entity blockEntity, const simd::float3& impactOrigin) {
+    if (!blockEntity || !blockEntity.IsValid()) return;
+    AudioSystem::Play(SoundEffect::Shatter);
+    const auto& parentTransform = blockEntity.GetComponent<TransformComponent>();
+    auto material = blockEntity.GetComponent<MaterialComponent>().SurfaceMaterial;
+    bool persist = false;
+    if (blockEntity.HasComponent<FracturableComponent>()) {
+      persist = blockEntity.GetComponent<FracturableComponent>().PersistDebris;
+    }
+    const simd::float3 blockCenter = parentTransform.Translation;
+    constexpr float subOffset = 0.2f;
+    for (float x : {-subOffset, subOffset}) {
+      for (float y : {-subOffset, subOffset}) {
+        for (float z : {-subOffset, subOffset}) {
+          Entity shard = CreateEntity("DebrisShard");
+          auto& transform = shard.GetComponent<TransformComponent>();
+          transform.Translation = blockCenter + simd_make_float3(x, y, z);
+          if (m_ShardMesh) {
+            shard.AddComponent<MeshComponent>(m_ShardMesh);
+          }
+          if (material) {
+            shard.AddComponent<MaterialComponent>(material);
+          }
+          simd::float3 blastDir = transform.Translation - impactOrigin;
+          float dist = simd_length(blastDir);
+          if (dist > 1e-4f) {
+            blastDir /= dist;
+          } else {
+            blastDir = simd_make_float3(0.0f, 1.0f, 0.0f);
+          }
+          blastDir.y += 0.55f;
+          blastDir = simd_normalize(blastDir);
+          const float impulseSpeed = 10.0f + (static_cast<float>(rand() % 100) / 100.0f) * 8.0f;
+          DebrisComponent debris;
+          debris.LinearVelocity  = blastDir * impulseSpeed;
+          debris.AngularVelocity = simd_make_float3(
+                                                    (static_cast<float>(rand() % 200 - 100) / 100.0f) * 16.0f,
+                                                    (static_cast<float>(rand() % 200 - 100) / 100.0f) * 16.0f,
+                                                    (static_cast<float>(rand() % 200 - 100) / 100.0f) * 16.0f
+                                                    );
+          debris.Lifetime   = persist ? 999999.0f : 5.0f;
+          debris.Bounciness = 0.35f;
+          debris.Friction   = 0.85f;
+          shard.AddComponent<DebrisComponent>(debris);
+        }
+      }
+    }
+    DestroyEntity(blockEntity);
+  }
+  void Scene::UpdateDebris(TimeStep ts) {
+    const float dt = ts.GetSeconds();
+    constexpr float shardRadius = 0.09f; // Half-extent of shard mesh
+    std::vector<EntityID> deadEntities;
+    auto debrisView = m_Registry.GetView<TransformComponent, DebrisComponent>();
+    auto colliderView = m_Registry.GetView<TransformComponent, ColliderComponent>();
+    debrisView.Each([&](EntityID entity, TransformComponent& transform, DebrisComponent& debris) {
+      debris.Lifetime -= dt;
+      if (debris.Lifetime <= 0.0f) {
+        deadEntities.push_back(entity);
+        return;
+      }
+      debris.LinearVelocity.y += -28.0f * dt;
+      simd::float3 nextPos = transform.Translation + debris.LinearVelocity * dt;
+      // Dynamic collision check against all scene colliders (floors, platforms, ground)
+      bool grounded = false;
+      float highestSurfaceY = -7.64f + 0.18f; // Fallback ground plane
+      colliderView.Each([&](EntityID colEntity, TransformComponent& tc, ColliderComponent& col) {
+        if (colEntity == entity) return;
+        const simd::float3 halfExtents = col.BoxCollider.HalfExtents * tc.Scale;
+        const simd::float3 boxMin = tc.Translation - halfExtents;
+        const simd::float3 boxMax = tc.Translation + halfExtents;
+        if (nextPos.x + shardRadius > boxMin.x && nextPos.x - shardRadius < boxMax.x &&
+            nextPos.z + shardRadius > boxMin.z && nextPos.z - shardRadius < boxMax.z) {
+          const float boxTopY = boxMax.y + shardRadius;
+          const float shardFeetY = transform.Translation.y - shardRadius;
+          if (debris.LinearVelocity.y <= 0.1f && boxMax.y > shardFeetY - 0.5f && boxMax.y <= shardFeetY + 0.6f) {
+            if (boxTopY > highestSurfaceY) {
+              highestSurfaceY = boxTopY;
+              grounded = true;
+            }
+          }
+        }
+      });
+      if (grounded || nextPos.y <= highestSurfaceY) {
+        nextPos.y = grounded ? highestSurfaceY : highestSurfaceY;
+        transform.Translation = nextPos;
+        debris.LinearVelocity.y = -debris.LinearVelocity.y * debris.Bounciness;
+        debris.LinearVelocity.x *= debris.Friction;
+        debris.LinearVelocity.z *= debris.Friction;
+        debris.AngularVelocity  *= 0.7f;
+        if (std::abs(debris.LinearVelocity.y) < 0.25f) {
+          debris.LinearVelocity.y = 0.0f;
+          debris.LinearVelocity.x = 0.0f;
+          debris.LinearVelocity.z = 0.0f;
+          debris.AngularVelocity  = simd_make_float3(0.0f, 0.0f, 0.0f);
+        }
+      } else {
+        transform.Translation = nextPos;
+      }
+      transform.Rotation += debris.AngularVelocity * dt;
+    });
+    for (EntityID id : deadEntities) {
+      m_Registry.Destroy(id);
+    }
+  }
+  void Scene::OnUpdate(TimeStep ts) {
+    UpdateDebris(ts);
+    auto controllerView = m_Registry.GetView<TransformComponent, CharacterControllerComponent>();
+    controllerView.Each([&](EntityID, TransformComponent&, CharacterControllerComponent& controller) {
+      if (controller.TriggerSlamImpact) {
+        AudioSystem::Play(SoundEffect::GroundSlam);
+        constexpr float blastRadius = 3.6f;
+        std::vector<Entity> blocksToShatter;
+        auto fracturableView = m_Registry.GetView<TransformComponent, FracturableComponent>();
+        fracturableView.Each([&](EntityID ent, TransformComponent& transform, FracturableComponent&) {
+          const float dist = simd_distance(transform.Translation, controller.ImpactPosition);
+          if (dist <= blastRadius) {
+            blocksToShatter.push_back(Entity(ent, this));
+          }
+        });
+        for (auto& block : blocksToShatter) {
+          ShatterBlock(block, controller.ImpactPosition);
+        }
+      }
+    });
+  }
+  void Scene::OnRenderShadowPass(const std::shared_ptr<Pipeline>& shadowPipeline,
+                                 const std::shared_ptr<Framebuffer>& shadowFramebuffer) {
+    KV_CORE_ASSERT(shadowPipeline != nullptr, "[KanVerse Scene] Shadow pipeline cannot be null!");
+    KV_CORE_ASSERT(shadowFramebuffer != nullptr, "[KanVerse Scene] Shadow framebuffer cannot be null!");
+    DirectionalLight sunLight = m_SunLight;
+    auto dirLightView = m_Registry.GetView<TransformComponent, DirectionalLightComponent>();
+    dirLightView.Each([&](EntityID entity, TransformComponent& transform, DirectionalLightComponent& light) {
+      (void)entity;
+      (void)transform;
+      if (light.Primary) {
+        sunLight = light.LightInstance;
+      }
+    });
+    Renderer::BeginShadowPass(sunLight, shadowFramebuffer);
+    std::map<Mesh*, std::vector<InstanceData>> shadowBatches;
+    auto renderView = m_Registry.GetView<TransformComponent, MeshComponent>();
+    renderView.Each([&](EntityID entity, TransformComponent& transform, MeshComponent& mesh) {
+      if (!mesh.MeshGeometry) return;
+      if (m_Registry.Has<PointLightComponent>(entity)) {
+        return;
+      }
+      if (m_Registry.Has<MaterialComponent>(entity)) {
+        const auto& mat = m_Registry.Get<MaterialComponent>(entity).SurfaceMaterial;
+        if (mat) {
+          const Math::Vec4& emissive = mat->GetEmissiveColor();
+          const float emissiveMax = std::max({emissive.x, emissive.y, emissive.z});
+          if (mat->IsTransparent() || emissiveMax > 0.5f) {
+            return;
+          }
+        }
+      }
+      const Math::Mat4 modelMatrix = transform.GetTransform();
+      shadowBatches[mesh.MeshGeometry.get()].push_back(InstanceData{
+        .ModelMatrix  = modelMatrix,
+        .NormalMatrix = Math::Transpose(Math::Inverse(modelMatrix))
+      });
+    });
+    for (auto& [meshPtr, instances] : shadowBatches) {
+      if (!instances.empty()) {
+        Renderer::SubmitInstanced(
+                                  shadowPipeline,
+                                  nullptr,
+                                  meshPtr->GetSubmeshes().empty() ? nullptr : std::shared_ptr<Mesh>(meshPtr, [](Mesh*){}),
+                                  instances
+                                  );
+      }
+    }
+    Renderer::EndScene();
+  }
+  void Scene::OnRenderRuntime(const std::shared_ptr<Pipeline>& defaultPipeline,
+                              const std::shared_ptr<Framebuffer>& target) {
+    KV_CORE_ASSERT(defaultPipeline != nullptr, "[KanVerse Scene] Default pipeline cannot be null during render!");
+    const PerspectiveCamera* mainCamera = nullptr;
+    auto cameraView = m_Registry.GetView<TransformComponent, CameraComponent>();
+    cameraView.Each([&](EntityID entity, TransformComponent& transform, CameraComponent& camera) {
+      (void)entity;
+      (void)transform;
+      if (camera.Primary) {
+        mainCamera = &camera.CameraInstance;
+      }
+    });
+    if (!mainCamera) {
+      KV_CORE_WARN("Scene::OnRenderRuntime: No primary camera active in registry. Skipping draw pass.");
+      return;
+    }
+    DirectionalLight sunLight = m_SunLight;
+    auto dirLightView = m_Registry.GetView<TransformComponent, DirectionalLightComponent>();
+    dirLightView.Each([&](EntityID entity, TransformComponent& transform, DirectionalLightComponent& light) {
+      (void)entity;
+      (void)transform;
+      if (light.Primary) {
+        sunLight = light.LightInstance;
+      }
+    });
+    EnvironmentLighting envLighting = m_Environment;
+    auto envLightView = m_Registry.GetView<EnvironmentLightComponent>();
+    envLightView.Each([&](EntityID entity, EnvironmentLightComponent& env) {
+      (void)entity;
+      envLighting = env.Environment;
+    });
+    std::vector<GPUPointLight> gpuPointLights;
+    gpuPointLights.reserve(Renderer::kMaxPointLights);
+    auto pointLightView = m_Registry.GetView<TransformComponent, PointLightComponent>();
+    pointLightView.Each([&](EntityID entity, TransformComponent& transform, PointLightComponent& plComp) {
+      (void)entity;
+      if (gpuPointLights.size() >= Renderer::kMaxPointLights) return;
+      const auto& pl = plComp.LightInstance;
+      const Math::Vec3& color = pl.GetColor();
+      const float constant  = (pl.GetConstant()  > 0.01f)  ? pl.GetConstant()  : 1.0f;
+      const float linear    = (pl.GetLinear()    > 0.001f) ? pl.GetLinear()    : 0.35f;
+      const float quadratic = (pl.GetQuadratic() > 0.001f) ? pl.GetQuadratic() : 0.08f;
+      const float radius    = std::clamp(pl.GetRadius(), 6.0f, 16.0f);
+      gpuPointLights.push_back(GPUPointLight{
+        .PositionAndRadius = Math::MakeVec4(transform.Translation.x, transform.Translation.y, transform.Translation.z, radius),
+        .ColorAndIntensity = Math::MakeVec4(color.x, color.y, color.z, pl.GetIntensity()),
+        .Attenuation       = Math::MakeVec4(constant, linear, quadratic, 0.0f)
+      });
+    });
+    using BatchKey = std::pair<Mesh*, Material*>;
+    struct BatchBucket {
+      std::shared_ptr<Mesh>     MeshRef;
+      std::shared_ptr<Material> MaterialRef;
+      std::vector<InstanceData> Instances;
+    };
+    std::map<BatchKey, BatchBucket> opaqueBatches;
+    std::map<BatchKey, BatchBucket> transparentBatches;
+    auto renderView = m_Registry.GetView<TransformComponent, MeshComponent, MaterialComponent>();
+    renderView.Each([&](EntityID entity,
+                        TransformComponent& transform,
+                        MeshComponent& mesh,
+                        MaterialComponent& material) {
+      (void)entity;
+      if (mesh.MeshGeometry && material.SurfaceMaterial) {
+        BatchKey key = { mesh.MeshGeometry.get(), material.SurfaceMaterial.get() };
+        auto& targetMap = material.SurfaceMaterial->IsTransparent() ? transparentBatches : opaqueBatches;
+        auto& bucket = targetMap[key];
+        bucket.MeshRef     = mesh.MeshGeometry;
+        bucket.MaterialRef = material.SurfaceMaterial;
+        const Math::Mat4 modelMatrix = transform.GetTransform();
+        bucket.Instances.push_back(InstanceData{
+          .ModelMatrix  = modelMatrix,
+          .NormalMatrix = Math::Transpose(Math::Inverse(modelMatrix))
+        });
+      }
+    });
+    Renderer::BeginScene(*mainCamera, sunLight, envLighting, target, gpuPointLights);
+    for (auto& [key, bucket] : opaqueBatches) {
+      if (!bucket.Instances.empty()) {
+        Renderer::SubmitInstanced(
+                                  defaultPipeline,
+                                  bucket.MaterialRef,
+                                  bucket.MeshRef,
+                                  bucket.Instances
+                                  );
+      }
+    }
+    auto transparentPipeline = Renderer::GetTransparentPipeline();
+    if (!transparentPipeline) {
+      transparentPipeline = defaultPipeline;
+    }
+    for (auto& [key, bucket] : transparentBatches) {
+      if (!bucket.Instances.empty()) {
+        Renderer::SubmitInstanced(
+                                  transparentPipeline,
+                                  bucket.MaterialRef,
+                                  bucket.MeshRef,
+                                  bucket.Instances
+                                  );
+      }
+    }
+    Renderer::EndScene();
+  }
+  void Scene::OnViewportResize(uint32_t width, uint32_t height) {
+    if (width == 0 || height == 0) return;
+    m_ViewportWidth  = width;
+    m_ViewportHeight = height;
+    auto cameraView = m_Registry.GetView<CameraComponent>();
+    cameraView.Each([&](EntityID entity, CameraComponent& camera) {
+      (void)entity;
+      camera.CameraInstance.SetViewportSize(width, height);
+    });
+  }
+} // namespace KanVerse
 // FILE: KanVerse_Engine/Scene/SparseSet.hpp
 /*!
  * @file SparseSet.hpp
@@ -7690,6 +9244,11 @@ namespace KanVerse {
    */
   void WorldSettingsPanel::OnImGuiRender(DirectionalLight& sunLight, EnvironmentLighting& envLighting) {
     ImGui::Begin("World & Post-Process Settings");
+    // -------------------------------------------------------------------------
+    // 0. Studio Theme & Dynamic Highlighter Color Picker
+    // -------------------------------------------------------------------------
+    ImGuiTheme::DrawThemeSelectorUI();
+    ImGui::Separator();
     // -------------------------------------------------------------------------
     // 1. Directional Sun / Moon Light
     // -------------------------------------------------------------------------
@@ -8104,7 +9663,6 @@ namespace KanVerse {
  * @license MIT License
  */
 #include "Layers/EditorLayer.hpp"
-#include "Renderer/UI/UIWidgets.hpp"
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
 #include <imgui.h>
@@ -8251,6 +9809,21 @@ namespace KanVerse {
       if (ImGui::BeginMenu("File")) {
         if (ImGui::MenuItem("Exit", "Cmd+Q")) {
           Application::Get().Close();
+        }
+        ImGui::EndMenu();
+      }
+      if (ImGui::BeginMenu("Theme")) {
+        if (ImGui::MenuItem("Dark Charcoal", nullptr, ImGuiTheme::GetThemeMode() == EditorThemeMode::DarkCharcoal)) {
+          ImGuiTheme::SetThemeMode(EditorThemeMode::DarkCharcoal);
+        }
+        if (ImGui::MenuItem("Light Studio", nullptr, ImGuiTheme::GetThemeMode() == EditorThemeMode::LightStudio)) {
+          ImGuiTheme::SetThemeMode(EditorThemeMode::LightStudio);
+        }
+        if (ImGui::MenuItem("Midnight OLED", nullptr, ImGuiTheme::GetThemeMode() == EditorThemeMode::MidnightOLED)) {
+          ImGuiTheme::SetThemeMode(EditorThemeMode::MidnightOLED);
+        }
+        if (ImGui::MenuItem("Cyberpunk Slate", nullptr, ImGuiTheme::GetThemeMode() == EditorThemeMode::CyberpunkSlate)) {
+          ImGuiTheme::SetThemeMode(EditorThemeMode::CyberpunkSlate);
         }
         ImGui::EndMenu();
       }

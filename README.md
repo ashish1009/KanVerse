@@ -289,11 +289,11 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Scene/Registry.hpp`
   - **Concepts:** Type-erased component pool map, slot recycling (`m_FreeList`), C++20 fold expressions to find the smallest pool (`FindSmallestPool`) in `Registry::View<Components...>`.
   - **Milestone:** Implement `Registry` and `GetView<...>()` queries.
-- [ ] **Day 58 — High-Level Entity Wrapper & Core ECS Components**
+- [x] **Day 58 — High-Level Entity Wrapper & Core ECS Components**
   - **Files:** `Scene/Entity.hpp`, `Scene/Components.hpp`
   - **Concepts:** Facade `Entity` handle, `TagComponent`, `TransformComponent` (`T * Rz * Ry * Rx * S`), `MeshComponent`, `MaterialComponent`, `CameraComponent`, `DirectionalLightComponent`, `PointLightComponent`, `EnvironmentLightComponent`.
   - **Milestone:** Implement `Entity.hpp` and the rendering/transform components in `Components.hpp`.
-- [ ] **Day 59 — Scene Container & Instanced Batch Rendering**
+- [x] **Day 59 — Scene Container & Instanced Batch Rendering**
   - **Files:** `Scene/Scene.hpp`, `Scene/Scene.mm` (Part 1: Rendering & Lifecycle)
   - **Concepts:** `CreateEntity`, `DestroyEntity`, grouping entities by `std::pair<Mesh*, Material*>` into `opaqueBatches` and `transparentBatches` inside `OnRenderRuntime` and `OnRenderEditor`.
   - **Milestone:** Render an entire `Scene` of ECS entities into the Editor Viewport!
