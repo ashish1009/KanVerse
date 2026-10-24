@@ -251,22 +251,22 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Renderer/UI/ImGuiTheme.hpp`, `Renderer/UI/ImGuiTheme.cpp`, `Renderer/UI/UIWidgets.hpp`
   - **Concepts:** Designing a sleek Blender/Unreal-inspired charcoal dark theme, loading crisp Retina `.ttf` fonts (Inter / JetBrains Mono), and creating `UI::DrawVec3Control` (with red/green/blue X/Y/Z reset buttons).
   - **Milestone:** Apply `ImGuiTheme::ApplyDarkTheme()` on startup.
-- [ ] **Day 50 — Master DockSpace & Main Menu Bar**
-  - **Files:** `Layers/EditorLayer.hpp`, `Layers/EditorLayer.mm` (Part 1)
-  - **Concepts:** Setting up a fullscreen persistent `ImGui::DockSpaceOverViewport`, top menu bar (`File -> New/Open/Save Scene`, `View -> Panels`, `Build -> Lighting`), and layout persistence (`imgui.ini`).
-  - **Milestone:** Create `EditorLayer` with a dockable workspace.
-- [ ] **Day 51 — Interactive 3D Editor Viewport Panel**
-  - **Files:** `Layers/EditorLayer.mm` (Part 2)
-  - **Concepts:** Rendering the 3D scene into an offscreen `Framebuffer`, passing `(ImTextureID)framebuffer->GetColorAttachment(0)` into `ImGui::Image()`, and dynamically calling `framebuffer->Resize(viewportSize.x, viewportSize.y)` when the ImGui panel is dragged/resized!
-  - **Milestone:** Resize the docked 3D Viewport tab inside ImGui and watch the Metal render target resize smoothly at 120Hz.
-- [ ] **Day 52 — Phase 4 Milestone: Blender/Maya-Style `EditorCamera`**
+- [x] **Day 50 — Phase 4 Milestone: Blender/Maya-Style `EditorCamera`**
   - **Files:** `Editor/Viewport/EditorCamera.hpp`, `Editor/Viewport/EditorCamera.cpp`
   - **Concepts:** Free-fly WASD + Right-Click look and Alt + Left/Middle/Right-Click Maya-style Orbit/Pan/Zoom camera exclusively for level editing when the Viewport panel is focused/hovered.
   - **Milestone:** Fly around your 3D scene inside the docked Viewport panel!
-- [ ] **Day 53 — World Settings & Post-Process Editor Panel**
+- [x] **Day 51 — World Settings & Post-Process Editor Panel**
   - **Files:** `Editor/Panels/WorldSettingsPanel.hpp`, `Editor/Panels/WorldSettingsPanel.cpp`
   - **Concepts:** Dockable panel to switch `TimeOfDay` presets, scrub the Day/Night cycle slider, toggle `IBL` and `EnvironmentMode` (`CrispHDR`, `Irradiance`, `Procedural`), and tune `Bloom Threshold`, `SoftKnee`, `Bloom Intensity`, and `Camera Exposure` in real time.
   - **Milestone:** Scrub the sun across the sky and tune HDR bloom glow live from the `World Settings` panel!
+- [ ] **Day 52 — Master DockSpace & Main Menu Bar**
+  - **Files:** `Layers/EditorLayer.hpp`, `Layers/EditorLayer.mm` (Part 1)
+  - **Concepts:** Setting up a fullscreen persistent `ImGui::DockSpaceOverViewport`, top menu bar (`File -> New/Open/Save Scene`, `View -> Panels`, `Build -> Lighting`), and layout persistence (`imgui.ini`).
+  - **Milestone:** Create `EditorLayer` with a dockable workspace.
+- [ ] **Day 53 — Interactive 3D Editor Viewport Panel**
+  - **Files:** `Layers/EditorLayer.mm` (Part 2)
+  - **Concepts:** Rendering the 3D scene into an offscreen `Framebuffer`, passing `(ImTextureID)framebuffer->GetColorAttachment(0)` into `ImGui::Image()`, and dynamically calling `framebuffer->Resize(viewportSize.x, viewportSize.y)` when the ImGui panel is dragged/resized!
+  - **Milestone:** Resize the docked 3D Viewport tab inside ImGui and watch the Metal render target resize smoothly at 120Hz.
 
 ---
 
