@@ -16,7 +16,7 @@ Use the following Markdown checkbox states to track your daily progress:
 - [x] **Phase 2:** Platform Events, Input Polling & Cocoa/Metal Windowing (Days 13–23)
 - [x] **Phase 3:** Metal RHI — Buffers, Shaders, Pipelines, Textures & First 3D Draw (Days 24–40)
 - [x] **Phase 4:** Advanced PBR, Shadows, IBL, Compute Bloom, ACES Tonemapping & Atmosphere (Days 79–90)
-- [-] **Phase 5:** Dear ImGui Backend, Docking, Offscreen Framebuffers & Editor Viewport (Days 41–48)
+- [x] **Phase 5:** Dear ImGui Backend, Docking, Offscreen Framebuffers & Editor Viewport (Days 41–48)
 - [ ] **Phase 6:** Generational ECS, Components & Asset Manager (Days 49–56)
 - [ ] **Phase 7:** KanVerse Studio Editor — Hierarchy, Inspector, Content Browser, Gizmos & Picking (Days 57–70)
 - [ ] **Phase 8:** Physics Engine, Colliders, PBD Solver & Visual Debug Renderer (Days 71–78)
@@ -259,11 +259,11 @@ Use the following Markdown checkbox states to track your daily progress:
   - **Files:** `Editor/Panels/WorldSettingsPanel.hpp`, `Editor/Panels/WorldSettingsPanel.cpp`
   - **Concepts:** Dockable panel to switch `TimeOfDay` presets, scrub the Day/Night cycle slider, toggle `IBL` and `EnvironmentMode` (`CrispHDR`, `Irradiance`, `Procedural`), and tune `Bloom Threshold`, `SoftKnee`, `Bloom Intensity`, and `Camera Exposure` in real time.
   - **Milestone:** Scrub the sun across the sky and tune HDR bloom glow live from the `World Settings` panel!
-- [ ] **Day 52 — Master DockSpace & Main Menu Bar**
+- [x] **Day 52 — Master DockSpace & Main Menu Bar**
   - **Files:** `Layers/EditorLayer.hpp`, `Layers/EditorLayer.mm` (Part 1)
   - **Concepts:** Setting up a fullscreen persistent `ImGui::DockSpaceOverViewport`, top menu bar (`File -> New/Open/Save Scene`, `View -> Panels`, `Build -> Lighting`), and layout persistence (`imgui.ini`).
   - **Milestone:** Create `EditorLayer` with a dockable workspace.
-- [ ] **Day 53 — Interactive 3D Editor Viewport Panel**
+- [x] **Day 53 — Interactive 3D Editor Viewport Panel**
   - **Files:** `Layers/EditorLayer.mm` (Part 2)
   - **Concepts:** Rendering the 3D scene into an offscreen `Framebuffer`, passing `(ImTextureID)framebuffer->GetColorAttachment(0)` into `ImGui::Image()`, and dynamically calling `framebuffer->Resize(viewportSize.x, viewportSize.y)` when the ImGui panel is dragged/resized!
   - **Milestone:** Resize the docked 3D Viewport tab inside ImGui and watch the Metal render target resize smoothly at 120Hz.
