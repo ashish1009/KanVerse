@@ -56,3 +56,5 @@
 #include "Renderer/Textures/Texture2D.hpp"
 #include "Renderer/Textures/TextureCube.hpp"
 #include "Renderer/Asset/AssetManager.hpp"
+#include "Renderer/UI/UIWidgets.hpp"
+#include "Renderer/UI/ImGuiTheme.hpp"

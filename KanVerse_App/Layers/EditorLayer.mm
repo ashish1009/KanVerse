@@ -6,7 +6,6 @@
  */
 
 #include "Layers/EditorLayer.hpp"
-#include "Renderer/UI/UIWidgets.hpp"
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
 #include <imgui.h>
@@ -182,6 +181,21 @@ namespace KanVerse {
       if (ImGui::BeginMenu("File")) {
         if (ImGui::MenuItem("Exit", "Cmd+Q")) {
           Application::Get().Close();
+        }
+        ImGui::EndMenu();
+      }
+      if (ImGui::BeginMenu("Theme")) {
+        if (ImGui::MenuItem("Dark Charcoal", nullptr, ImGuiTheme::GetThemeMode() == EditorThemeMode::DarkCharcoal)) {
+          ImGuiTheme::SetThemeMode(EditorThemeMode::DarkCharcoal);
+        }
+        if (ImGui::MenuItem("Light Studio", nullptr, ImGuiTheme::GetThemeMode() == EditorThemeMode::LightStudio)) {
+          ImGuiTheme::SetThemeMode(EditorThemeMode::LightStudio);
+        }
+        if (ImGui::MenuItem("Midnight OLED", nullptr, ImGuiTheme::GetThemeMode() == EditorThemeMode::MidnightOLED)) {
+          ImGuiTheme::SetThemeMode(EditorThemeMode::MidnightOLED);
+        }
+        if (ImGui::MenuItem("Cyberpunk Slate", nullptr, ImGuiTheme::GetThemeMode() == EditorThemeMode::CyberpunkSlate)) {
+          ImGuiTheme::SetThemeMode(EditorThemeMode::CyberpunkSlate);
         }
         ImGui::EndMenu();
       }

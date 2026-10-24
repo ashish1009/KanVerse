@@ -23,6 +23,12 @@ namespace KanVerse {
     ImGui::Begin("World & Post-Process Settings");
     
     // -------------------------------------------------------------------------
+    // 0. Studio Theme & Dynamic Highlighter Color Picker
+    // -------------------------------------------------------------------------
+    ImGuiTheme::DrawThemeSelectorUI();
+    ImGui::Separator();
+    
+    // -------------------------------------------------------------------------
     // 1. Directional Sun / Moon Light
     // -------------------------------------------------------------------------
     if (ImGui::CollapsingHeader("Directional Sun Light", ImGuiTreeNodeFlags_DefaultOpen)) {

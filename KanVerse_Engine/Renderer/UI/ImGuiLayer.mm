@@ -49,7 +49,10 @@ namespace KanVerse {
       io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
       io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
       
-      // Apply custom KanVerse Studio charcoal dark theme
+      // 1. Load custom OpenSans, HfMonorita, and Headers fonts from KanVerse_App/Assets/Fonts/
+      ImGuiTheme::LoadStudioFonts(15.5f);
+      
+      // 2. Apply custom KanVerse Studio charcoal dark theme
       ImGuiTheme::ApplyDarkTheme();
       
       auto& app = Application::Get();
